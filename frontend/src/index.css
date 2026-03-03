@@ -1811,3 +1811,61 @@ textarea::placeholder {
   font-weight: 600;
   color: rgba(168, 174, 222, 0.65);
 }
+
+/* ── Site Footer ─────────────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 20px 20px 28px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.site-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.site-footer__brand {
+  font-family: 'Syne', 'Inter', sans-serif;
+  font-weight: 700;
+  background: var(--logo-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-size: 13px;
+}
+
+.site-footer__divider {
+  opacity: 0.4;
+}
+
+.site-footer__text {
+  color: var(--text-3);
+}
+
+.site-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.site-footer__link:hover {
+  color: #0A66C2;
+}
+
+.site-footer__li-icon {
+  font-size: 15px;
+  color: #0A66C2;
+  flex-shrink: 0;
+}
