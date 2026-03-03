@@ -1,280 +1,305 @@
-# 🚀 PeerNet — Production Instagram-Like API
+# PeerNet — Social Media Platform
 
-A production-grade social media REST API backend built with Node.js, Express, MongoDB, Redis,
-Cloudinary, and Socket.io.
+> A production-grade, full-stack social media platform built with modern technologies.
+> Inspired by Instagram — built for scale.
+
+![Version](https://img.shields.io/badge/version-v1.0.0-blue)
+![Node](https://img.shields.io/badge/node-20%2B-green)
+![License](https://img.shields.io/badge/license-MIT-brightgreen)
+![Status](https://img.shields.io/badge/status-production-success)
 
 ---
 
-## 📦 Tech Stack
+## What is PeerNet?
 
-| Layer | Technology |
+PeerNet is a full-stack social media platform with features like posts, stories, reels (Dscrolls), real-time messaging, notifications, and an admin panel — all production-ready with JWT auth, Redis caching, Cloudinary media storage, and Docker deployment.
+
+---
+
+## Tech Stack
+
+### Backend
+| Area | Technology |
 |---|---|
 | Runtime | Node.js 20 |
 | Framework | Express 4 |
 | Database | MongoDB 7 (Mongoose) |
 | Cache | Redis 7 |
-| Media | Cloudinary |
-| Auth | JWT (access 15m + refresh 7d rotation) |
+| Auth | JWT — 15min access + 7d refresh rotation |
+| Media Storage | Cloudinary |
 | Real-time | Socket.io |
 | Validation | Joi |
-| Logging | Winston + daily rotate |
+| Logging | Winston + daily log rotation |
 | Security | Helmet, rate-limit, mongo-sanitize |
-| Job scheduler | node-cron |
-| Container | Docker + Docker Compose + Nginx |
+| Scheduler | node-cron |
+
+### Frontend
+| Area | Technology |
+|---|---|
+| Framework | React 18 + Vite |
+| Routing | React Router v7 |
+| HTTP Client | Axios |
+| Real-time | Socket.io-client |
+| Animations | Framer Motion |
+| Icons | React Icons |
+| Notifications | React Hot Toast |
+
+### Infrastructure
+| Area | Technology |
+|---|---|
+| Container | Docker + Docker Compose |
+| Reverse Proxy | Nginx |
 | CI/CD | GitHub Actions |
 
 ---
 
-## 🗂 Folder Structure
+## Project Structure
 
 ```
-peernet/
-├── src/
-│   ├── app.js                # Express factory
-│   ├── server.js             # Bootstrap entry point
-│   ├── config/               # db, redis, cloudinary, logger
-│   ├── models/               # Mongoose schemas + indexes
-│   ├── services/             # Business logic layer
-│   ├── controllers/          # Request/response handling
-│   ├── routes/v1/            # API route definitions
-│   ├── middleware/           # auth, admin, upload, validate, rateLimiter, error
-│   ├── validators/           # Joi schemas
-│   ├── utils/                # ApiError, jwt, cloudinary, pagination
-│   ├── sockets/              # Socket.io chat handler
-│   ├── jobs/                 # Cron jobs (story cleanup)
-│   └── seeders/              # DB seeder
-├── nginx/default.conf
+PeerNet/
+├── frontend/                   # React + Vite client
+│   ├── src/
+│   │   ├── api/                # Axios instance & API calls
+│   │   ├── components/         # Reusable UI components
+│   │   ├── context/            # Auth & Theme context
+│   │   ├── pages/              # App pages (Feed, Profile, etc.)
+│   │   └── utils/              # Helper utilities
+│   ├── index.html
+│   └── vite.config.js
+│
+├── backend/                    # Node.js + Express server
+│   ├── src/
+│   │   ├── app.js              # Express app setup
+│   │   ├── server.js           # Entry point
+│   │   ├── config/             # DB, Redis, Cloudinary, Logger config
+│   │   ├── models/             # Mongoose schemas (User, Post, Reel, Story, etc.)
+│   │   ├── controllers/        # Route handlers
+│   │   ├── services/           # Business logic
+│   │   ├── routes/v1/          # API route definitions
+│   │   ├── middleware/         # Auth, upload, validation, rate-limit, error
+│   │   ├── validators/         # Joi request schemas
+│   │   ├── utils/              # JWT, Cloudinary, pagination helpers
+│   │   ├── sockets/            # Socket.io real-time chat
+│   │   ├── jobs/               # Cron jobs (e.g. story cleanup)
+│   │   └── seeders/            # Database seed scripts
+│   └── package.json
+│
+├── nginx/default.conf          # Nginx reverse proxy config
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env.example
-├── .github/workflows/ci.yml
-└── package.json
+├── .env.example                # Environment variable template
+├── CHANGELOG.md
+└── README.md
 ```
 
 ---
 
-## ⚡ Quick Start (Local)
+## Getting Started (Local Development)
 
 ### Prerequisites
 
-- Node.js 20+
-- MongoDB running locally or Atlas URI
-- Redis running locally or Redis Cloud URI
-- Cloudinary account (free tier works)
-
-### 1. Clone & install
-
-```bash
-git clone https://github.com/your-org/peernet.git
-cd peernet
-npm install
-```
-
-### 2. Configure environment
-
-```bash
-cp .env.example .env
-# Fill in your values:
-# MONGO_URI, REDIS_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET,
-# CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
-```
-
-### 3. Seed the database
-
-```bash
-npm run seed
-# Creates: admin@peernet.dev and alice/bob/charlie/diana/eve@peernet.dev
-# Password for all: Seed@1234
-```
-
-### 4. Run
-
-```bash
-npm run dev   # nodemon hot-reload
-# or
-npm start     # production
-```
-
-Server starts at **http://localhost:3000**
-Health check: `GET /health`
+- [Node.js 20+](https://nodejs.org/)
+- MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas))
+- Redis (local or [Redis Cloud](https://redis.com/))
+- [Cloudinary](https://cloudinary.com/) account (free tier works)
 
 ---
 
-## 🐳 Docker Deployment
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/syedmukheeth/PeerNet.git
+cd PeerNet
+```
+
+---
+
+### 2. Set up environment variables
 
 ```bash
 cp .env.example .env
-# Edit .env — MONGO_URI and REDIS_URL are auto-set by docker-compose
-
-docker compose up -d --build
-# Starts: app (3000), mongo (27017), redis (6379), nginx (80)
 ```
 
-### Seed in Docker
+Open `.env` and fill in your values:
 
+```env
+MONGO_URI=mongodb://localhost:27017/peernet
+REDIS_URL=redis://localhost:6379
+JWT_ACCESS_SECRET=your_secret_at_least_64_chars
+JWT_REFRESH_SECRET=your_other_secret_at_least_64_chars
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+---
+
+### 3. Install dependencies
+
+**Backend:**
+```bash
+cd backend
+npm install
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+```
+
+---
+
+### 4. Seed the database (optional)
+
+```bash
+cd backend
+npm run seed          # Creates basic test users (password: Seed@1234)
+npm run seed:celebs   # Creates celebrity test accounts (password: Celeb@1234)
+```
+
+---
+
+### 5. Run the app
+
+**Backend** (from `backend/` folder):
+```bash
+npm run dev    # Development with hot-reload
+npm start      # Production
+```
+> Backend runs at: `http://localhost:3000`
+
+**Frontend** (from `frontend/` folder):
+```bash
+npm run dev
+```
+> Frontend runs at: `http://localhost:5173`
+
+---
+
+## Docker Deployment
+
+Run the entire stack (backend + MongoDB + Redis + Nginx) with a single command:
+
+```bash
+cp .env.example .env
+# Edit .env with your Cloudinary credentials
+# (MONGO_URI and REDIS_URL are automatically set by docker-compose)
+
+docker compose up -d --build
+```
+
+| Service | Port |
+|---|---|
+| App (API) | 3000 |
+| Nginx | 80 |
+| MongoDB | 27017 |
+| Redis | 6379 |
+
+**Seed in Docker:**
 ```bash
 docker compose exec app node src/seeders/seed.js
 ```
 
 ---
 
-## 🌐 API Reference
+## API Reference
 
-All routes are prefixed with `/api/v1`. Protected routes require:
+All API routes are prefixed with `/api/v1`.
+
+Protected routes require:
 ```
 Authorization: Bearer <accessToken>
 ```
 
 ### Auth
 
-| Method | Endpoint | Auth | Body |
+| Method | Endpoint | Protected | Description |
 |---|---|---|---|
-| POST | `/auth/register` | ❌ | `{ username, email, password, fullName }` |
-| POST | `/auth/login` | ❌ | `{ email, password }` |
-| POST | `/auth/refresh` | ❌ | (reads httpOnly cookie) |
-| POST | `/auth/logout` | ✅ | — |
-
-**Register Response (201)**
-```json
-{
-  "success": true,
-  "data": {
-    "user": { "_id": "...", "username": "alice", "email": "..." },
-    "accessToken": "eyJ..."
-  }
-}
-```
-
-**Error Response**
-```json
-{
-  "success": false,
-  "message": "Email is already taken"
-}
-```
+| POST | `/auth/register` | ❌ | Create a new account |
+| POST | `/auth/login` | ❌ | Login and receive tokens |
+| POST | `/auth/refresh` | ❌ | Refresh access token (via cookie) |
+| POST | `/auth/logout` | ✅ | Logout and invalidate tokens |
 
 ### Users
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/users/me` | Own profile |
-| PATCH | `/users/me` | Update profile (multipart, `avatar` field) |
-| GET | `/users/:id` | Get any profile |
-| GET | `/users/:id/posts` | User's posts |
-| GET | `/users/:id/followers` | Followers list |
-| GET | `/users/:id/following` | Following list |
-| POST | `/users/:id/follow` | Follow |
-| DELETE | `/users/:id/follow` | Unfollow |
-| GET | `/users/search?q=alice` | Search users |
+| GET | `/users/me` | Get your own profile |
+| PATCH | `/users/me` | Update profile / avatar |
+| GET | `/users/:id` | Get any user's profile |
+| GET | `/users/:id/posts` | Get user's posts |
+| GET | `/users/:id/followers` | Get follower list |
+| GET | `/users/:id/following` | Get following list |
+| POST | `/users/:id/follow` | Follow a user |
+| DELETE | `/users/:id/follow` | Unfollow a user |
+| GET | `/users/search?q=name` | Search users |
 
 ### Posts
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/posts/feed` | News feed (cursor-paginated) |
-| GET | `/posts/saved` | Saved posts |
-| POST | `/posts` | Create post (multipart `media` + body) |
-| GET | `/posts/:id` | Get post |
-| DELETE | `/posts/:id` | Delete post |
-| POST | `/posts/:id/like` | Like |
-| DELETE | `/posts/:id/like` | Unlike |
-| POST | `/posts/:id/save` | Save |
-| DELETE | `/posts/:id/save` | Unsave |
+| GET | `/posts/feed` | Paginated news feed |
+| POST | `/posts` | Create a post (with media) |
+| GET | `/posts/:id` | Get a single post |
+| DELETE | `/posts/:id` | Delete your post |
+| POST | `/posts/:id/like` | Like a post |
+| DELETE | `/posts/:id/like` | Unlike a post |
+| POST | `/posts/:id/save` | Save a post |
+| DELETE | `/posts/:id/save` | Unsave a post |
 | GET | `/posts/:id/comments` | Get comments |
-| POST | `/posts/:id/comments` | Add comment |
-
-**Create Post (multipart/form-data)**
-```
-media: <file>
-caption: "My first post!"
-location: "Mumbai"
-tags: "travel,photography"
-```
-
-**Feed Response (200)**
-```json
-{
-  "success": true,
-  "data": [{ "_id": "...", "caption": "...", "author": { ... } }],
-  "nextCursor": "2025-01-31T10:00:00.000Z",
-  "hasMore": true
-}
-```
-
-### Comments
-
-| Method | Endpoint | Description |
-|---|---|---|
-| DELETE | `/comments/:id` | Delete comment |
-| POST | `/comments/:id/like` | Like comment |
-| DELETE | `/comments/:id/like` | Unlike comment |
+| POST | `/posts/:id/comments` | Add a comment |
+| GET | `/posts/saved` | Get your saved posts |
 
 ### Stories
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/stories` | Stories from followees (non-expired) |
-| POST | `/stories` | Create story (multipart `media`) |
-| DELETE | `/stories/:id` | Delete story |
-| POST | `/stories/:id/view` | Mark as viewed |
+| GET | `/stories` | Get stories from people you follow |
+| POST | `/stories` | Upload a story (expires in 24h) |
+| DELETE | `/stories/:id` | Delete your story |
+| POST | `/stories/:id/view` | Mark story as viewed |
 
-### Reels
+### Dscrolls (Reels)
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/reels` | Reels feed |
-| POST | `/reels` | Upload reel (multipart `video`) |
-| DELETE | `/reels/:id` | Delete reel |
-| POST | `/reels/:id/like` | Like reel |
-| DELETE | `/reels/:id/like` | Unlike reel |
+| GET | `/reels` | Dscrolls feed |
+| POST | `/reels` | Upload a Dscroll (video) |
+| DELETE | `/reels/:id` | Delete your Dscroll |
+| POST | `/reels/:id/like` | Like a Dscroll |
+| DELETE | `/reels/:id/like` | Unlike a Dscroll |
 
 ### Notifications
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/notifications` | Get notifications + unreadCount |
+| GET | `/notifications` | Get notifications + unread count |
 | PATCH | `/notifications/read` | Mark all as read |
 
-### Direct Messaging
+### Messaging
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/conversations` | List conversations |
-| POST | `/conversations` | Start/get conversation `{ targetUserId }` |
-| GET | `/conversations/:id/messages` | Paginated messages |
-| POST | `/conversations/:id/messages` | Send message (text + optional `media`) |
+| GET | `/conversations` | List all conversations |
+| POST | `/conversations` | Start a new conversation |
+| GET | `/conversations/:id/messages` | Get paginated messages |
+| POST | `/conversations/:id/messages` | Send a message |
 
-### Admin (admin role required)
+### Admin *(admin role required)*
 
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/admin/users` | List all users |
-| DELETE | `/admin/users/:id` | Delete user |
-| DELETE | `/admin/posts/:id` | Delete post |
-| GET | `/admin/stats` | Platform stats |
+| DELETE | `/admin/users/:id` | Delete a user |
+| DELETE | `/admin/posts/:id` | Delete any post |
+| GET | `/admin/stats` | Platform statistics |
 
 ---
 
-## 🔐 Security Details
+## Real-time (WebSocket)
 
-| Concern | Implementation |
-|---|---|
-| Password | bcryptjs, cost factor 12 |
-| Access token | JWT HS256, 15-minute expiry |
-| Refresh token | JWT in `httpOnly` / `SameSite=Strict` cookie, 7-day expiry |
-| Token rotation | Old JTI blacklisted in Redis on every `/auth/refresh` |
-| Logout | Refresh token JTI blacklisted in Redis |
-| CSRF | Access token in memory (not localStorage); refresh cookie is SameSite=Strict |
-| Rate limiting | Global 100/15min; auth 5/15min; upload 50/hr |
-| HTTP headers | Helmet (HSTS, CSP, X-Frame-Options, etc.) |
-| NoSQL injection | express-mongo-sanitize strips `$` and `.` from inputs |
-| XSS | Helmet CSP; never render HTML from user input |
-
----
-
-## 🔌 WebSocket (Real-time Chat)
-
-Connect with Socket.io:
+PeerNet uses Socket.io for real-time chat and notifications.
 
 ```js
 const socket = io('http://localhost:3000', {
@@ -284,67 +309,65 @@ const socket = io('http://localhost:3000', {
 // Join a conversation room
 socket.emit('join_conversation', conversationId);
 
-// Send a message (via REST, socket receives 'new_message')
+// Listen for new messages
 socket.on('new_message', (message) => console.log(message));
 
-// Typing
+// Typing indicators
 socket.emit('typing', { conversationId });
 socket.on('user_typing', ({ userId }) => console.log(`${userId} is typing...`));
 
-// Keep online status alive
+// Online presence
 setInterval(() => socket.emit('ping_online'), 30000);
 ```
 
 ---
 
-## ⏰ Cron Jobs
+## Security
 
-| Job | Schedule | What it does |
-|---|---|---|
-| Story Cleanup | Every hour (`:00`) | Deletes expired stories from MongoDB + Cloudinary assets |
-
-MongoDB TTL index on `Story.expiresAt` provides a secondary cleanup mechanism.
-
----
-
-## 📈 Scaling Strategy
-
-| Layer | Strategy |
+| Area | How it's handled |
 |---|---|
-| App | Multiple Express instances behind Nginx load balancer |
-| State | Redis for session/cache (shared across instances) |
-| WebSocket | Socket.io Redis adapter for multi-node pub/sub |
-| Database | MongoDB Replica Set → MongoDB Atlas |
-| Media | Cloudinary CDN (removes bandwidth from app servers) |
-| Container | Docker → Kubernetes HPA for pod auto-scaling |
-| Feed | Pull model for MVP; transition to fan-out push for scale |
+| Passwords | bcryptjs with cost factor 12 |
+| Access Token | JWT HS256, expires in 15 minutes |
+| Refresh Token | JWT in `httpOnly` + `SameSite=Strict` cookie, 7 days |
+| Token Rotation | Old token JTI blacklisted in Redis on every refresh |
+| Rate Limiting | Global: 100 req/15min — Auth: 5 req/15min |
+| HTTP Headers | Helmet (HSTS, CSP, X-Frame-Options, etc.) |
+| NoSQL Injection | express-mongo-sanitize blocks `$` and `.` in inputs |
 
 ---
 
-## 🛠 CI/CD (GitHub Actions)
+## Versioning
 
-1. Push to any branch → lint + Docker build check
-2. Push to `main` → build + push Docker image to Docker Hub → SSH deploy to server
+This project follows [Semantic Versioning](https://semver.org/).
+
+| Type | When to use | Example |
+|---|---|---|
+| PATCH | Bug fix | `v1.0.0` → `v1.0.1` |
+| MINOR | New feature | `v1.0.0` → `v1.1.0` |
+| MAJOR | Breaking change | `v1.0.0` → `v2.0.0` |
+
+See [CHANGELOG.md](./CHANGELOG.md) for release history.
+
+---
+
+## CI/CD
+
+GitHub Actions runs automatically on every push:
+
+1. **Any branch** → Lint check + Docker build validation
+2. **`main` branch** → Build + push Docker image → Deploy to server via SSH
 
 **Required GitHub Secrets:**
 ```
-DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
-DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY
+DOCKERHUB_USERNAME
+DOCKERHUB_TOKEN
+DEPLOY_HOST
+DEPLOY_USER
+DEPLOY_SSH_KEY
 ```
 
 ---
 
-## 📝 Environment Variables
+## License
 
-See [.env.example](.env.example) for full reference.
-
-**Minimum required for local dev:**
-```env
-MONGO_URI=mongodb://localhost:27017/peernet
-REDIS_URL=redis://localhost:6379
-JWT_ACCESS_SECRET=change_me_at_least_64_chars
-JWT_REFRESH_SECRET=change_me_different_at_least_64_chars
-CLOUDINARY_CLOUD_NAME=your_cloud
-CLOUDINARY_API_KEY=your_key
-CLOUDINARY_API_SECRET=your_secret
-```
+[MIT](./LICENSE) © 2026 PeerNet
