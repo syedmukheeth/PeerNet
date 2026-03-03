@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6B4FFF"/>
+      <stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+    <linearGradient id="node" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9B7FFF"/>
+      <stop offset="100%" stop-color="#00E5FF"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+  <!-- Bold P letterform -->
+  <path d="M260 200 L260 824
+             M260 200 L560 200
+             Q720 200 720 380
+             Q720 560 560 560
+             L260 560"
+        stroke="#0A0A0F" stroke-width="115" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Network graph nodes -->
+  <circle cx="390" cy="330" r="32" fill="url(#node)"/>
+  <circle cx="370" cy="490" r="32" fill="url(#node)"/>
+  <circle cx="530" cy="420" r="24" fill="#0A0A0F"/>
+  <!-- Network edges -->
+  <line x1="390" y1="330" x2="370" y2="490" stroke="url(#node)" stroke-width="9" stroke-linecap="round"/>
+  <line x1="390" y1="330" x2="530" y2="420" stroke="url(#node)" stroke-width="9" stroke-linecap="round"/>
+  <line x1="370" y1="490" x2="530" y2="420" stroke="url(#node)" stroke-width="9" stroke-linecap="round"/>
+</svg>

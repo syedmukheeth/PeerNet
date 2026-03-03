@@ -1,0 +1,82 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      target: runner
+    container_name: peernet_app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongo:27017/peernet
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - '3000:3000'
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - peernet_net
+    volumes:
+      - app_logs:/app/logs
+
+  mongo:
+    image: mongo:7
+    container_name: peernet_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: peernet
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - peernet_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: peernet_redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - peernet_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: peernet_nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - peernet_net
+
+networks:
+  peernet_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  redis_data:
+  app_logs:

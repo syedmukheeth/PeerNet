@@ -1,0 +1,50 @@
+{
+  "name": "peernet",
+  "version": "1.0.0",
+  "description": "Production-level Instagram-like social media platform",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon --watch .env --ext js,mjs,cjs,json,env src/server.js",
+    "lint": "eslint src/",
+    "seed": "node src/seeders/seed.js",
+    "seed:celebs": "node src/seeders/celebrities.js"
+  },
+  "keywords": [
+    "social",
+    "media",
+    "rest",
+    "api"
+  ],
+  "author": "PeerNet",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.5.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.5",
+    "winston": "^3.17.0",
+    "streamifier": "^0.1.1",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
