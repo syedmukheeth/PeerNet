@@ -19,11 +19,7 @@ const { setIO } = require('./utils/socket.utils');
 const PORT = process.env.PORT || 3000;
 
 const bootstrap = async () => {
-    // ── Connect databases ──────────────────────────────────────────────────────
-    await connectDB();
-    await connectRedis();
-
-    // ── Create HTTP server ─────────────────────────────────────────────────────
+    // ── Create app & HTTP server first ────────────────────────────────────────
     const app = createApp();
     const httpServer = http.createServer(app);
 
@@ -34,19 +30,20 @@ const bootstrap = async () => {
             credentials: true,
         },
     });
-
-    // Expose io for use in services
     app.set('io', io);
     setIO(io);
     initChatSocket(io);
 
+    // ── Start listening FIRST (Render needs the port open) ────────────────────
+    await new Promise((resolve) => httpServer.listen(PORT, resolve));
+    logger.info(`PeerNet server running on port ${PORT} [${process.env.NODE_ENV}]`);
+
+    // ── Connect databases AFTER server is up ──────────────────────────────────
+    await connectDB();
+    await connectRedis();
+
     // ── Cron jobs ──────────────────────────────────────────────────────────────
     scheduleStoryCleanup();
-
-    // ── Start listening ────────────────────────────────────────────────────────
-    httpServer.listen(PORT, () => {
-        logger.info(`PeerNet server running on port ${PORT} [${process.env.NODE_ENV}]`);
-    });
 
     // ── Graceful shutdown ──────────────────────────────────────────────────────
     const shutdown = (signal) => {
@@ -79,3 +76,4 @@ bootstrap().catch((err) => {
     logger.error(`Bootstrap failed: ${err.message}`);
     process.exit(1);
 });
+
