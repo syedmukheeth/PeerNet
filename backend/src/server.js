@@ -38,24 +38,22 @@ const bootstrap = async () => {
     await new Promise((resolve) => httpServer.listen(PORT, resolve));
     logger.info(`PeerNet server running on port ${PORT} [${process.env.NODE_ENV}]`);
 
-    // ── Connect databases with retry ────────────────────────────────────────
-    const withRetry = async (fn, name, maxRetries = 5, delayMs = 10000) => {
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    // ── Connect databases in background (non-blocking, infinite retry) ────────
+    const connectForever = async (fn, name) => {
+        while (true) {
             try {
                 await fn();
+                logger.info(`${name} ready`);
                 return;
             } catch (err) {
-                if (attempt === maxRetries) {
-                    logger.error(`${name} failed after ${maxRetries} attempts: ${err.message}`);
-                    throw err;
-                }
-                logger.warn(`${name} attempt ${attempt}/${maxRetries} failed. Retrying in ${delayMs / 1000}s...`);
-                await new Promise((r) => setTimeout(r, delayMs));
+                logger.warn(`${name} failed: ${err.message.slice(0, 80)} — retrying in 30s`);
+                await new Promise((r) => setTimeout(r, 30000));
             }
         }
     };
-    await withRetry(connectDB, 'MongoDB');
-    await withRetry(connectRedis, 'Redis');
+    // Don't await — server stays alive regardless of DB status
+    connectForever(connectDB, 'MongoDB');
+    connectForever(connectRedis, 'Redis');
 
     // ── Cron jobs ──────────────────────────────────────────────────────────────
     scheduleStoryCleanup();
