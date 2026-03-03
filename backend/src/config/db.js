@@ -9,6 +9,8 @@ const connectDB = async () => {
     if (isConnected) return;
 
     try {
+        const safeUri = (process.env.MONGO_URI || '').replace(/:([^@]+)@/, ':***@');
+        logger.info(`Connecting to MongoDB: ${safeUri}`);
         const conn = await mongoose.connect(process.env.MONGO_URI, {
             serverSelectionTimeoutMS: 15000,
             socketTimeoutMS: 45000,
