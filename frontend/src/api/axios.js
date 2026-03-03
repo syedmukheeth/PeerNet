@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
+
 const api = axios.create({
-    baseURL: '/api/v1',
+    baseURL: BASE_URL,
     withCredentials: true,         // send cookies (refresh token)
     headers: { 'Content-Type': 'application/json' },
 })
@@ -35,7 +37,7 @@ api.interceptors.response.use(
             original._retry = true
             isRefreshing = true
             try {
-                const { data } = await axios.post('/api/v1/auth/refresh', {}, { withCredentials: true })
+                const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {}, { withCredentials: true })
                 const token = data.data.accessToken
                 localStorage.setItem('accessToken', token)
                 queue.forEach((p) => p.resolve(token))
