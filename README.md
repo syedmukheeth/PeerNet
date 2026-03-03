@@ -262,15 +262,15 @@ Authorization: Bearer <accessToken>
 | DELETE | `/stories/:id` | Delete your story |
 | POST | `/stories/:id/view` | Mark story as viewed |
 
-### Dscrolls (Reels)
+### Dscrolls
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/reels` | Dscrolls feed |
-| POST | `/reels` | Upload a Dscroll (video) |
-| DELETE | `/reels/:id` | Delete your Dscroll |
-| POST | `/reels/:id/like` | Like a Dscroll |
-| DELETE | `/reels/:id/like` | Unlike a Dscroll |
+| GET | `/dscrolls` | Dscrolls feed |
+| POST | `/dscrolls` | Upload a Dscroll (video) |
+| DELETE | `/dscrolls/:id` | Delete your Dscroll |
+| POST | `/dscrolls/:id/like` | Like a Dscroll |
+| DELETE | `/dscrolls/:id/like` | Unlike a Dscroll |
 
 ### Notifications
 
