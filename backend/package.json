@@ -1,11 +1,12 @@
 {
   "name": "peernet",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Production-level Instagram-like social media platform",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon --watch .env --ext js,mjs,cjs,json,env src/server.js",
+    "dev": "npx kill-port 3000 && nodemon --watch .env --ext js,mjs,cjs,json,env src/server.js",
+    "kill:port": "npx kill-port 3000",
     "lint": "eslint src/",
     "seed": "node src/seeders/seed.js",
     "seed:celebs": "node src/seeders/celebrities.js"

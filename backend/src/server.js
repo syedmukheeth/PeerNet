@@ -3,7 +3,7 @@
 // Allow self-signed TLS certs (required for Redis Cloud / Atlas free tier on Render)
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
 const http = require('http');
 const { Server: SocketServer } = require('socket.io');
