@@ -16,7 +16,7 @@ router.use('/users', userRoutes);
 router.use('/posts', postRoutes);
 router.use('/comments', commentRoutes);
 router.use('/stories', storyRoutes);
-router.use('/reels', reelRoutes);
+router.use('/dscrolls', reelRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/conversations', messageRoutes);
 router.use('/admin', adminRoutes);

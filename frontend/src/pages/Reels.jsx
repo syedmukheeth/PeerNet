@@ -21,8 +21,8 @@ function ReelItem({ reel, isActive }) {
         setLiked(newLiked)
         setLikesCount(newLiked ? likesCount + 1 : likesCount - 1)
         try {
-            if (newLiked) await api.post(`/reels/${reel._id}/like`)
-            else await api.delete(`/reels/${reel._id}/like`)
+            if (newLiked) await api.post(`/dscrolls/${reel._id}/like`)
+            else await api.delete(`/dscrolls/${reel._id}/like`)
         } catch { setLiked(!newLiked); setLikesCount(likesCount) }
     }
 
@@ -85,7 +85,7 @@ export default function Reels() {
     const containerRef = useRef()
 
     useEffect(() => {
-        api.get('/reels').then(({ data }) => setReels(data.data || [])).finally(() => setLoading(false))
+        api.get('/dscrolls').then(({ data }) => setReels(data.data || [])).finally(() => setLoading(false))
     }, [])
 
     useEffect(() => {
@@ -110,7 +110,7 @@ export default function Reels() {
     if (reels.length === 0) return (
         <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
             <p style={{ fontSize: 40 }}>🎬</p>
-            <p style={{ fontSize: 16, marginTop: 12, color: 'var(--text-secondary)' }}>No reels yet</p>
+            <p style={{ fontSize: 16, marginTop: 12, color: 'var(--text-secondary)' }}>No Dscrolls yet</p>
         </div>
     )
 

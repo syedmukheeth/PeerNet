@@ -8,11 +8,13 @@
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Status](https://img.shields.io/badge/status-production-success)
 
+🌐 **Live:** [peer-net-indol.vercel.app](https://peer-net-indol.vercel.app) | 🔧 **API:** [peernet-5u5q.onrender.com](https://peernet-5u5q.onrender.com/health)
+
 ---
 
 ## What is PeerNet?
 
-PeerNet is a full-stack social media platform with features like posts, stories, reels (Dscrolls), real-time messaging, notifications, and an admin panel — all production-ready with JWT auth, Redis caching, Cloudinary media storage, and Docker deployment.
+PeerNet is a full-stack social media platform with features like posts, stories, Dscrolls (short videos), real-time messaging, notifications, and an admin panel — all production-ready with JWT auth, Redis caching, Cloudinary media storage, and Docker deployment.
 
 ---
 

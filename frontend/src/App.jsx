@@ -55,7 +55,7 @@ export default function App() {
           {/* Protected app */}
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Feed />} />
-            <Route path="reels" element={<Reels />} />
+            <Route path="dscrolls" element={<Reels />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="messages" element={<Messages />} />
             <Route path="messages/:id" element={<Messages />} />

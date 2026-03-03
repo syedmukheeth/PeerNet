@@ -16,7 +16,7 @@ import ThemeToggle from './ThemeToggle'
 const links = [
     { to: '/', icon: HiHome, label: 'Home', exact: true },
     { to: '/search', icon: HiSearch, label: 'Search' },
-    { to: '/reels', icon: HiFilm, label: 'Dscrolls' },
+    { to: '/dscrolls', icon: HiFilm, label: 'Dscrolls' },
     { to: '/messages', icon: HiChatAlt2, label: 'Messages' },
     { to: '/notifications', icon: HiBell, label: 'Notifications', badge: true },
 ]
