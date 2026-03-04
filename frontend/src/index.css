@@ -629,6 +629,7 @@ textarea {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   min-height: 100dvh;
+  --sidebar-w: 240px;
 }
 
 /* ── Fade-in utility ──────────────────────────────────────── */
@@ -1447,6 +1448,7 @@ textarea {
 @media (max-width: 900px) {
   .app-layout {
     grid-template-columns: 68px minmax(0, 1fr);
+    --sidebar-w: 68px;
   }
 
   .sidebar {
@@ -1483,17 +1485,13 @@ textarea {
   .content-wrap {
     padding: 20px 14px 60px;
   }
-
-  .chat-layout {
-    grid-template-columns: 260px minmax(0, 1fr);
-  }
 }
 
 /* Mobile (≤640px) — bottom nav, full-width pages, chat fullscreen */
 @media (max-width: 640px) {
   .app-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) 58px;
+    --sidebar-w: 0px;
   }
 
   .sidebar {
@@ -1502,6 +1500,20 @@ textarea {
 
   .main-col {
     order: 1;
+  }
+
+  /* DM full-screen panels on mobile */
+  .dm-list-panel {
+    display: flex !important;
+    width: 100% !important;
+  }
+
+  .dm-chat-panel {
+    display: flex !important;
+  }
+
+  .dm-back-btn {
+    display: flex !important;
   }
 
   .mobile-nav {
