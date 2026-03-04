@@ -134,19 +134,7 @@ function RightPanel() {
             )}
 
             {/* ── Footer ───────────────────────── */}
-            <div style={{ marginTop: suggestions.length ? 0 : 'auto' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px', marginBottom: 10 }}>
-                    {['About', 'Help', 'Press', 'API', 'Jobs', 'Privacy', 'Terms'].map(l => (
-                        <a key={l} href="#"
-                            style={{ fontSize: 11, color: 'var(--text-3)', textDecoration: 'none', transition: 'color 150ms' }}
-                            onMouseEnter={e => e.target.style.color = 'var(--text-1)'}
-                            onMouseLeave={e => e.target.style.color = 'var(--text-3)'}>
-                            {l}
-                        </a>
-                    ))}
-                </div>
-
-                {/* LinkedIn link */}
+            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <a
                     href="https://www.linkedin.com/in/syedmukheeth"
                     target="_blank"
@@ -154,17 +142,15 @@ function RightPanel() {
                     style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6,
                         fontSize: 12, color: '#0A66C2', fontWeight: 600,
-                        textDecoration: 'none', marginBottom: 10,
-                        transition: 'opacity 150ms',
+                        textDecoration: 'none', transition: 'opacity 150ms',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
                     onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-                    <FaLinkedin style={{ fontSize: 16 }} />
-                    Connect on LinkedIn
+                    <FaLinkedin style={{ fontSize: 15 }} />
+                    Syed Mukheeth
                 </a>
-
-                <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4 }}>
-                    © 2025 PeerNet from Syed Mukheeth
+                <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>
+                    Built by Syed Mukheeth · © 2025 PeerNet
                 </p>
             </div>
 
