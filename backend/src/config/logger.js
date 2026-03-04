@@ -1,14 +1,17 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
-const path = require('path');
 
 const { combine, timestamp, errors, json, colorize, printf } = winston.format;
 
-const logDir = process.env.LOG_DIR || 'logs';
 const logLevel = process.env.LOG_LEVEL || 'info';
+const logDir = process.env.LOG_DIR || 'logs';
+const isProd = process.env.NODE_ENV === 'production';
 
+// ── Formats ──────────────────────────────────────────────────────────────────
 const devFormat = combine(
     colorize(),
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -20,57 +23,66 @@ const devFormat = combine(
     ),
 );
 
-const prodFormat = combine(
-    timestamp(),
-    errors({ stack: true }),
-    json(),
-);
+const prodFormat = combine(timestamp(), errors({ stack: true }), json());
 
-const fileTransport = new DailyRotateFile({
-    dirname: logDir,
-    filename: 'application-%DATE%.log',
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '14d',
-    level: 'info',
-    format: prodFormat,
-});
+// ── Transports ────────────────────────────────────────────────────────────────
+const transports = [
+    new winston.transports.Console({
+        format: isProd ? prodFormat : devFormat,
+    }),
+];
 
-const errorFileTransport = new DailyRotateFile({
-    dirname: logDir,
-    filename: 'error-%DATE%.log',
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '30d',
-    level: 'error',
-    format: prodFormat,
-});
+// Only add file transports when the log directory is writable (local dev / Docker).
+// On Render's ephemeral filesystem the directory may not exist or be read-only,
+// so we skip file logging rather than crashing.
+let fileTransportsOk = false;
+try {
+    if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+    }
+    // Quick write-access check
+    const testFile = path.join(logDir, '.write_test');
+    fs.writeFileSync(testFile, '');
+    fs.unlinkSync(testFile);
+    fileTransportsOk = true;
+} catch (_) {
+    // Filesystem not writable — console-only logging
+}
 
+if (fileTransportsOk) {
+    transports.push(
+        new DailyRotateFile({
+            dirname: logDir,
+            filename: 'application-%DATE%.log',
+            datePattern: 'YYYY-MM-DD',
+            zippedArchive: true,
+            maxSize: '20m',
+            maxFiles: '14d',
+            level: 'info',
+            format: prodFormat,
+        }),
+        new DailyRotateFile({
+            dirname: logDir,
+            filename: 'error-%DATE%.log',
+            datePattern: 'YYYY-MM-DD',
+            zippedArchive: true,
+            maxSize: '20m',
+            maxFiles: '30d',
+            level: 'error',
+            format: prodFormat,
+        }),
+    );
+}
+
+// ── Logger ────────────────────────────────────────────────────────────────────
+// IMPORTANT: Do NOT use Winston's exceptionHandlers / rejectionHandlers with
+// file transports.  Winston automatically calls process.exit(1) after writing
+// to those handlers — which terminates Render before the server ever starts.
+// Uncaught exceptions and unhandled rejections are handled in server.js instead.
 const logger = winston.createLogger({
     level: logLevel,
-    transports: [
-        new winston.transports.Console({
-            format: process.env.NODE_ENV === 'production' ? prodFormat : devFormat,
-        }),
-        fileTransport,
-        errorFileTransport,
-    ],
-    exceptionHandlers: [
-        new DailyRotateFile({
-            dirname: logDir,
-            filename: 'exceptions-%DATE%.log',
-            datePattern: 'YYYY-MM-DD',
-        }),
-    ],
-    rejectionHandlers: [
-        new DailyRotateFile({
-            dirname: logDir,
-            filename: 'rejections-%DATE%.log',
-            datePattern: 'YYYY-MM-DD',
-        }),
-    ],
+    transports,
+    exitOnError: false,   // prevent Winston from exiting the process on transport errors
 });
 
 module.exports = logger;

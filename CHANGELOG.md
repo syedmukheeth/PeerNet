@@ -6,6 +6,15 @@ Versioning follows [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.P
 
 ---
 
+## [v1.4.0] - 2026-03-04
+
+### Fixed
+- **Root crash cause on Render**: Winston `exceptionHandlers` / `rejectionHandlers` using `DailyRotateFile` were calling `process.exit(1)` automatically on Render's read-only filesystem — server exited before MongoDB could ever connect
+- Added writable-filesystem check before enabling file log transports (falls back to console-only on Render)
+- Set `exitOnError: false` on the Winston logger to prevent transport errors from killing the process
+
+---
+
 ## [v1.3.0] - 2026-03-04
 
 ### Fixed
