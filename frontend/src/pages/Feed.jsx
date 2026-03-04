@@ -50,17 +50,13 @@ function RightPanel() {
             }}>
                 <div onClick={() => navigate(`/profile/${user?._id}`)}
                     style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
-                    {/* Story-ring border */}
-                    <div style={{
-                        width: 58, height: 58, borderRadius: '50%', padding: 2,
-                        background: 'var(--story-ring)',
-                    }}>
-                        <div style={{ background: 'var(--surface)', borderRadius: '50%', padding: 2 }}>
-                            <img src={myAvatar}
-                                style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
-                                alt="" />
-                        </div>
-                    </div>
+                    <img src={myAvatar}
+                        style={{
+                            width: 54, height: 54, borderRadius: '50%',
+                            objectFit: 'cover', display: 'block',
+                            border: '2px solid var(--border-md)',
+                        }}
+                        alt="" />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -150,7 +146,7 @@ function RightPanel() {
                     Syed Mukheeth
                 </a>
                 <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>
-                    Built by Syed Mukheeth · © 2025 PeerNet
+                    Built by Syed Mukheeth · © 2026 PeerNet
                 </p>
             </div>
 

@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.P
 
 ---
 
+## [v1.1.0] - 2026-03-04
+
+### Changed
+- Refined Feed UI layout and right-hand panel design for improved responsiveness
+- Added share button functionality to feed posts
+
+### Added
+- New Post Detail page (`PostDetail.jsx`) with full post view, comments, and interactions
+
+---
+
 ## [v1.0.0] - 2026-03-03
 
 ### 🎉 Initial Release
