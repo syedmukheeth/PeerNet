@@ -44,8 +44,10 @@
   --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.80);
   --shadow-accent: 0 4px 28px rgba(79, 122, 255, 0.28);
 
-  /* Story ring — purple→blue→cyan arc */
+  /* Story ring */
   --story-ring: linear-gradient(135deg, #7C3AED, #4F7AFF, #06B6D4, #7C3AED);
+  /* DM */
+  --dm-theirs: #1C1C2E;
 }
 
 /* ── Light Mode — Clean White + Purple/Blue ─────────────── */
@@ -87,8 +89,10 @@
   --shadow-lg: 0 12px 40px rgba(79, 122, 255, 0.14);
   --shadow-accent: 0 4px 24px rgba(79, 122, 255, 0.22);
 
-  /* Story ring — purple→blue→cyan arc */
+  /* Story ring */
   --story-ring: linear-gradient(135deg, #7C3AED, #4F7AFF, #06B6D4, #7C3AED);
+  /* DM */
+  --dm-theirs: #E8E8F0;
 }
 
 /* ── Variable Aliases — all naming conventions work ─────── */
