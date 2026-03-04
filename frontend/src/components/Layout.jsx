@@ -12,6 +12,7 @@ import { FaLinkedin } from 'react-icons/fa'
 import api from '../api/axios'
 import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
+import logoImg from '../assets/logo.png'
 
 const links = [
     { to: '/', icon: HiHome, label: 'Home', exact: true },
@@ -140,8 +141,9 @@ export default function Layout() {
             {/* ── Sidebar ── */}
             <aside className="sidebar" style={{ display: 'flex', flexDirection: 'column' }}>
                 <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <div className="peernetLogo">
-                        PeerNet
+                    <div className="peernetLogo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <img src={logoImg} alt="PeerNet" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }} />
+                        <span className="sidebar-logo-text">PeerNet</span>
                     </div>
                 </Link>
 

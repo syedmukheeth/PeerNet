@@ -3,7 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
 import { io } from 'socket.io-client'
-import { HiPaperAirplane, HiBadgeCheck, HiSearch, HiX, HiPencilAlt } from 'react-icons/hi'
+import {
+    HiPaperAirplane, HiBadgeCheck, HiSearch, HiX,
+    HiPencilAlt, HiArrowLeft
+} from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
 
@@ -11,7 +14,7 @@ let socket = null
 
 function TypingIndicator() {
     return (
-        <div className="typing-indicator" style={{ alignSelf: 'flex-start' }}>
+        <div className="typing-indicator">
             <div className="typing-dot" />
             <div className="typing-dot" />
             <div className="typing-dot" />
@@ -105,6 +108,7 @@ export default function Messages() {
     const [peerTyping, setPeerTyping] = useState(false)
     const [showNewConvo, setShowNewConvo] = useState(false)
     const [starting, setStarting] = useState(false)
+    const [chatOpen, setChatOpen] = useState(false) // mobile slide
     const bottomRef = useRef()
     const typingTimer = useRef()
     const inputRef = useRef()
@@ -120,13 +124,16 @@ export default function Messages() {
             path: '/socket.io',
             transports: ['websocket', 'polling'],
         })
-        socket.on('connect', () => console.log('Socket connected:', socket.id))
-        socket.on('connect_error', (err) => console.error('Socket error:', err.message))
         socket.on('new_message', (msg) => {
-            // Only add messages from OTHER users — we already append our own in handleSend
             const senderId = msg.sender?._id || msg.sender
             if (senderId === userRef.current?._id) return
             setMessages(m => [...m, msg])
+            // Update last message preview in convo list
+            setConversations(cs => cs.map(c =>
+                c._id === msg.conversationId
+                    ? { ...c, lastMessage: msg }
+                    : c
+            ))
         })
         socket.on('user_typing', () => setPeerTyping(true))
         socket.on('user_stop_typing', () => setPeerTyping(false))
@@ -152,17 +159,23 @@ export default function Messages() {
 
     // ── Select a conversation ──────────────────────────────
     const selectConvo = async (convo) => {
-        if (activeConvo?._id === convo._id) return
+        if (activeConvo?._id === convo._id) { setChatOpen(true); return }
         if (activeConvo) socket?.emit('leave_conversation', activeConvo._id)
         setActiveConvo(convo)
         setMessages([])
+        setChatOpen(true)
         socket?.emit('join_conversation', convo._id)
         navigate(`/messages/${convo._id}`, { replace: true })
         try {
             const { data } = await api.get(`/conversations/${convo._id}/messages`, { params: { limit: 50 } })
-            setMessages((data.data || []))
+            setMessages(data.data || [])
         } catch { toast.error('Failed to load messages') }
         setTimeout(() => inputRef.current?.focus(), 100)
+    }
+
+    const closeChat = () => {
+        setChatOpen(false)
+        navigate('/messages', { replace: true })
     }
 
     // ── Start new conversation ─────────────────────────────
@@ -172,7 +185,6 @@ export default function Messages() {
         try {
             const { data } = await api.post('/conversations', { targetUserId: targetUser._id })
             const convo = data.data
-            // Re-fetch conversations to include the new one
             const fresh = await loadConversations()
             const found = fresh.find(c => c._id === convo._id) || {
                 ...convo,
@@ -202,7 +214,6 @@ export default function Messages() {
         try {
             const { data } = await api.post(`/conversations/${activeConvo._id}/messages`, { body })
             setMessages(m => [...m, data.data])
-            // Update last message in convo list
             setConversations(cs => cs.map(c => c._id === activeConvo._id
                 ? { ...c, lastMessage: { body } } : c))
         } catch { toast.error('Failed to send'); setText(body) }
@@ -223,16 +234,12 @@ export default function Messages() {
 
     return (
         <>
-            <div className="chat-layout" style={{ margin: '-28px -24px' }}>
+            {/* chat-layout fills the full main-col height via CSS */}
+            <div className="chat-layout" style={{ margin: '-28px -24px', height: 'calc(100dvh - 0px)' }}>
+
                 {/* ── Conversation List ── */}
                 <div className="convo-list">
-                    <div style={{
-                        padding: '18px 16px 12px',
-                        borderBottom: '1px solid var(--border)',
-                        background: 'var(--surface)',
-                        backdropFilter: 'none',
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    }}>
+                    <div className="convo-list-header">
                         <h2 style={{ fontWeight: 800, fontSize: 18, fontFamily: "'Syne','Inter',sans-serif" }}>
                             Messages
                         </h2>
@@ -246,70 +253,81 @@ export default function Messages() {
                     </div>
 
                     {starting && (
-                        <div className="flex justify-center" style={{ padding: 16 }}>
+                        <div className="flex justify-center" style={{ padding: 20 }}>
                             <div className="spinner" />
                         </div>
                     )}
 
-                    {conversations.map((c) => {
-                        const other = getOther(c)
-                        const avatar = other?.avatarUrl || `https://ui-avatars.com/api/?name=${other?.username}&background=6366F1&color=fff`
-                        return (
-                            <div key={c._id}
-                                className={`convo-item ${activeConvo?._id === c._id ? 'active' : ''}`}
-                                onClick={() => selectConvo(c)}>
-                                <div style={{ position: 'relative', flexShrink: 0 }}>
-                                    <img src={avatar} className="avatar avatar-md" alt=""
-                                        style={{ boxShadow: other?.isVerified ? '0 0 0 2px var(--accent)' : 'none' }} />
-                                    <div style={{
-                                        position: 'absolute', bottom: 1, right: 1,
-                                        width: 10, height: 10,
-                                        background: 'var(--success)',
-                                        borderRadius: '50%',
-                                        border: '2px solid var(--surface)',
-                                    }} />
-                                </div>
-                                <div style={{ flex: 1, overflow: 'hidden' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, fontSize: 14, marginBottom: 2 }}>
-                                        {other?.username}
-                                        {other?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13 }} />}
+                    <div style={{ overflowY: 'auto', flex: 1 }}>
+                        {conversations.map((c) => {
+                            const other = getOther(c)
+                            const avatar = other?.avatarUrl || `https://ui-avatars.com/api/?name=${other?.username}&background=6366F1&color=fff`
+                            return (
+                                <div key={c._id}
+                                    className={`convo-item ${activeConvo?._id === c._id ? 'active' : ''}`}
+                                    onClick={() => selectConvo(c)}>
+                                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                                        <img src={avatar} className="avatar avatar-md" alt=""
+                                            style={{ boxShadow: other?.isVerified ? '0 0 0 2px var(--accent)' : 'none' }} />
+                                        <div style={{
+                                            position: 'absolute', bottom: 1, right: 1,
+                                            width: 10, height: 10,
+                                            background: 'var(--success)',
+                                            borderRadius: '50%',
+                                            border: '2px solid var(--surface)',
+                                        }} />
                                     </div>
-                                    <div className="truncate" style={{ fontSize: 13, color: 'var(--text-3)' }}>
-                                        {c.lastMessage?.body || 'Say hello 👋'}
+                                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, fontSize: 14 }}>
+                                                {other?.username}
+                                                {other?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13 }} />}
+                                            </div>
+                                            {c.lastMessage?.createdAt && (
+                                                <span style={{ fontSize: 11, color: 'var(--text-3)', flexShrink: 0 }}>
+                                                    {timeago(c.lastMessage.createdAt)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="truncate" style={{ fontSize: 13, color: 'var(--text-3)' }}>
+                                            {c.lastMessage?.body || 'Say hello 👋'}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })}
 
-                    {conversations.length === 0 && !starting && (
-                        <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-3)' }}>
-                            <div style={{ fontSize: 36, marginBottom: 12 }}>💬</div>
-                            <p style={{ fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>No messages yet</p>
-                            <p style={{ fontSize: 13, marginBottom: 16 }}>Start a new conversation</p>
-                            <button className="btn btn-primary btn-sm" onClick={() => setShowNewConvo(true)}>
-                                + New Message
-                            </button>
-                        </div>
-                    )}
+                        {conversations.length === 0 && !starting && (
+                            <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-3)' }}>
+                                <div style={{ fontSize: 36, marginBottom: 12 }}>💬</div>
+                                <p style={{ fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>No messages yet</p>
+                                <p style={{ fontSize: 13, marginBottom: 16 }}>Start a new conversation</p>
+                                <button className="btn btn-primary btn-sm" onClick={() => setShowNewConvo(true)}>
+                                    + New Message
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* ── Chat Area ── */}
-                <div className="chat-area">
+                <div className={`chat-area ${chatOpen ? 'open' : ''}`}>
                     {activeConvo ? (() => {
                         const other = getOther(activeConvo)
                         const avatar = other?.avatarUrl || `https://ui-avatars.com/api/?name=${other?.username}&background=6366F1&color=fff`
                         return (
                             <>
                                 {/* Header */}
-                                <div className="flex items-center gap-3" style={{
-                                    padding: '14px 20px',
-                                    borderBottom: '1px solid var(--border)',
-                                    background: 'var(--surface)',
-                                    backdropFilter: 'none',
-                                }}>
+                                <div className="chat-area-header">
+                                    {/* Mobile back button */}
+                                    <button
+                                        className="btn btn-ghost btn-icon chat-back-btn"
+                                        onClick={closeChat}
+                                        style={{ marginRight: 4 }}>
+                                        <HiArrowLeft />
+                                    </button>
                                     <img src={avatar} className="avatar avatar-sm" alt="" />
-                                    <div>
+                                    <div style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 700 }}>
                                             {other?.username}
                                             {other?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14 }} />}
@@ -332,12 +350,12 @@ export default function Messages() {
                                     {messages.map((m) => {
                                         const isMine = m.sender === user?._id || m.sender?._id === user?._id
                                         return (
-                                            <div key={m._id} style={{ display: 'flex', flexDirection: 'column' }} className={isMine ? 'message-wrap mine' : 'message-wrap'}>
+                                            <div key={m._id} className={`message-wrap ${isMine ? 'mine' : ''}`}>
                                                 <div className={`message-bubble ${isMine ? 'mine' : 'theirs'}`}>
                                                     {m.body}
                                                     {m.mediaUrl && <img src={m.mediaUrl} style={{ marginTop: 8, borderRadius: 10, maxWidth: '100%' }} alt="" />}
                                                 </div>
-                                                <div className="message-time" style={{ textAlign: isMine ? 'right' : 'left' }}>
+                                                <div className="message-time">
                                                     {timeago(m.createdAt)}
                                                 </div>
                                             </div>
