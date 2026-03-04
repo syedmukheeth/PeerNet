@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiChevronDown, HiChevronUp, HiCog
+    HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiCog
 } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
 import api from '../api/axios'
