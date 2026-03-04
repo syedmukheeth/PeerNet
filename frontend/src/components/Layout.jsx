@@ -52,21 +52,8 @@ export default function Layout() {
             .catch(() => { })
     }, [user])
 
-    // ── Fetch initial unread message count (conversations with unread) ─
-    useEffect(() => {
-        if (!user) return
-        api.get('/conversations')
-            .then(({ data }) => {
-                const convs = data.data || []
-                // Count conversations where lastMessage sender is not me (simple heuristic)
-                const unread = convs.filter(c =>
-                    c.lastMessage && c.lastMessage.sender?._id !== user._id && !c.lastMessage.readBy?.includes(user._id)
-                ).length
-                msgRef.current = unread
-                setMsgCount(unread)
-            })
-            .catch(() => { })
-    }, [user])
+    // Messages badge starts at 0 — only bumped by real-time socket events
+    // (Instagram-style: badge only appears for messages received in this session)
 
     // ── Real-time notifications via socket ─────────────────
     useEffect(() => {
@@ -104,10 +91,32 @@ export default function Layout() {
         })
 
         layoutSocket.on('new_message', (msg) => {
-            // Only bump if we're not currently on the messages page
+            // Only bump if message is FROM someone else (not our own send)
+            const senderId = msg.sender?._id || msg.sender
+            const isFromMe = senderId === user?._id
+            if (isFromMe) return
+
+            // Only bump badge if NOT currently on messages page
             if (!window.location.pathname.startsWith('/messages')) {
                 msgRef.current += 1
-                setMsgCount(msgRef.current)
+                setMsgCount(c => c + 1)
+                // Show a toast like Instagram
+                const senderName = msg.sender?.username || 'Someone'
+                const senderAvatar = msg.sender?.avatarUrl ||
+                    `https://ui-avatars.com/api/?name=${senderName}&background=6366F1&color=fff`
+                toast(
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <img src={senderAvatar}
+                            style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                            alt="" />
+                        <div>
+                            <strong style={{ fontSize: 13 }}>{senderName}</strong>
+                            <span style={{ fontSize: 13, color: 'var(--text-2)', marginLeft: 5 }}>sent you a message</span>
+                        </div>
+                        <span style={{ fontSize: 16, marginLeft: 'auto' }}>💬</span>
+                    </div>,
+                    { duration: 3500 }
+                )
             }
         })
 
