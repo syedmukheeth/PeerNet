@@ -113,19 +113,20 @@ export default function Layout() {
         return () => { layoutSocket?.disconnect(); layoutSocket = null }
     }, [user])
 
-    // ── Reset badge counts when visiting relevant pages ────
-    const handleNavClick = (to) => {
-        if (to === '/notifications') {
+    // ── Clear badges when actually ON the relevant page ────
+    useEffect(() => {
+        if (location.pathname === '/notifications') {
             setUnreadCount(0)
             unreadRef.current = 0
-            // Mark all read on server
             api.patch('/notifications/read').catch(() => { })
         }
-        if (to.startsWith('/messages')) {
+        if (location.pathname.startsWith('/messages')) {
             setMsgCount(0)
             msgRef.current = 0
         }
-    }
+    }, [location.pathname])
+
+    const handleNavClick = () => { } // retained for any future use
 
     const handleLogout = async () => {
         await logout()
