@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.P
 
 ---
 
+## [v1.2.0] - 2026-03-04
+
+### Fixed
+- `dotenv` path resolution broken inside Docker / Render — now uses dual-path fallback strategy
+- `unhandledRejection` handler was calling `process.exit(1)`, killing the server on transient DB reconnects — changed to log-only
+
+### Added
+- `render.yaml` at repo root so Render correctly points to the `backend/` root directory with the right start command and env var declarations
+
+---
+
 ## [v1.1.0] - 2026-03-04
 
 ### Changed

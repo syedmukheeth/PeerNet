@@ -3,7 +3,10 @@
 // Allow self-signed TLS certs (required for Redis Cloud / Atlas free tier on Render)
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+// Load .env for local dev; on Render vars are injected into process.env automatically
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config(); // fallback to cwd/.env (no-op if already loaded)
 
 const http = require('http');
 const { Server: SocketServer } = require('socket.io');
@@ -80,8 +83,9 @@ const bootstrap = async () => {
     });
 
     process.on('unhandledRejection', (reason) => {
-        logger.error(`Unhandled Rejection: ${reason}`);
-        process.exit(1);
+        // Log but do NOT exit — transient DB/Redis retries emit rejections
+        // and we don't want the whole server to die during reconnection.
+        logger.warn(`Unhandled Rejection (non-fatal): ${reason}`);
     });
 };
 

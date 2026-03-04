@@ -1,6 +1,9 @@
 'use strict';
 
-require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+// Load .env for local dev; on Render vars are injected into process.env automatically
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config(); // fallback to cwd/.env (no-op if already loaded)
 
 const express = require('express');
 const helmet = require('helmet');
