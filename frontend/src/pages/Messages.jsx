@@ -468,23 +468,11 @@ export default function Messages() {
                                         )}
                                     </div>
 
-                                    {/* Send / Heart */}
-                                    {text.trim() ? (
-                                        <button type="submit" style={{
-                                            background: 'none', border: 'none', cursor: 'pointer',
-                                            color: 'var(--accent)', fontWeight: 700, fontSize: 15, flexShrink: 0,
-                                        }}>Send</button>
-                                    ) : (
-                                        <button type="button" onClick={sendHeart}
-                                            title="Send ❤️"
-                                            style={{
-                                                fontSize: 22, background: 'none', border: 'none',
-                                                display: 'flex', cursor: 'pointer', flexShrink: 0,
-                                                transition: 'transform 150ms',
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.25)'}
-                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>❤️</button>
-                                    )}
+                                    {/* Always show Send */}
+                                    <button type="submit" style={{
+                                        background: 'none', border: 'none', cursor: 'pointer',
+                                        color: 'var(--accent)', fontWeight: 700, fontSize: 15, flexShrink: 0,
+                                    }}>Send</button>
                                 </form>
                             </div>
                         </>
