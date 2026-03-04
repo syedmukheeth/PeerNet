@@ -1,6 +1,6 @@
 {
   "name": "peernet",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Production-level Instagram-like social media platform",
   "main": "src/server.js",
   "scripts": {

@@ -69,12 +69,7 @@ export default function Login() {
                     No account? <Link to="/register">Sign up</Link>
                 </p>
 
-                <div className="auth-hint">
-                    <strong style={{ color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>🔑 Quick Login</strong>
-                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>Admin</span> admin@peernet.dev / Seed@1234<br />
-                    <span style={{ color: 'var(--success)', fontWeight: 600 }}>User</span>{"  "} alice@peernet.dev / Seed@1234<br />
-                    <span style={{ color: 'var(--warning)', fontWeight: 600 }}>Celeb</span> virat@peernet.dev / Celeb@1234
-                </div>
+
             </motion.div>
         </div>
     )

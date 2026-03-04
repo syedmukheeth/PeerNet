@@ -779,6 +779,7 @@ textarea {
   gap: 40px;
   align-items: flex-start;
   max-width: 1050px;
+  margin: 0 auto;
 }
 
 .feed-col {
@@ -1821,16 +1822,7 @@ textarea {
   text-decoration: underline;
 }
 
-.auth-hint {
-  margin-top: 18px;
-  padding: 14px 16px;
-  background: var(--card);
-  border: 1px solid var(--border-md);
-  border-radius: 12px;
-  font-size: 13px;
-  color: var(--text-2);
-  line-height: 1.9;
-}
+
 
 /* ── Input placeholder contrast ─────────────────────────── */
 input::placeholder,

@@ -3,7 +3,7 @@
 > A production-grade, full-stack social media platform built with modern technologies.
 > Inspired by Instagram — built for scale.
 
-![Version](https://img.shields.io/badge/version-v1.1.0-blue)
+![Version](https://img.shields.io/badge/version-v1.5.0-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Status](https://img.shields.io/badge/status-production-success)

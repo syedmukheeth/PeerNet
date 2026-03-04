@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.P
 
 ---
 
+## [v1.5.0] - 2026-03-04
+
+### Removed
+- Removed dev-only **Quick Login** credentials hint from the Login page
+
+### Fixed
+- Feed post alignment: added `margin: 0 auto` to `.feed-layout` so posts are properly centered on wider screens
+
+### Cleanup
+- Removed unused `.auth-hint` CSS class from `index.css`
+
+---
+
 ## [v1.4.0] - 2026-03-04
 
 ### Fixed
