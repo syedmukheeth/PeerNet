@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiChevronDown, HiChevronUp
+    HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiChevronDown, HiChevronUp, HiCog
 } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
 import api from '../api/axios'
@@ -28,17 +28,7 @@ export default function Layout() {
     const navigate = useNavigate()
     const [showCreate, setShowCreate] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
-    const [following, setFollowing] = useState([])
-    const [showAllFollowing, setShowAllFollowing] = useState(false)
     const unreadRef = useRef(0)
-
-    // Fetch following for sidebar
-    useEffect(() => {
-        if (!user) return
-        api.get(`/users/${user._id}/following?limit=50`)
-            .then(({ data }) => setFollowing(data.data || []))
-            .catch(() => { })
-    }, [user])
 
     // ── Real-time notifications via socket ─────────────────
     useEffect(() => {
@@ -153,45 +143,6 @@ export default function Layout() {
                         <span>Create</span>
                     </motion.button>
 
-                    {/* Following Section */}
-                    {user && following.length > 0 && (
-                        <div style={{ paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', padding: '0 10px 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                Following
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {(showAllFollowing ? following : following.slice(0, 7)).map(fUser => (
-                                    <NavLink key={fUser._id} to={`/profile/${fUser._id}`}
-                                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                                        style={{ position: 'relative', padding: '6px 10px' }}>
-                                        {({ isActive }) => (
-                                            <>
-                                                {isActive && (
-                                                    <motion.div
-                                                        layoutId="sidebar-active"
-                                                        style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
-                                                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                                                    />
-                                                )}
-                                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12, width: '100%', color: isActive ? 'var(--accent)' : 'inherit' }}>
-                                                    <img src={fUser.avatarUrl || `https://ui-avatars.com/api/?name=${fUser.username}&background=FF375F&color=fff`} className="avatar avatar-xs" alt="" style={{ border: isActive ? '2px solid var(--accent)' : 'none', width: 24, height: 24 }} />
-                                                    <span className="truncate" style={{ flex: 1, maxWidth: 110, fontSize: 13, fontWeight: isActive ? 600 : 500 }}>{fUser.username}</span>
-                                                    {fUser.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14, flexShrink: 0 }} />}
-                                                </div>
-                                            </>
-                                        )}
-                                    </NavLink>
-                                ))}
-                                {following.length > 7 && (
-                                    <button className="sidebar-link" onClick={() => setShowAllFollowing(!showAllFollowing)}
-                                        style={{ padding: '8px 10px', marginTop: 4 }}>
-                                        {showAllFollowing ? <HiChevronUp style={{ fontSize: 20, opacity: 0.7 }} /> : <HiChevronDown style={{ fontSize: 20, opacity: 0.7 }} />}
-                                        <span style={{ fontSize: 13, fontWeight: 500 }}>Show {showAllFollowing ? 'fewer' : 'more'}</span>
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* Bottom — pinned, never pushed off-screen */}
@@ -217,6 +168,26 @@ export default function Layout() {
                                     <span className="truncate" style={{ flex: 1, maxWidth: 110 }}>{user?.username}</span>
                                     {user?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14, flexShrink: 0 }} />}
                                 </div>
+                            </>
+                        )}
+                    </NavLink>
+
+                    <NavLink to="/settings"
+                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                        style={{ position: 'relative' }}>
+                        {({ isActive }) => (
+                            <>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="sidebar-active"
+                                        style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
+                                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                                    />
+                                )}
+                                <div style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>
+                                    <HiCog style={{ fontSize: 20, opacity: isActive ? 1 : 0.7 }} />
+                                </div>
+                                <span style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>Settings</span>
                             </>
                         )}
                     </NavLink>

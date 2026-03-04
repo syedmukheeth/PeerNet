@@ -71,6 +71,19 @@ const getPost = async (postId, userId) => {
     return { ...post, isLiked, isSaved };
 };
 
+const updatePost = async (postId, userId, { caption }) => {
+    const post = await Post.findById(postId);
+    if (!post) throw new ApiError(404, 'Post not found');
+    if (post.author.toString() !== userId.toString()) {
+        throw new ApiError(403, 'Not authorised to edit this post');
+    }
+    post.caption = caption;
+    await post.save();
+    const redis = getRedis();
+    await redis.del(`post:${postId}`);
+    return post;
+};
+
 const deletePost = async (postId, userId) => {
     const post = await Post.findById(postId);
     if (!post) throw new ApiError(404, 'Post not found');
@@ -167,7 +180,7 @@ const getUserPosts = async (userId, { limit, cursor }) => {
 };
 
 module.exports = {
-    createPost, getPost, deletePost,
+    createPost, getPost, updatePost, deletePost,
     likePost, unlikePost,
     savePost, unsavePost, getSavedPosts,
     getUserPosts,

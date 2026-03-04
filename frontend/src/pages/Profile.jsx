@@ -6,6 +6,7 @@ import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAlt2 } from 'react-icons/hi'
 import UserListModal from '../components/UserListModal'
+import EditProfileModal from '../components/EditProfileModal'
 
 function useCountUp(target, duration = 800) {
     const [count, setCount] = useState(0)
@@ -48,6 +49,7 @@ export default function Profile() {
     const [messaging, setMessaging] = useState(false)
     const [showFollowers, setShowFollowers] = useState(false)
     const [showFollowing, setShowFollowing] = useState(false)
+    const [editProfile, setEditProfile] = useState(false)
 
     const isMe = me?._id === id
 
@@ -143,7 +145,7 @@ export default function Profile() {
                             <HiBadgeCheck style={{ fontSize: 20, color: 'var(--accent)', filter: 'drop-shadow(0 0 6px var(--accent-glow))' }} />
                         )}
                         {isMe ? (
-                            <Link to="/settings" className="btn btn-secondary btn-sm">Edit profile</Link>
+                            <button className="btn btn-secondary btn-sm" onClick={() => setEditProfile(true)}>Edit profile</button>
                         ) : (
                             <>
                                 <motion.button
@@ -286,6 +288,16 @@ export default function Profile() {
                 userId={profile._id}
                 type="following"
             />
+            {editProfile && (
+                <EditProfileModal
+                    profile={profile}
+                    onClose={() => setEditProfile(false)}
+                    onSave={(updated) => {
+                        setProfile(p => ({ ...p, ...updated }))
+                        setEditProfile(false)
+                    }}
+                />
+            )}
         </div>
     )
 }

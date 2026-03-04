@@ -11,4 +11,8 @@ const createPostSchema = Joi.object({
     ),
 });
 
-module.exports = { createPostSchema };
+const updatePostSchema = Joi.object({
+    caption: Joi.string().max(2200).allow('').required(),
+});
+
+module.exports = { createPostSchema, updatePostSchema };

@@ -1869,3 +1869,155 @@ textarea::placeholder {
   color: #0A66C2;
   flex-shrink: 0;
 }
+
+/* ── Post Options Dropdown ───────────────────────────────── */
+.post-options-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 200;
+  padding: 4px;
+}
+
+.post-options-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-1);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 140ms ease;
+  text-align: left;
+}
+
+.post-options-item:hover {
+  background: var(--hover);
+}
+
+.post-options-item.danger {
+  color: var(--error);
+}
+
+.post-options-item.danger:hover {
+  background: rgba(255, 69, 58, 0.10);
+}
+
+.post-options-item svg {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Settings Page ──────────────────────────────────────── */
+.settings-page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+.settings-header {
+  margin-bottom: 28px;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+
+.settings-card {
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  transition: background 140ms ease;
+  color: var(--text-1);
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-row:hover {
+  background: var(--hover);
+}
+
+.settings-row.danger {
+  color: var(--error);
+}
+
+.settings-row.danger:hover {
+  background: rgba(255, 69, 58, 0.08);
+}
+
+.settings-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.settings-row.danger .settings-row-icon {
+  background: rgba(255, 69, 58, 0.12);
+  color: var(--error);
+}
+
+.settings-row-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.settings-row-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.settings-row-value {
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -35,13 +35,23 @@ export default function Feed() {
         setPosts(p => p.map(post => post._id === postId ? { ...post, isLiked: liked, likesCount } : post))
     }
 
+    const onDelete = (postId) => setPosts(p => p.filter(post => post._id !== postId))
+
+    const onUpdate = (postId, updated) => {
+        setPosts(p => p.map(post => post._id === postId ? { ...post, ...updated } : post))
+    }
+
     return (
         <motion.div variants={pageVariants} initial="initial" animate="animate">
             <StoryRail />
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20 }}>
                 {posts.map(post => (
-                    <PostCard key={post._id} post={post} onLikeToggle={onLikeToggle} />
+                    <PostCard key={post._id} post={post}
+                        onLikeToggle={onLikeToggle}
+                        onDelete={onDelete}
+                        onUpdate={onUpdate}
+                    />
                 ))}
             </div>
 

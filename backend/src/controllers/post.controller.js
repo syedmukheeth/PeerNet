@@ -34,6 +34,13 @@ const deletePost = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+const updatePost = async (req, res, next) => {
+    try {
+        const post = await postService.updatePost(req.params.id, req.user._id, req.body);
+        res.json({ success: true, data: post });
+    } catch (err) { next(err); }
+};
+
 const likePost = async (req, res, next) => {
     try {
         const result = await postService.likePost(req.params.id, req.user._id);
@@ -79,7 +86,7 @@ const getSavedPosts = async (req, res, next) => {
 };
 
 module.exports = {
-    getFeed, createPost, getPost, deletePost,
+    getFeed, createPost, getPost, updatePost, deletePost,
     likePost, unlikePost,
     savePost, unsavePost, getSavedPosts,
 };

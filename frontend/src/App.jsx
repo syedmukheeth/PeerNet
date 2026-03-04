@@ -12,6 +12,7 @@ import Notifications from './pages/Notifications'
 import Search from './pages/Search'
 import PostDetail from './pages/PostDetail'
 import SplashScreen from './components/SplashScreen'
+import Settings from './pages/Settings'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -62,6 +63,7 @@ export default function App() {
             <Route path="search" element={<Search />} />
             <Route path="profile/:id" element={<Profile />} />
             <Route path="posts/:id" element={<PostDetail />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

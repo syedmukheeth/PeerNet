@@ -7,7 +7,7 @@ const { authenticate } = require('../../middleware/auth.middleware');
 const { uploadMedia } = require('../../middleware/upload.middleware');
 const { validate } = require('../../middleware/validate.middleware');
 const { uploadLimiter } = require('../../middleware/rateLimiter');
-const { createPostSchema } = require('../../validators/post.validator');
+const { createPostSchema, updatePostSchema } = require('../../validators/post.validator');
 const { addCommentSchema } = require('../../validators/comment.validator');
 
 // GET /api/v1/posts/feed
@@ -28,6 +28,9 @@ router.post(
 
 // GET /api/v1/posts/:id
 router.get('/:id', authenticate, postController.getPost);
+
+// PATCH /api/v1/posts/:id
+router.patch('/:id', authenticate, validate(updatePostSchema), postController.updatePost);
 
 // DELETE /api/v1/posts/:id
 router.delete('/:id', authenticate, postController.deletePost);
