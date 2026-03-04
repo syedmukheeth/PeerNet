@@ -1,9 +1,6 @@
 'use strict';
 
-// Allow self-signed TLS certs (required for Redis Cloud / Atlas free tier on Render)
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-// Load .env for local dev; on Render vars are injected into process.env automatically
+// Load .env for local dev — on Render, vars are injected into process.env automatically
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 require('dotenv').config(); // fallback to cwd/.env (no-op if already loaded)
@@ -22,11 +19,25 @@ const { setIO } = require('./utils/socket.utils');
 const PORT = process.env.PORT || 3000;
 
 const bootstrap = async () => {
-    // ── Create app & HTTP server first ────────────────────────────────────────
+    // ── 1. Connect MongoDB BEFORE anything else ───────────────────────────────
+    //   Queries will now never buffer-timeout because the connection is ready
+    //   before the HTTP server opens its port.
+    logger.info('Connecting to MongoDB…');
+    await connectDB();   // throws & exits on failure — Render will restart
+
+    // ── 2. Connect Redis (optional — log warning but keep going if it fails) ──
+    try {
+        logger.info('Connecting to Redis…');
+        await connectRedis();
+    } catch (err) {
+        logger.warn(`Redis unavailable: ${err.message} — continuing without cache`);
+    }
+
+    // ── 3. Build Express app & HTTP server ────────────────────────────────────
     const app = createApp();
     const httpServer = http.createServer(app);
 
-    // ── Attach Socket.io ───────────────────────────────────────────────────────
+    // ── 4. Attach Socket.io ───────────────────────────────────────────────────
     const io = new SocketServer(httpServer, {
         cors: {
             origin: (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()),
@@ -37,33 +48,16 @@ const bootstrap = async () => {
     setIO(io);
     initChatSocket(io);
 
-    // ── Start listening FIRST (Render needs the port open) ────────────────────
+    // ── 5. Start listening (DB is already connected) ──────────────────────────
     await new Promise((resolve) => httpServer.listen(PORT, resolve));
     logger.info(`PeerNet server running on port ${PORT} [${process.env.NODE_ENV}]`);
 
-    // ── Connect databases in background (non-blocking, infinite retry) ────────
-    const connectForever = async (fn, name) => {
-        while (true) {
-            try {
-                await fn();
-                logger.info(`${name} ready`);
-                return;
-            } catch (err) {
-                logger.warn(`${name} failed: ${err.message.slice(0, 80)} — retrying in 30s`);
-                await new Promise((r) => setTimeout(r, 30000));
-            }
-        }
-    };
-    // Don't await — server stays alive regardless of DB status
-    connectForever(connectDB, 'MongoDB');
-    connectForever(connectRedis, 'Redis');
-
-    // ── Cron jobs ──────────────────────────────────────────────────────────────
+    // ── 6. Cron jobs ──────────────────────────────────────────────────────────
     scheduleStoryCleanup();
 
-    // ── Graceful shutdown ──────────────────────────────────────────────────────
+    // ── 7. Graceful shutdown ──────────────────────────────────────────────────
     const shutdown = (signal) => {
-        logger.info(`${signal} received. Shutting down gracefully...`);
+        logger.info(`${signal} received — shutting down gracefully`);
         httpServer.close(() => {
             logger.info('HTTP server closed');
             process.exit(0);
@@ -71,7 +65,7 @@ const bootstrap = async () => {
         setTimeout(() => {
             logger.error('Forced shutdown after timeout');
             process.exit(1);
-        }, 10000);
+        }, 10_000);
     };
 
     process.on('SIGTERM', () => shutdown('SIGTERM'));
@@ -83,14 +77,13 @@ const bootstrap = async () => {
     });
 
     process.on('unhandledRejection', (reason) => {
-        // Log but do NOT exit — transient DB/Redis retries emit rejections
-        // and we don't want the whole server to die during reconnection.
+        // Log only — do not exit. Transient reconnect events can emit rejections.
         logger.warn(`Unhandled Rejection (non-fatal): ${reason}`);
     });
 };
 
 bootstrap().catch((err) => {
-    logger.error(`Bootstrap failed: ${err.message}`);
+    // Fatal startup failure (e.g. MongoDB unreachable) — let Render restart us
+    console.error(`FATAL bootstrap error: ${err.message}`);
     process.exit(1);
 });
-

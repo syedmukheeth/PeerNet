@@ -6,6 +6,16 @@ Versioning follows [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.P
 
 ---
 
+## [v1.3.0] - 2026-03-04
+
+### Fixed
+- MongoDB "buffering timed out" error on Render: server now awaits MongoDB connection before opening HTTP port
+- Removed insecure `NODE_TLS_REJECT_UNAUTHORIZED=0` global TLS bypass
+- Improved `connectDB` with production-grade timeouts (30s server selection, 60s socket) and `/PeerNet` DB name validation
+- Redis connection made non-fatal so server stays up if Redis is temporarily unavailable
+
+---
+
 ## [v1.2.0] - 2026-03-04
 
 ### Fixed
