@@ -1451,6 +1451,11 @@ textarea {
   display: none !important;
 }
 
+/* ── Feed right panel (suggestions + footer) ─────────────── */
+.feed-right-panel {
+  display: block;
+}
+
 /* ── Responsive Breakpoints ──────────────────────────────── */
 
 /* Tablet (≤900px) — sidebar collapses to icons only */
@@ -1458,6 +1463,10 @@ textarea {
   .app-layout {
     grid-template-columns: 68px minmax(0, 1fr);
     --sidebar-w: 68px;
+  }
+
+  .feed-right-panel {
+    display: none;
   }
 
   .sidebar {
