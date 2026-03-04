@@ -1,7 +1,8 @@
 'use strict';
 
 const User = require('../models/User');
-const { getRedis } = require('../config/redis');
+const { getRedisOptional } = require('../config/redis');
+const logger = require('../config/logger');
 const {
     signAccessToken,
     signRefreshToken,
@@ -10,7 +11,51 @@ const {
 } = require('../utils/jwt.utils');
 const ApiError = require('../utils/ApiError');
 
-const REFRESH_BLACKLIST_PREFIX = 'refresh_blacklist:';
+const REFRESH_PREFIX = 'refresh_blacklist:';
+
+// ── In-memory fallback store (used when Redis is unavailable) ─────────────────
+// Stores: jti → { value: '0'|'1', expiresAt: Date }
+const memStore = new Map();
+
+/** Purge expired entries from memStore to avoid unbounded growth */
+const _purgeExpired = () => {
+    const now = Date.now();
+    for (const [key, entry] of memStore) {
+        if (entry.expiresAt <= now) memStore.delete(key);
+    }
+};
+
+// ── Unified store helpers (Redis-first, mem fallback) ─────────────────────────
+
+const _setToken = async (jti, value) => {
+    const ttl = refreshTokenTTL(); // seconds
+    const redis = getRedisOptional();
+    if (redis) {
+        await redis.setEx(`${REFRESH_PREFIX}${jti}`, ttl, value);
+    } else {
+        _purgeExpired();
+        memStore.set(`${REFRESH_PREFIX}${jti}`, {
+            value,
+            expiresAt: Date.now() + ttl * 1000,
+        });
+    }
+};
+
+const _getToken = async (jti) => {
+    const redis = getRedisOptional();
+    if (redis) {
+        return redis.get(`${REFRESH_PREFIX}${jti}`);
+    }
+    const entry = memStore.get(`${REFRESH_PREFIX}${jti}`);
+    if (!entry) return null;
+    if (entry.expiresAt <= Date.now()) {
+        memStore.delete(`${REFRESH_PREFIX}${jti}`);
+        return null;
+    }
+    return entry.value;
+};
+
+// ── Auth operations ───────────────────────────────────────────────────────────
 
 const register = async ({ username, email, password, fullName }) => {
     const existing = await User.findOne({ $or: [{ email }, { username }] });
@@ -25,7 +70,7 @@ const register = async ({ username, email, password, fullName }) => {
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
 
-    await _storeRefreshToken(jti);
+    await _setToken(jti, '0'); // '0' = active (not blacklisted)
 
     return { user, accessToken, refreshToken };
 };
@@ -40,9 +85,8 @@ const login = async ({ email, password }) => {
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
 
-    await _storeRefreshToken(jti);
+    await _setToken(jti, '0');
 
-    // Strip passwordHash before returning
     const userObj = user.toJSON();
     return { user: userObj, accessToken, refreshToken };
 };
@@ -57,14 +101,13 @@ const refresh = async (oldRefreshToken) => {
         throw new ApiError(401, 'Invalid or expired refresh token');
     }
 
-    const redis = getRedis();
-    const blacklisted = await redis.get(`${REFRESH_BLACKLIST_PREFIX}${decoded.jti}`);
-    if (blacklisted) throw new ApiError(401, 'Refresh token has been revoked');
+    const stored = await _getToken(decoded.jti);
+    if (stored === '1') throw new ApiError(401, 'Refresh token has been revoked');
 
     // Rotate: blacklist old, issue new
-    await _blacklistRefreshToken(decoded.jti);
+    await _setToken(decoded.jti, '1');
     const { token: newRefreshToken, jti: newJti } = signRefreshToken({ userId: decoded.userId });
-    await _storeRefreshToken(newJti);
+    await _setToken(newJti, '0');
 
     const accessToken = signAccessToken({ userId: decoded.userId, role: decoded.role });
     return { accessToken, refreshToken: newRefreshToken };
@@ -74,24 +117,10 @@ const logout = async (refreshToken) => {
     if (!refreshToken) return;
     try {
         const decoded = verifyRefreshToken(refreshToken);
-        await _blacklistRefreshToken(decoded.jti);
+        await _setToken(decoded.jti, '1');
     } catch {
         // Ignore invalid tokens on logout
     }
-};
-
-// ── Private helpers ──────────────────────────────────────────────────────────
-
-const _storeRefreshToken = async (jti) => {
-    const redis = getRedis();
-    const ttl = refreshTokenTTL();
-    await redis.setEx(`${REFRESH_BLACKLIST_PREFIX}${jti}`, ttl, '0');
-};
-
-const _blacklistRefreshToken = async (jti) => {
-    const redis = getRedis();
-    const ttl = refreshTokenTTL();
-    await redis.setEx(`${REFRESH_BLACKLIST_PREFIX}${jti}`, ttl, '1');
 };
 
 module.exports = { register, login, refresh, logout };

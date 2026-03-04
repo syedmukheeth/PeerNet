@@ -51,4 +51,7 @@ const getRedis = () => {
     return redisClient;
 };
 
-module.exports = { connectRedis, getRedis };
+/** Returns the Redis client, or null if Redis is not connected. Never throws. */
+const getRedisOptional = () => redisClient || null;
+
+module.exports = { connectRedis, getRedis, getRedisOptional };
