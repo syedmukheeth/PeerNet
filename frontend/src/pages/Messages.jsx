@@ -109,11 +109,31 @@ export default function Messages() {
     const [showNewConvo, setShowNewConvo] = useState(false)
     const [starting, setStarting] = useState(false)
     const [mobilePanel, setMobilePanel] = useState('list')
+    const [showEmoji, setShowEmoji] = useState(false)
+    const fileRef = useRef()
     const bottomRef = useRef()
     const typingTimer = useRef()
     const inputRef = useRef()
     const userRef = useRef(user)
     useEffect(() => { userRef.current = user }, [user])
+
+    const EMOJIS = ['😊', '😂', '🔥', '❤️', '👍', '😍', '🥰', '😎', '🙏', '💯', '✨', '🎉', '😅', '👏', '💪',
+        '🤩', '😢', '😭', '🤔', '😴', '👋', '🥳', '💀', '😤', '🤯', '👀', '💬', '🌟', '🚀', '💥']
+
+    const insertEmoji = (e) => {
+        setText(t => t + e)
+        setShowEmoji(false)
+        inputRef.current?.focus()
+    }
+
+    const sendHeart = async () => {
+        if (!activeConvo) return
+        try {
+            const { data } = await api.post(`/conversations/${activeConvo._id}/messages`, { body: '❤️' })
+            setMessages(m => [...m, data.data])
+            setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: { body: '❤️' } } : c))
+        } catch { toast.error('Failed to send') }
+    }
 
     /* socket */
     useEffect(() => {
@@ -375,43 +395,98 @@ export default function Messages() {
                             </div>
 
                             {/* Input */}
-                            <form onSubmit={handleSend} style={{
-                                display: 'flex', alignItems: 'center', gap: 10,
-                                padding: '12px 16px', borderTop: '1px solid var(--border)',
-                                background: 'var(--surface)', flexShrink: 0,
-                            }}>
-                                <button type="button" style={{ color: 'var(--text-3)', fontSize: 22, background: 'none', border: 'none', flexShrink: 0, display: 'flex', cursor: 'pointer' }}>
-                                    <HiEmojiHappy />
-                                </button>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--hover)', border: '1px solid var(--border-md)', borderRadius: 24, padding: '8px 16px', transition: 'border-color 150ms' }}
-                                    onFocus={() => { }}>
-                                    <input
-                                        ref={inputRef}
-                                        value={text} onChange={handleType}
-                                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e) } }}
-                                        placeholder={`Message...`}
-                                        style={{
-                                            flex: 1, background: 'none', border: 'none', outline: 'none',
-                                            color: 'var(--text-1)', fontSize: 14,
-                                        }}
-                                    />
-                                    {!text.trim() && (
-                                        <button type="button" style={{ color: 'var(--text-3)', fontSize: 20, background: 'none', border: 'none', display: 'flex', cursor: 'pointer', flexShrink: 0 }}>
-                                            <HiPhotograph />
-                                        </button>
-                                    )}
-                                </div>
-                                {text.trim() ? (
-                                    <button type="submit" style={{
-                                        background: 'none', border: 'none', cursor: 'pointer',
-                                        color: 'var(--accent)', fontWeight: 700, fontSize: 15, flexShrink: 0,
-                                    }}>Send</button>
-                                ) : (
-                                    <button type="button" style={{ color: 'var(--text-3)', fontSize: 24, background: 'none', border: 'none', display: 'flex', cursor: 'pointer', flexShrink: 0 }}>
-                                        ❤️
-                                    </button>
+                            <div style={{ flexShrink: 0, position: 'relative' }}>
+                                {/* Emoji picker */}
+                                {showEmoji && (
+                                    <div style={{
+                                        position: 'absolute', bottom: '100%', left: 0,
+                                        marginBottom: 8, background: 'var(--surface)',
+                                        border: '1px solid var(--border-md)', borderRadius: 14,
+                                        padding: 10, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)',
+                                        gap: 2, boxShadow: 'var(--shadow-md)', zIndex: 10,
+                                        width: 220,
+                                    }}>
+                                        {EMOJIS.map(e => (
+                                            <button key={e} type="button" onClick={() => insertEmoji(e)}
+                                                style={{
+                                                    fontSize: 20, background: 'none', border: 'none',
+                                                    cursor: 'pointer', borderRadius: 6, padding: '4px 2px',
+                                                    transition: 'background 100ms',
+                                                }}
+                                                onMouseEnter={el => el.currentTarget.style.background = 'var(--hover)'}
+                                                onMouseLeave={el => el.currentTarget.style.background = 'none'}>
+                                                {e}
+                                            </button>
+                                        ))}
+                                    </div>
                                 )}
-                            </form>
+
+                                <form onSubmit={handleSend} style={{
+                                    display: 'flex', alignItems: 'center', gap: 10,
+                                    padding: '12px 16px', borderTop: '1px solid var(--border)',
+                                    background: 'var(--surface)',
+                                }}>
+                                    {/* Emoji button */}
+                                    <button type="button"
+                                        onClick={() => setShowEmoji(s => !s)}
+                                        style={{
+                                            color: showEmoji ? 'var(--accent)' : 'var(--text-3)',
+                                            fontSize: 22, background: 'none', border: 'none',
+                                            flexShrink: 0, display: 'flex', cursor: 'pointer',
+                                            transition: 'color 150ms',
+                                        }}>
+                                        <HiEmojiHappy />
+                                    </button>
+
+                                    {/* Text input pill */}
+                                    <div style={{
+                                        flex: 1, display: 'flex', alignItems: 'center',
+                                        background: 'var(--hover)', border: '1px solid var(--border-md)',
+                                        borderRadius: 24, padding: '8px 14px',
+                                    }}>
+                                        <input
+                                            ref={inputRef}
+                                            value={text} onChange={handleType}
+                                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e) } }}
+                                            onFocus={() => setShowEmoji(false)}
+                                            placeholder={`Message...`}
+                                            style={{
+                                                flex: 1, background: 'none', border: 'none',
+                                                outline: 'none', color: 'var(--text-1)', fontSize: 14,
+                                            }}
+                                        />
+                                        {/* Photo button (inside pill) */}
+                                        {!text.trim() && (
+                                            <>
+                                                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} />
+                                                <button type="button"
+                                                    onClick={() => fileRef.current?.click()}
+                                                    style={{ color: 'var(--text-3)', fontSize: 20, background: 'none', border: 'none', display: 'flex', cursor: 'pointer', flexShrink: 0 }}>
+                                                    <HiPhotograph />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* Send / Heart */}
+                                    {text.trim() ? (
+                                        <button type="submit" style={{
+                                            background: 'none', border: 'none', cursor: 'pointer',
+                                            color: 'var(--accent)', fontWeight: 700, fontSize: 15, flexShrink: 0,
+                                        }}>Send</button>
+                                    ) : (
+                                        <button type="button" onClick={sendHeart}
+                                            title="Send ❤️"
+                                            style={{
+                                                fontSize: 22, background: 'none', border: 'none',
+                                                display: 'flex', cursor: 'pointer', flexShrink: 0,
+                                                transition: 'transform 150ms',
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.25)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>❤️</button>
+                                    )}
+                                </form>
+                            </div>
                         </>
                     ) : (
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', textAlign: 'center', padding: 32, gap: 16 }}>
