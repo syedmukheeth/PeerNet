@@ -1442,6 +1442,11 @@ textarea {
   display: none;
 }
 
+/* On desktop: back button is always hidden, panel hiding only works on mobile */
+.dm-back-btn {
+  display: none !important;
+}
+
 /* ── Responsive Breakpoints ──────────────────────────────── */
 
 /* Tablet (≤900px) — sidebar collapses to icons only */
@@ -1503,13 +1508,8 @@ textarea {
   }
 
   /* DM full-screen panels on mobile */
-  .dm-list-panel {
-    display: flex !important;
-    width: 100% !important;
-  }
-
-  .dm-chat-panel {
-    display: flex !important;
+  .dm-mobile-hidden {
+    display: none !important;
   }
 
   .dm-back-btn {

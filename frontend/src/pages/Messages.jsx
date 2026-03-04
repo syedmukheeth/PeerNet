@@ -257,9 +257,7 @@ export default function Messages() {
                     display: 'flex',
                     flexDirection: 'column',
                     background: 'var(--surface)',
-                    // On mobile, hide when chat panel is open
-                    ...(mobilePanel === 'chat' ? { display: 'none' } : {}),
-                }} className="dm-list-panel">
+                }} className={`dm-list-panel${mobilePanel === 'chat' ? ' dm-mobile-hidden' : ''}`}>
 
                     {/* Header */}
                     <div style={{
@@ -369,9 +367,7 @@ export default function Messages() {
                 <div style={{
                     flex: 1, display: 'flex', flexDirection: 'column',
                     minWidth: 0, background: 'var(--bg)',
-                    // Mobile: only show when chat panel is active
-                    ...(mobilePanel === 'list' ? { display: 'none' } : {}),
-                }} className="dm-chat-panel">
+                }} className={`dm-chat-panel${mobilePanel === 'list' ? ' dm-mobile-hidden' : ''}`}>
 
                     {activeConvo && other ? (
                         <>
@@ -386,8 +382,7 @@ export default function Messages() {
                                 {/* Mobile back button */}
                                 <button
                                     className="btn btn-ghost btn-icon dm-back-btn"
-                                    onClick={goBackToList}
-                                    style={{ display: 'none' }}>
+                                    onClick={goBackToList}>
                                     <HiArrowLeft />
                                 </button>
 
