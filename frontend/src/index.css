@@ -769,30 +769,32 @@ textarea {
 
 .content-wrap {
   width: 100%;
-  padding: 28px 24px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 32px 60px;
   box-sizing: border-box;
 }
 
 /* ── Feed: two-column layout ─────────────────────────────── */
 .feed-layout {
   display: flex;
-  gap: 40px;
+  gap: 36px;
   align-items: flex-start;
-  max-width: 1050px;
+  max-width: 860px;
   margin: 0 auto;
 }
 
 .feed-col {
   flex: 1;
   min-width: 0;
-  max-width: 620px;
+  max-width: 470px;
 }
 
 .feed-right-panel {
-  width: 280px;
+  width: 260px;
   flex-shrink: 0;
   position: sticky;
-  top: 24px;
+  top: 28px;
 }
 
 .page-header {
