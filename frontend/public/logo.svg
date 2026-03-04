@@ -10,7 +10,7 @@
     </linearGradient>
   </defs>
   <!-- Rounded square background -->
-  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="260" fill="url(#bg)"/>
   <!-- Bold P letterform -->
   <path d="M260 200 L260 824
              M260 200 L560 200
