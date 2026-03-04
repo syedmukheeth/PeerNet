@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -17,7 +17,7 @@ const links = [
     { to: '/', icon: HiHome, label: 'Home', exact: true },
     { to: '/search', icon: HiSearch, label: 'Search' },
     { to: '/dscrolls', icon: HiFilm, label: 'Dscrolls' },
-    { to: '/messages', icon: HiChatAlt2, label: 'Messages' },
+    { to: '/messages', icon: HiChatAlt2, label: 'Messages', msgBadge: true },
     { to: '/notifications', icon: HiBell, label: 'Notifications', badge: true },
 ]
 
@@ -26,9 +26,46 @@ let layoutSocket = null
 export default function Layout() {
     const { user, logout } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
     const [showCreate, setShowCreate] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
+    const [msgCount, setMsgCount] = useState(0)
     const unreadRef = useRef(0)
+    const msgRef = useRef(0)
+    const mainRef = useRef(null)
+
+    // ── Scroll to top on route change ──────────────────────
+    useEffect(() => {
+        if (mainRef.current) mainRef.current.scrollTo({ top: 0, behavior: 'instant' })
+    }, [location.pathname])
+
+    // ── Fetch initial unread notification count ─────────────
+    useEffect(() => {
+        if (!user) return
+        api.get('/notifications?limit=1')
+            .then(({ data }) => {
+                const c = data.unreadCount || 0
+                unreadRef.current = c
+                setUnreadCount(c)
+            })
+            .catch(() => { })
+    }, [user])
+
+    // ── Fetch initial unread message count (conversations with unread) ─
+    useEffect(() => {
+        if (!user) return
+        api.get('/conversations')
+            .then(({ data }) => {
+                const convs = data.data || []
+                // Count conversations where lastMessage sender is not me (simple heuristic)
+                const unread = convs.filter(c =>
+                    c.lastMessage && c.lastMessage.sender?._id !== user._id && !c.lastMessage.readBy?.includes(user._id)
+                ).length
+                msgRef.current = unread
+                setMsgCount(unread)
+            })
+            .catch(() => { })
+    }, [user])
 
     // ── Real-time notifications via socket ─────────────────
     useEffect(() => {
@@ -65,14 +102,28 @@ export default function Layout() {
             )
         })
 
+        layoutSocket.on('new_message', (msg) => {
+            // Only bump if we're not currently on the messages page
+            if (!window.location.pathname.startsWith('/messages')) {
+                msgRef.current += 1
+                setMsgCount(msgRef.current)
+            }
+        })
+
         return () => { layoutSocket?.disconnect(); layoutSocket = null }
     }, [user])
 
-    // ── Reset unread count when visiting /notifications ────
+    // ── Reset badge counts when visiting relevant pages ────
     const handleNavClick = (to) => {
         if (to === '/notifications') {
             setUnreadCount(0)
             unreadRef.current = 0
+            // Mark all read on server
+            api.patch('/notifications/read').catch(() => { })
+        }
+        if (to.startsWith('/messages')) {
+            setMsgCount(0)
+            msgRef.current = 0
         }
     }
 
@@ -93,13 +144,13 @@ export default function Layout() {
                     </div>
                 </Link>
 
-                {/* Scrollable top section */}
-                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 8 }}>
+                {/* Nav links — no overflow, always fully visible */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 8 }}>
                     <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px 8px' }}>
                         Navigation
                     </div>
 
-                    {links.map(({ to, icon: Icon, label, exact, badge }) => (
+                    {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
                         <NavLink key={to} to={to} end={exact} onClick={() => handleNavClick(to)}
                             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                             style={{ position: 'relative' }}>
@@ -127,6 +178,21 @@ export default function Layout() {
                                                 animate={{ scale: 1 }}
                                                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
                                                 {unreadCount > 9 ? '9+' : unreadCount}
+                                            </motion.span>
+                                        )}
+                                        {msgBadge && msgCount > 0 && (
+                                            <motion.span
+                                                style={{
+                                                    position: 'absolute', top: -6, right: -8,
+                                                    background: 'var(--accent)', color: '#fff',
+                                                    borderRadius: 99, fontSize: 9, fontWeight: 700,
+                                                    minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
+                                                    border: '2px solid var(--surface)',
+                                                }}
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                                                {msgCount > 9 ? '9+' : msgCount}
                                             </motion.span>
                                         )}
                                     </div>
@@ -202,7 +268,7 @@ export default function Layout() {
             </aside>
 
             {/* ── Main ── */}
-            <main className="main-col">
+            <main className="main-col" ref={mainRef} style={{ overflowY: 'auto', height: '100dvh' }}>
                 <div className="content-wrap">
                     <AnimatePresence mode="wait">
                         <Outlet />
