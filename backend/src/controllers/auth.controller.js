@@ -4,8 +4,11 @@ const authService = require('../services/auth.service');
 
 const COOKIE_OPTS = {
     httpOnly: true,
-    sameSite: 'strict',
-    secure: process.env.COOKIE_SECURE === 'true',
+    // 'none' is required for cross-origin cookie sending (Vercel frontend → Render backend).
+    // 'strict' or 'lax' blocks the cookie entirely on cross-site requests.
+    // 'none' MUST be paired with secure: true per browser spec.
+    sameSite: 'none',
+    secure: true,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
 };
 

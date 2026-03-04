@@ -66,8 +66,8 @@ const createApp = () => {
     // ── Global rate limiter ──────────────────────────────────────────────────────
     app.use(globalLimiter);
 
-    // ── Health check ─────────────────────────────────────────────────────────────
-    app.get('/health', (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV }));
+    // ── Health check ─────────────────────────────────────────────────────────
+    app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV }));
 
     // ── API routes ───────────────────────────────────────────────────────────────
     app.use('/api/v1', v1Router);
