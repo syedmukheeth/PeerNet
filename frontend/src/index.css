@@ -768,9 +768,30 @@ textarea {
 }
 
 .content-wrap {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 28px 20px 60px;
+  width: 100%;
+  padding: 28px 24px 60px;
+  box-sizing: border-box;
+}
+
+/* ── Feed: two-column layout ─────────────────────────────── */
+.feed-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  max-width: 1050px;
+}
+
+.feed-col {
+  flex: 1;
+  min-width: 0;
+  max-width: 620px;
+}
+
+.feed-right-panel {
+  width: 280px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px;
 }
 
 .page-header {
@@ -1451,22 +1472,19 @@ textarea {
   display: none !important;
 }
 
-/* ── Feed right panel (suggestions + footer) ─────────────── */
-.feed-right-panel {
-  display: block;
-}
-
 /* ── Responsive Breakpoints ──────────────────────────────── */
 
-/* Tablet (≤900px) — sidebar collapses to icons only */
+/* Tablet (≤900px) — sidebar collapses to icons only, hide feed right panel */
+@media (max-width: 1024px) {
+  .feed-right-panel {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .app-layout {
     grid-template-columns: 68px minmax(0, 1fr);
     --sidebar-w: 68px;
-  }
-
-  .feed-right-panel {
-    display: none;
   }
 
   .sidebar {

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     HiHeart, HiOutlineHeart, HiChatAlt2,
     HiBookmark, HiOutlineBookmark, HiDotsHorizontal, HiBadgeCheck,
-    HiPencil, HiTrash,
+    HiPencil, HiTrash, HiShare,
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -149,6 +149,22 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         <HiChatAlt2 style={{ fontSize: 21 }} />
                         <span>{post.commentsCount || 0}</span>
                     </Link>
+
+                    {/* Share button */}
+                    <motion.button className="post-action-btn"
+                        whileTap={{ scale: 0.85 }}
+                        onClick={() => {
+                            const url = `${window.location.origin}/posts/${post._id}`
+                            if (navigator.share) {
+                                navigator.share({ title: 'PeerNet post', url })
+                            } else {
+                                navigator.clipboard.writeText(url)
+                                    .then(() => toast.success('Link copied!'))
+                                    .catch(() => toast.error('Copy failed'))
+                            }
+                        }}>
+                        <HiShare style={{ fontSize: 21 }} />
+                    </motion.button>
 
                     <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`}
                         onClick={handleSave}
