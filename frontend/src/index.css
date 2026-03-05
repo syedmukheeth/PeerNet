@@ -780,6 +780,7 @@ textarea {
   display: flex;
   gap: 36px;
   align-items: flex-start;
+  justify-content: center;
   max-width: 860px;
   margin: 0 auto;
 }
@@ -945,6 +946,35 @@ textarea {
 
 .post-caption strong::after {
   content: ' ';
+}
+
+/* ── Post Detail ─────────────────────────────────────────── */
+.post-detail-card {
+  display: flex;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border-md);
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+  min-height: 540px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.post-detail-media {
+  flex: 0 0 60%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.post-detail-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 /* ── Verified ────────────────────────────────────────────── */
@@ -1929,8 +1959,23 @@ textarea::placeholder {
     justify-content: center;
   }
 
+  .auth-page {
+    padding: 16px;
+  }
+
   .auth-card {
     padding: 30px 22px;
+  }
+
+  .post-detail-card {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .post-detail-media {
+    flex: none;
+    width: 100%;
+    aspect-ratio: 1;
   }
 }
 

@@ -148,7 +148,7 @@ export default function Layout() {
     return (
         <div className="app-layout">
             {/* ── Sidebar ── */}
-            <aside className="sidebar" style={{ display: 'flex', flexDirection: 'column' }}>
+            <aside className="sidebar">
                 <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
                     <div className="peernetLogo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <img src={logoImg} alt="PeerNet" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }} />
@@ -158,7 +158,7 @@ export default function Layout() {
 
                 {/* Nav links — no overflow, always fully visible */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 8 }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 10px 8px' }}>
+                    <div className="sidebar-section">
                         Navigation
                     </div>
 

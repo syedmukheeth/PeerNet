@@ -102,21 +102,10 @@ export default function PostDetail() {
             </div>
 
             {/* Instagram split-view card */}
-            <div style={{
-                display: 'flex', borderRadius: 14, overflow: 'hidden',
-                border: '1px solid var(--border-md)',
-                background: 'var(--card)',
-                boxShadow: 'var(--shadow-md)',
-                minHeight: 540,
-                maxWidth: 960,
-            }}>
+            <div className="post-detail-card">
 
                 {/* ── LEFT: media ──────────────────────────── */}
-                <div style={{
-                    flex: '0 0 60%', background: '#000',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    overflow: 'hidden',
-                }}>
+                <div className="post-detail-media">
                     {post.mediaType === 'video'
                         ? <video src={post.mediaUrl} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         : <img src={post.mediaUrl} alt={post.caption} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
@@ -124,7 +113,7 @@ export default function PostDetail() {
                 </div>
 
                 {/* ── RIGHT: info + comments ───────────────── */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <div className="post-detail-info">
 
                     {/* Header */}
                     <div style={{
