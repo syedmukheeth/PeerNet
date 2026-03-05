@@ -48,7 +48,6 @@ api.interceptors.response.use(
                 queue.forEach((p) => p.reject(err))
                 queue = []
                 localStorage.removeItem('accessToken')
-                window.location.href = '/login'
                 return Promise.reject(err)
             } finally {
                 isRefreshing = false

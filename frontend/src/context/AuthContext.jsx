@@ -26,12 +26,10 @@ export const AuthProvider = ({ children }) => {
             const { data } = await api.get('/users/me')
             _setUser(data.data)
         } catch {
-            // If background refresh fails AND we have no cached user → force logout
-            // If we DO have a cached user, keep them logged in optimistically
-            if (!readCached()) {
-                _setUser(null)
-                localStorage.removeItem('accessToken')
-            }
+            // If background refresh fails, the user is solidly logged out.
+            // We MUST clear the cache here so we don't fall into an infinite loop.
+            _setUser(null)
+            localStorage.removeItem('accessToken')
         } finally {
             setLoading(false)
         }
