@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
@@ -160,9 +160,11 @@ export default function Feed() {
     const [cursor, setCursor] = useState(null)
     const [hasMore, setHasMore] = useState(true)
     const [loading, setLoading] = useState(false)
+    const loadingRef = useRef(false)
 
     const fetchFeed = useCallback(async (cur = null) => {
-        if (loading) return
+        if (loadingRef.current) return
+        loadingRef.current = true
         setLoading(true)
         try {
             const params = { limit: 10 }
@@ -172,10 +174,10 @@ export default function Feed() {
             setCursor(data.nextCursor)
             setHasMore(data.hasMore)
         } catch { /* silent */ }
-        finally { setLoading(false) }
-    }, [loading])
+        finally { loadingRef.current = false; setLoading(false) }
+    }, [])
 
-    useEffect(() => { fetchFeed() }, []) // eslint-disable-line
+    useEffect(() => { fetchFeed() }, [fetchFeed])
 
     const onLikeToggle = (postId, liked, likesCount) =>
         setPosts(p => p.map(post => post._id === postId ? { ...post, isLiked: liked, likesCount } : post))

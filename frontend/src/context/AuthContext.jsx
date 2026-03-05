@@ -20,9 +20,10 @@ export const AuthProvider = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken')
-        if (token) fetchMe()
-        else setLoading(false)
+        // Always attempt to restore session — the axios interceptor will
+        // use the HttpOnly refresh-token cookie to get a new access token
+        // if the stored one is expired or missing.
+        fetchMe()
     }, [fetchMe])
 
     const login = async (email, password) => {

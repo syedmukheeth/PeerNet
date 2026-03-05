@@ -845,15 +845,14 @@ textarea {
 
 .post-media {
   width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
+  max-height: 600px;
+  object-fit: contain;
+  background: var(--surface);
   display: block;
   transition: transform 400ms ease;
 }
 
-.post-card:hover .post-media {
-  transform: scale(1.015);
-}
+
 
 .post-media-video {
   width: 100%;
