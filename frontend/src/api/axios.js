@@ -4,7 +4,6 @@ const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
 
 const api = axios.create({
     baseURL: BASE_URL,
-    withCredentials: true,         // send cookies (refresh token)
     headers: { 'Content-Type': 'application/json' },
 })
 
@@ -37,17 +36,20 @@ api.interceptors.response.use(
             original._retry = true
             isRefreshing = true
             try {
-                const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {}, { withCredentials: true })
-                const token = data.data.accessToken
-                localStorage.setItem('accessToken', token)
-                queue.forEach((p) => p.resolve(token))
+                const rt = localStorage.getItem('refreshToken')
+                const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken: rt })
+                const { accessToken, refreshToken } = data.data
+                localStorage.setItem('accessToken', accessToken)
+                localStorage.setItem('refreshToken', refreshToken)
+                queue.forEach((p) => p.resolve(accessToken))
                 queue = []
-                original.headers.Authorization = `Bearer ${token}`
+                original.headers.Authorization = `Bearer ${accessToken}`
                 return api(original)
             } catch {
                 queue.forEach((p) => p.reject(err))
                 queue = []
                 localStorage.removeItem('accessToken')
+                localStorage.removeItem('refreshToken')
                 return Promise.reject(err)
             } finally {
                 isRefreshing = false

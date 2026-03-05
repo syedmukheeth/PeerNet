@@ -27,9 +27,9 @@ export const AuthProvider = ({ children }) => {
             _setUser(data.data)
         } catch {
             // If background refresh fails, the user is solidly logged out.
-            // We MUST clear the cache here so we don't fall into an infinite loop.
             _setUser(null)
             localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
         } finally {
             setLoading(false)
         }
@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         const { data } = await api.post('/auth/login', { email, password })
         localStorage.setItem('accessToken', data.data.accessToken)
+        localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)
         return data.data.user
     }
@@ -52,13 +53,18 @@ export const AuthProvider = ({ children }) => {
     const register = async (payload) => {
         const { data } = await api.post('/auth/register', payload)
         localStorage.setItem('accessToken', data.data.accessToken)
+        localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)
         return data.data.user
     }
 
     const logout = async () => {
-        try { await api.post('/auth/logout') } catch { /* ignore */ }
+        try {
+            const rt = localStorage.getItem('refreshToken')
+            await api.post('/auth/logout', { refreshToken: rt })
+        } catch { /* ignore */ }
         localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
         _setUser(null)
     }
 

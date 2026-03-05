@@ -34,7 +34,7 @@ function ReelItem({ reel, isActive }) {
             <video
                 ref={videoRef}
                 src={reel.mediaUrl}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 loop muted={muted} playsInline
             />
 
