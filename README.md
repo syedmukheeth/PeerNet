@@ -315,19 +315,19 @@ Stories auto-expire after **24 hours** (cleaned up by cron job every hour).
 
 ### 🎬 Dscrolls *(short-form videos)*
 
-Dscrolls are PeerNet's short video feature (like Instagram Reels). The API prefix is `/reels`.
+Dscrolls are PeerNet's short video feature (like Instagram Reels). The API prefix is `/dscrolls`.
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/reels` | Get Dscrolls feed (paginated) |
-| POST | `/reels` | Upload a Dscroll — `video` field via `multipart/form-data` |
-| DELETE | `/reels/:id` | Delete your Dscroll |
-| POST | `/reels/:id/like` | Like a Dscroll |
-| DELETE | `/reels/:id/like` | Unlike a Dscroll |
+| GET | `/dscrolls` | Get Dscrolls feed (paginated) |
+| POST | `/dscrolls` | Upload a Dscroll — `video` field via `multipart/form-data` |
+| DELETE | `/dscrolls/:id` | Delete your Dscroll |
+| POST | `/dscrolls/:id/like` | Like a Dscroll |
+| DELETE | `/dscrolls/:id/like` | Unlike a Dscroll |
 
 **Upload example:**
 ```bash
-curl -X POST https://peernet-5u5q.onrender.com/api/v1/reels \
+curl -X POST https://peernet-5u5q.onrender.com/api/v1/dscrolls \
   -H "Authorization: Bearer <token>" \
   -F "video=@my_video.mp4"
 ```
