@@ -52,7 +52,7 @@ const getPost = async (postId, userId) => {
     if (cached) {
         post = JSON.parse(cached);
     } else {
-        post = await Post.findById(postId).populate('author', 'username fullName avatarUrl isVerified');
+        post = await Post.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
         if (!post || post.isArchived) throw new ApiError(404, 'Post not found');
         await redis.setEx(cacheKey, POST_CACHE_TTL, JSON.stringify(post));
     }
