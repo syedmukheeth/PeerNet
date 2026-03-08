@@ -3,7 +3,7 @@
 > A production-grade, full-stack social media platform built with modern technologies.
 > Inspired by Instagram — built for scale.
 
-![Version](https://img.shields.io/badge/version-v1.5.0-blue)
+![Version](https://img.shields.io/badge/version-v1.6.0-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Status](https://img.shields.io/badge/status-production-success)
@@ -154,6 +154,15 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 # ── CORS ──────────────────────────────────────
 ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+
+# ── Rate Limiting ─────────────────────────────
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+AUTH_RATE_LIMIT_MAX=5
+
+# ── Logging ───────────────────────────────────
+LOG_LEVEL=info
+LOG_DIR=logs
 
 # ── Cookie ────────────────────────────────────
 COOKIE_SECURE=false
