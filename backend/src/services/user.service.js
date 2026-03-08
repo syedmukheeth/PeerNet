@@ -38,7 +38,7 @@ const updateProfile = async (userId, updates, avatarFile) => {
         if (user.avatarPublicId) await deleteFromCloudinary(user.avatarPublicId);
         const { secure_url, public_id } = await uploadToCloudinary(avatarFile.buffer, {
             folder: 'peernet/avatars',
-            transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
+            transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face', quality: 'auto', fetch_format: 'auto' }],
         });
         user.avatarUrl = secure_url;
         user.avatarPublicId = public_id;

@@ -18,25 +18,52 @@ const getFeed = async (userId, { limit = 20, cursor = null }) => {
     // Only cache the raw post list, not per-user flags
     const cacheKey = `feed:${userId}:cursor:${cursor || 'start'}`;
 
-    // Resolve who the user follows
-    const followRelations = await Follower.find({ follower: userId }).select('following').lean();
-    const followingIds = followRelations.map((f) => f.following);
+    let results, nextCursor, hasMore;
+    let cachedData = null;
 
-    // Include own posts in feed
-    followingIds.push(userId);
+    if (redis) {
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                cachedData = JSON.parse(cached);
+                results = cachedData.results;
+                nextCursor = cachedData.nextCursor;
+                hasMore = cachedData.hasMore;
+            }
+        } catch (err) {
+            console.error('Redis cache get error:', err);
+        }
+    }
 
-    const query = { author: { $in: followingIds }, isArchived: false };
-    if (cursor) query.createdAt = { $lt: new Date(cursor) };
+    if (!cachedData) {
+        // Resolve who the user follows
+        const followRelations = await Follower.find({ follower: userId }).select('following').lean();
+        const followingIds = followRelations.map((f) => f.following);
 
-    const posts = await Post.find(query)
-        .populate('author', 'username fullName avatarUrl isVerified')
-        .sort({ createdAt: -1 })
-        .limit(limit + 1)
-        .lean();
+        // Include own posts in feed
+        followingIds.push(userId);
 
-    const hasMore = posts.length > limit;
-    const results = hasMore ? posts.slice(0, limit) : posts;
-    const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
+        const query = { author: { $in: followingIds }, isArchived: false };
+        if (cursor) query.createdAt = { $lt: new Date(cursor) };
+
+        const posts = await Post.find(query)
+            .populate('author', 'username fullName avatarUrl isVerified')
+            .sort({ createdAt: -1 })
+            .limit(limit + 1)
+            .lean();
+
+        hasMore = posts.length > limit;
+        results = hasMore ? posts.slice(0, limit) : posts;
+        nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
+
+        if (redis) {
+            try {
+                await redis.set(cacheKey, JSON.stringify({ results, nextCursor, hasMore }), { EX: FEED_CACHE_TTL });
+            } catch (err) {
+                console.error('Redis cache set error:', err);
+            }
+        }
+    }
 
     // ── Attach isLiked & isSaved per post for this user ──────────────────────
     const postIds = results.map((p) => p._id);
