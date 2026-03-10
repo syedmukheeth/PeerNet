@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import api from '../api/axios'
+import api, { SOCKET_URL } from '../api/axios'
 import { io } from 'socket.io-client'
 import { HiPaperAirplane, HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
@@ -138,7 +138,7 @@ export default function Messages() {
     /* socket */
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
-        socket = io(window.location.origin, { auth: { token }, path: '/socket.io', transports: ['websocket', 'polling'] })
+        socket = io(SOCKET_URL || window.location.origin, { auth: { token }, path: '/socket.io', transports: ['websocket', 'polling'] })
         socket.on('new_message', (msg) => {
             const senderId = msg.sender?._id || msg.sender
             if (senderId === userRef.current?._id) return

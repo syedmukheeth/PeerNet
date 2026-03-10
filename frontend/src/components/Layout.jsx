@@ -9,7 +9,7 @@ import {
     HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiCog
 } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
-import api from '../api/axios'
+import api, { SOCKET_URL } from '../api/axios'
 import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
 import logoImg from '../assets/logo.png'
@@ -69,7 +69,7 @@ export default function Layout() {
         const token = localStorage.getItem('accessToken')
         if (!token) return
 
-        layoutSocket = io(window.location.origin, {
+        layoutSocket = io(SOCKET_URL || window.location.origin, {
             auth: { token },
             path: '/socket.io',
             transports: ['websocket', 'polling'],

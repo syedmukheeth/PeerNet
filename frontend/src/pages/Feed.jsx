@@ -26,7 +26,7 @@ function RightPanel() {
     useEffect(() => {
         if (!user) return
         // Try fetching some users to suggest
-        api.get('/users/search', { params: { q: 'a', limit: 8 } })
+        api.get('/users/search', { params: { q: 'an', limit: 8 } })
             .then(({ data }) => {
                 const others = (data.data || []).filter(u => u._id !== user._id)
                 setSuggestions(others.slice(0, 5))
