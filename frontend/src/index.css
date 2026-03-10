@@ -2426,3 +2426,32 @@ textarea::placeholder {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ── DM Layout Custom ────────────────────────────────────── */
+.dm-wrapper {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: var(--sidebar-w, 240px);
+  display: flex;
+  background: var(--bg);
+  z-index: 20;
+}
+
+.dm-list-panel {
+  width: 350px;
+}
+
+@media (max-width: 640px) {
+  .dm-wrapper {
+    top: 52px !important;
+    bottom: 52px !important;
+    left: 0 !important;
+  }
+
+  .dm-list-panel {
+    width: 100% !important;
+    border-right: none !important;
+  }
+}

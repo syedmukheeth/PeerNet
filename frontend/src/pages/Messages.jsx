@@ -214,7 +214,7 @@ export default function Messages() {
     return (
         <>
             {/* Full-screen fixed DM overlay, starts right of the sidebar */}
-            <div style={{
+            <div className="dm-wrapper" style={{
                 position: 'fixed', top: 0, right: 0, bottom: 0,
                 left: 'var(--sidebar-w, 240px)',
                 display: 'flex', background: 'var(--bg)', zIndex: 20,
@@ -222,7 +222,7 @@ export default function Messages() {
 
                 {/* ─── LEFT: conversation list ─────────────────── */}
                 <div className={`dm-panel dm-list-panel${mobilePanel === 'chat' ? ' dm-mobile-hidden' : ''}`}
-                    style={{ width: 350, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
+                    style={{ flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
 
                     {/* List header */}
                     <div style={{ padding: '20px 20px 14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
