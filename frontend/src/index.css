@@ -2078,9 +2078,8 @@ textarea::placeholder {
   }
 
   .post-card {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
+    border-radius: 16px;
+    margin: 0 14px 20px;
   }
 }
 
