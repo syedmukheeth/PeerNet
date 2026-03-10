@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api, { SOCKET_URL } from '../api/axios'
 import { io } from 'socket.io-client'
-import { HiPaperAirplane, HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiHeart, HiDocument, HiDownload } from 'react-icons/hi'
+import { HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiHeart, HiDocument, HiDownload } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
 import EmojiPicker from 'emoji-picker-react'
@@ -43,7 +43,7 @@ function NewConvoModal({ onClose, onStart }) {
         if (v.length < 2) return setResults([])
         setLoading(true)
         try { const { data } = await api.get('/users/search', { params: { q: v, limit: 15 } }); setResults(data.data || []) }
-        catch { /* silent */ } finally { setLoading(false) }
+        catch (err) { console.error("Search error:", err) } finally { setLoading(false) }
     }
 
     return (
@@ -111,6 +111,7 @@ export default function Messages() {
     const [starting, setStarting] = useState(false)
     const [mobilePanel, setMobilePanel] = useState('list')
     const [showEmoji, setShowEmoji] = useState(false)
+    const [convoSearch, setConvoSearch] = useState('')
     const [filePreview, setFilePreview] = useState(null)
     const [isUploading, setIsUploading] = useState(false)
     const fileRef = useRef()
@@ -257,6 +258,14 @@ export default function Messages() {
     const other = activeConvo ? getOther(activeConvo) : null
     const otherAvatar = other?.avatarUrl || (other ? `https://ui-avatars.com/api/?name=${other.username}&background=6366F1&color=fff` : null)
 
+    const filteredConvos = conversations.filter(c => {
+        if (!convoSearch.trim()) return true
+        const peer = getOther(c)
+        if (!peer) return false
+        const s = convoSearch.toLowerCase()
+        return peer.username?.toLowerCase().includes(s) || peer.fullName?.toLowerCase().includes(s)
+    })
+
     return (
         <>
             {/* Full-screen fixed DM overlay, starts right of the sidebar */}
@@ -295,14 +304,22 @@ export default function Messages() {
                             background: 'var(--hover)', borderRadius: 10, padding: '9px 14px',
                         }}>
                             <HiSearch style={{ color: 'var(--text-3)', fontSize: 15, flexShrink: 0 }} />
-                            <span style={{ fontSize: 14, color: 'var(--text-3)' }}>Search</span>
+                            <input
+                                value={convoSearch}
+                                onChange={e => setConvoSearch(e.target.value)}
+                                placeholder="Search"
+                                style={{
+                                    background: 'none', border: 'none', outline: 'none',
+                                    fontSize: 14, color: 'var(--text-1)', width: '100%'
+                                }}
+                            />
                         </div>
                     </div>
 
                     {/* Convo items */}
                     <div style={{ flex: 1, overflowY: 'auto' }}>
                         {starting && <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}><div className="spinner" /></div>}
-                        {conversations.map(c => {
+                        {filteredConvos.map(c => {
                             const peer = getOther(c)
                             const pav = peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`
                             const isActive = activeConvo?._id === c._id

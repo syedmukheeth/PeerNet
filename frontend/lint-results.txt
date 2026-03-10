@@ -1,0 +1,57 @@
+﻿
+E:\PeerNet\frontend\src\components\Layout.jsx
+    3:8   error    'React' is defined but never used                                                                            no-unused-vars
+    3:46  error    'Fragment' is defined but never used                                                                         no-unused-vars
+   47:25  error    'setIsCollapsed' is assigned a value but never used                                                          no-unused-vars
+  217:8   warning  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+E:\PeerNet\frontend\src\components\SkeletonLoader.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+E:\PeerNet\frontend\src\components\StoryRail.jsx
+  1:31  error  'useRef' is defined but never used  no-unused-vars
+
+E:\PeerNet\frontend\src\components\UserListModal.jsx
+  1:31  error  'useRef' is defined but never used  no-unused-vars
+
+E:\PeerNet\frontend\src\components\__tests__\SkeletonLoader.test.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+   5:1   error  'describe' is not defined          no-undef
+   6:5   error  'describe' is not defined          no-undef
+   7:9   error  'it' is not defined                no-undef
+   9:13  error  'expect' is not defined            no-undef
+  10:13  error  'expect' is not defined            no-undef
+  11:13  error  'expect' is not defined            no-undef
+  15:5   error  'describe' is not defined          no-undef
+  16:9   error  'it' is not defined                no-undef
+  19:13  error  'expect' is not defined            no-undef
+  20:13  error  'expect' is not defined            no-undef
+
+E:\PeerNet\frontend\src\context\AuthContext.jsx
+  80:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+E:\PeerNet\frontend\src\context\ThemeContext.jsx
+  29:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+E:\PeerNet\frontend\src\pages\Feed.jsx
+  184:11  error  'isError' is assigned a value but never used  no-unused-vars
+
+E:\PeerNet\frontend\src\pages\Messages.jsx
+  6:10  error  'HiPaperAirplane' is defined but never used  no-unused-vars
+
+E:\PeerNet\frontend\src\pages\Notifications.jsx
+  210:13  error  'user' is assigned a value but never used                        no-unused-vars
+  378:82  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\PeerNet\frontend\src\pages\Profile.jsx
+  28:10  error  'StatItem' is defined but never used  no-unused-vars
+
+E:\PeerNet\frontend\src\pages\Reels.jsx
+  103:11  warning  The 'reels' conditional could make the dependencies of useEffect Hook (at line 133) change on every render. To fix this, wrap the initialization of 'reels' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+E:\PeerNet\frontend\src\pages\Search.jsx
+  101:72  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  101:76  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+Γ£û 28 problems (24 errors, 4 warnings)
+

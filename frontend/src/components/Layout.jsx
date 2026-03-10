@@ -1,6 +1,6 @@
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import React, { useState, useEffect, useRef, Fragment } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
@@ -44,7 +44,7 @@ export default function Layout() {
     const [showCreate, setShowCreate] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
     const [msgCount, setMsgCount] = useState(0)
-    const [isCollapsed, setIsCollapsed] = useState(false)
+    const [isCollapsed] = useState(false)
     const unreadRef = useRef(0)
     const msgRef = useRef(0)
     const mainRef = useRef(null)
@@ -214,7 +214,7 @@ export default function Layout() {
         })
 
         return () => { layoutSocket?.disconnect(); layoutSocket = null }
-    }, [user])
+    }, [user, navigate])
 
     // ── Clear badges when actually ON the relevant page ────
     useEffect(() => {

@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import './SkeletonLoader.css';
 
 export function PostSkeleton() {

@@ -181,7 +181,6 @@ export default function Feed() {
 
     const posts = data ? data.pages.flatMap((page) => page.data) : []
     const loading = status === 'pending' || isFetchingNextPage
-    const isError = status === 'error'
 
     const onLikeToggle = (postId, liked, likesCount) => {
         queryClient.setQueryData(['feed'], (oldData) => {

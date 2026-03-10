@@ -98,7 +98,7 @@ export default function Search() {
                 <div className="empty-state">
                     <div className="empty-state-icon">🔍</div>
                     <p className="empty-state-title">No results</p>
-                    <p className="empty-state-desc">No users found for "{q}"</p>
+                    <p className="empty-state-desc">No users found for &quot;{q}&quot;</p>
                 </div>
             )}
             {q.length < 2 && (

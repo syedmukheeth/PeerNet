@@ -260,7 +260,7 @@ export default function Notifications() {
             if (unread > 0) markRead()
         }, 1500)
         return () => clearTimeout(t)
-    }, [unread]) // eslint-disable-line
+    }, [unread])
 
     const groups = groupByTime(notifs)
 
@@ -375,7 +375,7 @@ export default function Notifications() {
                             All caught up
                         </p>
                         <p style={{ fontSize: 14, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
-                            When someone likes, comments or follows you,<br />you'll see it here.
+                            When someone likes, comments or follows you,&lt;br /&gt;you&apos;ll see it here.
                         </p>
                     </div>
                 </motion.div>

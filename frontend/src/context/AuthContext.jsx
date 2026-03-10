@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import api from '../api/axios'
 
@@ -33,7 +34,7 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false)
         }
-    }, []) // eslint-disable-line
+    }, [])
 
     useEffect(() => {
         // Always silently validate session on mount.
