@@ -107,12 +107,16 @@ const refresh = async (oldRefreshToken) => {
     const stored = await _getToken(decoded.jti);
     if (stored === '1') throw new ApiError(401, 'Refresh token has been revoked');
 
+    // Look up user to get their current role (refresh token payload doesn't carry role)
+    const user = await User.findById(decoded.userId).select('role').lean();
+    if (!user) throw new ApiError(401, 'User no longer exists');
+
     // Rotate: blacklist old, issue new
     await _setToken(decoded.jti, '1');
     const { token: newRefreshToken, jti: newJti } = signRefreshToken({ userId: decoded.userId });
     await _setToken(newJti, '0');
 
-    const accessToken = signAccessToken({ userId: decoded.userId, role: decoded.role });
+    const accessToken = signAccessToken({ userId: decoded.userId, role: user.role });
     return { accessToken, refreshToken: newRefreshToken };
 };
 
