@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun
+    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiUser
 } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
 import { useTheme } from '../context/ThemeContext'
