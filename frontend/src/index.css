@@ -862,7 +862,7 @@ textarea {
 .post-media-video {
   width: 100%;
   max-height: 520px;
-  object-fit: cover;
+  object-fit: contain;
   background: #000;
   display: block;
 }
