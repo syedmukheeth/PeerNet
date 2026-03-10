@@ -700,13 +700,13 @@ textarea {
 
 .peernetLogo {
   font-family: 'Syne', 'Inter', sans-serif;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: 0.5px;
   cursor: pointer;
   line-height: 1;
   display: inline-block;
-  padding-right: 4px;
-  /* Fix webkit right-edge truncation */
+  white-space: nowrap;
 
   /* Purple → Blue → Cyan — flows like the logo */
   background: linear-gradient(90deg,
@@ -722,7 +722,6 @@ textarea {
   color: transparent;
 
   animation: logoFlow 5s ease infinite;
-  white-space: nowrap;
 }
 
 .peernetLogo:hover {

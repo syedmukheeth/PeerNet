@@ -174,10 +174,10 @@ export default function Layout() {
                     </motion.button>
 
                     {!isCollapsed && (
-                        <Link to="/" style={{ textDecoration: 'none', flexShrink: 0, overflow: 'visible' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 0 }}>
-                                <img src={logoImg} alt="PeerNet" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }} />
-                                <span className="peernetLogo" style={{ fontSize: 22 }}>PeerNet&nbsp;</span>
+                        <Link to="/" style={{ textDecoration: 'none', flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <img src={logoImg} alt="PeerNet" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 7, flexShrink: 0 }} />
+                                <span className="peernetLogo">PeerNet</span>
                             </div>
                         </Link>
                     )}
