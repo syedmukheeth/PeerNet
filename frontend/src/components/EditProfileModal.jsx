@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext'
 export default function EditProfileModal({ profile, onClose, onSave }) {
     const { updateUser } = useAuth()
     const [form, setForm] = useState({
+        username: profile.username || '',
         fullName: profile.fullName || '',
         bio: profile.bio || '',
         website: profile.website || '',
@@ -30,6 +31,7 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
         setLoading(true)
         try {
             const fd = new FormData()
+            fd.append('username', form.username)
             fd.append('fullName', form.fullName)
             fd.append('bio', form.bio)
             fd.append('website', form.website)
@@ -89,6 +91,12 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
 
                 {/* Fields */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div>
+                        <label className="t-small" style={{ marginBottom: 6, display: 'block', fontWeight: 600 }}>Username</label>
+                        <input className="input" name="username" value={form.username}
+                            onChange={handleField} placeholder="Your unique username" />
+                        <span style={{ fontSize: 11, color: 'var(--text-3)', display: 'block', marginTop: 4 }}>Spaces will be converted to underscores.</span>
+                    </div>
                     <div>
                         <label className="t-small" style={{ marginBottom: 6, display: 'block', fontWeight: 600 }}>Full Name</label>
                         <input className="input" name="fullName" value={form.fullName}

@@ -44,6 +44,12 @@ const updateProfile = async (userId, updates, avatarFile) => {
         user.avatarPublicId = public_id;
     }
 
+    if (updates.username) {
+        updates.username = updates.username.toLowerCase().replace(/\s+/g, '_');
+        const existing = await User.findOne({ username: updates.username, _id: { $ne: userId } });
+        if (existing) throw new ApiError(409, 'Username is already taken');
+    }
+
     Object.assign(user, updates);
     await user.save();
 

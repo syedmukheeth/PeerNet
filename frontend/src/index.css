@@ -638,6 +638,12 @@ textarea {
   grid-template-columns: 240px minmax(0, 1fr);
   min-height: 100dvh;
   --sidebar-w: 240px;
+  transition: grid-template-columns 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-layout.sidebar-collapsed {
+  grid-template-columns: 80px minmax(0, 1fr);
+  --sidebar-w: 80px;
 }
 
 /* ── Fade-in utility ──────────────────────────────────────── */
@@ -666,10 +672,16 @@ textarea {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  padding: 20px 12px;
+  padding: 12px 12px;
   gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed {
+  padding: 12px 8px;
+  align-items: center;
 }
 
 @keyframes logoFlow {
@@ -688,12 +700,13 @@ textarea {
 
 .peernetLogo {
   font-family: 'Syne', 'Inter', sans-serif;
-  font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  padding: 6px 10px 22px;
   cursor: pointer;
   line-height: 1;
+  display: inline-block;
+  padding-right: 4px;
+  /* Fix webkit right-edge truncation */
 
   /* Purple → Blue → Cyan — flows like the logo */
   background: linear-gradient(90deg,
@@ -709,6 +722,7 @@ textarea {
   color: transparent;
 
   animation: logoFlow 5s ease infinite;
+  white-space: nowrap;
 }
 
 .peernetLogo:hover {
@@ -722,6 +736,11 @@ textarea {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 14px 10px 6px;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar-section {
+  display: none;
 }
 
 .sidebar-link {
@@ -739,6 +758,25 @@ textarea {
   background: none;
   width: 100%;
   text-align: left;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar-link {
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 0;
+  gap: 6px;
+  border-radius: 10px;
+}
+
+.sidebar.collapsed .sidebar-link span.link-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  width: 100%;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .sidebar-link:hover {
@@ -754,6 +792,11 @@ textarea {
 .sidebar-link svg {
   font-size: 19px;
   flex-shrink: 0;
+  transition: transform 250ms;
+}
+
+.sidebar.collapsed .sidebar-link svg {
+  font-size: 24px;
 }
 
 .sidebar-bottom {
@@ -763,6 +806,11 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  width: 100%;
+}
+
+.sidebar.collapsed .sidebar-bottom {
+  align-items: center;
 }
 
 /* ── Main Content ────────────────────────────────────────── */

@@ -1,14 +1,15 @@
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiCog
+    HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiCog, HiMenu, HiMoon, HiSun
 } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
+import { useTheme } from '../context/ThemeContext'
 import api, { SOCKET_URL } from '../api/axios'
 import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
@@ -35,11 +36,13 @@ let layoutSocket = null
 
 export default function Layout() {
     const { user, logout } = useAuth()
+    const { isDark } = useTheme()
     const navigate = useNavigate()
     const location = useLocation()
     const [showCreate, setShowCreate] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
     const [msgCount, setMsgCount] = useState(0)
+    const [isCollapsed, setIsCollapsed] = useState(false)
     const unreadRef = useRef(0)
     const msgRef = useRef(0)
     const mainRef = useRef(null)
@@ -155,109 +158,126 @@ export default function Layout() {
     const avatarUrl = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
 
     return (
-        <div className="app-layout">
+        <div className={`app-layout ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
             {/* ── Sidebar ── */}
-            <aside className="sidebar">
-                <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <div className="peernetLogo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <img src={logoImg} alt="PeerNet" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }} />
-                        <span className="sidebar-logo-text">PeerNet</span>
-                    </div>
-                </Link>
+            <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '4px', marginBottom: 16, gap: 12, justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
+                    <motion.button onClick={() => setIsCollapsed(!isCollapsed)}
+                        style={{
+                            background: 'transparent', border: 'none', color: 'var(--text-1)',
+                            cursor: 'pointer', padding: 8, borderRadius: '50%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0
+                        }}
+                        whileHover={{ background: 'var(--hover)' }}>
+                        <HiMenu style={{ fontSize: 24 }} />
+                    </motion.button>
 
-                {/* Nav links — no overflow, always fully visible */}
+                    {!isCollapsed && (
+                        <Link to="/" style={{ textDecoration: 'none', flexShrink: 0, overflow: 'visible' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 0 }}>
+                                <img src={logoImg} alt="PeerNet" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }} />
+                                <span className="peernetLogo" style={{ fontSize: 22 }}>PeerNet&nbsp;</span>
+                            </div>
+                        </Link>
+                    )}
+                </div>
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 8 }}>
-                    <div className="sidebar-section">
-                        Navigation
-                    </div>
-
-                    {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
-                        <NavLink key={to} to={to} end={exact} onClick={() => handleNavClick(to)}
-                            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                            style={{ position: 'relative' }}>
-                            {({ isActive }) => (
-                                <>
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="sidebar-active"
-                                            style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
-                                            transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                                        />
-                                    )}
-                                    <div style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>
-                                        <Icon style={{ fontSize: 20, opacity: isActive ? 1 : 0.7 }} />
-                                        {badge && unreadCount > 0 && (
-                                            <motion.span
-                                                style={{
-                                                    position: 'absolute', top: -6, right: -8,
-                                                    background: 'var(--error)', color: '#fff',
-                                                    borderRadius: 99, fontSize: 9, fontWeight: 700,
-                                                    minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
-                                                    border: '2px solid var(--surface)',
-                                                }}
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                {unreadCount > 9 ? '9+' : unreadCount}
-                                            </motion.span>
+                    {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }, index) => (
+                        <Fragment key={to}>
+                            {index === 3 && (
+                                <Fragment key="group2-divider">
+                                    <div style={{ height: 1, background: 'var(--border)', margin: '12px 10px' }} />
+                                    <NavLink to={`/profile/${user?._id}`}
+                                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                                        style={{ position: 'relative' }}>
+                                        {({ isActive }) => (
+                                            <>
+                                                {isActive && (
+                                                    <motion.div
+                                                        layoutId="sidebar-active"
+                                                        style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
+                                                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                                                    />
+                                                )}
+                                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'flex-start', color: isActive ? 'var(--accent)' : 'inherit' }}>
+                                                    <img src={avatarUrl} className="avatar avatar-xs" alt="" style={{ border: isActive ? '2px solid var(--accent)' : 'none', width: 24, height: 24, margin: isCollapsed ? '0 auto' : 0 }} />
+                                                </div>
+                                                <span className="link-label" style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>You</span>
+                                            </>
                                         )}
-                                        {msgBadge && msgCount > 0 && (
-                                            <motion.span
-                                                style={{
-                                                    position: 'absolute', top: -6, right: -8,
-                                                    background: 'var(--accent)', color: '#fff',
-                                                    borderRadius: 99, fontSize: 9, fontWeight: 700,
-                                                    minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
-                                                    border: '2px solid var(--surface)',
-                                                }}
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                                                {msgCount > 9 ? '9+' : msgCount}
-                                            </motion.span>
-                                        )}
-                                    </div>
-                                    <span style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>{label}</span>
-                                </>
+                                    </NavLink>
+                                </Fragment>
                             )}
-                        </NavLink>
+                            <NavLink to={to} end={exact} onClick={() => handleNavClick(to)}
+                                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                                style={{ position: 'relative' }}>
+                                {({ isActive }) => (
+                                    <>
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="sidebar-active"
+                                                style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
+                                                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                                            />
+                                        )}
+                                        <div style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>
+                                            <Icon style={{ fontSize: 24, opacity: isActive ? 1 : 0.7 }} />
+                                            {badge && unreadCount > 0 && (
+                                                <motion.span
+                                                    style={{
+                                                        position: 'absolute', top: -6, right: -8,
+                                                        background: 'var(--error)', color: '#fff',
+                                                        borderRadius: 99, fontSize: 9, fontWeight: 700,
+                                                        minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
+                                                        border: '2px solid var(--surface)',
+                                                    }}
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                                </motion.span>
+                                            )}
+                                            {msgBadge && msgCount > 0 && (
+                                                <motion.span
+                                                    style={{
+                                                        position: 'absolute', top: -6, right: -8,
+                                                        background: 'var(--accent)', color: '#fff',
+                                                        borderRadius: 99, fontSize: 9, fontWeight: 700,
+                                                        minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
+                                                        border: '2px solid var(--surface)',
+                                                    }}
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                                                    {msgCount > 9 ? '9+' : msgCount}
+                                                </motion.span>
+                                            )}
+                                        </div>
+                                        <span className="link-label" style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>{label}</span>
+                                    </>
+                                )}
+                            </NavLink>
+                        </Fragment>
                     ))}
 
                     <motion.button className="sidebar-link" onClick={() => setShowCreate(true)}
-                        style={{ width: '100%', marginTop: 4, marginBottom: 8 }}
+                        style={{ width: '100%' }}
                         whileHover={{ x: 3 }} whileTap={{ scale: 0.97 }}>
-                        <HiPlusCircle style={{ fontSize: 20, opacity: 0.7 }} />
-                        <span>Create</span>
+                        <HiPlusCircle style={{ fontSize: 24, opacity: 0.7 }} />
+                        <span className="link-label">Create</span>
                     </motion.button>
-
                 </div>
 
-                {/* Bottom — pinned, never pushed off-screen */}
-                <div style={{ flexShrink: 0, paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    <div style={{ padding: '4px 10px 8px' }}>
-                        <ThemeToggle />
-                    </div>
-
-                    <NavLink to={`/profile/${user?._id}`}
-                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                        style={{ position: 'relative' }}>
-                        {({ isActive }) => (
-                            <>
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="sidebar-active"
-                                        style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
-                                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                                    />
-                                )}
-                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12, width: '100%', color: isActive ? 'var(--accent)' : 'inherit' }}>
-                                    <img src={avatarUrl} className="avatar avatar-xs" alt="" style={{ border: isActive ? '2px solid var(--accent)' : 'none' }} />
-                                    <span className="truncate" style={{ flex: 1, maxWidth: 110 }}>{user?.username}</span>
-                                    {user?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14, flexShrink: 0 }} />}
-                                </div>
-                            </>
-                        )}
-                    </NavLink>
+                <div style={{ flexShrink: 0, marginTop: 'auto', paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <button className="sidebar-link" onClick={() => document.querySelector('.theme-toggle').click()}
+                        style={{ width: '100%', color: 'var(--text-3)' }}
+                        whileHover={{ color: 'var(--text-1)' }}>
+                        <ThemeToggle className="sr-only" />
+                        {isDark ? <HiSun style={{ fontSize: 24 }} /> : <HiMoon style={{ fontSize: 24 }} />}
+                        <span className="link-label">Appearance</span>
+                    </button>
 
                     <NavLink to="/settings"
                         className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
@@ -272,9 +292,9 @@ export default function Layout() {
                                     />
                                 )}
                                 <div style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>
-                                    <HiCog style={{ fontSize: 20, opacity: isActive ? 1 : 0.7 }} />
+                                    <HiCog style={{ fontSize: 24, opacity: isActive ? 1 : 0.7 }} />
                                 </div>
-                                <span style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>Settings</span>
+                                <span className="link-label" style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>Settings</span>
                             </>
                         )}
                     </NavLink>
@@ -282,8 +302,8 @@ export default function Layout() {
                     <motion.button className="sidebar-link" onClick={handleLogout}
                         style={{ width: '100%', color: 'var(--text-3)' }}
                         whileHover={{ color: 'var(--error)' }}>
-                        <HiLogout style={{ fontSize: 20 }} />
-                        <span>Sign out</span>
+                        <HiLogout style={{ fontSize: 24 }} />
+                        <span className="link-label">Sign out</span>
                     </motion.button>
                 </div>
             </aside>

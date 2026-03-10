@@ -7,7 +7,7 @@ import ThemeToggle from '../components/ThemeToggle'
 import logo from '../assets/logo.png'
 
 export default function Login() {
-    const [form, setForm] = useState({ email: '', password: '' })
+    const [form, setForm] = useState({ identifier: '', password: '' })
     const [loading, setLoading] = useState(false)
     const { login } = useAuth()
     const navigate = useNavigate()
@@ -18,7 +18,7 @@ export default function Login() {
         e.preventDefault()
         setLoading(true)
         try {
-            await login(form.email, form.password)
+            await login(form.identifier, form.password)
             toast.success('Welcome back!')
             navigate('/')
         } catch (err) {
@@ -47,9 +47,9 @@ export default function Login() {
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label>Email</label>
-                        <input className="input" type="email" placeholder="you@example.com"
-                            value={form.email} onChange={set('email')} required />
+                        <label>Username or Email</label>
+                        <input className="input" type="text" placeholder="johndoe or you@example.com"
+                            value={form.identifier} onChange={set('identifier')} required />
                     </div>
                     <div className="input-group">
                         <label>Password</label>

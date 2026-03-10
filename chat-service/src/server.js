@@ -16,7 +16,8 @@ const logger = require('./config/logger');
 const { initChatSocket } = require('./sockets/chat.socket');
 const { setIO } = require('./utils/socket.utils');
 
-const PORT = process.env.PORT || process.env.CHAT_PORT || 3001;
+// Prevent collision with the main backend (port 3000) defined in root .env
+const PORT = process.env.CHAT_PORT || 3001;
 
 const bootstrap = async () => {
     // ── 1. Connect MongoDB BEFORE anything else ───────────────────────────────
@@ -51,12 +52,16 @@ const bootstrap = async () => {
         try {
             const pubClient = redisClient.duplicate();
             const subClient = redisClient.duplicate();
+            pubClient.on('error', (err) => logger.error(`Redis pubClient error: ${err.message}`));
+            subClient.on('error', (err) => logger.error(`Redis subClient error: ${err.message}`));
+
             await Promise.all([pubClient.connect(), subClient.connect()]);
             io.adapter(createAdapter(pubClient, subClient));
             logger.info('Socket.io Redis adapter automatically attached');
 
             // --- Cross-Service Notification Bridge ---
             const notifSub = redisClient.duplicate();
+            notifSub.on('error', (err) => logger.error(`Redis notifSub error: ${err.message}`));
             await notifSub.connect();
             await notifSub.subscribe('peernet:notifications', (message) => {
                 try {

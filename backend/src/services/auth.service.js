@@ -75,12 +75,15 @@ const register = async ({ username, email, password, fullName }) => {
     return { user, accessToken, refreshToken };
 };
 
-const login = async ({ email, password }) => {
-    const user = await User.findOne({ email }).select('+passwordHash');
-    if (!user) throw new ApiError(401, 'Invalid email or password');
+const login = async ({ email: identifier, password }) => {
+    // The identifier could be an actual email or a username
+    const user = await User.findOne({
+        $or: [{ email: identifier }, { username: identifier }]
+    }).select('+passwordHash');
+    if (!user) throw new ApiError(401, 'Invalid credentials');
 
     const match = await user.matchPassword(password);
-    if (!match) throw new ApiError(401, 'Invalid email or password');
+    if (!match) throw new ApiError(401, 'Invalid credentials');
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
