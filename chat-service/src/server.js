@@ -16,7 +16,7 @@ const logger = require('./config/logger');
 const { initChatSocket } = require('./sockets/chat.socket');
 const { setIO } = require('./utils/socket.utils');
 
-const PORT = process.env.CHAT_PORT || 3001;
+const PORT = process.env.PORT || process.env.CHAT_PORT || 3001;
 
 const bootstrap = async () => {
     // ── 1. Connect MongoDB BEFORE anything else ───────────────────────────────
