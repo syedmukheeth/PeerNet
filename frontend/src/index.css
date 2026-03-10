@@ -728,6 +728,221 @@ textarea {
   animation-duration: 2s;
 }
 
+/* ── Instagram-Style Sidebar ─────────────────────────────── */
+
+/* Logo row */
+.sidebar-logo-row {
+  padding: 16px 4px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.sidebar-brand--collapsed {
+  justify-content: center;
+}
+
+.sidebar-brand-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+/* Nav container */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+/* ── Core link item — Instagram style ── */
+.ig-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ig-link:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+/* Active: bold text, full-opacity icon — NO coloured background */
+.ig-link--active {
+  color: var(--text-1);
+  font-weight: 700;
+}
+
+.ig-link--active:hover {
+  background: var(--hover);
+}
+
+/* Icon wrapper — keeps badge in position */
+.ig-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+}
+
+.ig-icon {
+  font-size: 26px !important;
+  flex-shrink: 0;
+}
+
+/* "Create" icon styled like Instagram's square-plus */
+.ig-icon--create {
+  font-size: 27px !important;
+}
+
+/* Avatar in profile link */
+.ig-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  outline-offset: 2px;
+  transition: outline-color 150ms ease;
+}
+
+/* Notification / message badge */
+.ig-badge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  background: var(--error);
+  color: #fff;
+  border-radius: 99px;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 2px solid var(--surface);
+}
+
+.ig-badge--msg {
+  background: var(--accent);
+}
+
+/* Text label */
+.ig-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Collapsed sidebar — icons only */
+.sidebar.collapsed .ig-link {
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.sidebar.collapsed .ig-label {
+  font-size: 10px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.sidebar.collapsed .ig-icon-wrap {
+  width: 30px;
+  height: 30px;
+}
+
+.sidebar.collapsed .ig-icon {
+  font-size: 28px !important;
+}
+
+/* ── "More" popup panel ──────────────────────────────────── */
+.sidebar-more-wrap {
+  position: relative;
+  flex-shrink: 0;
+  padding-top: 8px;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+
+.ig-more-popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 8px;
+  right: 8px;
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ig-more-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: var(--text-1);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  width: 100%;
+  text-align: left;
+  transition: background 140ms ease;
+}
+
+.ig-more-item:hover {
+  background: var(--hover);
+}
+
+.ig-more-item--danger {
+  color: var(--error);
+}
+
+.ig-more-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+
 .sidebar-section {
   font-size: 11px;
   font-weight: 600;

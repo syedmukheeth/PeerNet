@@ -6,7 +6,9 @@ import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiUser, HiLogout, HiPlusCircle, HiBadgeCheck, HiCog, HiMenu, HiMoon, HiSun
+    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun,
+    HiOutlineHome, HiOutlineSearch, HiOutlineFilm, HiOutlineChatAlt2,
+    HiOutlineBell, HiOutlinePlusCircle, HiDotsCircleHorizontal
 } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
 import { useTheme } from '../context/ThemeContext'
@@ -15,12 +17,13 @@ import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
 import logoImg from '../assets/logo.png'
 
+// Instagram-style nav: icon (outline inactive, filled active) + label
 const links = [
-    { to: '/', icon: HiHome, label: 'Home', exact: true },
-    { to: '/search', icon: HiSearch, label: 'Search' },
-    { to: '/dscrolls', icon: HiFilm, label: 'Dscrolls' },
-    { to: '/messages', icon: HiChatAlt2, label: 'Messages', msgBadge: true },
-    { to: '/notifications', icon: HiBell, label: 'Notifications', badge: true },
+    { to: '/', iconActive: HiHome, iconInactive: HiOutlineHome, label: 'Home', exact: true },
+    { to: '/search', iconActive: HiSearch, iconInactive: HiOutlineSearch, label: 'Search' },
+    { to: '/dscrolls', iconActive: HiFilm, iconInactive: HiOutlineFilm, label: 'Dscrolls' },
+    { to: '/messages', iconActive: HiChatAlt2, iconInactive: HiOutlineChatAlt2, label: 'Messages', msgBadge: true },
+    { to: '/notifications', iconActive: HiBell, iconInactive: HiOutlineBell, label: 'Notifications', badge: true },
 ]
 
 const mobileBottomLinksLeft = [
@@ -33,6 +36,7 @@ const mobileBottomLinksRight = [
 ]
 
 let layoutSocket = null
+
 
 export default function Layout() {
     const { user, logout } = useAuth()
@@ -157,154 +161,124 @@ export default function Layout() {
 
     const avatarUrl = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
 
+    const [showMore, setShowMore] = useState(false)
+    const moreRef = useRef(null)
+
+    // Close "More" popup when clicking outside
+    useEffect(() => {
+        if (!showMore) return
+        const handler = (e) => { if (moreRef.current && !moreRef.current.contains(e.target)) setShowMore(false) }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [showMore])
+
     return (
         <div className={`app-layout ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
             {/* ── Sidebar ── */}
             <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-                <div style={{ display: 'flex', alignItems: 'center', padding: '4px', marginBottom: 16, gap: 12, justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
-                    <motion.button onClick={() => setIsCollapsed(!isCollapsed)}
-                        style={{
-                            background: 'transparent', border: 'none', color: 'var(--text-1)',
-                            cursor: 'pointer', padding: 8, borderRadius: '50%',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexShrink: 0
-                        }}
-                        whileHover={{ background: 'var(--hover)' }}>
-                        <HiMenu style={{ fontSize: 24 }} />
-                    </motion.button>
 
-                    {!isCollapsed && (
-                        <Link to="/" style={{ textDecoration: 'none', flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <img src={logoImg} alt="PeerNet" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 7, flexShrink: 0 }} />
-                                <span className="peernetLogo">PeerNet</span>
-                            </div>
+                {/* Logo row */}
+                <div className="sidebar-logo-row">
+                    {!isCollapsed ? (
+                        <Link to="/" className="sidebar-brand">
+                            <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
+                            <span className="peernetLogo">PeerNet</span>
+                        </Link>
+                    ) : (
+                        <Link to="/" className="sidebar-brand sidebar-brand--collapsed">
+                            <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
                         </Link>
                     )}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 8 }}>
-                    {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }, index) => (
-                        <Fragment key={to}>
-                            {index === 3 && (
-                                <Fragment key="group2-divider">
-                                    <div style={{ height: 1, background: 'var(--border)', margin: '12px 10px' }} />
-                                    <NavLink to={`/profile/${user?._id}`}
-                                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                                        style={{ position: 'relative' }}>
-                                        {({ isActive }) => (
-                                            <>
-                                                {isActive && (
-                                                    <motion.div
-                                                        layoutId="sidebar-active"
-                                                        style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
-                                                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                                                    />
-                                                )}
-                                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'flex-start', color: isActive ? 'var(--accent)' : 'inherit' }}>
-                                                    <img src={avatarUrl} className="avatar avatar-xs" alt="" style={{ border: isActive ? '2px solid var(--accent)' : 'none', width: 24, height: 24, margin: isCollapsed ? '0 auto' : 0 }} />
-                                                </div>
-                                                <span className="link-label" style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>You</span>
-                                            </>
-                                        )}
-                                    </NavLink>
-                                </Fragment>
-                            )}
-                            <NavLink to={to} end={exact} onClick={() => handleNavClick(to)}
-                                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                                style={{ position: 'relative' }}>
-                                {({ isActive }) => (
+                {/* Main nav */}
+                <nav className="sidebar-nav">
+                    {links.map(({ to, iconActive: IconActive, iconInactive: IconInactive, label, exact, badge, msgBadge }) => (
+                        <NavLink key={to} to={to} end={exact}
+                            className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
+                            {({ isActive }) => {
+                                const Icon = isActive ? IconActive : IconInactive
+                                return (
                                     <>
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="sidebar-active"
-                                                style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
-                                                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                                            />
-                                        )}
-                                        <div style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>
-                                            <Icon style={{ fontSize: 24, opacity: isActive ? 1 : 0.7 }} />
+                                        <span className="ig-icon-wrap" style={{ position: 'relative' }}>
+                                            <Icon className="ig-icon" />
                                             {badge && unreadCount > 0 && (
-                                                <motion.span
-                                                    style={{
-                                                        position: 'absolute', top: -6, right: -8,
-                                                        background: 'var(--error)', color: '#fff',
-                                                        borderRadius: 99, fontSize: 9, fontWeight: 700,
-                                                        minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
-                                                        border: '2px solid var(--surface)',
-                                                    }}
-                                                    initial={{ scale: 0 }}
-                                                    animate={{ scale: 1 }}
-                                                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                                                <motion.span className="ig-badge" initial={{ scale: 0 }} animate={{ scale: 1 }}>
                                                     {unreadCount > 9 ? '9+' : unreadCount}
                                                 </motion.span>
                                             )}
                                             {msgBadge && msgCount > 0 && (
-                                                <motion.span
-                                                    style={{
-                                                        position: 'absolute', top: -6, right: -8,
-                                                        background: 'var(--accent)', color: '#fff',
-                                                        borderRadius: 99, fontSize: 9, fontWeight: 700,
-                                                        minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
-                                                        border: '2px solid var(--surface)',
-                                                    }}
-                                                    initial={{ scale: 0 }}
-                                                    animate={{ scale: 1 }}
-                                                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                                                <motion.span className="ig-badge ig-badge--msg" initial={{ scale: 0 }} animate={{ scale: 1 }}>
                                                     {msgCount > 9 ? '9+' : msgCount}
                                                 </motion.span>
                                             )}
-                                        </div>
-                                        <span className="link-label" style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>{label}</span>
+                                        </span>
+                                        <span className="ig-label">{label}</span>
                                     </>
-                                )}
-                            </NavLink>
-                        </Fragment>
+                                )
+                            }}
+                        </NavLink>
                     ))}
 
-                    <motion.button className="sidebar-link" onClick={() => setShowCreate(true)}
-                        style={{ width: '100%' }}
-                        whileHover={{ x: 3 }} whileTap={{ scale: 0.97 }}>
-                        <HiPlusCircle style={{ fontSize: 24, opacity: 0.7 }} />
-                        <span className="link-label">Create</span>
-                    </motion.button>
-                </div>
-
-                <div style={{ flexShrink: 0, marginTop: 'auto', paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <button className="sidebar-link" onClick={() => document.querySelector('.theme-toggle').click()}
-                        style={{ width: '100%', color: 'var(--text-3)' }}
-                        whileHover={{ color: 'var(--text-1)' }}>
-                        <ThemeToggle className="sr-only" />
-                        {isDark ? <HiSun style={{ fontSize: 24 }} /> : <HiMoon style={{ fontSize: 24 }} />}
-                        <span className="link-label">Appearance</span>
+                    {/* Create */}
+                    <button className="ig-link" onClick={() => setShowCreate(true)}>
+                        <span className="ig-icon-wrap">
+                            <HiOutlinePlusCircle className="ig-icon ig-icon--create" />
+                        </span>
+                        <span className="ig-label">Create</span>
                     </button>
 
-                    <NavLink to="/settings"
-                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                        style={{ position: 'relative' }}>
+                    {/* Profile */}
+                    <NavLink to={`/profile/${user?._id}`}
+                        className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
                         {({ isActive }) => (
                             <>
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="sidebar-active"
-                                        style={{ position: 'absolute', inset: 0, background: 'var(--accent-subtle)', borderRadius: 9 }}
-                                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                                    />
-                                )}
-                                <div style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>
-                                    <HiCog style={{ fontSize: 24, opacity: isActive ? 1 : 0.7 }} />
-                                </div>
-                                <span className="link-label" style={{ position: 'relative', zIndex: 1, color: isActive ? 'var(--accent)' : 'inherit' }}>Settings</span>
+                                <span className="ig-icon-wrap">
+                                    <img src={avatarUrl} alt=""
+                                        className="ig-avatar"
+                                        style={{ outline: isActive ? '2px solid var(--text-1)' : '2px solid transparent' }} />
+                                </span>
+                                <span className="ig-label">Profile</span>
                             </>
                         )}
                     </NavLink>
+                </nav>
 
-                    <motion.button className="sidebar-link" onClick={handleLogout}
-                        style={{ width: '100%', color: 'var(--text-3)' }}
-                        whileHover={{ color: 'var(--error)' }}>
-                        <HiLogout style={{ fontSize: 24 }} />
-                        <span className="link-label">Sign out</span>
-                    </motion.button>
+                {/* More button — bottom */}
+                <div className="sidebar-more-wrap" ref={moreRef}>
+                    <AnimatePresence>
+                        {showMore && (
+                            <motion.div className="ig-more-popup"
+                                initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                                transition={{ duration: 0.15 }}>
+                                <button className="ig-more-item" onClick={() => { document.querySelector('.theme-toggle')?.click(); setShowMore(false) }}>
+                                    <ThemeToggle className="sr-only" />
+                                    {isDark ? <HiSun style={{ fontSize: 20 }} /> : <HiMoon style={{ fontSize: 20 }} />}
+                                    <span>Switch appearance</span>
+                                </button>
+                                <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                    <HiCog style={{ fontSize: 20 }} />
+                                    <span>Settings</span>
+                                </NavLink>
+                                <div className="ig-more-divider" />
+                                <button className="ig-more-item ig-more-item--danger" onClick={handleLogout}>
+                                    <HiLogout style={{ fontSize: 20 }} />
+                                    <span>Log out</span>
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <button className={`ig-link ${showMore ? 'ig-link--active' : ''}`}
+                        onClick={() => setShowMore(v => !v)}
+                        style={{ width: '100%' }}>
+                        <span className="ig-icon-wrap">
+                            <HiMenu className="ig-icon" />
+                        </span>
+                        <span className="ig-label">More</span>
+                    </button>
                 </div>
             </aside>
 
