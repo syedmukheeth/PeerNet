@@ -675,7 +675,7 @@ textarea {
   padding: 12px 12px;
   gap: 2px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
