@@ -118,31 +118,25 @@ export default function Profile() {
     const avatar = profile.avatarUrl || `https://ui-avatars.com/api/?name=${profile.username}&size=200&background=6366F1&color=fff`
 
     return (
-        <div className="fade-in">
-            {/* Header */}
+        <div className="profile-page-wrap fade-in">
+            {/* ── Header ── */}
             <div className="profile-header">
-                {/* Avatar with gradient ring */}
-                <div style={{ position: 'relative', width: 'fit-content' }}>
-                    <div style={{
-                        position: 'absolute', inset: -4, borderRadius: '50%',
-                        background: 'var(--gradient-story)', padding: 3,
-                        opacity: profile.isVerified ? 1 : 0.6,
-                    }}>
-                        <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg-primary)' }} />
+
+                {/* Avatar */}
+                <div className="profile-avatar-col">
+                    <div className="profile-avatar-ring">
+                        <img src={avatar} alt={profile.username} />
                     </div>
-                    <img src={avatar} className="avatar avatar-2xl"
-                        alt={profile.username}
-                        style={{ position: 'relative', zIndex: 1 }} />
                 </div>
 
-                <div>
-                    {/* Username + verified + buttons */}
-                    <div className="flex items-center gap-3" style={{ flexWrap: 'wrap', marginBottom: 4 }}>
-                        <h1 style={{ fontSize: 22, fontWeight: 800, fontFamily: "'Syne','Inter',sans-serif" }}>
-                            {profile.username}
-                        </h1>
+                {/* Info */}
+                <div className="profile-info-col">
+
+                    {/* Row 1: username + buttons */}
+                    <div className="profile-username-row">
+                        <h1>{profile.username}</h1>
                         {profile.isVerified && (
-                            <HiBadgeCheck style={{ fontSize: 20, color: 'var(--accent)', filter: 'drop-shadow(0 0 6px var(--accent-glow))' }} />
+                            <HiBadgeCheck style={{ fontSize: 18, color: 'var(--accent)', flexShrink: 0 }} />
                         )}
                         {isMe ? (
                             <button className="btn btn-secondary btn-sm" onClick={() => setEditProfile(true)}>Edit profile</button>
@@ -154,7 +148,7 @@ export default function Profile() {
                                     style={{ minWidth: 100 }}
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}>
-                                    {following ? '✓ Following' : '+ Follow'}
+                                    {following ? 'Following' : 'Follow'}
                                 </motion.button>
                                 <motion.button
                                     className="btn btn-secondary btn-sm"
@@ -172,48 +166,53 @@ export default function Profile() {
                         )}
                     </div>
 
-                    {/* Stats */}
+                    {/* Row 2: stats — Instagram inline style */}
                     <div className="profile-stats">
-                        <StatItem value={posts.length} label="posts" />
-                        <StatItem value={profile.followersCount || 0} label="followers" onClick={() => setShowFollowers(true)} />
-                        <StatItem value={profile.followingCount || 0} label="following" onClick={() => setShowFollowing(true)} />
+                        <div className="profile-stat">
+                            <span className="profile-stat-num">{posts.length}</span>
+                            <span className="profile-stat-label">posts</span>
+                        </div>
+                        <div className="profile-stat" onClick={() => setShowFollowers(true)} style={{ cursor: 'pointer' }}>
+                            <span className="profile-stat-num">{profile.followersCount || 0}</span>
+                            <span className="profile-stat-label">followers</span>
+                        </div>
+                        <div className="profile-stat" onClick={() => setShowFollowing(true)} style={{ cursor: 'pointer' }}>
+                            <span className="profile-stat-num">{profile.followingCount || 0}</span>
+                            <span className="profile-stat-label">following</span>
+                        </div>
                     </div>
 
-                    {profile.fullName && (
-                        <p style={{ marginTop: 14, fontSize: 15, fontWeight: 600 }}>{profile.fullName}</p>
-                    )}
-                    {profile.bio && (
-                        <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.6 }}>
-                            {profile.bio}
-                        </p>
-                    )}
-                    {profile.website && (
-                        <a href={profile.website} target="_blank" rel="noreferrer"
-                            style={{ fontSize: 14, color: 'var(--accent)', marginTop: 6, display: 'block', fontWeight: 500 }}>
-                            {profile.website}
-                        </a>
-                    )}
+                    {/* Row 3: name + bio + website */}
+                    <div className="profile-bio-row">
+                        {profile.fullName && <p className="profile-full-name">{profile.fullName}</p>}
+                        {profile.bio && <p className="profile-bio">{profile.bio}</p>}
+                        {profile.website && (
+                            <a href={profile.website} target="_blank" rel="noreferrer" className="profile-website">
+                                {profile.website}
+                            </a>
+                        )}
+                    </div>
+
                 </div>
             </div>
 
-            {/* Tabs */}
+            {/* ── Tabs ── */}
             <div className="profile-tabs">
                 {[
                     { key: 'posts', icon: <HiViewGrid />, label: 'Posts' },
                     { key: 'dscrolls', icon: <HiFilm />, label: 'Dscrolls' },
-                    { key: 'saved', icon: <HiBookmark />, label: 'Saved' },
+                    ...(isMe ? [{ key: 'saved', icon: <HiBookmark />, label: 'Saved' }] : []),
                 ].map(({ key, icon, label }) => (
                     <button key={key} onClick={() => setTab(key)}
                         className={`profile-tab-btn ${tab === key ? 'active' : ''}`}>
                         {icon}
-                        <span style={{ fontSize: 12, marginLeft: 5 }}>{label}</span>
+                        <span>{label}</span>
                     </button>
                 ))}
             </div>
 
-            {/* Post Grid */}
+            {/* ── Grid ── */}
             {(() => {
-                // Determine which list to display
                 let displayPosts = []
                 let emptyIcon = '📷'
                 let emptyTitle = 'No posts yet'
@@ -222,7 +221,6 @@ export default function Profile() {
 
                 if (tab === 'posts') {
                     displayPosts = posts.filter(p => p.mediaType !== 'video')
-                    emptyTitle = 'No posts yet'
                 } else if (tab === 'dscrolls') {
                     displayPosts = posts.filter(p => p.mediaType === 'video')
                     emptyIcon = '🎬'
@@ -253,10 +251,10 @@ export default function Profile() {
                                         : <img src={p.mediaUrl} alt="" loading="lazy" />
                                     }
                                     <div className="profile-grid-overlay">
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                             <HiHeart /> {p.likesCount || 0}
                                         </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                             <HiChat /> {p.commentsCount || 0}
                                         </span>
                                     </div>
@@ -265,7 +263,7 @@ export default function Profile() {
                         </div>
                         {displayPosts.length === 0 && (
                             <div className="empty-state" style={{ paddingTop: 60 }}>
-                                <div className="empty-state-icon" style={{ animation: 'float 3s ease-in-out infinite' }}>{emptyIcon}</div>
+                                <div className="empty-state-icon">{emptyIcon}</div>
                                 <p className="empty-state-title">{emptyTitle}</p>
                                 {emptyDesc && <p className="empty-state-desc">{emptyDesc}</p>}
                             </div>

@@ -1428,57 +1428,169 @@ textarea {
 }
 
 /* ── Profile ─────────────────────────────────────────────── */
-.profile-header {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 36px;
-  align-items: start;
-  padding: 28px 0 24px;
+/* ── Profile ─────────────────────────────────────────────── */
+
+/* Outer page wrapper — Instagram uses ~930px max */
+.profile-page-wrap {
+  max-width: 930px;
+  margin: 0 auto;
+  padding: 30px 20px 40px;
 }
 
+/* ── Header ──────────────────────────────────────────────── */
+.profile-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 60px;
+  padding: 24px 0 32px;
+}
+
+/* Avatar column */
+.profile-avatar-col {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Avatar ring — gradient like Instagram story */
+.profile-avatar-ring {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  padding: 3px;
+  background: var(--gradient-story, linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%));
+}
+
+.profile-avatar-ring img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bg);
+}
+
+/* Info column */
+.profile-info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Row 1: username + action buttons */
+.profile-username-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.profile-username-row h1 {
+  font-size: 22px;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+/* Row 2: stats — horizontal like Instagram desktop */
 .profile-stats {
   display: flex;
-  gap: 28px;
-  margin-top: 16px;
+  gap: 36px;
+  margin-bottom: 16px;
 }
 
 .profile-stat {
-  text-align: center;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  cursor: default;
+}
+
+.profile-stat[onClick],
+.profile-stat[onClick] {
   cursor: pointer;
 }
 
 .profile-stat-num {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--text-1);
-  font-family: 'Syne', 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .profile-stat-label {
-  font-size: 12px;
-  color: var(--text-3);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-1);
+}
+
+/* Row 3: full name + bio */
+.profile-bio-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-full-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
+  line-height: 1.4;
+}
+
+.profile-bio {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-1);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.profile-website {
+  font-size: 14px;
+  font-weight: 600;
+  color: #00376B;
+  color: var(--accent);
+  text-decoration: none;
   margin-top: 2px;
 }
 
+/* ── Tab Bar ─────────────────────────────────────────────── */
 .profile-tabs {
   display: flex;
   border-top: 1px solid var(--border);
-  margin-bottom: 4px;
+  margin-bottom: 0;
+  gap: 0;
 }
 
 .profile-tab-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   flex: 1;
-  padding: 13px;
+  padding: 14px 8px;
   border: none;
   background: none;
   cursor: pointer;
   color: var(--text-3);
-  font-size: 18px;
-  border-top: 2px solid transparent;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-top: 1px solid transparent;
+  margin-top: -1px;
   transition: color 150ms ease, border-color 150ms ease;
+}
+
+.profile-tab-btn svg {
+  font-size: 18px;
 }
 
 .profile-tab-btn.active {
@@ -1486,10 +1598,12 @@ textarea {
   border-top-color: var(--text-1);
 }
 
+/* ── Post Grid ───────────────────────────────────────────── */
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 3px;
+  margin-top: 4px;
 }
 
 .profile-grid-item {
@@ -1497,6 +1611,7 @@ textarea {
   overflow: hidden;
   cursor: pointer;
   position: relative;
+  background: var(--surface);
 }
 
 .profile-grid-item img,
@@ -1505,11 +1620,12 @@ textarea {
   height: 100%;
   object-fit: cover;
   transition: transform 350ms ease;
+  display: block;
 }
 
 .profile-grid-item:hover img,
 .profile-grid-item:hover video {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .profile-grid-overlay {
@@ -1518,18 +1634,23 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  background: rgba(0, 0, 0, 0.42);
+  gap: 24px;
+  background: rgba(0, 0, 0, 0.45);
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   opacity: 0;
-  transition: opacity 280ms ease;
+  transition: opacity 220ms ease;
+}
+
+.profile-grid-overlay svg {
+  font-size: 20px;
 }
 
 .profile-grid-item:hover .profile-grid-overlay {
   opacity: 1;
 }
+
 
 /* ── Search ──────────────────────────────────────────────── */
 .search-bar {
