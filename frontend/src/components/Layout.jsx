@@ -6,9 +6,7 @@ import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun,
-    HiOutlineHome, HiOutlineSearch, HiOutlineFilm, HiOutlineChatAlt2,
-    HiOutlineBell, HiOutlinePlusCircle, HiDotsCircleHorizontal
+    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun
 } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
 import { useTheme } from '../context/ThemeContext'
@@ -17,13 +15,13 @@ import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
 import logoImg from '../assets/logo.png'
 
-// Instagram-style nav: icon (outline inactive, filled active) + label
+// Instagram-style nav: filled icon always, inactive = 0.55 opacity, active = full + bold
 const links = [
-    { to: '/', iconActive: HiHome, iconInactive: HiOutlineHome, label: 'Home', exact: true },
-    { to: '/search', iconActive: HiSearch, iconInactive: HiOutlineSearch, label: 'Search' },
-    { to: '/dscrolls', iconActive: HiFilm, iconInactive: HiOutlineFilm, label: 'Dscrolls' },
-    { to: '/messages', iconActive: HiChatAlt2, iconInactive: HiOutlineChatAlt2, label: 'Messages', msgBadge: true },
-    { to: '/notifications', iconActive: HiBell, iconInactive: HiOutlineBell, label: 'Notifications', badge: true },
+    { to: '/', icon: HiHome, label: 'Home', exact: true },
+    { to: '/search', icon: HiSearch, label: 'Search' },
+    { to: '/dscrolls', icon: HiFilm, label: 'Dscrolls' },
+    { to: '/messages', icon: HiChatAlt2, label: 'Messages', msgBadge: true },
+    { to: '/notifications', icon: HiBell, label: 'Notifications', badge: true },
 ]
 
 const mobileBottomLinksLeft = [
@@ -193,37 +191,34 @@ export default function Layout() {
 
                 {/* Main nav */}
                 <nav className="sidebar-nav">
-                    {links.map(({ to, iconActive: IconActive, iconInactive: IconInactive, label, exact, badge, msgBadge }) => (
+                    {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
                         <NavLink key={to} to={to} end={exact}
                             className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                            {({ isActive }) => {
-                                const Icon = isActive ? IconActive : IconInactive
-                                return (
-                                    <>
-                                        <span className="ig-icon-wrap" style={{ position: 'relative' }}>
-                                            <Icon className="ig-icon" />
-                                            {badge && unreadCount > 0 && (
-                                                <motion.span className="ig-badge" initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                                </motion.span>
-                                            )}
-                                            {msgBadge && msgCount > 0 && (
-                                                <motion.span className="ig-badge ig-badge--msg" initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                                                    {msgCount > 9 ? '9+' : msgCount}
-                                                </motion.span>
-                                            )}
-                                        </span>
-                                        <span className="ig-label">{label}</span>
-                                    </>
-                                )
-                            }}
+                            {({ isActive }) => (
+                                <>
+                                    <span className="ig-icon-wrap" style={{ position: 'relative' }}>
+                                        <Icon className="ig-icon" style={{ opacity: isActive ? 1 : 0.55 }} />
+                                        {badge && unreadCount > 0 && (
+                                            <motion.span className="ig-badge" initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                                {unreadCount > 9 ? '9+' : unreadCount}
+                                            </motion.span>
+                                        )}
+                                        {msgBadge && msgCount > 0 && (
+                                            <motion.span className="ig-badge ig-badge--msg" initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                                {msgCount > 9 ? '9+' : msgCount}
+                                            </motion.span>
+                                        )}
+                                    </span>
+                                    <span className="ig-label">{label}</span>
+                                </>
+                            )}
                         </NavLink>
                     ))}
 
                     {/* Create */}
                     <button className="ig-link" onClick={() => setShowCreate(true)}>
                         <span className="ig-icon-wrap">
-                            <HiOutlinePlusCircle className="ig-icon ig-icon--create" />
+                            <HiPlusCircle className="ig-icon" style={{ opacity: 0.55 }} />
                         </span>
                         <span className="ig-label">Create</span>
                     </button>
