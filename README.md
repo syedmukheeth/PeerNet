@@ -3,7 +3,7 @@
 > A production-grade, full-stack social media platform built with modern technologies.
 > Inspired by Instagram — built for scale.
 
-![Version](https://img.shields.io/badge/version-v1.6.0-blue)
+![Version](https://img.shields.io/badge/version-v1.7.0-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Status](https://img.shields.io/badge/status-production-success)
@@ -29,8 +29,10 @@ PeerNet is a full-stack social media platform featuring posts, stories, **Dscrol
 | Cache / Sessions | Redis 7 |
 | Auth | JWT — 15min access + 7d refresh rotation |
 | Media Storage | Cloudinary |
-| Real-time | Socket.io 4 |
+| Real-time | Socket.io 4 + Redis Adapter |
 | Validation | Joi |
+| API Docs | Swagger UI (OpenAPI 3.0) |
+| Testing | Jest + MongoDB Memory Server |
 | Logging | Winston + daily log rotation |
 | Security | Helmet, rate-limit, mongo-sanitize |
 | Scheduler | node-cron |
@@ -41,7 +43,9 @@ PeerNet is a full-stack social media platform featuring posts, stories, **Dscrol
 | Framework | React 18 + Vite |
 | Routing | React Router v7 |
 | HTTP Client | Axios |
+| State Management | TanStack React Query |
 | Real-time | Socket.io-client |
+| Testing | Vitest + React Testing Library |
 | Animations | Framer Motion |
 | Icons | React Icons |
 | Notifications | React Hot Toast |

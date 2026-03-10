@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
@@ -159,34 +160,67 @@ function RightPanel() {
 
 /* ── Feed ─────────────────────────────────────────────────── */
 export default function Feed() {
-    const [posts, setPosts] = useState([])
-    const [cursor, setCursor] = useState(null)
-    const [hasMore, setHasMore] = useState(true)
-    const [loading, setLoading] = useState(false)
-    const loadingRef = useRef(false)
+    const queryClient = useQueryClient()
 
-    const fetchFeed = useCallback(async (cur = null) => {
-        if (loadingRef.current) return
-        loadingRef.current = true
-        setLoading(true)
-        try {
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        status,
+    } = useInfiniteQuery({
+        queryKey: ['feed'],
+        queryFn: async ({ pageParam = null }) => {
             const params = { limit: 10 }
-            if (cur) params.cursor = cur
-            const { data } = await api.get('/posts/feed', { params })
-            setPosts(p => cur ? [...p, ...data.data] : data.data)
-            setCursor(data.nextCursor)
-            setHasMore(data.hasMore)
-        } catch { /* silent */ }
-        finally { loadingRef.current = false; setLoading(false) }
-    }, [])
+            if (pageParam) params.cursor = pageParam
+            const res = await api.get('/posts/feed', { params })
+            return res.data
+        },
+        getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
+    })
 
-    useEffect(() => { fetchFeed() }, [fetchFeed])
+    const posts = data ? data.pages.flatMap((page) => page.data) : []
+    const loading = status === 'pending' || isFetchingNextPage
+    const isError = status === 'error'
 
-    const onLikeToggle = (postId, liked, likesCount) =>
-        setPosts(p => p.map(post => post._id === postId ? { ...post, isLiked: liked, likesCount } : post))
-    const onDelete = (postId) => setPosts(p => p.filter(post => post._id !== postId))
-    const onUpdate = (postId, updated) =>
-        setPosts(p => p.map(post => post._id === postId ? { ...post, ...updated } : post))
+    const onLikeToggle = (postId, liked, likesCount) => {
+        queryClient.setQueryData(['feed'], (oldData) => {
+            if (!oldData) return oldData;
+            return {
+                ...oldData,
+                pages: oldData.pages.map(page => ({
+                    ...page,
+                    data: page.data.map(post => post._id === postId ? { ...post, isLiked: liked, likesCount } : post)
+                }))
+            }
+        })
+    }
+
+    const onDelete = (postId) => {
+        queryClient.setQueryData(['feed'], (oldData) => {
+            if (!oldData) return oldData;
+            return {
+                ...oldData,
+                pages: oldData.pages.map(page => ({
+                    ...page,
+                    data: page.data.filter(post => post._id !== postId)
+                }))
+            }
+        })
+    }
+
+    const onUpdate = (postId, updated) => {
+        queryClient.setQueryData(['feed'], (oldData) => {
+            if (!oldData) return oldData;
+            return {
+                ...oldData,
+                pages: oldData.pages.map(page => ({
+                    ...page,
+                    data: page.data.map(post => post._id === postId ? { ...post, ...updated } : post)
+                }))
+            }
+        })
+    }
 
     return (
         <motion.div variants={pageVariants} initial="initial" animate="animate">
@@ -222,10 +256,10 @@ export default function Feed() {
                             <p className="empty-state-desc">Follow people to see their posts here</p>
                         </div>
                     )}
-                    {hasMore && !loading && posts.length > 0 && (
+                    {hasNextPage && !loading && posts.length > 0 && (
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16, paddingBottom: 32 }}>
                             <motion.button className="btn btn-secondary"
-                                onClick={() => fetchFeed(cursor)}
+                                onClick={() => fetchNextPage()}
                                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                                 Load more
                             </motion.button>

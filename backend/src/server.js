@@ -7,10 +7,11 @@ require('dotenv').config(); // fallback to cwd/.env (no-op if already loaded)
 
 const http = require('http');
 const { Server: SocketServer } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
 
 const createApp = require('./app');
 const connectDB = require('./config/db');
-const { connectRedis } = require('./config/redis');
+const { connectRedis, getRedisOptional } = require('./config/redis');
 const logger = require('./config/logger');
 const { initChatSocket } = require('./sockets/chat.socket');
 const { scheduleStoryCleanup } = require('./jobs/storyCleanup.job');
@@ -44,6 +45,20 @@ const bootstrap = async () => {
             credentials: true,
         },
     });
+
+    const redisClient = getRedisOptional();
+    if (redisClient) {
+        try {
+            const pubClient = redisClient.duplicate();
+            const subClient = redisClient.duplicate();
+            await Promise.all([pubClient.connect(), subClient.connect()]);
+            io.adapter(createAdapter(pubClient, subClient));
+            logger.info('Socket.io Redis adapter automatically attached');
+        } catch (err) {
+            logger.warn(`Failed to connect Redis adapter for Socket.io: ${err.message}`);
+        }
+    }
+
     app.set('io', io);
     setIO(io);
     initChatSocket(io);

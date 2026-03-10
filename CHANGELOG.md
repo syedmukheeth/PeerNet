@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.P
 
 ---
 
+## [v1.7.0] - 2026-03-10
+
+### Added
+- **Horizontal WebSocket Scaling**: Added `@socket.io/redis-adapter` to sync socket events across multiple server instances.
+- **Automated Testing Suite**: Implemented Jest + MongoDB Memory Server for robust backend integration testing.
+- **Frontend Component Testing**: Configured Vitest + React Testing Library + jsdom for frontend testing.
+- **Frontend State Management**: Integrated `@tanstack/react-query` to handle caching, infinite scrolling, and background refetching in the Feed component.
+- **Interactive API Documentation**: Generated OpenAPI 3.0 specs using Swagger UI (`swagger-jsdoc` + `swagger-ui-express`) available at `/api-docs`.
+
+---
+
 ## [v1.5.0] - 2026-03-04
 
 ### Removed

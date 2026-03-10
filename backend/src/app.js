@@ -69,6 +69,10 @@ const createApp = () => {
     // ── Health check ─────────────────────────────────────────────────────────
     app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV }));
 
+    // ── Swagger API Documentation ────────────────────────────────────────────────
+    const setupSwagger = require('./docs/swagger');
+    setupSwagger(app);
+
     // ── API routes ───────────────────────────────────────────────────────────────
     app.use('/api/v1', v1Router);
 
