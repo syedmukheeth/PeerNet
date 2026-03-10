@@ -39,9 +39,10 @@ const bootstrap = async () => {
     const httpServer = http.createServer(app);
 
     // ── 4. Attach Socket.io ───────────────────────────────────────────────────
+    const originsArray = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
     const io = new SocketServer(httpServer, {
         cors: {
-            origin: (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()),
+            origin: originsArray.length > 0 ? originsArray : "*",
             credentials: true,
         },
     });
