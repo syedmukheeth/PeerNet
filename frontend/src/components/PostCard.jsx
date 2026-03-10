@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     HiHeart, HiOutlineHeart, HiChatAlt2,
     HiBookmark, HiOutlineBookmark, HiDotsHorizontal, HiBadgeCheck,
-    HiPencil, HiTrash, HiShare,
+    HiPencil, HiTrash, HiShare, HiPlay, HiVolumeUp, HiVolumeOff
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -24,6 +24,26 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [caption, setCaption] = useState(post.caption || '')
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
+
+    // ── Video Player State ────────────────────────────────────────────────────────
+    const videoRef = useRef(null)
+    const [isPlaying, setIsPlaying] = useState(false)
+    const [isMuted, setIsMuted] = useState(true)
+
+    useEffect(() => {
+        if (post.mediaType !== 'video' || !videoRef.current) return
+        const observer = new IntersectionObserver((entries) => {
+            const entry = entries[0]
+            if (entry.isIntersecting) {
+                videoRef.current?.play().then(() => setIsPlaying(true)).catch(() => { })
+            } else {
+                videoRef.current?.pause()
+                setIsPlaying(false)
+            }
+        }, { threshold: 0.6 })
+        observer.observe(videoRef.current)
+        return () => observer.disconnect()
+    }, [post.mediaType])
 
     // Close menu on outside click
     useEffect(() => {
@@ -126,13 +146,45 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 </div>
 
                 {/* Media */}
-                <div className="post-media-wrap" onClick={handleImageTap} style={{ cursor: 'pointer' }}>
-                    <Link to={`/posts/${post._id}`} onClick={e => e.stopPropagation()}>
-                        {post.mediaType === 'video'
-                            ? <video src={optimizeCloudinaryVideo(post.mediaUrl)} className="post-media-video" controls muted loop playsInline />
-                            : <img src={optimizeCloudinaryUrl(post.mediaUrl)} className="post-media" alt={post.caption} loading="lazy" />
-                        }
-                    </Link>
+                <div className="post-media-wrap" style={{ cursor: 'pointer', position: 'relative' }}>
+                    {post.mediaType === 'video' ? (
+                        <div
+                            style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }}
+                            onClick={(e) => {
+                                e.stopPropagation(); e.preventDefault();
+                                handleImageTap(); // detects double tap to like
+                                setIsMuted(!isMuted); // Single tap toggle mute
+                            }}
+                        >
+                            <video
+                                ref={videoRef}
+                                src={optimizeCloudinaryVideo(post.mediaUrl)}
+                                className="post-media-video"
+                                muted={isMuted}
+                                loop
+                                playsInline
+                                onPlay={() => setIsPlaying(true)}
+                                onPause={() => setIsPlaying(false)}
+                            />
+                            {/* Mute toggle icon */}
+                            <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMuted(!isMuted) }}
+                                style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                {isMuted ? <HiVolumeOff size={20} /> : <HiVolumeUp size={20} />}
+                            </button>
+                            {/* Play icon when paused */}
+                            {!isPlaying && (
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: 16, pointerEvents: 'none', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <HiPlay size={32} style={{ marginLeft: 4 }} />
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <Link to={`/posts/${post._id}`} onClick={e => e.stopPropagation()} style={{ display: 'block' }}>
+                            <img src={optimizeCloudinaryUrl(post.mediaUrl)} className="post-media" alt={post.caption} loading="lazy" onClick={handleImageTap} />
+                        </Link>
+                    )}
                 </div>
 
                 {/* Actions */}
