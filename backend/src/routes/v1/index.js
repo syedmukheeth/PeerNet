@@ -8,7 +8,6 @@ const commentRoutes = require('./comment.routes');
 const storyRoutes = require('./story.routes');
 const reelRoutes = require('./reel.routes');
 const notificationRoutes = require('./notification.routes');
-const messageRoutes = require('./message.routes');
 const adminRoutes = require('./admin.routes');
 
 router.use('/auth', authRoutes);
@@ -18,7 +17,6 @@ router.use('/comments', commentRoutes);
 router.use('/stories', storyRoutes);
 router.use('/dscrolls', reelRoutes);
 router.use('/notifications', notificationRoutes);
-router.use('/conversations', messageRoutes);
 router.use('/admin', adminRoutes);
 
 module.exports = router;

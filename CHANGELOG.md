@@ -6,6 +6,13 @@ Versioning follows [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.P
 
 ---
 
+## [2.0.0] - 2026-03-10
+### Changed
+- **Major Architectural Upgrade**: Extracted the real-time chat and notification Socket.IO system from the main Node.js monolithic backend into its own dedicated, horizontally scalable `chat-service` microservice.
+- Modified the React frontend to communicate simultaneously with the REST API monolith (port 3000) and the new Chat UI Microservice (port 3001) using a dual-Axios configuration.
+
+---
+
 ## [v1.7.0] - 2026-03-10
 
 ### Added

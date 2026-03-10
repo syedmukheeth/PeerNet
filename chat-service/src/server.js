@@ -6,14 +6,17 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 require('dotenv').config(); // fallback to cwd/.env (no-op if already loaded)
 
 const http = require('http');
+const { Server: SocketServer } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
 
 const createApp = require('./app');
 const connectDB = require('./config/db');
-const { connectRedis } = require('./config/redis');
+const { connectRedis, getRedisOptional } = require('./config/redis');
 const logger = require('./config/logger');
-const { scheduleStoryCleanup } = require('./jobs/storyCleanup.job');
+const { initChatSocket } = require('./sockets/chat.socket');
+const { setIO } = require('./utils/socket.utils');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.CHAT_PORT || 3001;
 
 const bootstrap = async () => {
     // ── 1. Connect MongoDB BEFORE anything else ───────────────────────────────
@@ -34,12 +37,35 @@ const bootstrap = async () => {
     const app = createApp();
     const httpServer = http.createServer(app);
 
-    // ── 4. Start listening (DB is already connected) ──────────────────────────
-    await new Promise((resolve) => httpServer.listen(PORT, resolve));
-    logger.info(`PeerNet server running on port ${PORT} [${process.env.NODE_ENV}]`);
+    // ── 4. Attach Socket.io ───────────────────────────────────────────────────
+    const originsArray = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
+    const io = new SocketServer(httpServer, {
+        cors: {
+            origin: originsArray.length > 0 ? originsArray : "*",
+            credentials: true,
+        },
+    });
 
-    // ── 6. Cron jobs ──────────────────────────────────────────────────────────
-    scheduleStoryCleanup();
+    const redisClient = getRedisOptional();
+    if (redisClient) {
+        try {
+            const pubClient = redisClient.duplicate();
+            const subClient = redisClient.duplicate();
+            await Promise.all([pubClient.connect(), subClient.connect()]);
+            io.adapter(createAdapter(pubClient, subClient));
+            logger.info('Socket.io Redis adapter automatically attached');
+        } catch (err) {
+            logger.warn(`Failed to connect Redis adapter for Socket.io: ${err.message}`);
+        }
+    }
+
+    app.set('io', io);
+    setIO(io);
+    initChatSocket(io);
+
+    // ── 5. Start listening (DB is already connected) ──────────────────────────
+    await new Promise((resolve) => httpServer.listen(PORT, resolve));
+    logger.info(`PeerNet Chat Microservice running on port ${PORT} [${process.env.NODE_ENV}]`);
 
     // ── 7. Graceful shutdown ──────────────────────────────────────────────────
     const shutdown = (signal) => {

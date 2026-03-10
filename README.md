@@ -3,7 +3,7 @@
 > A production-grade, full-stack social media platform built with modern technologies.
 > Inspired by Instagram — built for scale.
 
-![Version](https://img.shields.io/badge/version-v1.7.0-blue)
+![Version](https://img.shields.io/badge/version-v2.0.0-blue)
 ![Node](https://img.shields.io/badge/node-20%2B-green)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Status](https://img.shields.io/badge/status-production-success)
@@ -90,6 +90,16 @@ PeerNet/
 │   │   ├── sockets/            # Socket.io real-time chat handlers
 │   │   ├── jobs/               # Cron jobs (story auto-cleanup every hour)
 │   │   └── seeders/            # Database seed scripts
+│   └── package.json
+│
+├── chat-service/               # Real-time WebSocket microservice
+│   ├── src/
+│   │   ├── app.js
+│   │   ├── server.js           # Entry point (Port 3001)
+│   │   ├── sockets/            # Socket.io events
+│   │   ├── routes/v1/          # /conversations endpoints
+│   │   ├── controllers/
+│   │   └── models/
 │   └── package.json
 │
 ├── nginx/default.conf          # Nginx reverse proxy config
@@ -202,16 +212,21 @@ npm run seed:celebs   # Creates celebrity accounts (password: Celeb@1234)
 
 ---
 
-### 5. Run the app
+### 5. Run the isolated Microservices
 
-**Backend** (from `backend/` folder):
+**Terminal 1: Backend Monolith** (from `backend/` folder):
 ```bash
-npm run dev    # Development with hot-reload (auto-kills port 3000 first)
-npm start      # Production
+npm run dev    # Development with hot-reload
 ```
 > Runs at: `http://localhost:3000`
 
-**Frontend** (from `frontend/` folder):
+**Terminal 2: Chat Service** (from `chat-service/` folder):
+```bash
+npm run dev    # Real-time WebSocket Service
+```
+> Runs at: `http://localhost:3001`
+
+**Terminal 3: Frontend** (from `frontend/` folder):
 ```bash
 npm run dev
 ```

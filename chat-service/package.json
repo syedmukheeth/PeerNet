@@ -1,0 +1,39 @@
+{
+    "name": "chat-service",
+    "version": "2.0.0",
+    "description": "Real-time Chat Microservice for PeerNet",
+    "main": "src/server.js",
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "nodemon --watch ../.env --ext js,env src/server.js"
+    },
+    "dependencies": {
+        "@socket.io/redis-adapter": "^8.3.0",
+        "bcryptjs": "^3.0.3",
+        "cloudinary": "^2.9.0",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.21.2",
+        "express-mongo-sanitize": "^2.2.0",
+        "express-rate-limit": "^8.3.1",
+        "helmet": "^8.0.0",
+        "joi": "^18.0.2",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.9.5",
+        "morgan": "^1.10.0",
+        "multer": "^2.1.1",
+        "redis": "^5.11.0",
+        "socket.io": "^4.8.1",
+        "streamifier": "^0.1.1",
+        "uuid": "^13.0.0",
+        "winston": "^3.17.0",
+        "winston-daily-rotate-file": "^5.0.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.9"
+    },
+    "engines": {
+        "node": "20.x"
+    }
+}

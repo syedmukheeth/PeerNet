@@ -69,7 +69,7 @@ export default function Layout() {
         const token = localStorage.getItem('accessToken')
         if (!token) return
 
-        layoutSocket = io(SOCKET_URL || window.location.origin, {
+        layoutSocket = io(SOCKET_URL, {
             auth: { token },
             path: '/socket.io',
             transports: ['websocket', 'polling'],

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
-import api from '../api/axios'
+import api, { CHAT_BASE_URL } from '../api/axios'
 import toast from 'react-hot-toast'
 import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAlt2 } from 'react-icons/hi'
 import UserListModal from '../components/UserListModal'
@@ -97,7 +97,7 @@ export default function Profile() {
     const handleMessage = async () => {
         setMessaging(true)
         try {
-            const { data } = await api.post('/conversations', { targetUserId: id })
+            const { data } = await api.post(`${CHAT_BASE_URL}/conversations`, { targetUserId: id })
             navigate(`/messages/${data.data._id}`)
         } catch (err) {
             toast.error(err.response?.data?.message || 'Could not open chat')
