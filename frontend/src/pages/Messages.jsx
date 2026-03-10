@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import api, { SOCKET_URL, CHAT_BASE_URL } from '../api/axios'
+import api, { SOCKET_URL } from '../api/axios'
 import { io } from 'socket.io-client'
 import { HiPaperAirplane, HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiHeart, HiDocument, HiDownload } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
@@ -130,7 +130,7 @@ export default function Messages() {
     const sendHeart = async () => {
         if (!activeConvo) return
         try {
-            const { data } = await api.post(`${CHAT_BASE_URL}/conversations/${activeConvo._id}/messages`, { body: '❤️' })
+            const { data } = await api.post(`/conversations/${activeConvo._id}/messages`, { body: '❤️' })
             setMessages(m => [...m, data.data])
             setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: { body: '❤️' } } : c))
         } catch { toast.error('Failed to send') }
@@ -152,7 +152,7 @@ export default function Messages() {
     }, [])
 
     const loadConvos = async () => {
-        const { data } = await api.get(`${CHAT_BASE_URL}/conversations`)
+        const { data } = await api.get(`/conversations`)
         const convos = data.data || []; setConversations(convos); return convos
     }
 
@@ -168,7 +168,7 @@ export default function Messages() {
         setActiveConvo(convo); setMessages([]); setMobilePanel('chat')
         socket?.emit('join_conversation', convo._id)
         navigate(`/messages/${convo._id}`, { replace: true })
-        try { const { data } = await api.get(`${CHAT_BASE_URL}/conversations/${convo._id}/messages`, { params: { limit: 50 } }); setMessages(data.data || []) }
+        try { const { data } = await api.get(`/conversations/${convo._id}/messages`, { params: { limit: 50 } }); setMessages(data.data || []) }
         catch { toast.error('Failed to load messages') }
         setTimeout(() => inputRef.current?.focus(), 200)
     }
@@ -176,7 +176,7 @@ export default function Messages() {
     const startConvoWith = async (u) => {
         setShowNewConvo(false); setStarting(true)
         try {
-            const { data } = await api.post(`${CHAT_BASE_URL}/conversations`, { targetUserId: u._id })
+            const { data } = await api.post(`/conversations`, { targetUserId: u._id })
             const fresh = await loadConvos()
             const found = fresh.find(c => c._id === data.data._id) || { ...data.data, participants: [user, u] }
             await selectConvo(found)
@@ -206,7 +206,7 @@ export default function Messages() {
             if (body) formData.append('body', body)
             if (attachedFile) formData.append('media', attachedFile)
 
-            const { data } = await api.post(`${CHAT_BASE_URL}/conversations/${activeConvo._id}/messages`, formData, {
+            const { data } = await api.post(`/conversations/${activeConvo._id}/messages`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
             setMessages(m => [...m, data.data])
