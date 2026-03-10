@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../api/axios'
 import { HiHeart, HiOutlineHeart, HiChatAlt2, HiVolumeOff, HiVolumeUp } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
+import { useInfiniteQuery } from '@tanstack/react-query'
 
 function ReelItem({ reel, isActive }) {
     const videoRef = useRef()
@@ -79,14 +80,35 @@ function ReelItem({ reel, isActive }) {
 }
 
 export default function Reels() {
-    const [reels, setReels] = useState([])
     const [activeIdx, setActiveIdx] = useState(0)
-    const [loading, setLoading] = useState(true)
     const containerRef = useRef()
 
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        status,
+    } = useInfiniteQuery({
+        queryKey: ['dscrolls'],
+        queryFn: async ({ pageParam = null }) => {
+            const params = { limit: 5 }
+            if (pageParam) params.cursor = pageParam
+            const res = await api.get('/dscrolls', { params })
+            return res.data
+        },
+        getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
+    })
+
+    const reels = data ? data.pages.flatMap((page) => page.data || []) : []
+    const loading = status === 'pending'
+
+    // Fetch more if we hit the last reel
     useEffect(() => {
-        api.get('/dscrolls').then(({ data }) => setReels(data.data || [])).finally(() => setLoading(false))
-    }, [])
+        if (reels.length > 0 && activeIdx === reels.length - 1 && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
+        }
+    }, [activeIdx, reels.length, hasNextPage, isFetchingNextPage, fetchNextPage])
 
     useEffect(() => {
         const container = containerRef.current
@@ -101,9 +123,14 @@ export default function Reels() {
             },
             { threshold: 0.6, root: container },
         )
-        container.querySelectorAll('[data-idx]').forEach(el => observer.observe(el))
+        // give standard DOM a tick to render elements
+        setTimeout(() => {
+            const els = container.querySelectorAll('[data-idx]')
+            els.forEach(el => observer.observe(el))
+        }, 100)
+
         return () => observer.disconnect()
-    }, [reels])
+    }, [reels]) // re-run when reels array changes
 
     if (loading) return <div className="flex justify-center" style={{ padding: 60 }}><div className="spinner" /></div>
 
@@ -117,10 +144,15 @@ export default function Reels() {
     return (
         <div ref={containerRef} style={{ height: 'calc(100dvh - 48px)', overflowY: 'scroll', scrollSnapType: 'y mandatory', scrollbarWidth: 'none', margin: '-24px' }}>
             {reels.map((reel, i) => (
-                <div key={reel._id} data-idx={i} style={{ scrollSnapAlign: 'start' }}>
+                <div key={`${reel._id}-${i}`} data-idx={i} style={{ scrollSnapAlign: 'start' }}>
                     <ReelItem reel={reel} isActive={activeIdx === i} />
                 </div>
             ))}
+            {isFetchingNextPage && (
+                <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', scrollSnapAlign: 'start', background: '#000' }}>
+                    <div className="spinner" />
+                </div>
+            )}
         </div>
     )
 }

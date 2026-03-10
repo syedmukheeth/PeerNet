@@ -3,8 +3,10 @@ import { motion } from 'framer-motion'
 import { HiX, HiPhotograph, HiVideoCamera } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function CreatePostModal({ onClose }) {
+    const queryClient = useQueryClient()
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState(null)
     const [caption, setCaption] = useState('')
@@ -21,10 +23,19 @@ export default function CreatePostModal({ onClose }) {
         setLoading(true)
         try {
             const fd = new FormData()
-            fd.append('media', file)
+            const isVideoUpload = file.type.startsWith('video/')
+            fd.append(isVideoUpload ? 'video' : 'media', file)
             fd.append('caption', caption)
-            await api.post('/posts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-            toast.success('Post shared!')
+
+            if (isVideoUpload) {
+                await api.post('/dscrolls', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+                toast.success('Dscroll shared!')
+                queryClient.invalidateQueries({ queryKey: ['dscrolls'] })
+            } else {
+                await api.post('/posts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+                toast.success('Post shared!')
+                queryClient.invalidateQueries({ queryKey: ['feed'] })
+            }
             onClose()
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to create post')
