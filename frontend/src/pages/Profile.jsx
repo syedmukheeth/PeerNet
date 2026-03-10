@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import api, { CHAT_BASE_URL } from '../api/axios'
 import toast from 'react-hot-toast'
 import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAlt2 } from 'react-icons/hi'
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
+import { StoryViewer } from '../components/StoryRail'
 
 function useCountUp(target, duration = 800) {
     const [count, setCount] = useState(0)
@@ -50,6 +51,9 @@ export default function Profile() {
     const [showFollowers, setShowFollowers] = useState(false)
     const [showFollowing, setShowFollowing] = useState(false)
     const [editProfile, setEditProfile] = useState(false)
+    const [hasStory, setHasStory] = useState(false)
+    const [storyGroupData, setStoryGroupData] = useState(null)
+    const [viewerOpen, setViewerOpen] = useState(false)
 
     const isMe = me?._id === id
 
@@ -69,6 +73,21 @@ export default function Profile() {
         }
         fetchAll()
     }, [id])
+
+    // Check if this profile user has active stories
+    useEffect(() => {
+        api.get('/stories').then(({ data }) => {
+            const allStories = data.data || []
+            // Find stories authored by the profile user
+            const userStories = allStories.filter(s => s.author?._id === id || s.author === id)
+            setHasStory(userStories.length > 0)
+            if (userStories.length > 0) {
+                // Build a group object that StoryViewer can use
+                const author = userStories[0].author
+                setStoryGroupData({ author: typeof author === 'object' ? author : { _id: id, username: profile?.username, avatarUrl: profile?.avatarUrl }, stories: userStories })
+            }
+        }).catch(() => { })
+    }, [id]) // eslint-disable-line
 
     // Fetch saved posts only when Saved tab is opened (and only for own profile)
     useEffect(() => {
@@ -124,8 +143,46 @@ export default function Profile() {
 
                 {/* Avatar */}
                 <div className="profile-avatar-col">
-                    <div className="profile-avatar-ring">
-                        <img src={avatar} alt={profile.username} />
+                    <div
+                        onClick={() => hasStory && setViewerOpen(true)}
+                        style={{
+                            position: 'relative',
+                            cursor: hasStory ? 'pointer' : 'default',
+                            display: 'inline-block',
+                        }}
+                    >
+                        {/* Gradient story ring — only shown when user has stories */}
+                        {hasStory && (
+                            <div style={{
+                                position: 'absolute',
+                                inset: -3,
+                                borderRadius: '50%',
+                                background: 'conic-gradient(from 0deg, #DD2A7B, #F58529, #DD2A7B)',
+                                animation: 'rotateBorder 3s linear infinite',
+                                padding: 2,
+                                zIndex: 0,
+                            }} />
+                        )}
+                        <div className={hasStory ? '' : 'profile-avatar-ring'} style={{
+                            position: 'relative',
+                            zIndex: 1,
+                            borderRadius: '50%',
+                            background: 'var(--bg)',
+                            padding: hasStory ? 3 : 0,
+                            display: 'inline-block',
+                        }}>
+                            <img
+                                src={avatar}
+                                alt={profile.username}
+                                style={{
+                                    width: hasStory ? 100 : undefined,
+                                    height: hasStory ? 100 : undefined,
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -296,6 +353,17 @@ export default function Profile() {
                     }}
                 />
             )}
+
+            {/* Story viewer — only shown when profile has active stories */}
+            <AnimatePresence>
+                {viewerOpen && storyGroupData && (
+                    <StoryViewer
+                        groups={[storyGroupData]}
+                        startGroupIdx={0}
+                        onClose={() => setViewerOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     )
 }

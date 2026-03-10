@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api, { SOCKET_URL, CHAT_BASE_URL } from '../api/axios'
 import { io } from 'socket.io-client'
-import { HiPaperAirplane, HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy } from 'react-icons/hi'
+import { HiPaperAirplane, HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiHeart, HiDocument, HiDownload } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
+import EmojiPicker from 'emoji-picker-react'
 
 let socket = null
 
@@ -110,19 +111,19 @@ export default function Messages() {
     const [starting, setStarting] = useState(false)
     const [mobilePanel, setMobilePanel] = useState('list')
     const [showEmoji, setShowEmoji] = useState(false)
+    const [filePreview, setFilePreview] = useState(null)
+    const [isUploading, setIsUploading] = useState(false)
     const fileRef = useRef()
+    const docRef = useRef()
     const bottomRef = useRef()
     const typingTimer = useRef()
     const inputRef = useRef()
     const userRef = useRef(user)
     useEffect(() => { userRef.current = user }, [user])
 
-    const EMOJIS = ['😊', '😂', '🔥', '❤️', '👍', '😍', '🥰', '😎', '🙏', '💯', '✨', '🎉', '😅', '👏', '💪',
-        '🤩', '😢', '😭', '🤔', '😴', '👋', '🥳', '💀', '😤', '🤯', '👀', '💬', '🌟', '🚀', '💥']
-
-    const insertEmoji = (e) => {
-        setText(t => t + e)
-        setShowEmoji(false)
+    const insertEmoji = (emojiObj) => {
+        setText(t => t + emojiObj.emoji)
+        // Kept open for multiple emojis
         inputRef.current?.focus()
     }
 
@@ -186,16 +187,61 @@ export default function Messages() {
     useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, peerTyping])
 
     const handleSend = async (e) => {
-        e.preventDefault()
-        if (!text.trim() || !activeConvo) return
-        const body = text.trim(); setText('')
+        e?.preventDefault()
+        if ((!text.trim() && !filePreview) || !activeConvo) return
+        if (isUploading) return
+
+        const body = text.trim()
+        const attachedFile = filePreview?.file
+
+        setText('')
+        setFilePreview(null)
+        setIsUploading(true)
+
         clearTimeout(typingTimer.current)
         socket?.emit('stop_typing', { conversationId: activeConvo._id })
+
         try {
-            const { data } = await api.post(`${CHAT_BASE_URL}/conversations/${activeConvo._id}/messages`, { body })
+            const formData = new FormData()
+            if (body) formData.append('body', body)
+            if (attachedFile) formData.append('media', attachedFile)
+
+            const { data } = await api.post(`${CHAT_BASE_URL}/conversations/${activeConvo._id}/messages`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
             setMessages(m => [...m, data.data])
-            setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: { body } } : c))
-        } catch { toast.error('Failed to send'); setText(body) }
+            setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: data.data } : c))
+        } catch {
+            toast.error('Failed to send')
+            setText(body)
+            if (attachedFile) setFilePreview(filePreview)
+        } finally {
+            setIsUploading(false)
+        }
+    }
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        // 50MB limit
+        if (file.size > 50 * 1024 * 1024) {
+            toast.error('File too large (max 50MB)')
+            return
+        }
+
+        const type = file.type.startsWith('image/') ? 'image'
+            : file.type.startsWith('video/') ? 'video'
+                : 'doc'
+
+        setFilePreview({
+            file,
+            type,
+            url: type !== 'doc' ? URL.createObjectURL(file) : null,
+            name: file.name
+        })
+        e.target.value = '' // reset
+        inputRef.current?.focus()
     }
 
     const handleType = (e) => {
@@ -379,8 +425,23 @@ export default function Messages() {
                                                 wordBreak: 'break-word',
                                                 boxShadow: isMine ? '0 1px 8px var(--accent-ring)' : 'none',
                                             }}>
-                                                {m.body}
-                                                {m.mediaUrl && <img src={m.mediaUrl} style={{ marginTop: 8, borderRadius: 10, maxWidth: '100%', display: 'block' }} alt="" />}
+                                                {m.body && <span>{m.body}</span>}
+
+                                                {m.mediaUrl && (
+                                                    <div style={{ marginTop: m.body ? 8 : 0 }}>
+                                                        {m.mediaUrl.match(/\.(mp4|mov|webm)(\?.*)?$/i) ? (
+                                                            <video src={m.mediaUrl} controls style={{ borderRadius: 10, maxWidth: '100%', maxHeight: 300, display: 'block' }} />
+                                                        ) : m.mediaUrl.match(/\.(pdf|doc|docx|xls|xlsx|txt|csv|zip)(\?.*)?$/i) ? (
+                                                            <a href={m.mediaUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: isMine ? 'rgba(255,255,255,0.2)' : 'var(--hover)', borderRadius: 8, textDecoration: 'none', color: 'inherit' }}>
+                                                                <HiDocument style={{ fontSize: 24, flexShrink: 0 }} />
+                                                                <span style={{ fontSize: 13, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Document attached</span>
+                                                                <HiDownload style={{ fontSize: 18 }} />
+                                                            </a>
+                                                        ) : (
+                                                            <img src={m.mediaUrl} style={{ borderRadius: 10, maxWidth: '100%', maxHeight: 300, display: 'block', objectFit: 'contain', background: 'rgba(0,0,0,0.1)' }} alt="Attachment" />
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                             {isLast && (
                                                 <span style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, paddingInline: 2 }}>
@@ -398,26 +459,36 @@ export default function Messages() {
                             <div style={{ flexShrink: 0, position: 'relative' }}>
                                 {/* Emoji picker */}
                                 {showEmoji && (
+                                    <div style={{ position: 'absolute', bottom: '100%', left: 16, marginBottom: 12, zIndex: 50, boxShadow: 'var(--shadow-xl)', borderRadius: 8, overflow: 'hidden' }}>
+                                        <EmojiPicker
+                                            onEmojiClick={insertEmoji}
+                                            theme="auto"
+                                            searchDisabled={true}
+                                            skinTonesDisabled={true}
+                                            height={350}
+                                            width={300}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* File Preview Overlay */}
+                                {filePreview && (
                                     <div style={{
-                                        position: 'absolute', bottom: '100%', left: 0,
-                                        marginBottom: 8, background: 'var(--surface)',
-                                        border: '1px solid var(--border-md)', borderRadius: 14,
-                                        padding: 10, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)',
-                                        gap: 2, boxShadow: 'var(--shadow-md)', zIndex: 10,
-                                        width: 220,
+                                        position: 'absolute', bottom: '100%', left: 16, marginBottom: 8,
+                                        background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
+                                        padding: 8, display: 'flex', alignItems: 'center', gap: 12, boxShadow: 'var(--shadow-lg)'
                                     }}>
-                                        {EMOJIS.map(e => (
-                                            <button key={e} type="button" onClick={() => insertEmoji(e)}
-                                                style={{
-                                                    fontSize: 20, background: 'none', border: 'none',
-                                                    cursor: 'pointer', borderRadius: 6, padding: '4px 2px',
-                                                    transition: 'background 100ms',
-                                                }}
-                                                onMouseEnter={el => el.currentTarget.style.background = 'var(--hover)'}
-                                                onMouseLeave={el => el.currentTarget.style.background = 'none'}>
-                                                {e}
-                                            </button>
-                                        ))}
+                                        {filePreview.type === 'image' && <img src={filePreview.url} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} alt="" />}
+                                        {filePreview.type === 'video' && <video src={filePreview.url} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />}
+                                        {filePreview.type === 'doc' && <div style={{ width: 60, height: 60, background: 'var(--hover)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}><HiDocument /></div>}
+
+                                        <div style={{ flex: 1, minWidth: 100 }}>
+                                            <div style={{ fontSize: 13, fontWeight: 600, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{filePreview.name}</div>
+                                            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{(filePreview.file.size / 1024 / 1024).toFixed(2)} MB</div>
+                                        </div>
+                                        <button onClick={() => setFilePreview(null)} style={{ background: 'var(--hover)', border: 'none', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-2)' }}>
+                                            <HiX />
+                                        </button>
                                     </div>
                                 )}
 
@@ -430,8 +501,8 @@ export default function Messages() {
                                     <button type="button"
                                         onClick={() => setShowEmoji(s => !s)}
                                         style={{
-                                            color: showEmoji ? 'var(--accent)' : 'var(--text-3)',
-                                            fontSize: 22, background: 'none', border: 'none',
+                                            color: showEmoji ? 'var(--accent)' : 'var(--text-1)',
+                                            fontSize: 26, background: 'none', border: 'none',
                                             flexShrink: 0, display: 'flex', cursor: 'pointer',
                                             transition: 'color 150ms',
                                         }}>
@@ -441,8 +512,8 @@ export default function Messages() {
                                     {/* Text input pill */}
                                     <div style={{
                                         flex: 1, display: 'flex', alignItems: 'center',
-                                        background: 'var(--hover)', border: '1px solid var(--border-md)',
-                                        borderRadius: 24, padding: '8px 14px',
+                                        background: 'transparent', border: '1px solid var(--border-md)',
+                                        borderRadius: 24, padding: '10px 16px', gap: 8
                                     }}>
                                         <input
                                             ref={inputRef}
@@ -452,27 +523,46 @@ export default function Messages() {
                                             placeholder={`Message...`}
                                             style={{
                                                 flex: 1, background: 'none', border: 'none',
-                                                outline: 'none', color: 'var(--text-1)', fontSize: 14,
+                                                outline: 'none', color: 'var(--text-1)', fontSize: 15,
                                             }}
+                                            disabled={isUploading}
                                         />
-                                        {/* Photo button (inside pill) */}
-                                        {!text.trim() && (
-                                            <>
-                                                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} />
-                                                <button type="button"
-                                                    onClick={() => fileRef.current?.click()}
-                                                    style={{ color: 'var(--text-3)', fontSize: 20, background: 'none', border: 'none', display: 'flex', cursor: 'pointer', flexShrink: 0 }}>
+
+                                        {/* Attachment Buttons (Inside pill if empty) */}
+                                        {!text.trim() && !filePreview && (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <input ref={fileRef} type="file" accept="image/*,video/*" onChange={handleFileSelect} style={{ display: 'none' }} />
+                                                <button type="button" onClick={() => fileRef.current?.click()} style={{ color: 'var(--text-1)', fontSize: 24, background: 'none', border: 'none', display: 'flex', cursor: 'pointer', flexShrink: 0 }}>
                                                     <HiPhotograph />
                                                 </button>
-                                            </>
+
+                                                <input ref={docRef} type="file" onChange={handleFileSelect} accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" style={{ display: 'none' }} />
+                                                <button type="button" onClick={() => docRef.current?.click()} style={{ color: 'var(--text-1)', fontSize: 24, background: 'none', border: 'none', display: 'flex', cursor: 'pointer', flexShrink: 0 }}>
+                                                    <HiDocument />
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
 
-                                    {/* Always show Send */}
-                                    <button type="submit" style={{
-                                        background: 'none', border: 'none', cursor: 'pointer',
-                                        color: 'var(--accent)', fontWeight: 700, fontSize: 15, flexShrink: 0,
-                                    }}>Send</button>
+                                    {/* Send / Heart button (Instagram Style) */}
+                                    {isUploading ? (
+                                        <div className="spinner" style={{ width: 22, height: 22, flexShrink: 0, margin: '0 4px' }} />
+                                    ) : text.trim() || filePreview ? (
+                                        <button type="submit" style={{
+                                            background: 'none', border: 'none', cursor: 'pointer',
+                                            color: 'var(--accent)', fontWeight: 600, fontSize: 16, flexShrink: 0,
+                                            padding: '4px 8px'
+                                        }}>Send</button>
+                                    ) : (
+                                        <button type="button" onClick={sendHeart} style={{
+                                            background: 'none', border: 'none', cursor: 'pointer',
+                                            color: 'var(--text-1)', fontSize: 28, flexShrink: 0,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            transition: 'transform 0.1s',
+                                        }} onMouseDown={e => e.currentTarget.style.transform = 'scale(0.9)'} onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                            <HiHeart />
+                                        </button>
+                                    )}
                                 </form>
                             </div>
                         </>

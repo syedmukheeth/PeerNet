@@ -45,7 +45,7 @@ function ViewerProgressBar({ total, current, duration, paused, onNext }) {
 }
 
 // ── Full Story Viewer ─────────────────────────────────────────
-function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) {
+export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) {
     const { user } = useAuth()
     const [groupIdx, setGroupIdx] = useState(startGroupIdx)
     const [storyIdx, setStoryIdx] = useState(0)
