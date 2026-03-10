@@ -42,3 +42,24 @@ services:
         value: "5"
       - key: LOG_LEVEL
         value: info
+  - type: web
+    name: peernet-chat
+    env: node
+    rootDir: chat-service
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CHAT_PORT
+        value: 10000
+      # ── Secrets: set values manually in the Render dashboard ──
+      - key: MONGO_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false   # e.g. https://peernet.vercel.app
