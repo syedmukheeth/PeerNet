@@ -5,6 +5,7 @@ import api from '../api/axios'
 import PostCard from '../components/PostCard'
 import StoryRail from '../components/StoryRail'
 import { PostSkeleton } from '../components/SkeletonLoader'
+import { optimizeAvatarUrl } from '../utils/cloudinary'
 import { useAuth } from '../context/AuthContext'
 import { HiBadgeCheck } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
@@ -38,8 +39,8 @@ function RightPanel() {
         catch { setFollowed(f => ({ ...f, [u._id]: !f[u._id] })) }
     }
 
-    const myAvatar = user?.avatarUrl ||
-        `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
+    const myAvatar = optimizeAvatarUrl(user?.avatarUrl ||
+        `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`)
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -94,8 +95,9 @@ function RightPanel() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
                         {suggestions.map(u => {
-                            const av = u.avatarUrl ||
+                            const rawAv = u.avatarUrl ||
                                 `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
+                            const av = optimizeAvatarUrl(rawAv)
                             const isFollowed = followed[u._id]
                             return (
                                 <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

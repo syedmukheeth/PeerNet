@@ -6,7 +6,7 @@ const SavedPost = require('../models/SavedPost');
 const Follower = require('../models/Follower');
 const { getRedis } = require('../config/redis');
 
-const FEED_CACHE_TTL = 60; // 1 min (reduced so like state stays fresh)
+const FEED_CACHE_TTL = 300; // 5 mins (extended to reduce database hits)
 
 /**
  * Pull-model feed: fetch posts from users the requestor follows.

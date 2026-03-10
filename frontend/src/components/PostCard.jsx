@@ -10,6 +10,7 @@ import {
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
+import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 import EditPostModal from './EditPostModal'
 
 export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
@@ -70,7 +71,8 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     }
 
     const author = post.author || {}
-    const avatarUrl = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username}&background=6366F1&color=fff`
+    const rawAvatarUrl = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username}&background=6366F1&color=fff`
+    const avatarUrl = optimizeAvatarUrl(rawAvatarUrl)
 
     return (
         <>
@@ -127,8 +129,8 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 <div className="post-media-wrap" onClick={handleImageTap} style={{ cursor: 'pointer' }}>
                     <Link to={`/posts/${post._id}`} onClick={e => e.stopPropagation()}>
                         {post.mediaType === 'video'
-                            ? <video src={post.mediaUrl} className="post-media-video" controls muted loop playsInline />
-                            : <img src={post.mediaUrl} className="post-media" alt={post.caption} loading="lazy" />
+                            ? <video src={optimizeCloudinaryVideo(post.mediaUrl)} className="post-media-video" controls muted loop playsInline />
+                            : <img src={optimizeCloudinaryUrl(post.mediaUrl)} className="post-media" alt={post.caption} loading="lazy" />
                         }
                     </Link>
                 </div>

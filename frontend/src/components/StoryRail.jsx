@@ -6,6 +6,7 @@ import api from '../api/axios'
 import toast from 'react-hot-toast'
 import CreateStoryModal from './CreateStoryModal'
 import { StorySkeleton } from './SkeletonLoader'
+import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
 // ── Story ring gradient colors ────────────────────────────────
 const RING_COLORS = [
@@ -97,8 +98,8 @@ function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) {
     useEffect(() => { setPaused(false); setMenuOpen(false) }, [groupIdx, storyIdx])
 
     if (!story) return null
-    const authorAvatar = group.author.avatarUrl ||
-        `https://ui-avatars.com/api/?name=${group.author.username}&background=6366F1&color=fff`
+    const rawAuthorAvatar = group.author.avatarUrl || `https://ui-avatars.com/api/?name=${group.author.username}&background=6366F1&color=fff`
+    const authorAvatar = optimizeAvatarUrl(rawAuthorAvatar)
 
     return (
         <motion.div
@@ -132,9 +133,9 @@ function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) {
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}>
                         {story.mediaType === 'video'
-                            ? <video src={story.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            ? <video src={optimizeCloudinaryVideo(story.mediaUrl)} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 autoPlay muted loop />
-                            : <img src={story.mediaUrl} alt=""
+                            : <img src={optimizeCloudinaryUrl(story.mediaUrl, 1000)} alt=""
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         }
                     </motion.div>
@@ -353,17 +354,20 @@ export default function StoryRail() {
                             onClick={() => setShowCreate(true)}
                         />
 
-                        {groups.map((g, i) => (
-                            <StoryCircle
-                                key={g.author._id}
-                                label={g.author.username}
-                                avatar={g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`}
-                                ringColors={RING_COLORS[i % RING_COLORS.length]}
-                                seen={g.stories.every(s => s.viewedByMe)}
-                                index={i + 1}
-                                onClick={() => setViewerGroup({ groups, startIdx: i })}
-                            />
-                        ))}
+                        {groups.map((g, i) => {
+                            const rawAvatarUrl = g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`
+                            return (
+                                <StoryCircle
+                                    key={g.author._id}
+                                    label={g.author.username}
+                                    avatar={optimizeAvatarUrl(rawAvatarUrl)}
+                                    ringColors={RING_COLORS[i % RING_COLORS.length]}
+                                    seen={g.stories.every(s => s.viewedByMe)}
+                                    index={i + 1}
+                                    onClick={() => setViewerGroup({ groups, startIdx: i })}
+                                />
+                            )
+                        })}
                     </>
                 )}
             </div>
