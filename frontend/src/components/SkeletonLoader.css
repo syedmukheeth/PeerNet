@@ -1,0 +1,107 @@
+.skeleton-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.skeleton-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 12px;
+}
+
+.skeleton-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: var(--hover);
+}
+
+.skeleton-header-info {
+    flex: 1;
+}
+
+.skeleton-text-line {
+    height: 12px;
+    border-radius: 6px;
+    background-color: var(--hover);
+}
+
+.skeleton-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: var(--hover);
+}
+
+.skeleton-footer {
+    padding: 16px;
+}
+
+.skeleton-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.skeleton-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--hover);
+}
+
+.skeleton-story-rail {
+    display: flex;
+    gap: 12px;
+    overflow: hidden;
+    padding: 16px 0;
+}
+
+.skeleton-story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.skeleton-story-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: var(--hover);
+}
+
+/* Shimmer Animation */
+@keyframes shimmerAnim {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.shimmer {
+    background-image: linear-gradient(90deg,
+            var(--hover) 0%,
+            var(--border-md) 50%,
+            var(--hover) 100%);
+    background-size: 200% 100%;
+    animation: shimmerAnim 1.5s infinite linear;
+}
+
+[data-theme="dark"] .shimmer {
+    background-image: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+}
+
+[data-theme="light"] .shimmer {
+    background-image: linear-gradient(90deg,
+            rgba(0, 0, 0, 0.05) 0%,
+            rgba(0, 0, 0, 0.1) 50%,
+            rgba(0, 0, 0, 0.05) 100%);
+}

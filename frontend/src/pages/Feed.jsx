@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import PostCard from '../components/PostCard'
 import StoryRail from '../components/StoryRail'
+import { PostSkeleton } from '../components/SkeletonLoader'
 import { useAuth } from '../context/AuthContext'
 import { HiBadgeCheck } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
@@ -200,7 +201,14 @@ export default function Feed() {
                                 onUpdate={onUpdate} />
                         ))}
                     </div>
-                    {loading && (
+                    {loading && posts.length === 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                            <PostSkeleton />
+                            <PostSkeleton />
+                            <PostSkeleton />
+                        </div>
+                    )}
+                    {loading && posts.length > 0 && (
                         <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
                             <div className="spinner" />
                         </div>

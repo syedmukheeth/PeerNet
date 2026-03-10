@@ -1499,6 +1499,10 @@ textarea {
 }
 
 /* ── Mobile Nav ──────────────────────────────────────────── */
+.mobile-top-header {
+  display: none;
+}
+
 .mobile-nav {
   display: none;
 }
@@ -1583,6 +1587,45 @@ textarea {
     display: flex !important;
   }
 
+  .mobile-top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    z-index: 100;
+  }
+
+  .mobile-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 24px;
+    color: var(--text-1);
+  }
+
+  .mobile-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    color: #fff;
+    border-radius: 99px;
+    font-size: 9px;
+    min-width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2px;
+    font-weight: 700;
+  }
+
   .mobile-nav {
     display: flex;
     align-items: center;
@@ -1592,7 +1635,7 @@ textarea {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 58px;
+    height: 52px;
     background: var(--surface);
     border-top: 1px solid var(--border);
     z-index: 100;
@@ -1601,22 +1644,26 @@ textarea {
   .mobile-nav a,
   .mobile-nav button {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-3);
-    font-size: 22px;
-    padding: 6px 12px;
+    color: var(--text-1);
+    font-size: 24px;
+    padding: 10px;
     position: relative;
     transition: color 150ms ease;
   }
 
   .mobile-nav a.active {
-    color: var(--accent);
+    color: var(--text-1);
+  }
+
+  .mobile-nav a.active svg {
+    stroke-width: 1.5;
   }
 
   .content-wrap {
-    padding: 16px 14px 72px;
+    padding: 68px 14px 72px;
+    /* Top padding pushed down to account for the top-header */
   }
 
   /* Chat: full screen single column */
@@ -1663,12 +1710,31 @@ textarea {
 
   /* Profile responsive */
   .profile-header {
-    grid-template-columns: auto 1fr;
-    gap: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
   }
 
   .profile-stats {
-    gap: 18px;
+    gap: 24px;
+    margin-top: 12px;
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .profile-stat-num {
+    font-size: 18px;
+    /* Less stretched/squished on native mobile fonts */
+    font-family: inherit;
+    /* Remove the custom display font that stretches awkwardly */
+    font-weight: 700;
+  }
+
+  .profile-stat-label {
+    font-size: 13px;
+    color: var(--text-2);
   }
 
   /* Feed: reduce padding */
@@ -1911,6 +1977,21 @@ textarea::placeholder {
     display: none;
   }
 
+  .mobile-top-header {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 48px;
+    z-index: 100;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .mobile-nav {
     display: flex;
     position: fixed;
@@ -1919,34 +2000,35 @@ textarea::placeholder {
     right: 0;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    padding: 8px 0 env(safe-area-inset-bottom, 10px);
+    padding: 0 env(safe-area-inset-bottom, 0px);
+    /* Removes padding pushing the nav bar up too high */
+    height: 48px;
     z-index: 100;
     justify-content: space-around;
+    align-items: center;
   }
 
   .mobile-nav a {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 3px;
-    color: var(--text-3);
-    font-size: 10px;
-    font-weight: 500;
-    padding: 6px 14px;
-    border-radius: 10px;
+    justify-content: center;
+    color: var(--text-1);
+    font-size: 24px;
+    padding: 10px;
     transition: color 150ms ease;
   }
 
   .mobile-nav a.active {
-    color: var(--accent);
+    color: var(--text-1);
   }
 
-  .mobile-nav svg {
-    font-size: 22px;
+  .mobile-nav a.active svg {
+    stroke-width: 1.5;
   }
 
   .content-wrap {
-    padding: 10px 0px 80px;
+    padding: 60px 0px 60px;
+    /* Accounts for both top and bottom headers edge-to-edge */
   }
 
   .chat-layout {
@@ -1954,14 +2036,16 @@ textarea::placeholder {
   }
 
   .profile-header {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 16px;
-    text-align: center;
-    padding: 20px 14px 16px;
+    padding: 16px 14px;
   }
 
   .profile-stats {
-    justify-content: center;
+    width: 100%;
+    justify-content: space-around;
   }
 
   .auth-page {

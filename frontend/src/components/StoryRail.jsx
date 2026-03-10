@@ -5,6 +5,7 @@ import { HiPlus, HiX, HiDotsVertical, HiPlay, HiPause, HiTrash } from 'react-ico
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import CreateStoryModal from './CreateStoryModal'
+import { StorySkeleton } from './SkeletonLoader'
 
 // ── Story ring gradient colors ────────────────────────────────
 const RING_COLORS = [
@@ -303,11 +304,15 @@ export default function StoryRail() {
     const [viewerGroup, setViewerGroup] = useState(null)
     const [showCreate, setShowCreate] = useState(false)
 
+    const [loading, setLoading] = useState(true)
+
     const loadStories = async () => {
+        setLoading(true)
         try {
             const { data } = await api.get('/stories')
             setStories(data.data || [])
         } catch { /* silent */ }
+        finally { setLoading(false) }
     }
 
     useEffect(() => { loadStories() }, [])
@@ -333,28 +338,34 @@ export default function StoryRail() {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
             }}>
-                {/* "Your story" / add button */}
-                <StoryCircle
-                    label="Your story"
-                    avatar={userAvatar}
-                    ringColors={null}
-                    isAdd={true}
-                    seen={false}
-                    index={0}
-                    onClick={() => setShowCreate(true)}
-                />
+                {loading && stories.length === 0 ? (
+                    <StorySkeleton />
+                ) : (
+                    <>
+                        {/* "Your story" / add button */}
+                        <StoryCircle
+                            label="Your story"
+                            avatar={userAvatar}
+                            ringColors={null}
+                            isAdd={true}
+                            seen={false}
+                            index={0}
+                            onClick={() => setShowCreate(true)}
+                        />
 
-                {groups.map((g, i) => (
-                    <StoryCircle
-                        key={g.author._id}
-                        label={g.author.username}
-                        avatar={g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`}
-                        ringColors={RING_COLORS[i % RING_COLORS.length]}
-                        seen={g.stories.every(s => s.viewedByMe)}
-                        index={i + 1}
-                        onClick={() => setViewerGroup({ groups, startIdx: i })}
-                    />
-                ))}
+                        {groups.map((g, i) => (
+                            <StoryCircle
+                                key={g.author._id}
+                                label={g.author.username}
+                                avatar={g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`}
+                                ringColors={RING_COLORS[i % RING_COLORS.length]}
+                                seen={g.stories.every(s => s.viewedByMe)}
+                                index={i + 1}
+                                onClick={() => setViewerGroup({ groups, startIdx: i })}
+                            />
+                        ))}
+                    </>
+                )}
             </div>
 
             {/* Divider */}

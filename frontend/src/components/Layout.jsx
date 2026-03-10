@@ -22,6 +22,15 @@ const links = [
     { to: '/notifications', icon: HiBell, label: 'Notifications', badge: true },
 ]
 
+const mobileBottomLinksLeft = [
+    { to: '/', icon: HiHome, exact: true },
+    { to: '/search', icon: HiSearch },
+]
+
+const mobileBottomLinksRight = [
+    { to: '/dscrolls', icon: HiFilm },
+]
+
 let layoutSocket = null
 
 export default function Layout() {
@@ -281,6 +290,32 @@ export default function Layout() {
 
             {/* ── Main ── */}
             <main className="main-col" ref={mainRef} style={{ overflowY: 'auto', height: '100dvh' }}>
+                {/* ── Mobile Top Header ── */}
+                <header className="mobile-top-header">
+                    <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <img src={logoImg} alt="PeerNet" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 8 }} />
+                        <span style={{ fontFamily: "'Syne', 'Inter', sans-serif", fontWeight: 800, fontSize: 18, background: 'var(--logo-gradient)', WebkitBackgroundClip: 'text', color: 'transparent' }}>PeerNet</span>
+                    </Link>
+                    <div className="mobile-top-actions">
+                        <NavLink to="/notifications" className={({ isActive }) => isActive ? 'active' : ''} style={{ position: 'relative' }}>
+                            <HiBell />
+                            {unreadCount > 0 && (
+                                <span className="mobile-badge" style={{ background: 'var(--error)' }}>
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </NavLink>
+                        <NavLink to="/messages" className={({ isActive }) => isActive ? 'active' : ''} style={{ position: 'relative' }}>
+                            <HiChatAlt2 />
+                            {msgCount > 0 && (
+                                <span className="mobile-badge" style={{ background: 'var(--accent)' }}>
+                                    {msgCount > 9 ? '9+' : msgCount}
+                                </span>
+                            )}
+                        </NavLink>
+                    </div>
+                </header>
+
                 <div className="content-wrap">
                     <AnimatePresence mode="wait">
                         <Outlet />
@@ -307,36 +342,26 @@ export default function Layout() {
             </main>
 
             <nav className="mobile-nav">
-                {links.slice(0, 2).map(({ to, icon: Icon, exact }) => (
+                {mobileBottomLinksLeft.map(({ to, icon: Icon, exact }) => (
                     <NavLink key={to} to={to} end={exact} onClick={() => handleNavClick(to)}
                         className={({ isActive }) => isActive ? 'active' : ''}>
                         <div style={{ position: 'relative' }}>
                             <Icon />
-                            {to === '/notifications' && unreadCount > 0 && (
-                                <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--error)', color: '#fff', borderRadius: 99, fontSize: 9, minWidth: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 2px', fontWeight: 700 }}>
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </span>
-                            )}
                         </div>
                     </NavLink>
                 ))}
 
                 {/* Centre: Create button */}
                 <button onClick={() => setShowCreate(true)}
-                    style={{ background: 'var(--accent)', border: 'none', borderRadius: 12, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-accent)', color: '#fff', fontSize: 22, fontWeight: 300, lineHeight: 1 }}>
-                    +
+                    style={{ background: 'none', border: '1px solid var(--border-md)', borderRadius: 12, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-1)', fontSize: 24, fontWeight: 300, lineHeight: 1 }}>
+                    <HiPlusCircle style={{ fontSize: 28 }} />
                 </button>
 
-                {links.slice(2).map(({ to, icon: Icon, exact }) => (
+                {mobileBottomLinksRight.map(({ to, icon: Icon, exact }) => (
                     <NavLink key={to} to={to} end={exact} onClick={() => handleNavClick(to)}
                         className={({ isActive }) => isActive ? 'active' : ''}>
                         <div style={{ position: 'relative' }}>
                             <Icon />
-                            {to === '/notifications' && unreadCount > 0 && (
-                                <span style={{ position: 'absolute', top: -4, right: -6, background: 'var(--error)', color: '#fff', borderRadius: 99, fontSize: 9, minWidth: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 2px', fontWeight: 700 }}>
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </span>
-                            )}
                         </div>
                     </NavLink>
                 ))}
