@@ -54,6 +54,18 @@ const bootstrap = async () => {
             await Promise.all([pubClient.connect(), subClient.connect()]);
             io.adapter(createAdapter(pubClient, subClient));
             logger.info('Socket.io Redis adapter automatically attached');
+
+            // --- Cross-Service Notification Bridge ---
+            const notifSub = redisClient.duplicate();
+            await notifSub.connect();
+            await notifSub.subscribe('peernet:notifications', (message) => {
+                try {
+                    const { recipient, notification } = JSON.parse(message);
+                    io.to(`user:${recipient}`).emit('new_notification', notification);
+                } catch (e) {
+                    logger.error(`Failed to process incoming Redis notification: ${e.message}`);
+                }
+            });
         } catch (err) {
             logger.warn(`Failed to connect Redis adapter for Socket.io: ${err.message}`);
         }

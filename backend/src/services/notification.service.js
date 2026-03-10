@@ -1,7 +1,7 @@
 'use strict';
 
 const Notification = require('../models/Notification');
-const { getIO } = require('../utils/socket.utils');
+const { getRedisOptional } = require('../config/redis');
 
 const createNotification = async ({ recipient, sender, type, entityId, entityModel }) => {
     // Don't notify yourself
@@ -12,10 +12,17 @@ const createNotification = async ({ recipient, sender, type, entityId, entityMod
     // Populate sender details for real-time delivery
     await notification.populate('sender', 'username avatarUrl isVerified');
 
-    // Push real-time notification to recipient's personal socket room
-    const io = getIO();
-    if (io) {
-        io.to(`user:${recipient.toString()}`).emit('new_notification', notification);
+    // Push real-time notification cross-service via Redis
+    const redis = getRedisOptional();
+    if (redis) {
+        try {
+            await redis.publish('peernet:notifications', JSON.stringify({
+                recipient: recipient.toString(),
+                notification
+            }));
+        } catch (err) {
+            console.error('Failed to publish notification to Redis:', err);
+        }
     }
 
     return notification;
