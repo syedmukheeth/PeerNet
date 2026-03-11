@@ -5,6 +5,7 @@ const Dscroll = require('../models/Dscroll');
 const Like = require('../models/Like');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary.utils');
 const ApiError = require('../utils/ApiError');
+const { getRedisOptional } = require('../config/redis');
 
 const createDscroll = async (userId, { caption, tags }, file) => {
     if (!file) throw new ApiError(400, 'Video file is required');
@@ -35,13 +36,12 @@ const createDscroll = async (userId, { caption, tags }, file) => {
     const User = require('../models/User');
     await User.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } });
 
-    // Invalidate the user's feed cache
-    const { getRedis } = require('../config/redis');
-    const redis = getRedis();
+    // Invalidate the user's feed cache (ALL cursor pages)
+    const redis = getRedisOptional();
     if (redis) {
-        // Clear at least the first page cursor to show the new post immediately for the author
         try {
-            await redis.del(`feed:${userId}:cursor:start`);
+            const keys = await redis.keys(`feed:${userId}:cursor:*`);
+            if (keys.length) await redis.del(keys);
         } catch (e) {
             console.error('Failed to clear feed cache on new dscroll', e);
         }
