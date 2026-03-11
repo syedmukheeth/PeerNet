@@ -35,8 +35,17 @@ const createDscroll = async (userId, { caption, tags }, file) => {
     const User = require('../models/User');
     await User.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } });
 
-    // Invalidate the user's feed cache if applicable, though it might be tricky here without knowing the exact cursor.
-    // The safest is to clear caching or rely on frontend invalidation.
+    // Invalidate the user's feed cache
+    const { getRedis } = require('../config/redis');
+    const redis = getRedis();
+    if (redis) {
+        // Clear at least the first page cursor to show the new post immediately for the author
+        try {
+            await redis.del(`feed:${userId}:cursor:start`);
+        } catch (e) {
+            console.error('Failed to clear feed cache on new dscroll', e);
+        }
+    }
 
     return post;
 };

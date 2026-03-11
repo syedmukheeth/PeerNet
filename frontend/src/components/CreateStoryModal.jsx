@@ -39,7 +39,9 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
         } finally { setLoading(false) }
     }
 
-    const isVideo = file?.type?.startsWith('video/') || /\.(mp4|mov|webm)$/i.test(file?.name)
+    const isVideo = file?.type?.startsWith('video/') ||
+        /\.(mp4|mov|webm|mkv|avi|3gp|hevc)$/i.test(file?.name || '') ||
+        (file?.type === 'application/octet-stream' && file?.size > 2000000)
 
     return (
         <AnimatePresence>
