@@ -12,16 +12,19 @@ const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 
 const imageFilter = (_req, file, cb) => {
     if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) return cb(null, true);
+    if (file.mimetype === 'application/octet-stream') return cb(null, true); // Fallback for raw mobile uploads
     cb(new ApiError(400, 'Only JPEG, PNG, WEBP, GIF images are allowed'));
 };
 
 const videoFilter = (_req, file, cb) => {
     if (ALLOWED_VIDEO_TYPES.includes(file.mimetype)) return cb(null, true);
-    cb(new ApiError(400, 'Only MP4, MOV, WEBM videos are allowed'));
+    if (file.mimetype === 'application/octet-stream') return cb(null, true); // Fallback for raw mobile uploads
+    cb(new ApiError(400, 'Only MP4, MOV, WEBM videos are allowed. Or try changing your file extension.'));
 };
 
 const mediaFilter = (_req, file, cb) => {
     if (ALLOWED_MEDIA_TYPES.includes(file.mimetype)) return cb(null, true);
+    if (file.mimetype === 'application/octet-stream') return cb(null, true); // Fallback for raw mobile uploads
     cb(new ApiError(400, 'Unsupported media type'));
 };
 
