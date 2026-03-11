@@ -171,12 +171,14 @@ export default function Feed() {
     } = useInfiniteQuery({
         queryKey: ['feed'],
         queryFn: async ({ pageParam = null }) => {
-            const params = { limit: 10 }
+            const params = { limit: 10, _t: Date.now() }
             if (pageParam) params.cursor = pageParam
             const res = await api.get('/posts/feed', { params })
             return res.data
         },
         getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
+        staleTime: 0,
+        refetchOnMount: 'always',
     })
 
     const posts = data ? data.pages.flatMap((page) => page.data) : []
