@@ -83,4 +83,66 @@ const sendMessage = async (conversationId, senderId, { body }, file) => {
     return message;
 };
 
-module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage };
+const editMessage = async (messageId, userId, newBody) => {
+    const message = await Message.findById(messageId);
+    if (!message) throw new ApiError(404, 'Message not found');
+
+    if (message.sender.toString() !== userId.toString()) {
+        throw new ApiError(403, 'You can only edit your own messages');
+    }
+
+    if (Date.now() - new Date(message.createdAt).getTime() > 15 * 60 * 1000) {
+        throw new ApiError(403, 'Message can only be edited within 15 minutes');
+    }
+
+    if (!newBody || newBody.trim() === '') {
+        throw new ApiError(400, 'Message body cannot be empty');
+    }
+
+    message.body = newBody.trim();
+    message.isEdited = true;
+    await message.save();
+
+    await message.populate('sender', 'username avatarUrl');
+    
+    // Update conversation if this is the last message
+    await Conversation.findOneAndUpdate(
+        { _id: message.conversation, lastMessage: messageId },
+        { updatedAt: new Date() }
+    );
+
+    return message;
+};
+
+const deleteMessage = async (messageId, userId) => {
+    const message = await Message.findById(messageId);
+    if (!message) throw new ApiError(404, 'Message not found');
+
+    if (message.sender.toString() !== userId.toString()) {
+        throw new ApiError(403, 'You can only delete your own messages');
+    }
+
+    if (Date.now() - new Date(message.createdAt).getTime() > 15 * 60 * 1000) {
+        throw new ApiError(403, 'Message can only be deleted within 15 minutes');
+    }
+
+    // Optional: if it has media, we could also call deleteFromCloudinary(message.mediaPublicId)
+    // but we'll focus on just DB deletion for now to match timeline scope
+    
+    const conversationId = message.conversation;
+    await message.deleteOne();
+
+    // Re-evaluate lastMessage logic for the conversation sidebar
+    const conversation = await Conversation.findById(conversationId);
+    if (conversation && conversation.lastMessage?.toString() === messageId.toString()) {
+        const newLastMessage = await Message.findOne({ conversation: conversationId })
+            .sort({ createdAt: -1 });
+
+        conversation.lastMessage = newLastMessage ? newLastMessage._id : null;
+        await conversation.save();
+    }
+
+    return true;
+};
+
+module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage };

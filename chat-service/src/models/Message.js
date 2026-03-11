@@ -15,6 +15,7 @@ const messageSchema = new mongoose.Schema(
         mediaUrl: { type: String, default: '' },
         mediaPublicId: { type: String, default: '' },
         isRead: { type: Boolean, default: false },
+        isEdited: { type: Boolean, default: false },
     },
     { timestamps: true },
 );

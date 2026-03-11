@@ -1,0 +1,11 @@
+const axios = require('axios');
+const api = axios.create({ baseURL: 'http://localhost:3000/api/v1' });
+
+api.interceptors.request.use(config => {
+  console.log('Resulting URL:', config.url);
+  console.log('Resulting baseURL:', config.baseURL);
+  console.log('Combined:', axios.getUri(config));
+  return config;
+});
+
+api.post('/conversations', {}, { baseURL: 'http://localhost:3001/api/v1' }).catch(() => {});

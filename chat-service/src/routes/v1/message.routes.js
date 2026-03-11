@@ -21,5 +21,18 @@ router.post(
     uploadMedia.single('media'),
     messageController.sendMessage,
 );
+// PUT /api/v1/conversations/:id/messages/:messageId
+router.put(
+    '/:id/messages/:messageId',
+    authenticate,
+    messageController.editMessage
+);
+
+// DELETE /api/v1/conversations/:id/messages/:messageId
+router.delete(
+    '/:id/messages/:messageId',
+    authenticate,
+    messageController.deleteMessage
+);
 
 module.exports = router;

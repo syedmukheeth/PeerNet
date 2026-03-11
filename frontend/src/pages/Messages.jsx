@@ -114,6 +114,9 @@ export default function Messages() {
     const [convoSearch, setConvoSearch] = useState('')
     const [filePreview, setFilePreview] = useState(null)
     const [isUploading, setIsUploading] = useState(false)
+    const [editingMessageId, setEditingMessageId] = useState(null)
+    const [editBody, setEditBody] = useState('')
+    const [hoveredMessageId, setHoveredMessageId] = useState(null)
     const fileRef = useRef()
     const docRef = useRef()
     const bottomRef = useRef()
@@ -146,6 +149,18 @@ export default function Messages() {
             if (senderId === userRef.current?._id) return
             setMessages(m => [...m, msg])
             setConversations(cs => cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg } : c))
+        })
+        socket.on('message_edited', (msg) => {
+            setMessages(m => m.map(x => x._id === msg._id ? msg : x))
+            setConversations(cs => cs.map(c => 
+                (c.lastMessage?._id === msg._id || c._id === msg.conversation) 
+                ? { ...c, lastMessage: msg } : c
+            ))
+        })
+        socket.on('message_deleted', ({ messageId }) => {
+            setMessages(m => m.filter(x => x._id !== messageId))
+            // We do not re-fetch the entire conversation's lastMessage here yet, 
+            // but the next refresh will auto-correct it if the last message was deleted.
         })
         socket.on('user_typing', () => setPeerTyping(true))
         socket.on('user_stop_typing', () => setPeerTyping(false))
@@ -252,6 +267,40 @@ export default function Messages() {
             socket?.emit('typing', { conversationId: activeConvo._id })
             clearTimeout(typingTimer.current)
             typingTimer.current = setTimeout(() => socket?.emit('stop_typing', { conversationId: activeConvo._id }), 2000)
+        }
+    }
+
+    const startEditing = (m) => {
+        setEditingMessageId(m._id)
+        setEditBody(m.body || '')
+    }
+
+    const cancelEditing = () => {
+        setEditingMessageId(null)
+        setEditBody('')
+    }
+
+    const saveEdit = async (m) => {
+        if (!editBody.trim()) return
+        try {
+            const { data } = await api.put(`conversations/${activeConvo._id}/messages/${m._id}`, { body: editBody }, { baseURL: CHAT_BASE_URL })
+            setMessages(ms => ms.map(x => x._id === m._id ? data.data : x))
+            setConversations(cs => cs.map(c => c.lastMessage?._id === m._id ? { ...c, lastMessage: data.data } : c))
+            setEditingMessageId(null)
+            setEditBody('')
+        } catch {
+            toast.error('Failed to edit message')
+        }
+    }
+
+    const deleteMessage = async (m) => {
+        if (!window.confirm("Delete this message for everyone?")) return
+        try {
+            await api.delete(`conversations/${activeConvo._id}/messages/${m._id}`, { baseURL: CHAT_BASE_URL })
+            setMessages(ms => ms.filter(x => x._id !== m._id))
+            toast.success('Message deleted')
+        } catch {
+            toast.error('Failed to delete message')
         }
     }
 
@@ -425,7 +474,37 @@ export default function Messages() {
                                             display: 'flex', flexDirection: 'column',
                                             alignItems: isMine ? 'flex-end' : 'flex-start',
                                             marginBottom: isLast ? 6 : 1,
-                                        }}>
+                                            position: 'relative'
+                                        }}
+                                        onMouseEnter={() => setHoveredMessageId(m._id)}
+                                        onMouseLeave={() => setHoveredMessageId(null)}>
+
+                                            {/* Hover Actions (Edit/Delete) */}
+                                            {isMine && hoveredMessageId === m._id && editingMessageId !== m._id && (
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    right: '100%',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    marginRight: 8,
+                                                    display: 'flex',
+                                                    gap: 4,
+                                                    background: 'var(--surface)',
+                                                    border: '1px solid var(--border-md)',
+                                                    borderRadius: 8,
+                                                    padding: 4,
+                                                    boxShadow: 'var(--shadow-md)',
+                                                    zIndex: 2,
+                                                }}>
+                                                    {Date.now() - new Date(m.createdAt).getTime() <= 15 * 60 * 1000 && (
+                                                        <>
+                                                            <button onClick={() => startEditing(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-2)', display: 'flex' }} title="Edit (within 15m)"><HiPencilAlt size={16} /></button>
+                                                            <button onClick={() => deleteMessage(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--error)', display: 'flex' }} title="Delete (within 15m)"><HiX size={16} /></button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+
                                             {/* Avatar for theirs, first in group */}
                                             {!isMine && isFirst && (
                                                 <img src={otherAvatar}
@@ -443,22 +522,45 @@ export default function Messages() {
                                                 wordBreak: 'break-word',
                                                 boxShadow: isMine ? '0 1px 8px var(--accent-ring)' : 'none',
                                             }}>
-                                                {m.body && <span>{m.body}</span>}
-
-                                                {m.mediaUrl && (
-                                                    <div style={{ marginTop: m.body ? 8 : 0 }}>
-                                                        {m.mediaUrl.match(/\.(mp4|mov|webm)(\?.*)?$/i) ? (
-                                                            <video src={m.mediaUrl} controls style={{ borderRadius: 10, maxWidth: '100%', maxHeight: 300, display: 'block' }} />
-                                                        ) : m.mediaUrl.match(/\.(pdf|doc|docx|xls|xlsx|txt|csv|zip)(\?.*)?$/i) ? (
-                                                            <a href={m.mediaUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: isMine ? 'rgba(255,255,255,0.2)' : 'var(--hover)', borderRadius: 8, textDecoration: 'none', color: 'inherit' }}>
-                                                                <HiDocument style={{ fontSize: 24, flexShrink: 0 }} />
-                                                                <span style={{ fontSize: 13, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Document attached</span>
-                                                                <HiDownload style={{ fontSize: 18 }} />
-                                                            </a>
-                                                        ) : (
-                                                            <img src={m.mediaUrl} style={{ borderRadius: 10, maxWidth: '100%', maxHeight: 300, display: 'block', objectFit: 'contain', background: 'rgba(0,0,0,0.1)' }} alt="Attachment" />
-                                                        )}
+                                                {editingMessageId === m._id ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                                        <input 
+                                                            autoFocus
+                                                            value={editBody}
+                                                            onChange={e => setEditBody(e.target.value)}
+                                                            onKeyDown={e => { if(e.key === 'Enter') saveEdit(m); if(e.key === 'Escape') cancelEditing(); }}
+                                                            style={{
+                                                                width: '100%', padding: '6px 10px', borderRadius: 6,
+                                                                border: '1px solid var(--border)', background: 'var(--surface)',
+                                                                color: 'var(--text-1)', fontSize: 14, outline: 'none'
+                                                            }}
+                                                        />
+                                                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                                                            <button onClick={cancelEditing} style={{ fontSize: 12, padding: '4px 8px', borderRadius: 4, background: 'var(--hover)', border: 'none', color: 'var(--text-2)', cursor: 'pointer' }}>Cancel</button>
+                                                            <button onClick={() => saveEdit(m)} style={{ fontSize: 12, padding: '4px 8px', borderRadius: 4, background: '#fff', color: '#000', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Save</button>
+                                                        </div>
                                                     </div>
+                                                ) : (
+                                                    <>
+                                                        {m.body && <span>{m.body}</span>}
+                                                        
+                                                        {m.mediaUrl && (
+                                                            <div style={{ marginTop: m.body ? 8 : 0 }}>
+                                                                {m.mediaUrl.match(/\.(mp4|mov|webm)(\?.*)?$/i) ? (
+                                                                    <video src={m.mediaUrl} controls style={{ borderRadius: 10, maxWidth: '100%', maxHeight: 300, display: 'block' }} />
+                                                                ) : m.mediaUrl.match(/\.(pdf|doc|docx|xls|xlsx|txt|csv|zip)(\?.*)?$/i) ? (
+                                                                    <a href={m.mediaUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: isMine ? 'rgba(255,255,255,0.2)' : 'var(--hover)', borderRadius: 8, textDecoration: 'none', color: 'inherit' }}>
+                                                                        <HiDocument style={{ fontSize: 24, flexShrink: 0 }} />
+                                                                        <span style={{ fontSize: 13, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Document attached</span>
+                                                                        <HiDownload style={{ fontSize: 18 }} />
+                                                                    </a>
+                                                                ) : (
+                                                                    <img src={m.mediaUrl} style={{ borderRadius: 10, maxWidth: '100%', maxHeight: 300, display: 'block', objectFit: 'contain', background: 'rgba(0,0,0,0.1)' }} alt="Attachment" />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {m.isEdited && <div style={{ fontSize: 10, opacity: 0.7, marginTop: 4, textAlign: 'right' }}>(edited)</div>}
+                                                    </>
                                                 )}
                                             </div>
                                             {isLast && (
@@ -565,7 +667,7 @@ export default function Messages() {
                                     {/* Send / Heart button (Instagram Style) */}
                                     {isUploading ? (
                                         <div className="spinner" style={{ width: 22, height: 22, flexShrink: 0, margin: '0 4px' }} />
-                                    ) : text.trim() || filePreview ? (
+                                    ) : (text.trim() || filePreview) ? (
                                         <button type="submit" style={{
                                             background: 'none', border: 'none', cursor: 'pointer',
                                             color: 'var(--accent)', fontWeight: 600, fontSize: 16, flexShrink: 0,

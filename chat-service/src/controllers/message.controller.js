@@ -47,4 +47,42 @@ const sendMessage = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-module.exports = { getConversations, createOrGetConversation, getMessages, sendMessage };
+const editMessage = async (req, res, next) => {
+    try {
+        const message = await messageService.editMessage(
+            req.params.messageId,
+            req.user._id,
+            req.body.body
+        );
+
+        // Emit real-time socket event
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`conversation:${req.params.id}`).emit('message_edited', message);
+        }
+
+        res.json({ success: true, data: message });
+    } catch (err) { next(err); }
+};
+
+const deleteMessage = async (req, res, next) => {
+    try {
+        await messageService.deleteMessage(
+            req.params.messageId,
+            req.user._id
+        );
+
+        // Emit real-time socket event
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`conversation:${req.params.id}`).emit('message_deleted', {
+                conversationId: req.params.id,
+                messageId: req.params.messageId
+            });
+        }
+
+        res.json({ success: true, message: 'Message deleted successfully' });
+    } catch (err) { next(err); }
+};
+
+module.exports = { getConversations, createOrGetConversation, getMessages, sendMessage, editMessage, deleteMessage };
