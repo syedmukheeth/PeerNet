@@ -72,11 +72,9 @@ export default function App() {
             </Route>
             
             {/* Public/Shared routes (can be viewed without login) */}
-            <Route path="/posts/:id" element={
-              <Layout>
-                <PostDetail />
-              </Layout>
-            } />
+            <Route element={<Layout />}>
+              <Route path="/posts/:id" element={<PostDetail />} />
+            </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

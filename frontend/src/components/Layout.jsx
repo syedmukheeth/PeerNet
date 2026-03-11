@@ -396,7 +396,7 @@ export default function Layout() {
                         <span className="site-footer__divider">·</span>
                         <span className="site-footer__text">Built by</span>
                         <a
-                            href="https://github.com/syedmukheeth"
+                            href="https://www.linkedin.com/in/syedmukheeth"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="site-footer__link"
