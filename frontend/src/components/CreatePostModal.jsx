@@ -23,7 +23,7 @@ export default function CreatePostModal({ onClose }) {
         setLoading(true)
         try {
             const fd = new FormData()
-            const isVideoUpload = file.type.startsWith('video/')
+            const isVideoUpload = file.type?.startsWith('video/') || /\.(mp4|mov|webm)$/i.test(file.name)
             fd.append(isVideoUpload ? 'video' : 'media', file)
             fd.append('caption', caption)
 

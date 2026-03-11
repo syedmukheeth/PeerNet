@@ -39,7 +39,7 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
         } finally { setLoading(false) }
     }
 
-    const isVideo = file?.type?.startsWith('video/')
+    const isVideo = file?.type?.startsWith('video/') || /\.(mp4|mov|webm)$/i.test(file?.name)
 
     return (
         <AnimatePresence>
