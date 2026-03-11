@@ -30,7 +30,7 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
         try {
             const fd = new FormData()
             fd.append('media', file)
-            await api.post('/stories', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+            await api.post('/stories', fd)
             toast.success('Story posted! ✨')
             onSuccess?.()
             onClose()

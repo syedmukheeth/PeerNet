@@ -42,6 +42,22 @@ const getComments = async (postId, { limit = 20, cursor = null }) => {
     return { data: results, nextCursor, hasMore };
 };
 
+const getReplies = async (commentId, { limit = 20, cursor = null }) => {
+    const query = { parentComment: commentId }; // fetch child comments
+    if (cursor) query.createdAt = { $lt: new Date(cursor) };
+
+    const comments = await Comment.find(query)
+        .populate('author', 'username avatarUrl isVerified')
+        .sort({ createdAt: 1 }) // chronologically, earliest replies first
+        .limit(limit + 1);
+
+    const hasMore = comments.length > limit;
+    const results = hasMore ? comments.slice(0, limit) : comments;
+    const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
+
+    return { data: results, nextCursor, hasMore };
+};
+
 const deleteComment = async (commentId, userId) => {
     const comment = await Comment.findById(commentId);
     if (!comment) throw new ApiError(404, 'Comment not found');
@@ -72,4 +88,4 @@ const unlikeComment = async (commentId, userId) => {
     return { liked: false };
 };
 
-module.exports = { addComment, getComments, deleteComment, likeComment, unlikeComment };
+module.exports = { addComment, getComments, getReplies, deleteComment, likeComment, unlikeComment };

@@ -18,6 +18,14 @@ const getComments = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+const getReplies = async (req, res, next) => {
+    try {
+        const { limit, cursor } = parsePagination(req.query);
+        const result = await commentService.getReplies(req.params.commentId, { limit, cursor });
+        res.json({ success: true, ...result });
+    } catch (err) { next(err); }
+};
+
 const deleteComment = async (req, res, next) => {
     try {
         await commentService.deleteComment(req.params.id, req.user._id);
@@ -39,4 +47,4 @@ const unlikeComment = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-module.exports = { addComment, getComments, deleteComment, likeComment, unlikeComment };
+module.exports = { addComment, getComments, getReplies, deleteComment, likeComment, unlikeComment };

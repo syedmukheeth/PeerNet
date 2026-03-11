@@ -12,11 +12,19 @@ const USER_CACHE_TTL = 600; // 10 min
 const getProfile = async (targetUserId, requestingUserId) => {
     const redis = getRedis();
     const cacheKey = `user:${targetUserId}`;
+    
+    let profileData;
     const cached = await redis.get(cacheKey);
-    if (cached) return JSON.parse(cached);
-
-    const user = await User.findById(targetUserId).select('-passwordHash');
-    if (!user) throw new ApiError(404, 'User not found');
+    if (cached) {
+        profileData = JSON.parse(cached);
+        // Clean up previously incorrectly cached isFollowing
+        delete profileData.isFollowing;
+    } else {
+        const user = await User.findById(targetUserId).select('-passwordHash');
+        if (!user) throw new ApiError(404, 'User not found');
+        profileData = user.toJSON();
+        await redis.setEx(cacheKey, USER_CACHE_TTL, JSON.stringify(profileData));
+    }
 
     let isFollowing = false;
     if (requestingUserId) {
@@ -24,9 +32,7 @@ const getProfile = async (targetUserId, requestingUserId) => {
         isFollowing = Boolean(relation);
     }
 
-    const profile = { ...user.toJSON(), isFollowing };
-    await redis.setEx(cacheKey, USER_CACHE_TTL, JSON.stringify(profile));
-    return profile;
+    return { ...profileData, isFollowing };
 };
 
 const updateProfile = async (userId, updates, avatarFile) => {
@@ -81,7 +87,7 @@ const follow = async (followerId, followingId) => {
 
     // Invalidate cached profiles
     const redis = getRedis();
-    await redis.del(`user:${followerId}`, `user:${followingId}`);
+    await redis.del([`user:${followerId}`, `user:${followingId}`]);
 
     // Notify the followed user
     notificationService.createNotification({
@@ -105,7 +111,7 @@ const unfollow = async (followerId, followingId) => {
     ]);
 
     const redis = getRedis();
-    await redis.del(`user:${followerId}`, `user:${followingId}`);
+    await redis.del([`user:${followerId}`, `user:${followingId}`]);
 
     return { message: 'Unfollowed successfully' };
 };
