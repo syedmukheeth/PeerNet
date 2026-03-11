@@ -4,6 +4,7 @@ const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const { uploadToCloudinary } = require('../utils/cloudinary.utils');
 const ApiError = require('../utils/ApiError');
+const { getRedis } = require('../config/redis');
 
 const getOrCreateConversation = async (userId, targetUserId) => {
     if (userId.toString() === targetUserId.toString()) {
@@ -21,11 +22,26 @@ const getOrCreateConversation = async (userId, targetUserId) => {
     return conversation;
 };
 
-const getUserConversations = async (userId) =>
-    Conversation.find({ participants: userId })
+const getUserConversations = async (userId) => {
+    const redis = getRedis();
+    const cacheKey = `user:${userId}:conversations`;
+
+    // Try cache first
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+        return JSON.parse(cached);
+    }
+
+    // Cache miss — fetch from DB
+    const conversations = await Conversation.find({ participants: userId })
         .populate('participants', 'username avatarUrl isVerified')
         .populate('lastMessage')
         .sort({ updatedAt: -1 });
+
+    // Cache the result for 5 minutes (300s)
+    await redis.setEx(cacheKey, 300, JSON.stringify(conversations));
+    return conversations;
+};
 
 const getMessages = async (conversationId, userId, { limit = 30, cursor = null }) => {
     const conversation = await Conversation.findById(conversationId);
@@ -80,6 +96,13 @@ const sendMessage = async (conversationId, senderId, { body }, file) => {
     });
 
     await message.populate('sender', 'username avatarUrl');
+    
+    // Invalidate conversation cache for all participants
+    const redis = getRedis();
+    for (const p of conversation.participants) {
+        await redis.del(`user:${p.toString()}:conversations`);
+    }
+
     return message;
 };
 
@@ -111,6 +134,15 @@ const editMessage = async (messageId, userId, newBody) => {
         { updatedAt: new Date() }
     );
 
+    // Invalidate conversation cache
+    const conversation = await Conversation.findById(message.conversation);
+    if (conversation) {
+        const redis = getRedis();
+        for (const p of conversation.participants) {
+            await redis.del(`user:${p.toString()}:conversations`);
+        }
+    }
+
     return message;
 };
 
@@ -140,6 +172,14 @@ const deleteMessage = async (messageId, userId) => {
 
         conversation.lastMessage = newLastMessage ? newLastMessage._id : null;
         await conversation.save();
+    }
+
+    // Invalidate cache
+    if (conversation) {
+        const redis = getRedis();
+        for (const p of conversation.participants) {
+            await redis.del(`user:${p.toString()}:conversations`);
+        }
     }
 
     return true;

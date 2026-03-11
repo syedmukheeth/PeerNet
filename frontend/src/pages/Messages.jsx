@@ -10,19 +10,7 @@ import EmojiPicker from 'emoji-picker-react'
 
 let socket = null
 
-/* ── Skeletons ──────────────────────────────────────────── */
-function MessageSkeleton() {
-    return (
-        <div style={{ display: 'flex', gap: 12, padding: '10px 0', opacity: 0.6, animation: 'pulse 1.5s infinite' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--border-md)' }} />
-            <div style={{ flex: 1 }}>
-                <div style={{ width: 120, height: 16, borderRadius: 4, background: 'var(--border-md)', marginBottom: 8 }} />
-                <div style={{ width: '60%', height: 14, borderRadius: 4, background: 'var(--border)', marginBottom: 4 }} />
-                <div style={{ width: '40%', height: 14, borderRadius: 4, background: 'var(--border)' }} />
-            </div>
-        </div>
-    )
-}
+
 
 /* ── Typing Bubbles ─────────────────────────────────────── */
 function TypingBubble() {
@@ -408,20 +396,10 @@ export default function Messages() {
 
                     {/* Convo items */}
                     <div style={{ flex: 1, overflowY: 'auto' }}>
-                        {initialLoad ? (
-                            <div style={{ padding: '10px 16px' }}>
-                                {Array.from({ length: Math.floor(window.innerHeight / 72) || 8 }).map((_, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0', opacity: 1 - i * 0.1 }}>
-                                        <div className="skeleton-media" style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0 }} />
-                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                            <div className="skeleton-text" style={{ width: '40%', height: 14, borderRadius: 4 }} />
-                                            <div className="skeleton-text" style={{ width: '70%', height: 12, borderRadius: 4 }} />
-                                        </div>
-                                    </div>
-                                ))}
+                        {(initialLoad || starting) ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 20px' }}>
+                                <div className="spinner" />
                             </div>
-                        ) : starting ? (
-                            <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}><div className="spinner" /></div>
                         ) : null}
                         
                         {!initialLoad && filteredConvos.map(c => {
@@ -503,9 +481,9 @@ export default function Messages() {
                             {/* Messages */}
                             <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 {loadingMessages ? (
-                                    <>
-                                        {Array.from({ length: 5 }).map((_, i) => <MessageSkeleton key={i} />)}
-                                    </>
+                                    <div style={{ margin: 'auto' }}>
+                                        <div className="spinner" />
+                                    </div>
                                 ) : messages.length === 0 && (
                                     <div style={{ textAlign: 'center', margin: 'auto', color: 'var(--text-3)' }}>
                                         <img src={otherAvatar} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 14px', display: 'block' }} alt="" />
