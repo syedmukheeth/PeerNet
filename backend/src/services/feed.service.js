@@ -4,7 +4,7 @@ const Post = require('../models/Post');
 const Like = require('../models/Like');
 const SavedPost = require('../models/SavedPost');
 const Follower = require('../models/Follower');
-const { getRedis } = require('../config/redis');
+const { getRedisOptional } = require('../config/redis');
 
 const FEED_CACHE_TTL = 300; // 5 mins (extended to reduce database hits)
 
@@ -14,7 +14,7 @@ const FEED_CACHE_TTL = 300; // 5 mins (extended to reduce database hits)
  * isLiked and isSaved are computed per-user and NOT cached (they are per-user).
  */
 const getFeed = async (userId, { limit = 20, cursor = null }) => {
-    const redis = getRedis();
+    const redis = getRedisOptional();
     // Only cache the raw post list, not per-user flags
     const cacheKey = `feed:${userId}:cursor:${cursor || 'start'}`;
 

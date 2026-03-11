@@ -5,7 +5,7 @@ const User = require('../models/User');
 const Like = require('../models/Like');
 const SavedPost = require('../models/SavedPost');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary.utils');
-const { getRedis } = require('../config/redis');
+const { getRedisOptional } = require('../config/redis');
 const ApiError = require('../utils/ApiError');
 const notificationService = require('./notification.service');
 
@@ -14,7 +14,7 @@ const POST_CACHE_TTL = 300; // 5 min
 const createPost = async (userId, { caption, location, tags }, file) => {
     if (!file) throw new ApiError(400, 'Media file is required');
 
-    const isVideo = file.mimetype.startsWith('video/');
+    const isVideo = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
     const { secure_url, public_id } = await uploadToCloudinary(file.path, {
         folder: 'peernet/posts',
         resource_type: isVideo ? 'video' : 'image',
@@ -40,11 +40,13 @@ const createPost = async (userId, { caption, location, tags }, file) => {
 
     await User.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } });
 
-    // Invalidate the user's feed cache
-    const redis = getRedis();
+    // Invalidate the user's feed cache (all cursor pages)
+    const redis = getRedisOptional();
     if (redis) {
         try {
-            await redis.del(`feed:${userId}:cursor:start`);
+            // Scan and delete all matching keys for this user's feed
+            const keys = await redis.keys(`feed:${userId}:cursor:*`);
+            if (keys.length) await redis.del(keys);
         } catch (e) {
             console.error('Failed to clear feed cache on new post', e);
         }
@@ -54,17 +56,17 @@ const createPost = async (userId, { caption, location, tags }, file) => {
 };
 
 const getPost = async (postId, userId) => {
-    const redis = getRedis();
+    const redis = getRedisOptional();
     const cacheKey = `post:${postId}`;
-    const cached = await redis.get(cacheKey);
 
     let post;
+    const cached = redis ? await redis.get(cacheKey) : null;
     if (cached) {
         post = JSON.parse(cached);
     } else {
         post = await Post.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
         if (!post || post.isArchived) throw new ApiError(404, 'Post not found');
-        await redis.setEx(cacheKey, POST_CACHE_TTL, JSON.stringify(post));
+        if (redis) await redis.setEx(cacheKey, POST_CACHE_TTL, JSON.stringify(post));
     }
 
     let isLiked = false;
@@ -89,8 +91,8 @@ const updatePost = async (postId, userId, { caption }) => {
     }
     post.caption = caption;
     await post.save();
-    const redis = getRedis();
-    await redis.del(`post:${postId}`);
+    const redis = getRedisOptional();
+    if (redis) await redis.del(`post:${postId}`);
     return post;
 };
 
@@ -106,8 +108,8 @@ const deletePost = async (postId, userId) => {
     await User.findByIdAndUpdate(userId, { $inc: { postsCount: -1 } });
 
     // Invalidate
-    const redis = getRedis();
-    await redis.del(`post:${postId}`);
+    const redis = getRedisOptional();
+    if (redis) await redis.del(`post:${postId}`);
 };
 
 const likePost = async (postId, userId) => {
