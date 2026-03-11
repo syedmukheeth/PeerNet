@@ -24,6 +24,15 @@ const createApp = () => {
     // ── Trust proxy (for accurate IP behind Nginx) ──────────────────────────────
     app.set('trust proxy', 1);
 
+    // ── Disable ETags — prevents 304 responses that bypass our Redis cache ──────
+    app.set('etag', false);
+
+    // ── Force no browser caching on all API routes ───────────────────────────────
+    app.use('/api', (_req, res, next) => {
+        res.set('Cache-Control', 'no-store');
+        next();
+    });
+
     // ── Security headers ─────────────────────────────────────────────────────────
     app.use(helmet());
 
