@@ -146,37 +146,30 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 </div>
 
                 {/* Media */}
-                <div className="post-media-wrap" style={{ cursor: 'pointer', position: 'relative' }}>
+                <div className="post-media-wrap">
                     {post.mediaType === 'video' ? (
-                        <div
-                            style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }}
-                            onClick={(e) => {
-                                e.stopPropagation(); e.preventDefault();
-                                handleImageTap(); // detects double tap to like
-                                setIsMuted(!isMuted); // Single tap toggle mute
-                            }}
-                        >
+                        <div style={{ position: 'relative', background: '#000' }}>
                             <video
                                 ref={videoRef}
-                                src={optimizeCloudinaryVideo(post.mediaUrl)}
+                                src={post.mediaUrl}
                                 className="post-media-video"
                                 muted={isMuted}
                                 loop
                                 playsInline
                                 onPlay={() => setIsPlaying(true)}
                                 onPause={() => setIsPlaying(false)}
+                                onClick={(e) => { e.stopPropagation(); handleImageTap(); }}
                             />
-                            {/* Mute toggle icon */}
+                            {/* Mute toggle */}
                             <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMuted(!isMuted) }}
-                                style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
                             >
-                                {isMuted ? <HiVolumeOff size={20} /> : <HiVolumeUp size={20} />}
+                                {isMuted ? <HiVolumeOff size={18} /> : <HiVolumeUp size={18} />}
                             </button>
-                            {/* Play icon when paused */}
                             {!isPlaying && (
-                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: 16, pointerEvents: 'none', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <HiPlay size={32} style={{ marginLeft: 4 }} />
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: 14, pointerEvents: 'none', color: '#fff', display: 'flex', zIndex: 2 }}>
+                                    <HiPlay size={28} style={{ marginLeft: 3 }} />
                                 </div>
                             )}
                         </div>
