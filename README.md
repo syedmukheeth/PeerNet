@@ -11,7 +11,7 @@
   ![Status](https://img.shields.io/badge/status-production-success)
 
   <br />
-  🌐 **Live:** [peer-net-indol.vercel.app](https://peer-net-indol.vercel.app) | 🔧 **API:** [peernet-5u5q.onrender.com](https://peernet-5u5q.onrender.com/health)
+  🌐 Live: (https://peer-net-indol.vercel.app) | 🔧 API: (https://peernet-5u5q.onrender.com/health)
 </div>
 
 ---
@@ -19,23 +19,6 @@
 ## What is PeerNet?
 
 PeerNet is a full-stack social media platform featuring posts, stories, **Dscrolls** (short-form videos), real-time messaging, live notifications, and an admin panel — all production-ready with JWT authentication, Redis caching, Cloudinary media storage, Socket.io real-time communication, and Docker deployment support.
-
----
-
-## 📸 Screenshots
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/syedmukheeth/PeerNet/master/docs/demo-desktop.png" width="800" alt="PeerNet Desktop View" />
-  <br/>
-  <p><i>Desktop Interface</i></p>
-</div>
-
-<div align="center" style="display: flex; justify-content: center; gap: 20px;">
-  <img src="https://raw.githubusercontent.com/syedmukheeth/PeerNet/master/docs/demo-mobile-feed.png" width="300" alt="Mobile Feed View" />
-  <img src="https://raw.githubusercontent.com/syedmukheeth/PeerNet/master/docs/demo-mobile-dscrolls.png" width="300" alt="Mobile Dscrolls View" />
-</div>
-
-*(Note: Create a `docs/` folder in the root and add `demo-desktop.png`, `demo-mobile-feed.png`, and `demo-mobile-dscrolls.png` to populate these images!)*
 
 ---
 
