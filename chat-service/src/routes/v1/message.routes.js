@@ -35,4 +35,11 @@ router.delete(
     messageController.deleteMessage
 );
 
+// PATCH /api/v1/conversations/:id/messages/read
+router.patch(
+    '/:id/messages/read',
+    authenticate,
+    messageController.markAsRead
+);
+
 module.exports = router;

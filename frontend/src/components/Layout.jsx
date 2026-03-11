@@ -393,17 +393,15 @@ export default function Layout() {
                 {/* ── Footer ── */}
                 <footer className="site-footer">
                     <div className="site-footer__inner">
-                        <span className="site-footer__brand">syedmukheeth</span>
+                        <span className="site-footer__brand">PeerNet</span>
                         <span className="site-footer__divider">·</span>
                         <span className="site-footer__text">Built by</span>
                         <a
-                            href="https://www.linkedin.com/in/syedmukheeth/"
-                            target="_blank"
+                            href="/"
                             rel="noopener noreferrer"
                             className="site-footer__link"
                         >
-                            <FaLinkedin className="site-footer__li-icon" />
-                            Syed Mukheeth
+                            PeerNet
                         </a>
                     </div>
                 </footer>

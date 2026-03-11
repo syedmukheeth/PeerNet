@@ -148,5 +148,14 @@ const deleteMessage = async (messageId, userId) => {
 const getConversationById = (conversationId) =>
     Conversation.findById(conversationId).lean();
 
-module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage, getConversationById };
+const markMessagesAsRead = async (conversationId, userId) => {
+    // Mark messages in the conversation as read where sender is NOT the current user
+    const result = await Message.updateMany(
+        { conversation: conversationId, sender: { $ne: userId }, isRead: false },
+        { $set: { isRead: true } }
+    );
+    return result;
+};
+
+module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage, getConversationById, markMessagesAsRead };
 

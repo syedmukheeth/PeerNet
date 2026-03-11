@@ -28,11 +28,11 @@ export default function CreatePostModal({ onClose }) {
             fd.append('caption', caption)
 
             if (isVideoUpload) {
-                await api.post('/dscrolls', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+                await api.post('/dscrolls', fd)
                 toast.success('Dscroll shared!')
                 queryClient.invalidateQueries({ queryKey: ['dscrolls'] })
             } else {
-                await api.post('/posts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+                await api.post('/posts', fd)
                 toast.success('Post shared!')
                 queryClient.invalidateQueries({ queryKey: ['feed'] })
             }

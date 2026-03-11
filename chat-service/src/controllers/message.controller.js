@@ -99,4 +99,20 @@ const deleteMessage = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-module.exports = { getConversations, createOrGetConversation, getMessages, sendMessage, editMessage, deleteMessage };
+const markAsRead = async (req, res, next) => {
+    try {
+        await messageService.markMessagesAsRead(req.params.id, req.user._id);
+
+        const io = getIO() || req.app.get('io');
+        if (io) {
+            io.to(`conversation:${req.params.id}`).emit('messages_read', {
+                conversationId: req.params.id,
+                readBy: req.user._id
+            });
+        }
+
+        res.json({ success: true, message: 'Messages marked as read' });
+    } catch (err) { next(err); }
+};
+
+module.exports = { getConversations, createOrGetConversation, getMessages, sendMessage, editMessage, deleteMessage, markAsRead };

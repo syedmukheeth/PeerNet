@@ -10,6 +10,20 @@ import EmojiPicker from 'emoji-picker-react'
 
 let socket = null
 
+/* ── Skeletons ──────────────────────────────────────────── */
+function MessageSkeleton() {
+    return (
+        <div style={{ display: 'flex', gap: 12, padding: '10px 0', opacity: 0.6, animation: 'pulse 1.5s infinite' }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--border-md)' }} />
+            <div style={{ flex: 1 }}>
+                <div style={{ width: 120, height: 16, borderRadius: 4, background: 'var(--border-md)', marginBottom: 8 }} />
+                <div style={{ width: '60%', height: 14, borderRadius: 4, background: 'var(--border)', marginBottom: 4 }} />
+                <div style={{ width: '40%', height: 14, borderRadius: 4, background: 'var(--border)' }} />
+            </div>
+        </div>
+    )
+}
+
 /* ── Typing Bubbles ─────────────────────────────────────── */
 function TypingBubble() {
     return (
@@ -105,12 +119,14 @@ export default function Messages() {
     const [conversations, setConversations] = useState([])
     const [activeConvo, setActiveConvo] = useState(null)
     const [messages, setMessages] = useState([])
+    const [loadingMessages, setLoadingMessages] = useState(false)
     const [text, setText] = useState('')
     const [peerTyping, setPeerTyping] = useState(false)
     const [showNewConvo, setShowNewConvo] = useState(false)
     const [starting, setStarting] = useState(false)
     const [mobilePanel, setMobilePanel] = useState('list')
     const [showEmoji, setShowEmoji] = useState(false)
+    const [initialLoad, setInitialLoad] = useState(true)
     const [convoSearch, setConvoSearch] = useState('')
     const [filePreview, setFilePreview] = useState(null)
     const [isUploading, setIsUploading] = useState(false)
@@ -140,11 +156,24 @@ export default function Messages() {
         socket.on('new_message', (msg) => {
             const senderId = msg.sender?._id || msg.sender
             if (senderId === userRef.current?._id) return
+            
             setMessages(m => {
+                // If this message belongs to the currently open conversation
+                if (activeConvoRef.current?._id === msg.conversationId) {
+                    // Mark as read immediately on the server
+                    api.patch(`conversations/${msg.conversationId}/messages/read`, {}, { baseURL: CHAT_BASE_URL }).catch(() => {})
+                    // Assume it's read locally since we are looking at it
+                    msg.isRead = true
+                }
                 if (m.find(x => x._id === msg._id)) return m
                 return [...m, msg]
             })
             setConversations(cs => cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg } : c))
+        })
+        socket.on('messages_read', ({ conversationId, readBy }) => {
+            if (activeConvoRef.current?._id === conversationId && readBy !== userRef.current?._id) {
+                setMessages(m => m.map(msg => msg.sender === userRef.current?._id ? { ...msg, isRead: true } : msg))
+            }
         })
         socket.on('message_edited', (msg) => {
             setMessages(m => m.map(x => x._id === msg._id ? msg : x))
@@ -163,26 +192,41 @@ export default function Messages() {
         return () => { socket?.disconnect(); socket = null }
     }, [])
 
+    const activeConvoRef = useRef(activeConvo)
+    useEffect(() => { activeConvoRef.current = activeConvo }, [activeConvo])
+
     const loadConvos = async () => {
-        const { data } = await api.get(`conversations`, { baseURL: CHAT_BASE_URL })
-        const convos = data.data || []; setConversations(convos); return convos
+        try {
+            const { data } = await api.get(`conversations`, { baseURL: CHAT_BASE_URL })
+            const convos = data.data || []; setConversations(convos); return convos
+        } finally {
+            setInitialLoad(false)
+        }
     }
 
     useEffect(() => {
         loadConvos().then(convos => {
             if (paramConvoId) { const f = convos.find(c => c._id === paramConvoId); if (f) selectConvo(f) }
-        }).catch(() => { })
+        }).catch(() => { setInitialLoad(false) })
     }, []) // eslint-disable-line
 
     const selectConvo = async (convo) => {
         if (activeConvo?._id === convo._id) { setMobilePanel('chat'); return }
         if (activeConvo) socket?.emit('leave_conversation', activeConvo._id)
-        setActiveConvo(convo); setMessages([]); setMobilePanel('chat')
+        setActiveConvo(convo); setMessages([]); setMobilePanel('chat'); setLoadingMessages(true)
         socket?.emit('join_conversation', convo._id)
         navigate(`/messages/${convo._id}`, { replace: true })
-        try { const { data } = await api.get(`conversations/${convo._id}/messages`, { params: { limit: 50 }, baseURL: CHAT_BASE_URL }); setMessages(data.data || []) }
-        catch { toast.error('Failed to load messages') }
-        setTimeout(() => inputRef.current?.focus(), 200)
+        try {
+            const { data } = await api.get(`conversations/${convo._id}/messages`, { params: { limit: 50 }, baseURL: CHAT_BASE_URL })
+            setMessages(data.data || [])
+            // Mark messages as read on open
+            api.patch(`conversations/${convo._id}/messages/read`, {}, { baseURL: CHAT_BASE_URL }).catch(() => {})
+        } catch {
+            toast.error('Failed to load messages')
+        } finally {
+            setLoadingMessages(false)
+            setTimeout(() => inputRef.current?.focus(), 200)
+        }
     }
 
     const startConvoWith = async (u) => {
@@ -219,7 +263,6 @@ export default function Messages() {
             if (attachedFile) formData.append('media', attachedFile)
 
             const { data } = await api.post(`conversations/${activeConvo._id}/messages`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
                 baseURL: CHAT_BASE_URL
             })
             setMessages(m => {
@@ -367,8 +410,23 @@ export default function Messages() {
 
                     {/* Convo items */}
                     <div style={{ flex: 1, overflowY: 'auto' }}>
-                        {starting && <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}><div className="spinner" /></div>}
-                        {filteredConvos.map(c => {
+                        {initialLoad ? (
+                            <div style={{ padding: '10px 16px' }}>
+                                {Array.from({ length: Math.floor(window.innerHeight / 72) || 8 }).map((_, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0', opacity: 1 - i * 0.1 }}>
+                                        <div className="skeleton-media" style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0 }} />
+                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                            <div className="skeleton-text" style={{ width: '40%', height: 14, borderRadius: 4 }} />
+                                            <div className="skeleton-text" style={{ width: '70%', height: 12, borderRadius: 4 }} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : starting ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}><div className="spinner" /></div>
+                        ) : null}
+                        
+                        {!initialLoad && filteredConvos.map(c => {
                             const peer = getOther(c)
                             const pav = peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`
                             const isActive = activeConvo?._id === c._id
@@ -403,7 +461,7 @@ export default function Messages() {
                                 </div>
                             )
                         })}
-                        {!conversations.length && !starting && (
+                        {!initialLoad && !conversations.length && !starting && (
                             <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-3)' }}>
                                 <div style={{ fontSize: 44, marginBottom: 14 }}>✉️</div>
                                 <p style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-1)', marginBottom: 8 }}>Your messages</p>
@@ -446,7 +504,11 @@ export default function Messages() {
 
                             {/* Messages */}
                             <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {messages.length === 0 && (
+                                {loadingMessages ? (
+                                    <>
+                                        {Array.from({ length: 5 }).map((_, i) => <MessageSkeleton key={i} />)}
+                                    </>
+                                ) : messages.length === 0 && (
                                     <div style={{ textAlign: 'center', margin: 'auto', color: 'var(--text-3)' }}>
                                         <img src={otherAvatar} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 14px', display: 'block' }} alt="" />
                                         <p style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-1)', marginBottom: 4 }}>{other.username}</p>
@@ -454,7 +516,7 @@ export default function Messages() {
                                     </div>
                                 )}
 
-                                {messages.map((m, i) => {
+                                {!loadingMessages && messages.map((m, i) => {
                                     const isMine = m.sender === user?._id || m.sender?._id === user?._id
                                     const nextSender = messages[i + 1]?.sender?._id || messages[i + 1]?.sender
                                     const prevSender = messages[i - 1]?.sender?._id || messages[i - 1]?.sender
@@ -553,6 +615,9 @@ export default function Messages() {
                                                 {isLast && (
                                                     <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
                                                         {timeago(m.createdAt)}
+                                                        {isMine && m.isRead && (
+                                                            <span style={{ marginLeft: 6, color: 'var(--accent)', fontWeight: 600 }}>Seen</span>
+                                                        )}
                                                     </span>
                                                 )}
                                             </div>

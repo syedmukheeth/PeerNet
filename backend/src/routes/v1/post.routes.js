@@ -51,4 +51,7 @@ router.delete('/:id/save', authenticate, postController.unsavePost);
 router.get('/:postId/comments', authenticate, commentController.getComments);
 router.post('/:postId/comments', authenticate, validate(addCommentSchema), commentController.addComment);
 
+// GET /api/v1/posts/:postId/comments/:commentId/replies
+router.get('/:postId/comments/:commentId/replies', authenticate, commentController.getReplies);
+
 module.exports = router;

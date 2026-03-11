@@ -37,9 +37,7 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
             fd.append('website', form.website)
             if (avatar) fd.append('avatar', avatar)
 
-            const { data } = await api.patch('/users/me', fd, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
+            const { data } = await api.patch('/users/me', fd)
             updateUser(data.data)
             toast.success('Profile updated!')
             onSave(data.data)

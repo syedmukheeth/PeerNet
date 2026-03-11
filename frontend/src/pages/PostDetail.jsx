@@ -25,6 +25,8 @@ export default function PostDetail() {
     const [loading, setLoading] = useState(true)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
+    const [replyingTo, setReplyingTo] = useState(null)
+    const [replyData, setReplyData] = useState({}) // { commentId: { replies: [], loading: false, show: false } }
     const inputRef = useRef()
     const menuRef = useRef()
     const commentsEndRef = useRef()
@@ -79,11 +81,59 @@ export default function PostDetail() {
         e.preventDefault()
         if (!body.trim()) return
         try {
-            const { data } = await api.post(`/posts/${id}/comments`, { body })
-            setComments(c => [...c, data.data])
+            const payload = { body }
+            if (replyingTo) payload.parentComment = replyingTo._id
+
+            const { data } = await api.post(`/posts/${id}/comments`, payload)
+
+            if (replyingTo) {
+                // Add to replies of the parent comment
+                setReplyData(prev => ({
+                    ...prev,
+                    [replyingTo._id]: {
+                        ...prev[replyingTo._id],
+                        replies: [...(prev[replyingTo._id]?.replies || []), data.data],
+                        show: true
+                    }
+                }))
+            } else {
+                // Add to top level comments
+                setComments(c => [...c, data.data])
+                setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+            }
+            
             setBody('')
-            setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+            setReplyingTo(null)
         } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
+    }
+
+    const toggleReplies = async (commentId) => {
+        const current = replyData[commentId]
+        
+        // If we already have them and are showing them, hide them
+        if (current?.show) {
+            setReplyData(prev => ({ ...prev, [commentId]: { ...prev[commentId], show: false } }))
+            return
+        }
+
+        // If we already have them but they're hidden, just show them
+        if (current?.replies) {
+            setReplyData(prev => ({ ...prev, [commentId]: { ...prev[commentId], show: true } }))
+            return
+        }
+
+        // Otherwise fetch them
+        setReplyData(prev => ({ ...prev, [commentId]: { loading: true, show: true, replies: [] } }))
+        try {
+            const { data } = await api.get(`/posts/${id}/comments/${commentId}/replies`)
+            setReplyData(prev => ({
+                ...prev,
+                [commentId]: { loading: false, show: true, replies: data.data || [] }
+            }))
+        } catch (err) {
+            setReplyData(prev => ({ ...prev, [commentId]: { loading: false, show: false, replies: [] } }))
+            toast.error('Failed to load replies')
+        }
     }
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}><div className="spinner" /></div>
@@ -212,7 +262,56 @@ export default function PostDetail() {
                                                 </strong>
                                                 {c.body}
                                             </div>
-                                            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>{timeago(c.createdAt)}</div>
+                                            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, display: 'flex', gap: 12, alignItems: 'center' }}>
+                                                <span>{timeago(c.createdAt)}</span>
+                                                <button 
+                                                    onClick={() => {
+                                                        setReplyingTo(replyingTo?._id === c._id ? null : c);
+                                                        if (replyingTo?._id !== c._id) setTimeout(() => inputRef.current?.focus(), 10);
+                                                    }}
+                                                    style={{ background: 'none', border: 'none', color: replyingTo?._id === c._id ? 'var(--text-1)' : 'var(--text-3)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                                                >
+                                                    {replyingTo?._id === c._id ? 'Cancel reply' : 'Reply'}
+                                                </button>
+                                            </div>
+
+                                            {/* Replies Toggle */}
+                                            <div style={{ marginTop: 8 }}>
+                                                <button 
+                                                    onClick={() => toggleReplies(c._id)}
+                                                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', color: 'var(--text-3)', fontSize: 11, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                                                >
+                                                    <div style={{ width: 20, height: 1, background: 'var(--border)' }} />
+                                                    {replyData[c._id]?.loading ? 'Loading...' : replyData[c._id]?.show ? 'Hide replies' : 'View replies'}
+                                                </button>
+                                            </div>
+
+                                            {/* Replies List */}
+                                            {replyData[c._id]?.show && (
+                                                <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                    {replyData[c._id]?.replies?.map(reply => {
+                                                        const rav = reply.author?.avatarUrl || `https://ui-avatars.com/api/?name=${reply.author?.username}&background=6366F1&color=fff`
+                                                        return (
+                                                            <div key={reply._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                                                                <Link to={`/profile/${reply.author?._id}`}>
+                                                                    <img src={rav} style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} alt="" />
+                                                                </Link>
+                                                                <div style={{ flex: 1 }}>
+                                                                    <div style={{ fontSize: 13, lineHeight: 1.5 }}>
+                                                                        <strong style={{ marginRight: 6 }}>
+                                                                            <Link to={`/profile/${reply.author?._id}`} style={{ color: 'var(--text-1)', textDecoration: 'none' }}>
+                                                                                {reply.author?.username}
+                                                                            </Link>
+                                                                        </strong>
+                                                                        {reply.body}
+                                                                    </div>
+                                                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>{timeago(reply.createdAt)}</div>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )
@@ -244,14 +343,21 @@ export default function PostDetail() {
                         <form onSubmit={handleComment} style={{ display: 'flex', alignItems: 'center', gap: 10, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
                             <img src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`}
                                 style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt="" />
-                            <input
-                                ref={inputRef}
-                                value={body} onChange={e => setBody(e.target.value)}
-                                placeholder="Add a comment…"
-                                style={{
-                                    flex: 1, background: 'none', border: 'none', outline: 'none',
-                                    color: 'var(--text-1)', fontSize: 14,
-                                }} />
+                            <div style={{ flex: 1, position: 'relative' }}>
+                                {replyingTo && (
+                                    <div style={{ position: 'absolute', bottom: '100%', left: 0, fontSize: 11, color: 'var(--text-3)', paddingBottom: 6 }}>
+                                        Replying to <strong>{replyingTo.author?.username}</strong>
+                                    </div>
+                                )}
+                                <input
+                                    ref={inputRef}
+                                    value={body} onChange={e => setBody(e.target.value)}
+                                    placeholder={replyingTo ? 'Write a reply...' : 'Add a comment…'}
+                                    style={{
+                                        width: '100%', background: 'none', border: 'none', outline: 'none',
+                                        color: 'var(--text-1)', fontSize: 14,
+                                    }} />
+                            </div>
                             {body.trim() && (
                                 <button type="submit" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>
                                     Post
