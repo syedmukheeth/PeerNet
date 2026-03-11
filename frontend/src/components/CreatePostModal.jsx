@@ -23,7 +23,10 @@ export default function CreatePostModal({ onClose }) {
         setLoading(true)
         try {
             const fd = new FormData()
-            const isVideoUpload = file.type?.startsWith('video/') || /\.(mp4|mov|webm)$/i.test(file.name)
+            const isVideoUpload = file.type?.startsWith('video/') ||
+                /\.(mp4|mov|webm|mkv|avi|3gp|hevc)$/i.test(file.name || '') ||
+                (file.type === 'application/octet-stream' && file.size > 2000000) // Fallback for raw mobile uploads
+            console.log('Upload File:', { name: file.name, type: file.type, isVideoUpload })
             fd.append(isVideoUpload ? 'video' : 'media', file)
             fd.append('caption', caption)
 
