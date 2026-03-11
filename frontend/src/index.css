@@ -2397,6 +2397,11 @@ textarea::placeholder {
   line-height: 1.55;
 }
 
+.mobile-header-spacer,
+.mobile-nav-spacer {
+  display: none;
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
   .app-layout {
@@ -2457,8 +2462,19 @@ textarea::placeholder {
   }
 
   .content-wrap {
-    padding: 60px 0px 60px;
-    /* Accounts for both top and bottom headers edge-to-edge */
+    padding: 0;
+  }
+
+  .mobile-header-spacer {
+    display: block;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .mobile-nav-spacer {
+    display: block;
+    height: 58px;
+    flex-shrink: 0;
   }
 
   .chat-layout {
