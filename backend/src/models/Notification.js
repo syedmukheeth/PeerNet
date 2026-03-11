@@ -12,7 +12,7 @@ const notificationSchema = new mongoose.Schema(
             required: true,
         },
         entityId: { type: mongoose.Schema.Types.ObjectId, default: null },
-        entityModel: { type: String, enum: ['Post', 'Comment', 'Reel', 'Message', null], default: null },
+        entityModel: { type: String, enum: ['Post', 'Comment', 'Dscroll', 'Message', null], default: null },
         isRead: { type: Boolean, default: false },
     },
     { timestamps: true },

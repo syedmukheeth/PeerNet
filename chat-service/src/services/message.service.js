@@ -61,7 +61,7 @@ const sendMessage = async (conversationId, senderId, { body }, file) => {
     let mediaPublicId = '';
 
     if (file) {
-        const result = await uploadToCloudinary(file.buffer, { folder: 'peernet/messages' });
+        const result = await uploadToCloudinary(file.path, { folder: 'peernet/messages' });
         mediaUrl = result.secure_url;
         mediaPublicId = result.public_id;
     }

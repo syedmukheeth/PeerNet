@@ -207,7 +207,7 @@ function NotifSkeleton() {
 
 /* ── Main component ───────────────────────────────────────── */
 export default function Notifications() {
-    const { user } = useAuth()
+    useAuth()
     const [notifs, setNotifs] = useState([])
     const [unread, setUnread] = useState(0)
     const [loading, setLoading] = useState(true)

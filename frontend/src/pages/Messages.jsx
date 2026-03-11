@@ -132,8 +132,6 @@ export default function Messages() {
     const [isUploading, setIsUploading] = useState(false)
     const [editingMessageId, setEditingMessageId] = useState(null)
     const [editBody, setEditBody] = useState('')
-    const [hoveredMessageId, setHoveredMessageId] = useState(null)
-    const [tappedMessageId, setTappedMessageId] = useState(null)
     const fileRef = useRef()
     const docRef = useRef()
     const bottomRef = useRef()
@@ -536,10 +534,7 @@ export default function Messages() {
                                             alignItems: isMine ? 'flex-end' : 'flex-start',
                                             marginBottom: isLast ? 6 : 1,
                                             position: 'relative'
-                                        }}
-                                        onMouseEnter={() => setHoveredMessageId(m._id)}
-                                        onMouseLeave={() => setHoveredMessageId(null)}
-                                        onTouchStart={() => { if (isMine) setTappedMessageId(id => id === m._id ? null : m._id) }}>
+                                        }}>
 
                                             {/* (Edit/Delete moved below message) */}
 

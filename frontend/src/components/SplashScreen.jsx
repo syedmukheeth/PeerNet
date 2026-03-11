@@ -55,7 +55,7 @@ export default function SplashScreen({ onDone }) {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.7, duration: 0.4 }}
                     >
-                        by Syed Mukheeth
+                        Connect with your peers
                     </motion.p>
 
                     {/* Bottom Meta logo (Instagram-style) */}
@@ -65,7 +65,7 @@ export default function SplashScreen({ onDone }) {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1.0, duration: 0.4 }}
                     >
-                        Built by <span>PeerNet</span>
+                        Built by <span>Syed Mukheeth</span>
                     </motion.div>
                 </motion.div>
             )}
