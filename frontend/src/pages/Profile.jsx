@@ -157,7 +157,7 @@ export default function Profile() {
                                 position: 'absolute',
                                 inset: -3,
                                 borderRadius: '50%',
-                                background: 'conic-gradient(from 0deg, #DD2A7B, #F58529, #DD2A7B)',
+                                background: 'linear-gradient(215deg, #6559CA 0%, #C13584 25%, #E1306C 50%, #F77737 75%, #FCAF45 100%)',
                                 animation: 'rotateBorder 3s linear infinite',
                                 padding: 2,
                                 zIndex: 0,

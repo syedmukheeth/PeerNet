@@ -8,16 +8,8 @@ import CreateStoryModal from './CreateStoryModal'
 import { StorySkeleton } from './SkeletonLoader'
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
-// ── Story ring gradient colors ────────────────────────────────
-const RING_COLORS = [
-    ['#FF375F', '#FF9500'],   // Rose → Amber   (Apple accent + energy)
-    ['#DD2A7B', '#F58529'],   // Instagram magenta → orange
-    ['#8134AF', '#DD2A7B'],   // Instagram purple → magenta
-    ['#515BD4', '#8134AF'],   // Instagram blue → purple
-    ['#06C8FF', '#515BD4'],   // Cyan → blue
-    ['#30D158', '#06C8FF'],   // Apple green → cyan
-    ['#FFD60A', '#FF375F'],   // Gold → rose
-]
+// Instagram-style 4-stop gradient (purple → magenta → orange → yellow)
+const IG_GRADIENT = 'linear-gradient(215deg, #6559CA 0%, #C13584 25%, #E1306C 50%, #F77737 75%, #FCAF45 100%)'
 
 // ── Animated Progress Bar (pause-aware) ──────────────────────
 function ViewerProgressBar({ total, current, duration, paused, onNext }) {
@@ -240,8 +232,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
 
 // ── Story Item Circle ─────────────────────────────────────────
-function StoryCircle({ label, avatar, ringColors, seen, onClick, isAdd, index }) {
-    const [from, to] = ringColors || ['#6366F1', '#A78BFA']
+function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
 
     return (
         <motion.div
@@ -260,7 +251,7 @@ function StoryCircle({ label, avatar, ringColors, seen, onClick, isAdd, index })
                         borderRadius: '50%',
                         background: seen
                             ? `conic-gradient(from 0deg, var(--border-md) 0%, var(--border-md) 100%)`
-                            : `conic-gradient(from 0deg, ${from}, ${to}, ${from})`,
+                            : IG_GRADIENT,
                         animation: seen ? 'none' : 'rotateBorder 3s linear infinite',
                         padding: 2,
                     }} />
@@ -361,7 +352,6 @@ export default function StoryRail() {
                                     key={g.author._id}
                                     label={g.author.username}
                                     avatar={optimizeAvatarUrl(rawAvatarUrl)}
-                                    ringColors={RING_COLORS[i % RING_COLORS.length]}
                                     seen={g.stories.every(s => s.viewedByMe)}
                                     index={i + 1}
                                     onClick={() => setViewerGroup({ groups, startIdx: i })}
