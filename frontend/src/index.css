@@ -1124,6 +1124,9 @@ textarea {
 
 .post-media-wrap {
   overflow: hidden;
+  min-height: 200px;
+  background: var(--surface);
+  position: relative;
 }
 
 .post-media {
@@ -1139,8 +1142,9 @@ textarea {
 
 .post-media-video {
   width: 100%;
+  min-height: 280px;
   max-height: 520px;
-  object-fit: contain;
+  object-fit: cover;
   background: #000;
   display: block;
 }
