@@ -251,7 +251,7 @@ export default function Profile() {
                 let isLoading = false
 
                 if (tab === 'posts') {
-                    displayPosts = posts.filter(p => p.mediaType !== 'video')
+                    displayPosts = posts // Show all posts including videos in main grid
                 } else if (tab === 'dscrolls') {
                     displayPosts = posts.filter(p => p.mediaType === 'video')
                     emptyIcon = '🎬'
