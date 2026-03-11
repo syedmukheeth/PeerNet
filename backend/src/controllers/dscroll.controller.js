@@ -5,17 +5,38 @@ const { parsePagination } = require('../utils/pagination.utils');
 
 const createDscroll = async (req, res, next) => {
     try {
+        // ── DEBUG: log exactly what arrives ──────────────────────────────
+        console.log('[Dscroll] createDscroll called');
+        console.log('[Dscroll] req.file:', req.file);
+        console.log('[Dscroll] req.body:', req.body);
+        console.log('[Dscroll] user:', req.user?._id);
+        // ─────────────────────────────────────────────────────────────────
+
+        if (!req.file) {
+            console.log('[Dscroll] ERROR: No file received by multer');
+            return res.status(400).json({ success: false, message: 'No video file received. Make sure the field name is "video".' });
+        }
+
         const dscroll = await dscrollService.createDscroll(req.user._id, req.body, req.file);
+        console.log('[Dscroll] Success! Post ID:', dscroll._id);
         res.status(201).json({ success: true, data: dscroll });
-    } catch (err) { next(err); }
+    } catch (err) {
+        console.error('[Dscroll] createDscroll ERROR:', err.message, err.stack);
+        next(err);
+    }
 };
 
 const getDscrollsFeed = async (req, res, next) => {
     try {
+        console.log('[Dscroll] getDscrollsFeed called, user:', req.user?._id);
         const { limit, cursor } = parsePagination(req.query);
         const result = await dscrollService.getDscrollsFeed({ limit, cursor, userId: req.user._id });
+        console.log('[Dscroll] getDscrollsFeed count:', result.data?.length);
         res.json({ success: true, ...result });
-    } catch (err) { next(err); }
+    } catch (err) {
+        console.error('[Dscroll] getDscrollsFeed ERROR:', err.message);
+        next(err);
+    }
 };
 
 const deleteDscroll = async (req, res, next) => {

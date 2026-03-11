@@ -10,12 +10,22 @@ const { getRedisOptional } = require('../config/redis');
 const createDscroll = async (userId, { caption, tags }, file) => {
     if (!file) throw new ApiError(400, 'Video file is required');
 
-    const { secure_url, public_id } = await uploadToCloudinary(file.path, {
-        folder: 'peernet/posts', // Save in the same folder as posts for consistency
-        resource_type: 'video',
-        eager: [{ format: 'jpg', start_offset: '0' }],
-        eager_async: true,
-    });
+    console.log('[DscrollService] createDscroll start');
+    console.log('[DscrollService] file:', { path: file.path, mimetype: file.mimetype, size: file.size, originalname: file.originalname });
+
+    let uploadResult;
+    try {
+        uploadResult = await uploadToCloudinary(file.path, {
+            folder: 'peernet/dscrolls',
+            resource_type: 'video',
+        });
+        console.log('[DscrollService] Cloudinary upload success:', uploadResult.secure_url);
+    } catch (cloudErr) {
+        console.error('[DscrollService] Cloudinary upload FAILED:', cloudErr.message);
+        throw cloudErr;
+    }
+
+    const { secure_url, public_id } = uploadResult;
 
     const parsedTags = Array.isArray(tags)
         ? tags
