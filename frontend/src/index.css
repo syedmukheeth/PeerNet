@@ -8,19 +8,19 @@
 :root,
 [data-theme="dark"] {
   /* Backgrounds */
-  --bg: #070710;
-  --surface: #0C0C1A;
-  --card: #111126;
-  --hover: #181830;
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --card: #121212;
+  --hover: #1f1f1f;
 
   /* Borders */
-  --border: rgba(99, 102, 241, 0.10);
-  --border-md: rgba(99, 102, 241, 0.22);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-md: rgba(255, 255, 255, 0.15);
 
   /* Typography */
-  --text-1: #EEF0FF;
-  --text-2: #A8AEDE;
-  --text-3: #6B70A8;
+  --text-1: #ffffff;
+  --text-2: #a1a1aa;
+  --text-3: #71717a;
 
   /* ── Accent: Electric Blue (logo midpoint) ── */
   --accent: #4F7AFF;
@@ -53,19 +53,19 @@
 /* ── Light Mode — Clean White + Purple/Blue ─────────────── */
 [data-theme="light"] {
   /* Backgrounds */
-  --bg: #F5F5FC;
-  --surface: #FFFFFF;
-  --card: #FFFFFF;
-  --hover: #EEEEF8;
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --hover: #f3f4f6;
 
   /* Borders */
-  --border: rgba(79, 122, 255, 0.08);
-  --border-md: rgba(79, 122, 255, 0.18);
+  --border: rgba(0, 0, 0, 0.06);
+  --border-md: rgba(0, 0, 0, 0.12);
 
   /* Typography */
-  --text-1: #0F0F2D;
-  --text-2: #4A4A7A;
-  --text-3: #9090B8;
+  --text-1: #09090b;
+  --text-2: #52525b;
+  --text-3: #a1a1aa;
 
   /* ── Accent: Royal Blue ── */
   --accent: #4F7AFF;
