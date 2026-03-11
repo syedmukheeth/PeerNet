@@ -116,7 +116,7 @@ export default function Profile() {
     const handleMessage = async () => {
         setMessaging(true)
         try {
-            const { data } = await api.post(`${CHAT_BASE_URL}/conversations`, { targetUserId: id })
+            const { data } = await api.post(`conversations`, { targetUserId: id }, { baseURL: CHAT_BASE_URL })
             navigate(`/messages/${data.data._id}`)
         } catch (err) {
             toast.error(err.response?.data?.message || 'Could not open chat')
