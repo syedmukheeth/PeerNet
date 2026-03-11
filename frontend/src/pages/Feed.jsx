@@ -181,7 +181,9 @@ export default function Feed() {
         refetchOnMount: 'always',
     })
 
-    const posts = data ? data.pages.flatMap((page) => page.data) : []
+    const posts = data
+        ? data.pages.flatMap((page) => (Array.isArray(page?.data) ? page.data : []))
+        : []
     const loading = status === 'pending' || isFetchingNextPage
 
     const onLikeToggle = (postId, liked, likesCount) => {
@@ -231,8 +233,8 @@ export default function Feed() {
                 <div className="feed-col">
                     <StoryRail />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20 }}>
-                        {posts.map(post => (
-                            <PostCard key={post._id} post={post}
+                        {posts.filter(Boolean).map(post => (
+                            <PostCard key={post?._id || post?.id} post={post}
                                 onLikeToggle={onLikeToggle}
                                 onDelete={onDelete}
                                 onUpdate={onUpdate} />

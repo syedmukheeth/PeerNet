@@ -21,6 +21,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [isLikePending, setIsLikePending] = useState(false)
     const [lastTap, setLastTap] = useState(0)
     const [menuOpen, setMenuOpen] = useState(false)
+    const [editOpen, setEditOpen] = useState(false)
     const [caption, setCaption] = useState(post.caption || '')
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
