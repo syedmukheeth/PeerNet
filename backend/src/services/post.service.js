@@ -40,6 +40,16 @@ const createPost = async (userId, { caption, location, tags }, file) => {
 
     await User.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } });
 
+    // Invalidate the user's feed cache
+    const redis = getRedis();
+    if (redis) {
+        try {
+            await redis.del(`feed:${userId}:cursor:start`);
+        } catch (e) {
+            console.error('Failed to clear feed cache on new post', e);
+        }
+    }
+
     return post;
 };
 

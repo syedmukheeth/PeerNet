@@ -8,7 +8,7 @@ const ApiError = require('../utils/ApiError');
 const createStory = async (userId, file) => {
     if (!file) throw new ApiError(400, 'Media file is required');
 
-    const isVideo = file.mimetype.startsWith('video/');
+    const isVideo = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
     const { secure_url, public_id } = await uploadToCloudinary(file.path, {
         folder: 'peernet/stories',
         resource_type: isVideo ? 'video' : 'image',
