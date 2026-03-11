@@ -249,7 +249,8 @@ export default function Messages() {
             if (attachedFile) formData.append('media', attachedFile)
 
             const { data } = await api.post(`conversations/${activeConvo._id}/messages`, formData, {
-                baseURL: CHAT_BASE_URL
+                baseURL: CHAT_BASE_URL,
+                headers: { 'Content-Type': 'multipart/form-data' }
             })
             setMessages(m => {
                 if (m.find(x => x._id === data.data._id)) return m
