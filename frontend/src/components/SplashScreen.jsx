@@ -55,7 +55,7 @@ export default function SplashScreen({ onDone }) {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.7, duration: 0.4 }}
                     >
-                        Connect · Share · Discover
+                        by Syed Mukheeth
                     </motion.p>
 
                     {/* Bottom Meta logo (Instagram-style) */}

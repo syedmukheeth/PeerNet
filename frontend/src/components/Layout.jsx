@@ -221,7 +221,6 @@ export default function Layout() {
         if (location.pathname === '/notifications') {
             setUnreadCount(0)
             unreadRef.current = 0
-            api.patch('/notifications/read').catch(() => { })
         }
         if (location.pathname.startsWith('/messages')) {
             setMsgCount(0)
@@ -397,11 +396,12 @@ export default function Layout() {
                         <span className="site-footer__divider">·</span>
                         <span className="site-footer__text">Built by</span>
                         <a
-                            href="/"
+                            href="https://github.com/syedmukheeth"
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="site-footer__link"
                         >
-                            PeerNet
+                            Syed Mukheeth
                         </a>
                     </div>
                 </footer>
