@@ -2,6 +2,7 @@
 
 const messageService = require('../services/message.service');
 const { parsePagination } = require('../utils/pagination.utils');
+const { getIO } = require('../utils/socket.utils');
 
 const getConversations = async (req, res, next) => {
     try {
@@ -37,22 +38,23 @@ const sendMessage = async (req, res, next) => {
             req.file || null,
         );
 
-        // Emit real-time socket event to:
-        // 1. The conversation room (for active chat viewers)
-        // 2. Each participant's personal room (for notification badges in Layout)
-        const io = req.app.get('io');
+        // Emit real-time events
+        const io = getIO() || req.app.get('io');
         if (io) {
-            const payload = { ...message.toObject?.() ?? message, conversationId: req.params.id };
-            // Active viewers of this conversation
+            // Build a plain-object payload with conversationId attached
+            const msgObj = message.toObject ? message.toObject() : { ...message };
+            const payload = { ...msgObj, conversationId: req.params.id };
+
+            // 1. Broadcast to the conversation room (active chat viewers get the message inline)
             io.to(`conversation:${req.params.id}`).emit('new_message', payload);
-            // Every participant's personal notification channel
-            const convo = await require('../services/message.service').getConversationById(req.params.id);
+
+            // 2. Also emit to every participant's personal room so Layout.jsx
+            //    can show the notification badge / toast even on other pages.
+            const convo = await messageService.getConversationById(req.params.id);
             if (convo) {
-                convo.participants.forEach((participantId) => {
-                    const pid = participantId.toString();
-                    // Don't double-emit to the sender (they already received an optimistic update)
-                    io.to(`user:${pid}`).emit('new_message', payload);
-                });
+                for (const participantId of convo.participants) {
+                    io.to(`user:${participantId.toString()}`).emit('new_message', payload);
+                }
             }
         }
 
@@ -68,10 +70,10 @@ const editMessage = async (req, res, next) => {
             req.body.body
         );
 
-        // Emit real-time socket event
-        const io = req.app.get('io');
+        const io = getIO() || req.app.get('io');
         if (io) {
-            io.to(`conversation:${req.params.id}`).emit('message_edited', message);
+            const payload = message.toObject ? message.toObject() : { ...message };
+            io.to(`conversation:${req.params.id}`).emit('message_edited', { ...payload, conversationId: req.params.id });
         }
 
         res.json({ success: true, data: message });
@@ -85,12 +87,11 @@ const deleteMessage = async (req, res, next) => {
             req.user._id
         );
 
-        // Emit real-time socket event
-        const io = req.app.get('io');
+        const io = getIO() || req.app.get('io');
         if (io) {
             io.to(`conversation:${req.params.id}`).emit('message_deleted', {
                 conversationId: req.params.id,
-                messageId: req.params.messageId
+                messageId: req.params.messageId,
             });
         }
 

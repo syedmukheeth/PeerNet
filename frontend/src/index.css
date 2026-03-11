@@ -2066,20 +2066,23 @@ textarea {
     /* Top padding pushed down to account for the top-header */
   }
 
-  /* Chat: full screen single column */
+  /* Chat: full screen single column — covers full screen on mobile */
   .chat-layout {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     position: fixed;
     inset: 0;
-    bottom: 58px;
-    z-index: 50;
+    /* Don't cut off at mobile-nav — let the chat-area handle its own z-index */
+    bottom: 0;
+    z-index: 100;
   }
 
+  /* Convo list sits below the mobile top header */
   .convo-list {
     display: block;
     width: 100%;
     border-right: none;
+    padding-bottom: 0;
   }
 
   .chat-area {
