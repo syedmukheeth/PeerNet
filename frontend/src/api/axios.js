@@ -1,8 +1,14 @@
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const BASE_URL = rawApiUrl 
+    ? (rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/+$/, '')}/api/v1`)
+    : '/api/v1';
 
-export const CHAT_BASE_URL = import.meta.env.VITE_CHAT_API_URL || 'http://localhost:3001/api/v1'
+const rawChatApiUrl = import.meta.env.VITE_CHAT_API_URL;
+export const CHAT_BASE_URL = rawChatApiUrl 
+    ? (rawChatApiUrl.endsWith('/api/v1') ? rawChatApiUrl : `${rawChatApiUrl.replace(/\/+$/, '')}/api/v1`)
+    : 'http://localhost:3001/api/v1';
 
 export const SOCKET_URL = import.meta.env.VITE_CHAT_API_URL
     ? import.meta.env.VITE_CHAT_API_URL.replace(/\/api\/v1\/?$/, '')
@@ -17,6 +23,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken')
     if (token) config.headers.Authorization = `Bearer ${token}`
+    console.log('[AXIOS] Outgoing ->', config.baseURL, config.url)
     return config
 })
 
