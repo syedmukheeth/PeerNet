@@ -145,4 +145,8 @@ const deleteMessage = async (messageId, userId) => {
     return true;
 };
 
-module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage };
+const getConversationById = (conversationId) =>
+    Conversation.findById(conversationId).lean();
+
+module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage, getConversationById };
+

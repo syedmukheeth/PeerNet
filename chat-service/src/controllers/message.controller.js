@@ -37,10 +37,23 @@ const sendMessage = async (req, res, next) => {
             req.file || null,
         );
 
-        // Emit real-time socket event
+        // Emit real-time socket event to:
+        // 1. The conversation room (for active chat viewers)
+        // 2. Each participant's personal room (for notification badges in Layout)
         const io = req.app.get('io');
         if (io) {
-            io.to(`conversation:${req.params.id}`).emit('new_message', message);
+            const payload = { ...message.toObject?.() ?? message, conversationId: req.params.id };
+            // Active viewers of this conversation
+            io.to(`conversation:${req.params.id}`).emit('new_message', payload);
+            // Every participant's personal notification channel
+            const convo = await require('../services/message.service').getConversationById(req.params.id);
+            if (convo) {
+                convo.participants.forEach((participantId) => {
+                    const pid = participantId.toString();
+                    // Don't double-emit to the sender (they already received an optimistic update)
+                    io.to(`user:${pid}`).emit('new_message', payload);
+                });
+            }
         }
 
         res.status(201).json({ success: true, data: message });

@@ -382,6 +382,8 @@ export default function Dscrolls() {
         queryKey: ['dscrolls'],
         queryFn: fetchDscrolls,
         getNextPageParam: (last) => last.nextCursor ?? undefined,
+        staleTime: 0,
+        refetchOnMount: 'always',
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
