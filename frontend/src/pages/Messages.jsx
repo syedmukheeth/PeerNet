@@ -140,7 +140,10 @@ export default function Messages() {
         socket.on('new_message', (msg) => {
             const senderId = msg.sender?._id || msg.sender
             if (senderId === userRef.current?._id) return
-            setMessages(m => [...m, msg])
+            setMessages(m => {
+                if (m.find(x => x._id === msg._id)) return m
+                return [...m, msg]
+            })
             setConversations(cs => cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg } : c))
         })
         socket.on('message_edited', (msg) => {
@@ -219,7 +222,10 @@ export default function Messages() {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 baseURL: CHAT_BASE_URL
             })
-            setMessages(m => [...m, data.data])
+            setMessages(m => {
+                if (m.find(x => x._id === data.data._id)) return m
+                return [...m, data.data]
+            })
             setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: data.data } : c))
         } catch {
             toast.error('Failed to send')
@@ -473,31 +479,7 @@ export default function Messages() {
                                         onMouseLeave={() => setHoveredMessageId(null)}
                                         onTouchStart={() => { if (isMine) setTappedMessageId(id => id === m._id ? null : m._id) }}>
 
-                                            {/* Tap/Hover Actions (Edit/Delete) — visible on hover or after tap on mobile */}
-                                            {isMine && (hoveredMessageId === m._id || tappedMessageId === m._id) && editingMessageId !== m._id && (
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    right: '100%',
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                    marginRight: 8,
-                                                    display: 'flex',
-                                                    gap: 4,
-                                                    background: 'var(--surface)',
-                                                    border: '1px solid var(--border-md)',
-                                                    borderRadius: 8,
-                                                    padding: 4,
-                                                    boxShadow: 'var(--shadow-md)',
-                                                    zIndex: 2,
-                                                }}>
-                                                    {Date.now() - new Date(m.createdAt).getTime() <= 15 * 60 * 1000 && (
-                                                        <>
-                                                            <button onClick={() => startEditing(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-2)', display: 'flex' }} title="Edit (within 15m)"><HiPencilAlt size={16} /></button>
-                                                            <button onClick={() => deleteMessage(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--error)', display: 'flex' }} title="Delete (within 15m)"><HiTrash size={16} /></button>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            )}
+                                            {/* (Edit/Delete moved below message) */}
 
                                             {/* Avatar for theirs, first in group */}
                                             {!isMine && isFirst && (
@@ -557,11 +539,23 @@ export default function Messages() {
                                                     </>
                                                 )}
                                             </div>
-                                            {isLast && (
-                                                <span style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, paddingInline: 2 }}>
-                                                    {timeago(m.createdAt)}
-                                                </span>
-                                            )}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, paddingInline: 2 }}>
+                                                {isMine && !editingMessageId && Date.now() - new Date(m.createdAt).getTime() <= 15 * 60 * 1000 && (
+                                                    <div style={{ display: 'flex', gap: 6, opacity: 0.7 }}>
+                                                        <button onClick={() => startEditing(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-1)', display: 'flex', alignItems: 'center', fontSize: 11, gap: 3 }} title="Edit">
+                                                            <HiPencilAlt size={13} /> Edit
+                                                        </button>
+                                                        <button onClick={() => deleteMessage(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', display: 'flex', alignItems: 'center', fontSize: 11, gap: 3 }} title="Delete">
+                                                            <HiTrash size={13} /> Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {isLast && (
+                                                    <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                                                        {timeago(m.createdAt)}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     )
                                 })}
@@ -631,7 +625,7 @@ export default function Messages() {
                                     <div style={{
                                         flex: 1, display: 'flex', alignItems: 'center',
                                         background: 'transparent', border: '1px solid var(--border-md)',
-                                        borderRadius: 24, padding: '10px 16px', gap: 8
+                                        borderRadius: 24, padding: '10px 16px', gap: 8, minWidth: 0
                                     }}>
                                         <input
                                             ref={inputRef}
@@ -641,7 +635,7 @@ export default function Messages() {
                                             placeholder={`Message...`}
                                             style={{
                                                 flex: 1, background: 'none', border: 'none',
-                                                outline: 'none', color: 'var(--text-1)', fontSize: 15,
+                                                outline: 'none', color: 'var(--text-1)', fontSize: 15, minWidth: 0
                                             }}
                                             disabled={isUploading}
                                         />
