@@ -1,12 +1,14 @@
 import { useState, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { HiX, HiPhotograph, HiVideoCamera } from 'react-icons/hi'
+import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 
 export default function CreatePostModal({ onClose }) {
     const queryClient = useQueryClient()
+    const navigate = useNavigate()
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState(null)
     const [caption, setCaption] = useState('')
@@ -23,31 +25,44 @@ export default function CreatePostModal({ onClose }) {
         setLoading(true)
         try {
             const fd = new FormData()
-            const isVideoUpload = file.type?.startsWith('video/') ||
-                /\.(mp4|mov|webm|mkv|avi|3gp|hevc)$/i.test(file.name || '') ||
-                (file.type === 'application/octet-stream' && file.size > 2000000) // Fallback for raw mobile uploads
-            console.log('Upload File:', { name: file.name, type: file.type, isVideoUpload })
+            // Robust video detection: MIME type, extension, and large octet-stream files (raw mobile videos)
+            const isVideoUpload =
+                file.type?.startsWith('video/') ||
+                /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(file.name || '') ||
+                (file.type === 'application/octet-stream' && file.size > 1_000_000)
+
             fd.append(isVideoUpload ? 'video' : 'media', file)
             fd.append('caption', caption)
 
-            const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+            const config = { headers: { 'Content-Type': 'multipart/form-data' } }
+
             if (isVideoUpload) {
                 await api.post('/dscrolls', fd, config)
-                toast.success('Video shared!')
-                queryClient.invalidateQueries({ queryKey: ['dscrolls'] })
-                queryClient.invalidateQueries({ queryKey: ['feed'] })
+                toast.success('🎬 Video shared! Opening Dscrolls...')
+                // Invalidate before closing so the next mount sees fresh data
+                await queryClient.invalidateQueries({ queryKey: ['dscrolls'] })
+                await queryClient.invalidateQueries({ queryKey: ['feed'] })
+                onClose()
+                // Navigate to Dscrolls so the user can immediately see the video
+                navigate('/dscrolls')
             } else {
                 await api.post('/posts', fd, config)
-                toast.success('Post shared!')
-                queryClient.invalidateQueries({ queryKey: ['feed'] })
+                toast.success('✅ Post shared!')
+                await queryClient.invalidateQueries({ queryKey: ['feed'] })
+                onClose()
             }
-            onClose()
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to share content')
-        } finally { setLoading(false) }
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const isVideo = file?.type?.startsWith('video/')
+    const isVideo = file
+        ? file.type?.startsWith('video/') ||
+          /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(file.name || '') ||
+          (file.type === 'application/octet-stream' && file.size > 1_000_000)
+        : false
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -58,7 +73,9 @@ export default function CreatePostModal({ onClose }) {
                 transition={{ duration: 0.22, ease: 'easeOut' }}
                 onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <h2 className="t-heading" style={{ fontSize: 17 }}>New Post</h2>
+                    <h2 className="t-heading" style={{ fontSize: 17 }}>
+                        {isVideo ? '🎬 New Dscroll' : '📸 New Post'}
+                    </h2>
                     <motion.button className="btn btn-ghost btn-icon-sm" onClick={onClose} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                         <HiX style={{ fontSize: 18 }} />
                     </motion.button>
@@ -77,12 +94,12 @@ export default function CreatePostModal({ onClose }) {
                         </div>
                         <p className="t-title" style={{ marginBottom: 6 }}>Drop photo or video here</p>
                         <p className="t-small">or click to browse</p>
-                        <input ref={inputRef} type="file" accept="image/*,video/*" hidden onChange={handleFile} />
+                        <input ref={inputRef} type="file" accept="image/*,video/*,.mp4,.mov,.avi,.webm,.mkv,.3gp" hidden onChange={handleFile} />
                     </div>
                 ) : (
                     <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 14, maxHeight: 320, background: 'var(--card)' }}>
                         {isVideo
-                            ? <video src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} controls />
+                            ? <video src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} controls playsInline />
                             : <img src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} alt="" />
                         }
                         <button className="btn btn-secondary btn-sm"
@@ -93,16 +110,33 @@ export default function CreatePostModal({ onClose }) {
                     </div>
                 )}
 
+                {isVideo && (
+                    <div style={{
+                        margin: '8px 0 12px',
+                        padding: '10px 12px',
+                        background: 'rgba(99,102,241,0.1)',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        color: 'var(--accent)',
+                        border: '1px solid rgba(99,102,241,0.2)',
+                    }}>
+                        📱 This will be posted as a Dscroll (short video)
+                    </div>
+                )}
+
                 <textarea className="input" placeholder="Write a caption…"
                     value={caption} onChange={e => setCaption(e.target.value)}
-                    rows={3} style={{ marginTop: 12, resize: 'none' }} />
+                    rows={3} style={{ marginTop: 4, resize: 'none' }} />
 
                 <motion.button className="btn btn-primary w-full"
                     style={{ marginTop: 14, height: 46 }}
                     onClick={handleSubmit}
                     disabled={loading || !file}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Share Post'}
+                    {loading
+                        ? <><span className="spinner" style={{ width: 18, height: 18 }} />&nbsp;Uploading...</>
+                        : isVideo ? '🎬 Share Dscroll' : '✅ Share Post'
+                    }
                 </motion.button>
             </motion.div>
         </div>
