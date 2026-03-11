@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { HiHeart, HiOutlineHeart, HiVolumeOff, HiVolumeUp, HiChatAlt2, HiShare, HiArrowLeft } from 'react-icons/hi'
+import { HiHeart, HiOutlineHeart, HiVolumeOff, HiVolumeUp, HiChatAlt2, HiShare, HiArrowLeft, HiRefresh } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const fetchDscrolls = async ({ pageParam = null }) => {
@@ -13,7 +13,6 @@ const fetchDscrolls = async ({ pageParam = null }) => {
     return data
 }
 
-/* Heart burst on double-tap */
 function HeartBurst({ x, y }) {
     return (
         <motion.div
@@ -30,7 +29,6 @@ function HeartBurst({ x, y }) {
     )
 }
 
-/* Right-side action button */
 function Btn({ icon, count, onClick, active }) {
     return (
         <motion.div onClick={onClick} whileTap={{ scale: 0.75 }}
@@ -50,17 +48,17 @@ function Btn({ icon, count, onClick, active }) {
     )
 }
 
-/* Individual dscroll */
 function DscrollItem({ dscroll, isActive }) {
     const videoRef = useRef()
     const [liked, setLiked] = useState(dscroll.isLiked || false)
     const [likesCount, setLikesCount] = useState(dscroll.likesCount || 0)
-    const [muted, setMuted] = useState(false)
+    const [muted, setMuted] = useState(true)
     const [progress, setProgress] = useState(0)
     const [duration, setDuration] = useState(0)
     const [showPause, setShowPause] = useState(false)
     const [heartBursts, setHeartBursts] = useState([])
     const [captionExpanded, setCaptionExpanded] = useState(false)
+    const [videoError, setVideoError] = useState(false)
     const tapCount = useRef(0)
     const tapTimer = useRef(null)
     const pauseTimer = useRef(null)
@@ -69,8 +67,15 @@ function DscrollItem({ dscroll, isActive }) {
     useEffect(() => {
         const v = videoRef.current
         if (!v) return
-        if (isActive) { v.play().catch(() => {}); }
-        else { v.pause(); v.currentTime = 0; setProgress(0) }
+        if (isActive) {
+            // Reset and play
+            v.currentTime = 0
+            v.play().catch(() => {})
+        } else {
+            v.pause()
+            v.currentTime = 0
+            setProgress(0)
+        }
     }, [isActive])
 
     const onTimeUpdate = () => {
@@ -117,8 +122,9 @@ function DscrollItem({ dscroll, isActive }) {
 
     const handleShare = (e) => {
         e.stopPropagation()
-        if (navigator.share) navigator.share({ url: window.location.href }).catch(() => {})
-        else navigator.clipboard.writeText(window.location.href).catch(() => {})
+        const url = `${window.location.origin}/posts/${dscroll._id}`
+        if (navigator.share) navigator.share({ url }).catch(() => {})
+        else { navigator.clipboard.writeText(url).catch(() => {}); }
     }
 
     const handleSeek = (e) => {
@@ -136,11 +142,25 @@ function DscrollItem({ dscroll, isActive }) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', background: '#000', overflow: 'hidden', userSelect: 'none' }}>
             {/* Video */}
-            <video
-                ref={videoRef} src={dscroll.mediaUrl} loop muted={muted} playsInline preload="metadata"
-                onTimeUpdate={onTimeUpdate} onLoadedMetadata={onTimeUpdate}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            {videoError ? (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: '#fff', gap: 8 }}>
+                    <div style={{ fontSize: 32 }}>⚠️</div>
+                    <div style={{ fontSize: 14 }}>Video unavailable</div>
+                </div>
+            ) : (
+                <video
+                    ref={videoRef}
+                    src={dscroll.mediaUrl}
+                    loop
+                    muted={muted}
+                    playsInline
+                    preload="auto"
+                    onTimeUpdate={onTimeUpdate}
+                    onLoadedMetadata={onTimeUpdate}
+                    onError={() => setVideoError(true)}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+            )}
 
             {/* Gradient */}
             <div style={{
@@ -177,12 +197,6 @@ function DscrollItem({ dscroll, isActive }) {
                     <Link to={`/profile/${author._id}`} onClick={e => e.stopPropagation()}>
                         <img src={avatar} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', display: 'block' }} />
                     </Link>
-                    <div style={{
-                        position: 'absolute', bottom: -8, left: '50%', transform: 'translateX(-50%)',
-                        width: 18, height: 18, borderRadius: '50%', background: 'linear-gradient(135deg,#E1306C,#F77737)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900,
-                        border: '1.5px solid #000', color: '#fff', fontSize: 12, cursor: 'pointer',
-                    }}>+</div>
                 </div>
                 <Btn icon={liked ? <HiHeart /> : <HiOutlineHeart />} count={likesCount} onClick={handleLike} active={liked} />
                 <Btn icon={<HiChatAlt2 />} count={dscroll.commentsCount || 0} onClick={e => e.stopPropagation()} />
@@ -209,21 +223,6 @@ function DscrollItem({ dscroll, isActive }) {
                         )}
                     </p>
                 )}
-                {/* Music row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto' }}>
-                    <div style={{
-                        width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                        background: 'linear-gradient(135deg,#1a1a2e,#312060)',
-                        border: '2px solid rgba(255,255,255,0.4)',
-                        animation: 'spinSlow 5s linear infinite',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12,
-                    }}>🎵</div>
-                    <div style={{ overflow: 'hidden', flex: 1 }}>
-                        <div style={{ whiteSpace: 'nowrap', fontSize: 12, color: '#fff', fontWeight: 500, animation: 'scrollText 10s linear infinite' }}>
-                            Original audio · {author.username}
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* Progress bar */}
@@ -233,29 +232,36 @@ function DscrollItem({ dscroll, isActive }) {
             <div style={{ position: 'absolute', bottom: 5, right: 10, fontSize: 10, color: 'rgba(255,255,255,0.6)', textShadow: '0 1px 3px rgba(0,0,0,0.6)', zIndex: 11 }}>
                 {fmt(progress * duration)} / {fmt(duration)}
             </div>
-
-            <style>{`
-                @keyframes spinSlow { to { transform: rotate(360deg); } }
-                @keyframes scrollText { 0%,15%{transform:translateX(0)} 85%,100%{transform:translateX(-50%)} }
-            `}</style>
         </div>
     )
 }
 
-/* ── Dscrolls page ── */
 export default function Dscrolls() {
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [currentIdx, setCurrentIdx] = useState(0)
     const containerRef = useRef()
     const observerRef = useRef()
 
-    const { data, status, fetchNextPage, hasNextPage } = useInfiniteQuery({
+    const { data, status, fetchNextPage, hasNextPage, refetch } = useInfiniteQuery({
         queryKey: ['dscrolls'],
         queryFn: fetchDscrolls,
         getNextPageParam: (last) => last.nextCursor ?? undefined,
-        staleTime: 0,
-        refetchOnMount: 'always',
+        staleTime: 0,              // Always consider stale
+        refetchOnMount: 'always',  // Always refetch when component mounts
+        refetchOnWindowFocus: true, // Refetch when tab becomes active
     })
+
+    // Prefetch fresh data whenever the user returns to this page (visibility)
+    useEffect(() => {
+        const handleVisibility = () => {
+            if (document.visibilityState === 'visible') {
+                refetch()
+            }
+        }
+        document.addEventListener('visibilitychange', handleVisibility)
+        return () => document.removeEventListener('visibilitychange', handleVisibility)
+    }, [refetch])
 
     const dscrolls = data?.pages.flatMap(p => p.data || []) ?? []
 
@@ -286,19 +292,23 @@ export default function Dscrolls() {
         <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', gap: 16, padding: 32 }}>
             <div style={{ fontSize: 56 }}>🎬</div>
             <p style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>No Dscrolls yet</p>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', margin: 0 }}>Upload a video post to see it here</p>
-            <button onClick={() => navigate(-1)} style={{ marginTop: 8, background: '#fff', color: '#000', border: 'none', borderRadius: 20, padding: '10px 28px', fontWeight: 700, cursor: 'pointer' }}>
-                Go back
-            </button>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', margin: 0, textAlign: 'center' }}>
+                Upload a video using the + button in the navigation bar
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button
+                    onClick={() => refetch()}
+                    style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 20, padding: '10px 20px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
+                    <HiRefresh /> Refresh
+                </button>
+                <button onClick={() => navigate(-1)} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: 20, padding: '10px 28px', fontWeight: 700, cursor: 'pointer' }}>
+                    Go back
+                </button>
+            </div>
         </div>
     )
 
     return (
-        /*
-         * Full-screen black overlay.
-         * Uses display:flex + justifyContent:center to reliably center
-         * the 430px column regardless of any parent transforms or overflow.
-         */
         <div style={{
             position: 'fixed', inset: 0, zIndex: 200,
             background: '#000',
@@ -306,7 +316,6 @@ export default function Dscrolls() {
             justifyContent: 'center',
             alignItems: 'stretch',
         }}>
-            {/* Centered phone-width column — exactly like Instagram web */}
             <div style={{
                 width: '100%',
                 maxWidth: 430,
@@ -315,7 +324,7 @@ export default function Dscrolls() {
                 background: '#000',
                 overflow: 'hidden',
             }}>
-                {/* Back button — inside column so it's always at top-left of the video */}
+                {/* Back button */}
                 <button
                     onClick={() => navigate(-1)}
                     style={{
@@ -326,6 +335,18 @@ export default function Dscrolls() {
                         cursor: 'pointer', color: '#fff', fontSize: 19,
                     }}
                 ><HiArrowLeft /></button>
+
+                {/* Refresh button */}
+                <button
+                    onClick={() => { queryClient.invalidateQueries({ queryKey: ['dscrolls'] }) }}
+                    style={{
+                        position: 'absolute', top: 16, right: 16, zIndex: 220,
+                        background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                        border: 'none', borderRadius: '50%', width: 36, height: 36,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', color: '#fff', fontSize: 19,
+                    }}
+                ><HiRefresh /></button>
 
                 {/* Scroll-snap container */}
                 <div
