@@ -13,7 +13,7 @@ const createReel = async (req, res, next) => {
 const getReelsFeed = async (req, res, next) => {
     try {
         const { limit, cursor } = parsePagination(req.query);
-        const result = await reelService.getReelsFeed({ limit, cursor });
+        const result = await reelService.getReelsFeed({ limit, cursor, userId: req.user._id });
         res.json({ success: true, ...result });
     } catch (err) { next(err); }
 };

@@ -108,8 +108,8 @@ function ReelItem({ reel, isActive, onPrev, onNext, hasPrev, hasNext }) {
         setLiked(newLiked)
         setLikesCount(newLiked ? likesCount + 1 : likesCount - 1)
         try {
-            if (newLiked) await api.post(`/dscrolls/${reel._id}/like`)
-            else await api.delete(`/dscrolls/${reel._id}/like`)
+            if (newLiked) await api.post(`/posts/${reel._id}/like`)
+            else await api.delete(`/posts/${reel._id}/like`)
         } catch { setLiked(!newLiked); setLikesCount(likesCount) }
     }
 
