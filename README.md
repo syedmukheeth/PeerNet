@@ -2,6 +2,7 @@
   <img src="https://raw.githubusercontent.com/syedmukheeth/PeerNet/master/frontend/src/assets/logo.png" width="120" alt="PeerNet Logo" />
   <h1>PeerNet — Social Media Platform</h1>
   <p><strong>Connect · Share · Discover</strong></p>
+  <p><b>Built by Syed Mukheeth</b></p>
   <p>A production-grade, full-stack social media platform built for scale, inspired by Instagram.</p>
 
   ![Version](https://img.shields.io/badge/version-v2.1.0-blue)
@@ -53,7 +54,7 @@ graph TD
     
     Chat <--> DB
     Chat <--> PubSub[(♻️ Redis Pub/Sub\nEvent Bus)]
-    API -->|Publish Events\n(Likes, Follows)| PubSub
+    API -->|"Publish Events (Likes, Follows)"| PubSub
 ```
 
 ### 2. Real-Time Notification Flow
