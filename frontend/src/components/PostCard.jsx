@@ -18,9 +18,9 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [liked, setLiked] = useState(post.isLiked || false)
     const [likesCount, setLikesCount] = useState(post.likesCount || 0)
     const [saved, setSaved] = useState(post.isSaved || false)
+    const [isLikePending, setIsLikePending] = useState(false)
     const [lastTap, setLastTap] = useState(0)
     const [menuOpen, setMenuOpen] = useState(false)
-    const [editOpen, setEditOpen] = useState(false)
     const [caption, setCaption] = useState(post.caption || '')
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
@@ -54,19 +54,36 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     }, [menuOpen])
 
     const handleLike = async () => {
+        if (isLikePending) return  // prevent double-click race
         const newLiked = !liked
         setLiked(newLiked)
+        setIsLikePending(true)
         const newCount = newLiked ? likesCount + 1 : likesCount - 1
         setLikesCount(newCount)
         onLikeToggle?.(post._id, newLiked, newCount)
         try {
             if (newLiked) await api.post(`/posts/${post._id}/like`)
             else await api.delete(`/posts/${post._id}/like`)
-        } catch { setLiked(!newLiked); setLikesCount(likesCount) }
+        } catch (err) {
+            // 409 = already liked (server state ahead of us), keep liked=true
+            if (err.response?.status === 409) {
+                setLiked(true)
+                setLikesCount(likesCount + 1)
+                onLikeToggle?.(post._id, true, likesCount + 1)
+            } else {
+                // genuine error — revert
+                setLiked(!newLiked)
+                setLikesCount(likesCount)
+                onLikeToggle?.(post._id, !newLiked, likesCount)
+            }
+        } finally {
+            setIsLikePending(false)
+        }
     }
 
     const handleImageTap = () => {
         const now = Date.now()
+        // Double-tap to like only — never double-tap to unlike
         if (now - lastTap < 350 && !liked) handleLike()
         setLastTap(now)
     }

@@ -177,7 +177,7 @@ export default function Feed() {
             return res.data
         },
         getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
-        staleTime: 0,
+        staleTime: 30_000,         // 30s — don't refetch so often it wipes optimistic like state
         refetchOnMount: 'always',
     })
 
