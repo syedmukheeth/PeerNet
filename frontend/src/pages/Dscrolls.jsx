@@ -7,7 +7,7 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const fetchDscrolls = async ({ pageParam = null }) => {
-    const params = { limit: 10 }
+    const params = { limit: 10, _t: Date.now() }
     if (pageParam) params.cursor = pageParam
     const { data } = await api.get('/dscrolls', { params })
     return data
