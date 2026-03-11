@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../api/axios'
 import {
     HiHeart, HiOutlineHeart, HiChatAlt2, HiVolumeOff, HiVolumeUp,
-    HiChevronLeft, HiChevronRight, HiShare
+    HiChevronLeft, HiChevronRight, HiReply
 } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import { useInfiniteQuery } from '@tanstack/react-query'
@@ -229,7 +229,7 @@ function ReelItem({ reel, isActive, onPrev, onNext, hasPrev, hasNext }) {
                     <span style={{ fontSize: 12, fontWeight: 600 }}>{reel.commentsCount || 0}</span>
                 </button>
                 <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }}>
-                    <HiShare style={{ fontSize: 26 }} />
+                    <HiReply style={{ fontSize: 26 }} />
                 </button>
                 <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }} onClick={() => setMuted(!muted)}>
                     {muted ? <HiVolumeOff style={{ fontSize: 26 }} /> : <HiVolumeUp style={{ fontSize: 26 }} />}
