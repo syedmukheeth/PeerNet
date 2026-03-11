@@ -227,7 +227,11 @@ export default function Layout() {
         }
     }, [location.pathname])
 
-    const handleNavClick = () => { } // retained for any future use
+    const handleNavClick = (to) => {
+        if (to === '/' && location.pathname === '/') {
+            mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+    }
 
     const handleLogout = async () => {
         await logout()
@@ -255,12 +259,12 @@ export default function Layout() {
                 {/* Logo row */}
                 <div className="sidebar-logo-row">
                     {!isCollapsed ? (
-                        <Link to="/" className="sidebar-brand">
+                        <Link to="/" onClick={() => handleNavClick('/')} className="sidebar-brand">
                             <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
                             <span className="peernetLogo">PeerNet</span>
                         </Link>
                     ) : (
-                        <Link to="/" className="sidebar-brand sidebar-brand--collapsed">
+                        <Link to="/" onClick={() => handleNavClick('/')} className="sidebar-brand sidebar-brand--collapsed">
                             <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
                         </Link>
                     )}
@@ -269,7 +273,7 @@ export default function Layout() {
                 {/* Main nav */}
                 <nav className="sidebar-nav">
                     {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
-                        <NavLink key={to} to={to} end={exact}
+                        <NavLink key={to} to={to} end={exact} onClick={() => handleNavClick(to)}
                             className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
                             {({ isActive }) => (
                                 <>
@@ -358,11 +362,11 @@ export default function Layout() {
             <main className="main-col" ref={mainRef} style={{ overflowY: 'auto', height: '100dvh' }}>
                 {/* ── Mobile Top Header ── */}
                 <header className="mobile-top-header">
-                    <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Link to="/" onClick={() => handleNavClick('/')} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <img src={logoImg} alt="PeerNet" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 8 }} />
                         <span style={{ fontFamily: "'Syne', 'Inter', sans-serif", fontWeight: 800, fontSize: 18, background: 'var(--logo-gradient)', WebkitBackgroundClip: 'text', color: 'transparent' }}>PeerNet</span>
                     </Link>
-                    <div className="mobile-top-actions">
+                    <div className="mobile-top-actions" ref={moreRef}>
                         <NavLink to="/notifications" className={({ isActive }) => isActive ? 'active' : ''} style={{ position: 'relative' }}>
                             <HiBell />
                             {unreadCount > 0 && (
@@ -379,6 +383,40 @@ export default function Layout() {
                                 </span>
                             )}
                         </NavLink>
+                        
+                        {/* Mobile More Toggle */}
+                        <div style={{ position: 'relative' }}>
+                            <button onClick={() => setShowMore(v => !v)} style={{ background: 'none', border: 'none', color: 'var(--text-1)', fontSize: 24, display: 'flex', alignItems: 'center' }}>
+                                <HiMenu />
+                            </button>
+
+                            {/* Mobile More Dropdown */}
+                            <AnimatePresence>
+                                {showMore && (
+                                    <motion.div className="ig-more-popup"
+                                        style={{ position: 'absolute', top: '100%', right: 0, marginTop: 12, bottom: 'auto', left: 'auto', width: 200 }}
+                                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                                        transition={{ duration: 0.15 }}>
+                                        <button className="ig-more-item" onClick={() => { document.querySelector('.theme-toggle')?.click(); setShowMore(false) }}>
+                                            <ThemeToggle className="sr-only" />
+                                            {isDark ? <HiSun style={{ fontSize: 20 }} /> : <HiMoon style={{ fontSize: 20 }} />}
+                                            <span>Switch appearance</span>
+                                        </button>
+                                        <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                            <HiCog style={{ fontSize: 20 }} />
+                                            <span>Settings</span>
+                                        </NavLink>
+                                        <div className="ig-more-divider" />
+                                        <button className="ig-more-item ig-more-item--danger" onClick={handleLogout}>
+                                            <HiLogout style={{ fontSize: 20 }} />
+                                            <span>Log out</span>
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </header>
 
