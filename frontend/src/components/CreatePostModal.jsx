@@ -30,8 +30,9 @@ export default function CreatePostModal({ onClose }) {
             const config = { headers: { 'Content-Type': 'multipart/form-data' } };
             if (isVideoUpload) {
                 await api.post('/dscrolls', fd, config)
-                toast.success('Dscroll shared!')
+                toast.success('Video shared!')
                 queryClient.invalidateQueries({ queryKey: ['dscrolls'] })
+                queryClient.invalidateQueries({ queryKey: ['feed'] })
             } else {
                 await api.post('/posts', fd, config)
                 toast.success('Post shared!')
@@ -39,7 +40,7 @@ export default function CreatePostModal({ onClose }) {
             }
             onClose()
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to create post')
+            toast.error(err.response?.data?.message || 'Failed to share content')
         } finally { setLoading(false) }
     }
 

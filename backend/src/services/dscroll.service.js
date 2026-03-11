@@ -10,7 +10,7 @@ const createDscroll = async (userId, { caption, tags }, file) => {
     if (!file) throw new ApiError(400, 'Video file is required');
 
     const { secure_url, public_id } = await uploadToCloudinary(file.path, {
-        folder: 'peernet/dscrolls',
+        folder: 'peernet/posts', // Save in the same folder as posts for consistency
         resource_type: 'video',
         eager: [{ format: 'jpg', start_offset: '0' }],
         eager_async: true,
@@ -22,15 +22,23 @@ const createDscroll = async (userId, { caption, tags }, file) => {
             ? tags.split(',').map((t) => t.trim()).filter(Boolean)
             : [];
 
-    const dscroll = await Dscroll.create({
+    const post = await Post.create({
         author: userId,
-        videoUrl: secure_url,
-        videoPublicId: public_id,
+        mediaUrl: secure_url,
+        mediaPublicId: public_id,
+        mediaType: 'video',
         caption: caption || '',
         tags: parsedTags,
     });
 
-    return dscroll;
+    // We also increment the user's posts count so it reflects on their profile
+    const User = require('../models/User');
+    await User.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } });
+
+    // Invalidate the user's feed cache if applicable, though it might be tricky here without knowing the exact cursor.
+    // The safest is to clear caching or rely on frontend invalidation.
+
+    return post;
 };
 
 /**

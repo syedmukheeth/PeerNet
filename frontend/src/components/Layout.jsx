@@ -420,7 +420,7 @@ export default function Layout() {
                     </div>
                 </header>
 
-                <div className="content-wrap">
+                <div className="layout-container" style={{ paddingBottom: 'env(safe-area-inset-bottom, 60px)' }}>
                     <AnimatePresence mode="wait">
                         <Outlet />
                     </AnimatePresence>
