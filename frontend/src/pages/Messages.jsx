@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api, { SOCKET_URL, CHAT_BASE_URL } from '../api/axios'
 import { io } from 'socket.io-client'
-import { HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiHeart, HiDocument, HiDownload } from 'react-icons/hi'
+import { HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiDocument, HiDownload, HiPaperAirplane, HiTrash } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
 import EmojiPicker from 'emoji-picker-react'
@@ -117,6 +117,7 @@ export default function Messages() {
     const [editingMessageId, setEditingMessageId] = useState(null)
     const [editBody, setEditBody] = useState('')
     const [hoveredMessageId, setHoveredMessageId] = useState(null)
+    const [tappedMessageId, setTappedMessageId] = useState(null)
     const fileRef = useRef()
     const docRef = useRef()
     const bottomRef = useRef()
@@ -131,16 +132,8 @@ export default function Messages() {
         inputRef.current?.focus()
     }
 
-    const sendHeart = async () => {
-        if (!activeConvo) return
-        try {
-            const { data } = await api.post(`conversations/${activeConvo._id}/messages`, { body: '❤️' }, { baseURL: CHAT_BASE_URL })
-            setMessages(m => [...m, data.data])
-            setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: { body: '❤️' } } : c))
-        } catch { toast.error('Failed to send') }
-    }
-
     /* socket */
+
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
         socket = io(SOCKET_URL, { auth: { token }, path: '/socket.io', transports: ['websocket', 'polling'] })
@@ -477,10 +470,11 @@ export default function Messages() {
                                             position: 'relative'
                                         }}
                                         onMouseEnter={() => setHoveredMessageId(m._id)}
-                                        onMouseLeave={() => setHoveredMessageId(null)}>
+                                        onMouseLeave={() => setHoveredMessageId(null)}
+                                        onTouchStart={() => { if (isMine) setTappedMessageId(id => id === m._id ? null : m._id) }}>
 
-                                            {/* Hover Actions (Edit/Delete) */}
-                                            {isMine && hoveredMessageId === m._id && editingMessageId !== m._id && (
+                                            {/* Tap/Hover Actions (Edit/Delete) — visible on hover or after tap on mobile */}
+                                            {isMine && (hoveredMessageId === m._id || tappedMessageId === m._id) && editingMessageId !== m._id && (
                                                 <div style={{
                                                     position: 'absolute',
                                                     right: '100%',
@@ -499,7 +493,7 @@ export default function Messages() {
                                                     {Date.now() - new Date(m.createdAt).getTime() <= 15 * 60 * 1000 && (
                                                         <>
                                                             <button onClick={() => startEditing(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-2)', display: 'flex' }} title="Edit (within 15m)"><HiPencilAlt size={16} /></button>
-                                                            <button onClick={() => deleteMessage(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--error)', display: 'flex' }} title="Delete (within 15m)"><HiX size={16} /></button>
+                                                            <button onClick={() => deleteMessage(m)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--error)', display: 'flex' }} title="Delete (within 15m)"><HiTrash size={16} /></button>
                                                         </>
                                                     )}
                                                 </div>
@@ -664,23 +658,22 @@ export default function Messages() {
                                         )}
                                     </div>
 
-                                    {/* Send / Heart button (Instagram Style) */}
+                                    {/* Send button — always visible, replaces heart */}
                                     {isUploading ? (
                                         <div className="spinner" style={{ width: 22, height: 22, flexShrink: 0, margin: '0 4px' }} />
-                                    ) : (text.trim() || filePreview) ? (
-                                        <button type="submit" style={{
-                                            background: 'none', border: 'none', cursor: 'pointer',
-                                            color: 'var(--accent)', fontWeight: 600, fontSize: 16, flexShrink: 0,
-                                            padding: '4px 8px'
-                                        }}>Send</button>
                                     ) : (
-                                        <button type="button" onClick={sendHeart} style={{
-                                            background: 'none', border: 'none', cursor: 'pointer',
-                                            color: 'var(--text-1)', fontSize: 28, flexShrink: 0,
+                                        <button type="submit" style={{
+                                            background: (text.trim() || filePreview) ? 'var(--accent)' : 'var(--hover)',
+                                            border: 'none', borderRadius: '50%',
+                                            width: 38, height: 38,
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            transition: 'transform 0.1s',
-                                        }} onMouseDown={e => e.currentTarget.style.transform = 'scale(0.9)'} onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
-                                            <HiHeart />
+                                            cursor: 'pointer',
+                                            color: (text.trim() || filePreview) ? '#fff' : 'var(--text-3)',
+                                            flexShrink: 0,
+                                            transition: 'all 0.2s',
+                                            fontSize: 18,
+                                        }}>
+                                            <HiPaperAirplane style={{ transform: 'rotate(90deg)' }} />
                                         </button>
                                     )}
                                 </form>

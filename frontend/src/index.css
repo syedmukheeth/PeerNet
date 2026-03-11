@@ -2108,32 +2108,59 @@ textarea {
     padding: 14px 14px;
   }
 
-  /* Profile responsive */
+  /* Profile — Instagram-style mobile layout */
   .profile-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;        /* ← Instagram: avatar LEFT, stats RIGHT */
     align-items: flex-start;
-    gap: 16px;
+    gap: 20px;
     padding: 16px 0;
   }
 
+  /* Make avatar smaller on mobile like Instagram */
+  .profile-avatar-col {
+    flex-shrink: 0;
+  }
+
+  .profile-avatar-col img,
+  .profile-avatar-col > div > div > img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  /* The right column (username, stats, bio) fills remaining space */
+  .profile-info-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Username row */
+  .profile-username-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Stats: 3 columns in a row below username */
   .profile-stats {
-    gap: 24px;
-    margin-top: 12px;
+    gap: 0;
+    margin-top: 0;
     width: 100%;
-    justify-content: space-around;
+    justify-content: flex-start;
+    gap: 20px;
   }
 
   .profile-stat-num {
-    font-size: 18px;
-    /* Less stretched/squished on native mobile fonts */
-    font-family: inherit;
-    /* Remove the custom display font that stretches awkwardly */
+    font-size: 17px;
     font-weight: 700;
   }
 
   .profile-stat-label {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-2);
   }
 
