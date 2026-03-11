@@ -27,12 +27,13 @@ export default function CreatePostModal({ onClose }) {
             fd.append(isVideoUpload ? 'video' : 'media', file)
             fd.append('caption', caption)
 
+            const config = { headers: { 'Content-Type': 'multipart/form-data' } };
             if (isVideoUpload) {
-                await api.post('/dscrolls', fd)
+                await api.post('/dscrolls', fd, config)
                 toast.success('Dscroll shared!')
                 queryClient.invalidateQueries({ queryKey: ['dscrolls'] })
             } else {
-                await api.post('/posts', fd)
+                await api.post('/posts', fd, config)
                 toast.success('Post shared!')
                 queryClient.invalidateQueries({ queryKey: ['feed'] })
             }
