@@ -54,12 +54,14 @@ export default function PostDetail() {
     }, [menuOpen])
 
     const handleLike = async () => {
+        if (!user) { toast.error('Please sign in to like posts'); return navigate('/login'); }
         const next = !liked; setLiked(next); setLikesCount(c => next ? c + 1 : c - 1)
         try { next ? await api.post(`/posts/${id}/like`) : await api.delete(`/posts/${id}/like`) }
         catch { setLiked(!next); setLikesCount(c => next ? c - 1 : c + 1) }
     }
 
     const handleSave = async () => {
+        if (!user) { toast.error('Please sign in to save posts'); return navigate('/login'); }
         const next = !saved; setSaved(next)
         try { next ? await api.post(`/posts/${id}/save`) : await api.delete(`/posts/${id}/save`) }
         catch { setSaved(!next) }
@@ -79,6 +81,7 @@ export default function PostDetail() {
 
     const handleComment = async (e) => {
         e.preventDefault()
+        if (!user) { toast.error('Please sign in to comment'); return navigate('/login'); }
         if (!body.trim()) return
         try {
             const payload = { body }
@@ -266,6 +269,7 @@ export default function PostDetail() {
                                                 <span>{timeago(c.createdAt)}</span>
                                                 <button 
                                                     onClick={() => {
+                                                        if (!user) { toast.error('Please sign in to reply'); return navigate('/login'); }
                                                         setReplyingTo(replyingTo?._id === c._id ? null : c);
                                                         if (replyingTo?._id !== c._id) setTimeout(() => inputRef.current?.focus(), 10);
                                                     }}

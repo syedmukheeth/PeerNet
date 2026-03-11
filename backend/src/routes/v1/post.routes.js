@@ -4,6 +4,7 @@ const router = require('express').Router();
 const postController = require('../../controllers/post.controller');
 const commentController = require('../../controllers/comment.controller');
 const { authenticate } = require('../../middleware/auth.middleware');
+const { optionalAuth } = require('../../middleware/optionalAuth.middleware');
 const { uploadMedia } = require('../../middleware/upload.middleware');
 const { validate } = require('../../middleware/validate.middleware');
 const { uploadLimiter } = require('../../middleware/rateLimiter');
@@ -27,7 +28,7 @@ router.post(
 );
 
 // GET /api/v1/posts/:id
-router.get('/:id', authenticate, postController.getPost);
+router.get('/:id', optionalAuth, postController.getPost);
 
 // PATCH /api/v1/posts/:id
 router.patch('/:id', authenticate, validate(updatePostSchema), postController.updatePost);
@@ -48,10 +49,10 @@ router.post('/:id/save', authenticate, postController.savePost);
 router.delete('/:id/save', authenticate, postController.unsavePost);
 
 // GET/POST /api/v1/posts/:postId/comments
-router.get('/:postId/comments', authenticate, commentController.getComments);
+router.get('/:postId/comments', optionalAuth, commentController.getComments);
 router.post('/:postId/comments', authenticate, validate(addCommentSchema), commentController.addComment);
 
 // GET /api/v1/posts/:postId/comments/:commentId/replies
-router.get('/:postId/comments/:commentId/replies', authenticate, commentController.getReplies);
+router.get('/:postId/comments/:commentId/replies', optionalAuth, commentController.getReplies);
 
 module.exports = router;

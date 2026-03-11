@@ -68,9 +68,15 @@ export default function App() {
               <Route path="messages/:id" element={<Messages />} />
               <Route path="search" element={<Search />} />
               <Route path="profile/:id" element={<Profile />} />
-              <Route path="posts/:id" element={<PostDetail />} />
               <Route path="settings" element={<Settings />} />
             </Route>
+            
+            {/* Public/Shared routes (can be viewed without login) */}
+            <Route path="/posts/:id" element={
+              <Layout>
+                <PostDetail />
+              </Layout>
+            } />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
