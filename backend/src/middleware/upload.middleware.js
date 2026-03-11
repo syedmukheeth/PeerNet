@@ -25,23 +25,32 @@ const mediaFilter = (_req, file, cb) => {
     cb(new ApiError(400, 'Unsupported media type'));
 };
 
-// All uploads are stored in memory as Buffer (piped to Cloudinary directly)
-const memoryStorage = multer.memoryStorage();
+const os = require('os');
+const path = require('path');
+
+// Store uploads on disk temporarily to avoid RAM exhaustion on large files
+const diskStorage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, os.tmpdir()),
+    filename: (_req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
 
 const uploadImage = multer({
-    storage: memoryStorage,
+    storage: diskStorage,
     limits: { fileSize: MAX_IMAGE_SIZE },
     fileFilter: imageFilter,
 });
 
 const uploadVideo = multer({
-    storage: memoryStorage,
+    storage: diskStorage,
     limits: { fileSize: MAX_VIDEO_SIZE },
     fileFilter: videoFilter,
 });
 
 const uploadMedia = multer({
-    storage: memoryStorage,
+    storage: diskStorage,
     limits: { fileSize: MAX_VIDEO_SIZE },
     fileFilter: mediaFilter,
 });

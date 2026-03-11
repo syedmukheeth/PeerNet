@@ -397,7 +397,7 @@ Stories auto-expire after **24 hours** (cleaned up by cron job every hour).
 
 ### 🎬 Dscrolls *(short-form videos)*
 
-Dscrolls are PeerNet's short video feature (like Instagram Reels). The API prefix is `/dscrolls`.
+Dscrolls are PeerNet's short video feature (like Instagram Dscrolls). The API prefix is `/dscrolls`.
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -443,7 +443,7 @@ curl -X POST https://peernet-5u5q.onrender.com/api/v1/dscrolls \
 | GET | `/admin/users` | List all users (paginated) |
 | DELETE | `/admin/users/:id` | Permanently delete a user |
 | DELETE | `/admin/posts/:id` | Permanently delete any post |
-| GET | `/admin/stats` | Platform statistics (users, posts, reels, stories) |
+| GET | `/admin/stats` | Platform statistics (users, posts, dscrolls, stories) |
 
 ---
 

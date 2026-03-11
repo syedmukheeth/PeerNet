@@ -1,25 +1,26 @@
 'use strict';
 
-const streamifier = require('streamifier');
 const cloudinary = require('../config/cloudinary');
 const ApiError = require('./ApiError');
+const fs = require('fs');
 
 /**
- * Upload a buffer to Cloudinary via upload_stream
- * @param {Buffer} buffer
- * @param {object} options - cloudinary upload options (folder, resource_type, etc.)
- * @returns {Promise<{secure_url, public_id}>}
+ * Upload a local file to Cloudinary and delete it after
+ * @param {string} filePath
+ * @param {object} options - cloudinary upload options
+ * @returns {Promise<{secure_url, public_id, resource_type}>}
  */
-const uploadToCloudinary = (buffer, options = {}) =>
+const uploadToCloudinary = (filePath, options = {}) =>
     new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
+        cloudinary.uploader.upload(
+            filePath,
             { resource_type: 'auto', ...options },
             (error, result) => {
+                fs.unlink(filePath, () => {}); // Ignore cleanup errors
                 if (error) return reject(new ApiError(500, `Cloudinary upload failed: ${error.message}`));
-                resolve({ secure_url: result.secure_url, public_id: result.public_id });
-            },
+                resolve({ secure_url: result.secure_url, public_id: result.public_id, resource_type: result.resource_type });
+            }
         );
-        streamifier.createReadStream(buffer).pipe(stream);
     });
 
 /**

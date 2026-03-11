@@ -1,4 +1,4 @@
-import React from 'react';
+/* global describe, it, expect */
 import { render } from '@testing-library/react';
 import { PostSkeleton, StorySkeleton } from '../SkeletonLoader';
 

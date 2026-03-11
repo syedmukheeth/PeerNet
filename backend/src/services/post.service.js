@@ -15,7 +15,7 @@ const createPost = async (userId, { caption, location, tags }, file) => {
     if (!file) throw new ApiError(400, 'Media file is required');
 
     const isVideo = file.mimetype.startsWith('video/');
-    const { secure_url, public_id } = await uploadToCloudinary(file.buffer, {
+    const { secure_url, public_id } = await uploadToCloudinary(file.path, {
         folder: 'peernet/posts',
         resource_type: isVideo ? 'video' : 'image',
         ...(isVideo ? {} : { transformation: [{ quality: 'auto', fetch_format: 'auto' }] }),

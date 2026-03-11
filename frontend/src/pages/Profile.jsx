@@ -9,32 +9,6 @@ import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
 
-function useCountUp(target, duration = 800) {
-    const [count, setCount] = useState(0)
-    useEffect(() => {
-        if (!target) return
-        const step = Math.ceil(target / (duration / 16))
-        let current = 0
-        const timer = setInterval(() => {
-            current = Math.min(current + step, target)
-            setCount(current)
-            if (current >= target) clearInterval(timer)
-        }, 16)
-        return () => clearInterval(timer)
-    }, [target, duration])
-    return count
-}
-
-function StatItem({ value, label, onClick }) {
-    const count = useCountUp(value)
-    const fmt = (n) => n >= 1000000 ? (n / 1000000).toFixed(1) + 'M' : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n
-    return (
-        <div className="profile-stat" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
-            <div className="profile-stat-num">{fmt(count)}</div>
-            <div className="profile-stat-label">{label}</div>
-        </div>
-    )
-}
 
 export default function Profile() {
     const { id } = useParams()

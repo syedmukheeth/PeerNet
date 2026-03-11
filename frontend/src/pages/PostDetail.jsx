@@ -133,7 +133,7 @@ export default function PostDetail() {
                 ...prev,
                 [commentId]: { loading: false, show: true, replies: data.data || [] }
             }))
-        } catch (err) {
+        } catch {
             setReplyData(prev => ({ ...prev, [commentId]: { loading: false, show: false, replies: [] } }))
             toast.error('Failed to load replies')
         }
