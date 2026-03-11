@@ -420,7 +420,9 @@ export default function Layout() {
                     </div>
                 </header>
 
-                <div className="layout-container" style={{ paddingBottom: 'env(safe-area-inset-bottom, 60px)' }}>
+                <div className="mobile-header-spacer" />
+
+                <div className="layout-container">
                     <AnimatePresence mode="wait">
                         <Outlet />
                     </AnimatePresence>
@@ -442,6 +444,8 @@ export default function Layout() {
                         </a>
                     </div>
                 </footer>
+                
+                <div className="mobile-nav-spacer" />
             </main>
 
             <nav className="mobile-nav">
