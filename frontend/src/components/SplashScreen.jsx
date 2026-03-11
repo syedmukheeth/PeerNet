@@ -65,7 +65,7 @@ export default function SplashScreen({ onDone }) {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1.0, duration: 0.4 }}
                     >
-                        from <span>PeerNet ◎</span>
+                        Built by <span>Syed Mukheeth</span>
                     </motion.div>
                 </motion.div>
             )}

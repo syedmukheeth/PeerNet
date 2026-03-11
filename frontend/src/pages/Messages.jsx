@@ -608,8 +608,12 @@ export default function Messages() {
 
                                 <form onSubmit={handleSend} style={{
                                     display: 'flex', alignItems: 'center', gap: 10,
-                                    padding: '12px 16px', borderTop: '1px solid var(--border)',
+                                    padding: '12px 16px',
+                                    paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+                                    borderTop: '1px solid var(--border)',
                                     background: 'var(--surface)',
+                                    flexWrap: 'nowrap',
+                                    minHeight: 60,
                                 }}>
                                     {/* Emoji button */}
                                     <button type="button"

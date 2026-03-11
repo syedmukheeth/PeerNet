@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { HiHeart, HiOutlineHeart, HiVolumeOff, HiVolumeUp, HiChatAlt2, HiShare, HiDotsHorizontal } from 'react-icons/hi'
+import { HiHeart, HiOutlineHeart, HiVolumeOff, HiVolumeUp, HiChatAlt2, HiShare, HiArrowLeft } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,46 +13,44 @@ const fetchDscrolls = async ({ pageParam = null }) => {
     return data
 }
 
-/* ── Double-tap heart burst (Instagram style) ─────────── */
+/* ── Double-tap heart burst ─────────────────────────── */
 function HeartBurst({ x, y }) {
     return (
         <motion.div
             style={{
-                position: 'absolute', left: x - 60, top: y - 60,
-                width: 120, height: 120, pointerEvents: 'none', zIndex: 20,
+                position: 'absolute', left: x - 55, top: y - 55,
+                width: 110, height: 110, pointerEvents: 'none', zIndex: 20,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 90, filter: 'drop-shadow(0 2px 16px rgba(255,0,80,0.9))',
+                fontSize: 80, filter: 'drop-shadow(0 2px 20px rgba(255,0,80,0.9))',
             }}
             initial={{ scale: 0, opacity: 1 }}
-            animate={{ scale: [0, 1.3, 1.0, 1.2], opacity: [1, 1, 1, 0] }}
+            animate={{ scale: [0, 1.4, 1.1, 1.3], opacity: [1, 1, 1, 0] }}
             transition={{ duration: 0.75, ease: 'easeOut' }}
         >❤️</motion.div>
     )
 }
 
-/* ── Right-side action button ────────────────────────── */
+/* ── Action button (right sidebar) ─────────────────── */
 function ActionBtn({ icon, count, onClick, active, accentColor = '#FF3040' }) {
     return (
         <motion.div
             onClick={onClick}
-            whileTap={{ scale: 0.80 }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, cursor: 'pointer', padding: '4px 0' }}
+            whileTap={{ scale: 0.75 }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, cursor: 'pointer', padding: '6px 0' }}
         >
             <div style={{
-                fontSize: 34,
+                fontSize: 28,
                 color: active ? accentColor : '#fff',
-                filter: `drop-shadow(0 1px 4px rgba(0,0,0,0.6))`,
-                transition: 'color 0.15s, transform 0.15s',
+                filter: 'drop-shadow(0 1px 5px rgba(0,0,0,0.7))',
+                transition: 'color 0.15s',
                 display: 'flex',
-                transform: active ? 'scale(1.08)' : 'scale(1)',
             }}>
                 {icon}
             </div>
             {count !== undefined && (
                 <span style={{
-                    fontSize: 13, fontWeight: 700, color: '#fff',
+                    fontSize: 12, fontWeight: 700, color: '#fff',
                     textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-                    letterSpacing: -0.3,
                 }}>
                     {count > 9999 ? `${(count / 1000).toFixed(1)}k` : count}
                 </span>
@@ -61,27 +59,22 @@ function ActionBtn({ icon, count, onClick, active, accentColor = '#FF3040' }) {
     )
 }
 
-/* ── Vinyl disc for music row ─────────────────────────── */
-function VinylDisc({ avatarUrl }) {
+/* ── Spinning vinyl disc ────────────────────────────── */
+function VinylDisc() {
     return (
         <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: avatarUrl
-                ? `url(${avatarUrl}) center/cover`
-                : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            border: '2px solid rgba(255,255,255,0.5)',
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'linear-gradient(135deg,#1a1a2e,#312060)',
+            border: '2px solid rgba(255,255,255,0.4)',
             flexShrink: 0,
             animation: 'spinSlow 5s linear infinite',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
-            fontSize: 16,
-        }}>
-            {!avatarUrl && '🎵'}
-        </div>
+            fontSize: 13, boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+        }}>🎵</div>
     )
 }
 
-/* ── Main reel item ─────────────────────────────────── */
+/* ── Individual Reel item ──────────────────────────── */
 function ReelItem({ reel, isActive }) {
     const videoRef = useRef()
     const [liked, setLiked] = useState(reel.isLiked || false)
@@ -89,40 +82,46 @@ function ReelItem({ reel, isActive }) {
     const [muted, setMuted] = useState(false)
     const [progress, setProgress] = useState(0)
     const [duration, setDuration] = useState(0)
+    const [showPause, setShowPause] = useState(false)
     const [paused, setPaused] = useState(false)
     const [heartBursts, setHeartBursts] = useState([])
     const [captionExpanded, setCaptionExpanded] = useState(false)
     const tapTimer = useRef(null)
     const tapCount = useRef(0)
+    const pauseTimer = useRef(null)
     const lastTapPos = useRef({ x: 0, y: 0 })
 
-    /* ── Play/Pause based on active ── */
+    /* Play/pause based on active */
     useEffect(() => {
         const v = videoRef.current
         if (!v) return
-        if (isActive) { v.play().catch(() => { }); setPaused(false) }
-        else { v.pause(); v.currentTime = 0; setProgress(0) }
+        if (isActive) {
+            v.play().catch(() => { })
+            setPaused(false)
+        } else {
+            v.pause()
+            v.currentTime = 0
+            setProgress(0)
+        }
     }, [isActive])
 
     const onTimeUpdate = () => {
         const v = videoRef.current
-        if (v && v.duration) { setProgress(v.currentTime / v.duration); setDuration(v.duration) }
+        if (v?.duration) { setProgress(v.currentTime / v.duration); setDuration(v.duration) }
     }
 
-    /* ── Single/Double tap ── */
-    const handleVideoTap = useCallback((e) => {
+    /* Tap handling — single = pause, double = like + heart burst */
+    const handleTap = useCallback((e) => {
         const rect = e.currentTarget.getBoundingClientRect()
-        const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? rect.left + rect.width / 2
-        const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? rect.top + rect.height / 2
-        const x = clientX - rect.left
-        const y = clientY - rect.top
+        const x = (e.clientX ?? e.touches?.[0]?.clientX ?? rect.left + rect.width / 2) - rect.left
+        const y = (e.clientY ?? e.touches?.[0]?.clientY ?? rect.top + rect.height / 2) - rect.top
         lastTapPos.current = { x, y }
         tapCount.current += 1
 
         clearTimeout(tapTimer.current)
         tapTimer.current = setTimeout(() => {
             if (tapCount.current >= 2) {
-                // Double tap → like + heart burst
+                // Double tap → like
                 if (!liked) {
                     setLiked(true)
                     setLikesCount(c => c + 1)
@@ -130,38 +129,50 @@ function ReelItem({ reel, isActive }) {
                 }
                 const id = Date.now()
                 setHeartBursts(b => [...b, { id, ...lastTapPos.current }])
-                setTimeout(() => setHeartBursts(b => b.filter(h => h.id !== id)), 850)
+                setTimeout(() => setHeartBursts(b => b.filter(h => h.id !== id)), 900)
             } else {
-                // Single tap → toggle pause
+                // Single tap → toggle pause (show icon briefly)
                 const v = videoRef.current
-                if (v) { if (v.paused) { v.play().catch(() => { }); setPaused(false) } else { v.pause(); setPaused(true) } }
+                if (!v) return
+                if (v.paused) {
+                    v.play().catch(() => { })
+                    setPaused(false)
+                    setShowPause(false)
+                } else {
+                    v.pause()
+                    setPaused(true)
+                    setShowPause(true)
+                    clearTimeout(pauseTimer.current)
+                    // Auto-hide pause indicator after 2s if stays paused
+                    pauseTimer.current = setTimeout(() => setShowPause(false), 2000)
+                }
             }
             tapCount.current = 0
-        }, 220)
+        }, 230)
     }, [liked, reel._id])
 
-    /* ── Seek via progress bar ── */
-    const handleSeek = (e) => {
-        e.stopPropagation()
-        const rect = e.currentTarget.getBoundingClientRect()
-        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-        const v = videoRef.current
-        if (v && v.duration) v.currentTime = ratio * v.duration
-    }
-
-    /* ── Like via button ── */
     const handleLike = (e) => {
         e.stopPropagation()
         const next = !liked
         setLiked(next)
         setLikesCount(c => next ? c + 1 : c - 1)
-        ;(next ? api.post : api.delete)(`/posts/${reel._id}/like`).catch(() => { setLiked(!next); setLikesCount(c => c + (next ? -1 : 1)) })
+        ;(next ? api.post : api.delete)(`/posts/${reel._id}/like`).catch(() => {
+            setLiked(!next); setLikesCount(c => c + (next ? -1 : 1))
+        })
     }
 
     const handleShare = (e) => {
         e.stopPropagation()
         if (navigator.share) navigator.share({ title: reel.caption || 'Dscroll', url: window.location.href })
-        else navigator.clipboard.writeText(window.location.href).then(() => {}).catch(() => {})
+        else navigator.clipboard.writeText(window.location.href).catch(() => { })
+    }
+
+    const handleSeek = (e) => {
+        e.stopPropagation()
+        const rect = e.currentTarget.getBoundingClientRect()
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+        const v = videoRef.current
+        if (v?.duration) v.currentTime = ratio * v.duration
     }
 
     const fmtTime = (s) => {
@@ -170,16 +181,13 @@ function ReelItem({ reel, isActive }) {
     }
 
     const author = reel.author || {}
-    const avatar = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username}&background=6c63ff&color=fff`
+    const avatar = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username || 'U'}&background=6c63ff&color=fff`
     const caption = reel.caption || ''
-    const isLong = caption.length > 90
+    const isLong = caption.length > 80
 
     return (
-        <div
-            style={{ position: 'relative', width: '100%', height: '100dvh', background: '#000', flexShrink: 0, overflow: 'hidden' }}
-            onClick={handleVideoTap}
-        >
-            {/* ── Video ── */}
+        <div style={{ position: 'relative', width: '100%', height: '100%', background: '#000', overflow: 'hidden' }}>
+            {/* Video */}
             <video
                 ref={videoRef}
                 src={reel.mediaUrl}
@@ -187,80 +195,76 @@ function ReelItem({ reel, isActive }) {
                 loop muted={muted} playsInline preload="metadata"
                 onTimeUpdate={onTimeUpdate}
                 onLoadedMetadata={onTimeUpdate}
+                onClick={handleTap}
             />
 
-            {/* ── Gradient overlay ── */}
+            {/* Gradient overlay */}
             <div style={{
                 position: 'absolute', inset: 0, pointerEvents: 'none',
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, transparent 20%, transparent 50%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.8) 100%)',
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 18%, transparent 52%, rgba(0,0,0,0.45) 72%, rgba(0,0,0,0.82) 100%)',
             }} />
 
-            {/* ── Heart bursts ── */}
+            {/* Tap area (covers video) */}
+            <div style={{ position: 'absolute', inset: 0, zIndex: 5 }} onClick={handleTap} />
+
+            {/* Heart bursts */}
             {heartBursts.map(b => <HeartBurst key={b.id} x={b.x} y={b.y} />)}
 
-            {/* ── Pause icon ── */}
+            {/* Pause/Play indicator */}
             <AnimatePresence>
-                {paused && (
+                {showPause && (
                     <motion.div
                         style={{
                             position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-                            pointerEvents: 'none', zIndex: 5,
+                            zIndex: 8, pointerEvents: 'none',
                         }}
-                        initial={{ opacity: 0, scale: 0.6 }}
+                        initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.6 }}
-                        transition={{ duration: 0.12 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
                     >
                         <div style={{
-                            width: 72, height: 72, borderRadius: '50%',
-                            background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+                            width: 64, height: 64, borderRadius: '50%',
+                            background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(6px)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 34, color: '#fff', paddingLeft: 4,
-                        }}>▶</div>
+                            fontSize: 26, color: '#fff', paddingLeft: paused ? 4 : 0,
+                        }}>
+                            {paused ? '▶' : '⏸'}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* ── Right action bar ── */}
+            {/* Right action bar */}
             <div
                 style={{
-                    position: 'absolute', right: 12, bottom: 90,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
+                    position: 'absolute', right: 12, bottom: 100,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18,
                     zIndex: 10,
                 }}
                 onClick={e => e.stopPropagation()}
             >
-                {/* Author avatar with follow + */}
-                <div style={{ position: 'relative', marginBottom: 4 }}>
+                {/* Author avatar + follow button */}
+                <div style={{ position: 'relative', marginBottom: 6 }}>
                     <Link to={`/profile/${author._id}`} onClick={e => e.stopPropagation()}>
                         <img src={avatar} alt="" style={{
-                            width: 46, height: 46, borderRadius: '50%', objectFit: 'cover',
-                            border: '2px solid #fff', display: 'block',
+                            width: 44, height: 44, borderRadius: '50%',
+                            objectFit: 'cover', border: '2px solid #fff', display: 'block',
                         }} />
                     </Link>
-                    <motion.div
-                        whileTap={{ scale: 0.85 }}
-                        style={{
-                            position: 'absolute', bottom: -10, left: '50%', transform: 'translateX(-50%)',
-                            width: 22, height: 22, borderRadius: '50%',
-                            background: 'linear-gradient(135deg,#E1306C,#F77737)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 14, fontWeight: 700, border: '2px solid #000', color: '#fff',
-                            cursor: 'pointer',
-                        }}
-                    >+</motion.div>
+                    <motion.div whileTap={{ scale: 0.8 }} style={{
+                        position: 'absolute', bottom: -9, left: '50%', transform: 'translateX(-50%)',
+                        width: 20, height: 20, borderRadius: '50%',
+                        background: 'linear-gradient(135deg,#E1306C,#F77737)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 900, border: '1.5px solid #000', color: '#fff', fontSize: 13,
+                        cursor: 'pointer',
+                    }}>+</motion.div>
                 </div>
 
-                {/* Like */}
                 <ActionBtn icon={liked ? <HiHeart /> : <HiOutlineHeart />} count={likesCount} onClick={handleLike} active={liked} />
-
-                {/* Comment — placeholder */}
                 <ActionBtn icon={<HiChatAlt2 />} count={reel.commentsCount || 0} onClick={e => e.stopPropagation()} active={false} />
-
-                {/* Share */}
                 <ActionBtn icon={<HiShare />} onClick={handleShare} active={false} />
-
-                {/* Volume */}
                 <ActionBtn
                     icon={muted ? <HiVolumeOff /> : <HiVolumeUp />}
                     onClick={e => { e.stopPropagation(); setMuted(m => !m) }}
@@ -268,66 +272,61 @@ function ReelItem({ reel, isActive }) {
                 />
             </div>
 
-            {/* ── Bottom info block ── */}
+            {/* Bottom info */}
             <div style={{
-                position: 'absolute', bottom: 28, left: 14, right: 68,
+                position: 'absolute', bottom: 30, left: 14, right: 70,
                 zIndex: 10, pointerEvents: 'none',
             }}>
-                {/* Author row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, pointerEvents: 'auto' }}>
+                {/* Author + timestamp row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, pointerEvents: 'auto' }}>
                     <Link to={`/profile/${author._id}`} onClick={e => e.stopPropagation()} style={{ textDecoration: 'none' }}>
-                        <span style={{
-                            fontSize: 15, fontWeight: 700, color: '#fff',
-                            textShadow: '0 1px 5px rgba(0,0,0,0.6)',
-                        }}>{author.username}</span>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: '#fff', textShadow: '0 1px 5px rgba(0,0,0,0.6)' }}>
+                            {author.username}
+                        </span>
                     </Link>
-                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{timeago(reel.createdAt)}</span>
-                    <HiDotsHorizontal style={{ marginLeft: 'auto', fontSize: 18, color: '#fff', cursor: 'pointer', opacity: 0.8, pointerEvents: 'auto' }} onClick={e => e.stopPropagation()} />
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{timeago(reel.createdAt)}</span>
                 </div>
 
                 {/* Caption */}
                 {caption && (
-                    <div style={{ marginBottom: 10, pointerEvents: 'auto' }}>
-                        <p style={{
-                            fontSize: 14, color: '#fff', margin: 0,
-                            textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-                            lineHeight: 1.45,
-                        }}>
-                            {isLong && !captionExpanded ? caption.slice(0, 90) : caption}
-                            {isLong && (
-                                <>
-                                    {!captionExpanded && '… '}
-                                    <button
-                                        onClick={e => { e.stopPropagation(); setCaptionExpanded(x => !x) }}
-                                        style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', padding: 0 }}
-                                    >{captionExpanded ? ' less' : 'more'}</button>
-                                </>
-                            )}
-                        </p>
-                    </div>
+                    <p style={{
+                        fontSize: 13, color: '#fff', margin: '0 0 8px',
+                        textShadow: '0 1px 4px rgba(0,0,0,0.5)', lineHeight: 1.45,
+                        pointerEvents: 'auto',
+                    }}>
+                        {isLong && !captionExpanded ? caption.slice(0, 80) : caption}
+                        {isLong && (
+                            <>
+                                {!captionExpanded && '… '}
+                                <button
+                                    onClick={e => { e.stopPropagation(); setCaptionExpanded(x => !x) }}
+                                    style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 12, cursor: 'pointer', padding: 0 }}
+                                >{captionExpanded ? ' less' : 'more'}</button>
+                            </>
+                        )}
+                    </p>
                 )}
 
-                {/* Instagram-style music row */}
+                {/* Music row — Instagram style */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto' }}>
-                    <VinylDisc avatarUrl={null} />
+                    <VinylDisc />
                     <div style={{ overflow: 'hidden', flex: 1 }}>
                         <div style={{
-                            whiteSpace: 'nowrap', fontSize: 13, color: '#fff', fontWeight: 500,
+                            whiteSpace: 'nowrap', fontSize: 12, color: '#fff', fontWeight: 500,
                             textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-                            animation: `scrollText 10s linear infinite`,
+                            animation: 'scrollText 10s linear infinite',
                         }}>
-                            🎵 Original audio · {author.username}
+                            Original audio · {author.username}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* ── Progress bar ── */}
+            {/* Progress bar */}
             <div
                 style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0,
-                    height: 2.5, background: 'rgba(255,255,255,0.22)', zIndex: 10,
-                    cursor: 'pointer',
+                    height: 2, background: 'rgba(255,255,255,0.2)', zIndex: 10, cursor: 'pointer',
                 }}
                 onClick={handleSeek}
             >
@@ -337,28 +336,26 @@ function ReelItem({ reel, isActive }) {
                 }} />
             </div>
 
-            {/* Time indicator */}
+            {/* Time */}
             <div style={{
-                position: 'absolute', bottom: 7, right: 12,
-                fontSize: 11, color: 'rgba(255,255,255,0.65)',
-                textShadow: '0 1px 3px rgba(0,0,0,0.5)', zIndex: 11,
+                position: 'absolute', bottom: 6, right: 12, fontSize: 10,
+                color: 'rgba(255,255,255,0.6)', textShadow: '0 1px 3px rgba(0,0,0,0.6)', zIndex: 11,
             }}>
                 {fmtTime(progress * duration)} / {fmtTime(duration)}
             </div>
 
-            {/* Inline keyframes */}
             <style>{`
                 @keyframes spinSlow { to { transform: rotate(360deg); } }
                 @keyframes scrollText {
-                    0%, 15% { transform: translateX(0); }
-                    85%, 100% { transform: translateX(-55%); }
+                    0%,15% { transform: translateX(0); }
+                    85%,100% { transform: translateX(-50%); }
                 }
             `}</style>
         </div>
     )
 }
 
-/* ── Main Dscrolls Page ─────────────────────────────── */
+/* ── Dscrolls page ──────────────────────────────────── */
 export default function Dscrolls() {
     const navigate = useNavigate()
     const [currentIdx, setCurrentIdx] = useState(0)
@@ -374,9 +371,8 @@ export default function Dscrolls() {
     })
 
     const reels = data?.pages.flatMap(p => p.data || []) ?? []
-    const loading = status === 'pending'
 
-    /* Intersection observer — detect active reel */
+    /* Intersection observer — active reel detection */
     useEffect(() => {
         if (!containerRef.current) return
         const items = containerRef.current.querySelectorAll('[data-reel]')
@@ -389,79 +385,80 @@ export default function Dscrolls() {
                     if (idx >= reels.length - 2 && hasNextPage) fetchNextPage()
                 }
             })
-        }, { threshold: 0.65 })
+        }, { threshold: 0.6 })
         items.forEach(el => observerRef.current.observe(el))
         return () => observerRef.current?.disconnect()
     }, [reels.length, hasNextPage, fetchNextPage])
 
-    if (loading) return (
-        <div style={{
-            position: 'fixed', inset: 0, background: '#000', zIndex: 200,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-            <div className="spinner" style={{ width: 44, height: 44, borderColor: 'rgba(255,255,255,0.25)', borderTopColor: '#fff' }} />
+    if (status === 'pending') return (
+        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="spinner" style={{ width: 44, height: 44, borderColor: 'rgba(255,255,255,0.2)', borderTopColor: '#fff' }} />
         </div>
     )
 
-    if (!loading && reels.length === 0) return (
+    if (reels.length === 0) return (
         <div style={{
             position: 'fixed', inset: 0, background: '#000', zIndex: 200,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', gap: 16, textAlign: 'center', padding: 32,
+            color: '#fff', gap: 16, padding: 32, textAlign: 'center',
         }}>
-            <div style={{ fontSize: 60 }}>🎬</div>
+            <div style={{ fontSize: 56 }}>🎬</div>
             <p style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>No Dscrolls yet</p>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Upload a video post to see it here</p>
-            <button
-                onClick={() => navigate(-1)}
-                style={{ marginTop: 12, background: '#fff', color: '#000', border: 'none', borderRadius: 20, padding: '10px 24px', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}
-            >Go back</button>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', margin: 0 }}>Create a video post to see it here</p>
+            <button onClick={() => navigate(-1)} style={{
+                marginTop: 8, background: '#fff', color: '#000', border: 'none',
+                borderRadius: 20, padding: '10px 28px', fontWeight: 700, cursor: 'pointer', fontSize: 14,
+            }}>Go back</button>
         </div>
     )
 
     return (
-        /* Full screen — covers sidebar on desktop too */
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#000', overflow: 'hidden' }}>
+        /* Full viewport overlay */
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#000' }}>
 
-            {/* Back arrow — top left, subtle */}
+            {/* Back arrow */}
             <button
                 onClick={() => navigate(-1)}
                 style={{
-                    position: 'absolute', top: 16, left: 16, zIndex: 210,
-                    background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(8px)',
-                    border: 'none', borderRadius: '50%', width: 38, height: 38,
+                    position: 'absolute', top: 16, left: 16, zIndex: 220,
+                    background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)',
+                    border: 'none', borderRadius: '50%', width: 36, height: 36,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', color: '#fff', fontSize: 20, lineHeight: 1,
+                    cursor: 'pointer', color: '#fff', fontSize: 18,
                 }}
-            >←</button>
+            ><HiArrowLeft /></button>
 
-            {/* Camera / New Dscroll button — top right like Instagram */}
-            <button
-                onClick={() => navigate('/create')}
-                style={{
-                    position: 'absolute', top: 16, right: 16, zIndex: 210,
-                    background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(8px)',
-                    border: 'none', borderRadius: '50%', width: 38, height: 38,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', color: '#fff', fontSize: 22,
-                }}
-            >📷</button>
-
-            {/* Scroll-snap container */}
-            <div
-                ref={containerRef}
-                style={{
-                    height: '100dvh', overflowY: 'scroll',
-                    scrollSnapType: 'y mandatory', scrollbarWidth: 'none',
-                }}
-            >
-                {reels.map((reel, i) => (
-                    <div key={reel._id || i} data-reel={i}
-                        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
-                    >
-                        <ReelItem reel={reel} isActive={currentIdx === i} />
-                    </div>
-                ))}
+            {/*
+              Desktop: centered phone-column (430px max, like Instagram web)
+              Mobile: full width
+            */}
+            <div style={{
+                height: '100dvh',
+                maxWidth: 430,
+                margin: '0 auto',
+                position: 'relative',
+            }}>
+                {/* Scroll container */}
+                <div
+                    ref={containerRef}
+                    style={{
+                        height: '100%',
+                        overflowY: 'scroll',
+                        scrollSnapType: 'y mandatory',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                    }}
+                >
+                    {reels.map((reel, i) => (
+                        <div
+                            key={reel._id || i}
+                            data-reel={i}
+                            style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always', height: '100dvh' }}
+                        >
+                            <ReelItem reel={reel} isActive={currentIdx === i} />
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )
