@@ -54,162 +54,162 @@ export default function Layout() {
         if (mainRef.current) mainRef.current.scrollTo({ top: 0, behavior: 'instant' })
     }, [location.pathname])
 
-    // ── Fetch initial unread notification count ─────────────
+    // ── Fetch initial unread notification count + polling fallback ─────
+    // Polls every 30s so badge updates even if socket/Redis is down
     useEffect(() => {
         if (!user) return
-        api.get('/notifications?limit=1')
-            .then(({ data }) => {
-                const c = data.unreadCount || 0
-                unreadRef.current = c
-                setUnreadCount(c)
-            })
-            .catch(() => { })
+
+        const syncNotifCount = () => {
+            api.get('/notifications?limit=1')
+                .then(({ data }) => {
+                    const serverCount = data.unreadCount || 0
+                    if (serverCount > unreadRef.current) {
+                        // Server has MORE unread than we know about → bump badge (polling delivered it)
+                        setUnreadCount(serverCount)
+                        unreadRef.current = serverCount
+                    } else if (serverCount < unreadRef.current) {
+                        // They read on another tab/device
+                        setUnreadCount(serverCount)
+                        unreadRef.current = serverCount
+                    }
+                })
+                .catch(() => { })
+        }
+
+        syncNotifCount()                           // immediate
+        const poll = setInterval(syncNotifCount, 30_000)   // every 30s fallback
+        return () => clearInterval(poll)
     }, [user])
 
-    // Messages badge starts at 0 — only bumped by real-time socket events
-    // (Instagram-style: badge only appears for messages received in this session)
-
-    // ── Real-time notifications via socket ─────────────────
+    // ── Real-time socket notifications ─────────────────────────────────
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
-        if (!token) return
+        if (!token || !user) return
+
+        const showNotifToast = (notif) => {
+            const typeEmoji = { like: '❤️', comment: '💬', follow: '👤', message: '💬' }
+            const typeText = { like: 'liked your post', comment: 'commented on your post', follow: 'started following you' }
+            const typeColor = { like: '#FF375F', comment: '#6366F1', follow: '#10B981' }
+            const color = typeColor[notif.type] || '#6366F1'
+
+            toast((t) => (
+                <div
+                    onClick={() => { navigate('/notifications'); toast.dismiss(t.id) }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '2px 4px' }}
+                >
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <img
+                            src={notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.username}&background=6366F1&color=fff`}
+                            style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+                            alt=""
+                        />
+                        <div style={{
+                            position: 'absolute', bottom: -2, right: -2,
+                            width: 18, height: 18, borderRadius: '50%',
+                            background: color,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 10, border: '2px solid var(--surface)',
+                        }}>{typeEmoji[notif.type]}</div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-1)', lineHeight: 1.3 }}>
+                            {notif.sender?.username}
+                            <span style={{ fontWeight: 400, color: 'var(--text-2)', marginLeft: 4 }}>{typeText[notif.type]}</span>
+                        </p>
+                        <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--text-3)' }}>Tap to view</p>
+                    </div>
+                </div>
+            ), {
+                duration: 5000,
+                style: {
+                    background: 'var(--surface)', color: 'var(--text-1)',
+                    border: '1px solid var(--border-md)', borderRadius: 16,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.25)', backdropFilter: 'blur(20px)',
+                    padding: '12px 16px', maxWidth: 340,
+                },
+            })
+        }
+
+        const showMsgToast = (msg) => {
+            const senderName = msg.sender?.username || 'Someone'
+            const senderAvatar = msg.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${senderName}&background=6366F1&color=fff`
+            const convoId = msg.conversationId
+            const preview = msg.body?.length > 40 ? msg.body.slice(0, 40) + '…' : (msg.body || '📷 Photo')
+
+            toast((t) => (
+                <div
+                    onClick={() => { navigate(`/messages/${convoId || ''}`); toast.dismiss(t.id) }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '2px 4px' }}
+                >
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <img src={senderAvatar} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block' }} alt="" />
+                        <div style={{
+                            position: 'absolute', bottom: -2, right: -2, width: 18, height: 18, borderRadius: '50%',
+                            background: 'linear-gradient(135deg,#6366F1,#A78BFA)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 9, border: '2px solid var(--surface)',
+                        }}>💬</div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-1)', lineHeight: 1.3 }}>{senderName}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}>{preview}</p>
+                    </div>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366F1', flexShrink: 0, boxShadow: '0 0 6px #6366F1' }} />
+                </div>
+            ), {
+                duration: 6000,
+                style: {
+                    background: 'var(--surface)', color: 'var(--text-1)',
+                    border: '1px solid var(--border-md)', borderRadius: 16,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.25)', backdropFilter: 'blur(20px)',
+                    padding: '12px 16px', maxWidth: 340,
+                },
+            })
+        }
 
         layoutSocket = io(SOCKET_URL, {
             auth: { token },
             path: '/socket.io',
             transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1500,
+            reconnectionDelayMax: 10000,
+        })
+
+        layoutSocket.on('connect', () => {
+            // Re-sync counts after reconnect (e.g. Render cold-start, tab wake)
+            api.get('/notifications?limit=1').then(({ data }) => {
+                const c = data.unreadCount || 0
+                unreadRef.current = c
+                setUnreadCount(c)
+            }).catch(() => { })
+        })
+
+        layoutSocket.on('connect_error', (err) => {
+            console.warn('[Socket] Connection error:', err.message)
         })
 
         layoutSocket.on('new_notification', (notif) => {
             unreadRef.current += 1
             setUnreadCount(unreadRef.current)
-
-            const typeEmoji = { like: '❤️', comment: '💬', follow: '👤' }
-            const typeText = { like: 'liked your post', comment: 'commented on your post', follow: 'started following you' }
-            const typeColor = { like: '#FF375F', comment: '#6366F1', follow: '#10B981' }
-            const color = typeColor[notif.type] || '#6366F1'
-
-            toast(
-                (t) => (
-                    <div
-                        onClick={() => { navigate('/notifications'); toast.dismiss(t.id) }}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: 12,
-                            cursor: 'pointer', padding: '2px 4px',
-                        }}
-                    >
-                        <div style={{ position: 'relative', flexShrink: 0 }}>
-                            <img
-                                src={notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.username}&background=6366F1&color=fff`}
-                                style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
-                                alt=""
-                            />
-                            <div style={{
-                                position: 'absolute', bottom: -2, right: -2,
-                                width: 18, height: 18, borderRadius: '50%',
-                                background: color,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 10, border: '2px solid var(--surface)',
-                            }}>
-                                {typeEmoji[notif.type]}
-                            </div>
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-1)', lineHeight: 1.3 }}>
-                                {notif.sender?.username}
-                                <span style={{ fontWeight: 400, color: 'var(--text-2)', marginLeft: 4 }}>{typeText[notif.type]}</span>
-                            </p>
-                            <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--text-3)' }}>Tap to view</p>
-                        </div>
-                    </div>
-                ),
-                {
-                    duration: 4000,
-                    style: {
-                        background: 'var(--surface)',
-                        color: 'var(--text-1)',
-                        border: '1px solid var(--border-md)',
-                        borderRadius: 16,
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                        backdropFilter: 'blur(20px)',
-                        padding: '12px 16px',
-                        maxWidth: 340,
-                    },
-                }
-            )
+            showNotifToast(notif)
         })
 
         layoutSocket.on('new_message', (msg) => {
-            // Only bump if message is FROM someone else (not our own send)
-            const senderId = msg.sender?._id || msg.sender
-            const isFromMe = senderId === user?._id
-            if (isFromMe) return
+            // FIX: compare IDs as strings — sender may be ObjectId from backend
+            const senderId = (msg.sender?._id || msg.sender || '').toString()
+            const myId = (user?._id || '').toString()
+            if (senderId === myId) return  // skip own sent messages
 
-            // Only bump badge if NOT currently on messages page
             if (!window.location.pathname.startsWith('/messages')) {
                 msgRef.current += 1
                 setMsgCount(c => c + 1)
-                // Show a rich Instagram-style message toast
-                const senderName = msg.sender?.username || 'Someone'
-                const senderAvatar = msg.sender?.avatarUrl ||
-                    `https://ui-avatars.com/api/?name=${senderName}&background=6366F1&color=fff`
-                const convoId = msg.conversationId
-                const preview = msg.body?.length > 40 ? msg.body.slice(0, 40) + '…' : (msg.body || '📷 Photo')
-
-                toast(
-                    (t) => (
-                        <div
-                            onClick={() => { navigate(`/messages/${convoId || ''}`); toast.dismiss(t.id) }}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: 12,
-                                cursor: 'pointer', padding: '2px 4px',
-                            }}
-                        >
-                            <div style={{ position: 'relative', flexShrink: 0 }}>
-                                <img
-                                    src={senderAvatar}
-                                    style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
-                                    alt=""
-                                />
-                                <div style={{
-                                    position: 'absolute', bottom: -2, right: -2,
-                                    width: 18, height: 18, borderRadius: '50%',
-                                    background: 'linear-gradient(135deg,#6366F1,#A78BFA)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: 9, border: '2px solid var(--surface)',
-                                }}>
-                                    💬
-                                </div>
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-1)', lineHeight: 1.3 }}>
-                                    {senderName}
-                                </p>
-                                <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}>
-                                    {preview}
-                                </p>
-                            </div>
-                            <div style={{
-                                width: 8, height: 8, borderRadius: '50%',
-                                background: '#6366F1', flexShrink: 0,
-                                boxShadow: '0 0 6px #6366F1',
-                            }} />
-                        </div>
-                    ),
-                    {
-                        duration: 5000,
-                        style: {
-                            background: 'var(--surface)',
-                            color: 'var(--text-1)',
-                            border: '1px solid var(--border-md)',
-                            borderRadius: 16,
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                            backdropFilter: 'blur(20px)',
-                            padding: '12px 16px',
-                            maxWidth: 340,
-                        },
-                    }
-                )
+                showMsgToast(msg)
+            } else {
+                // Still update badge in sidebar even when on messages (different convo)
+                msgRef.current += 1
+                setMsgCount(c => c + 1)
             }
         })
 
