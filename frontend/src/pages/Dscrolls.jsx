@@ -52,7 +52,9 @@ function DscrollItem({ dscroll, isActive }) {
     const videoRef = useRef()
     const [liked, setLiked] = useState(dscroll.isLiked || false)
     const [likesCount, setLikesCount] = useState(dscroll.likesCount || 0)
-    const pendingLike = useRef(false) // true while API call is in-flight
+    const pendingLike = useRef(false)   // true while API call is in-flight
+    const localLiked = useRef(null)     // user's intended liked state; null = defer to server
+    const localCount = useRef(null)     // user's intended count; null = defer to server
     const [muted, setMuted] = useState(true)
     const [progress, setProgress] = useState(0)
     const [duration, setDuration] = useState(0)
@@ -65,9 +67,13 @@ function DscrollItem({ dscroll, isActive }) {
     const pauseTimer = useRef(null)
     const lastPos = useRef({ x: 0, y: 0 })
 
-    // Sync liked state from server data, but only when no API call is in-flight
+    // Sync liked state from server data only when we don't have a pending local override
     useEffect(() => {
-        if (!pendingLike.current) {
+        if (localLiked.current !== null) {
+            // We have a locally set state — keep it; ignore stale server data
+            setLiked(localLiked.current)
+            setLikesCount(localCount.current)
+        } else {
             setLiked(dscroll.isLiked || false)
             setLikesCount(dscroll.likesCount || 0)
         }
@@ -102,10 +108,17 @@ function DscrollItem({ dscroll, isActive }) {
         tapTimer.current = setTimeout(() => {
             if (tapCount.current >= 2) {
                 if (!liked) {
-                    setLiked(true); setLikesCount(c => c + 1)
+                    const nextCount = likesCount + 1
+                    localLiked.current = true
+                    localCount.current = nextCount
+                    setLiked(true); setLikesCount(nextCount)
                     pendingLike.current = true
                     api.post(`/posts/${dscroll._id}/like`)
-                        .catch(() => { setLiked(false); setLikesCount(c => c - 1) })
+                        .catch(() => {
+                            localLiked.current = false
+                            localCount.current = likesCount
+                            setLiked(false); setLikesCount(likesCount)
+                        })
                         .finally(() => { pendingLike.current = false })
                 }
                 const id = Date.now()
@@ -124,16 +137,25 @@ function DscrollItem({ dscroll, isActive }) {
             }
             tapCount.current = 0
         }, 230)
-    }, [liked, dscroll._id])
+    }, [liked, likesCount, dscroll._id])
 
     const handleLike = (e) => {
         e.stopPropagation()
+        if (pendingLike.current) return  // prevent double-tap race
         const next = !liked
+        const nextCount = next ? likesCount + 1 : likesCount - 1
+        localLiked.current = next
+        localCount.current = nextCount
         setLiked(next)
-        setLikesCount(c => next ? c + 1 : c - 1)
+        setLikesCount(nextCount)
         pendingLike.current = true
         ;(next ? api.post : api.delete)(`/posts/${dscroll._id}/like`)
-            .catch(() => { setLiked(!next); setLikesCount(c => c + (next ? -1 : 1)) })
+            .catch(() => {
+                localLiked.current = !next
+                localCount.current = likesCount
+                setLiked(!next)
+                setLikesCount(likesCount)
+            })
             .finally(() => { pendingLike.current = false })
     }
 

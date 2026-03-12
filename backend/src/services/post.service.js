@@ -118,7 +118,8 @@ const likePost = async (postId, userId) => {
     try {
         await Like.create({ user: userId, targetId: postId, targetModel: 'Post' });
         await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
-        await getRedis().del(`post:${postId}`);
+        const redis = getRedisOptional();
+        if (redis) await redis.del(`post:${postId}`);
         // Notify post author
         notificationService.createNotification({
             recipient: post.author,
@@ -138,7 +139,8 @@ const unlikePost = async (postId, userId) => {
     const like = await Like.findOneAndDelete({ user: userId, targetId: postId, targetModel: 'Post' });
     if (!like) throw new ApiError(404, 'Like not found');
     await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
-    await getRedis().del(`post:${postId}`);
+    const redis = getRedisOptional();
+    if (redis) await redis.del(`post:${postId}`);
     return { liked: false };
 };
 

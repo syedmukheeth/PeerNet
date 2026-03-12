@@ -19,12 +19,21 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [likesCount, setLikesCount] = useState(post.likesCount || 0)
     const [saved, setSaved] = useState(post.isSaved || false)
     const [isLikePending, setIsLikePending] = useState(false)
+    const pendingLike = useRef(false) // true while a like/unlike API call is in-flight
     const [lastTap, setLastTap] = useState(0)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
     const [caption, setCaption] = useState(post.caption || '')
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
+
+    // Sync liked state from server data, but only when no API call is in-flight
+    useEffect(() => {
+        if (!pendingLike.current) {
+            setLiked(post.isLiked || false)
+            setLikesCount(post.likesCount || 0)
+        }
+    }, [post.isLiked, post.likesCount])
 
     // ── Video Player State ────────────────────────────────────────────────────────
     const videoRef = useRef(null)
@@ -55,8 +64,9 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     }, [menuOpen])
 
     const handleLike = async () => {
-        if (isLikePending) return  // prevent double-click race
+        if (isLikePending || pendingLike.current) return  // prevent double-click race
         const newLiked = !liked
+        pendingLike.current = true
         setLiked(newLiked)
         setIsLikePending(true)
         const newCount = newLiked ? likesCount + 1 : likesCount - 1
@@ -79,6 +89,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
             }
         } finally {
             setIsLikePending(false)
+            pendingLike.current = false
         }
     }
 
