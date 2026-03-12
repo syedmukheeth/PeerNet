@@ -52,6 +52,7 @@ function DscrollItem({ dscroll, isActive }) {
     const videoRef = useRef()
     const [liked, setLiked] = useState(dscroll.isLiked || false)
     const [likesCount, setLikesCount] = useState(dscroll.likesCount || 0)
+    const pendingLike = useRef(false) // true while API call is in-flight
     const [muted, setMuted] = useState(true)
     const [progress, setProgress] = useState(0)
     const [duration, setDuration] = useState(0)
@@ -63,6 +64,14 @@ function DscrollItem({ dscroll, isActive }) {
     const tapTimer = useRef(null)
     const pauseTimer = useRef(null)
     const lastPos = useRef({ x: 0, y: 0 })
+
+    // Sync liked state from server data, but only when no API call is in-flight
+    useEffect(() => {
+        if (!pendingLike.current) {
+            setLiked(dscroll.isLiked || false)
+            setLikesCount(dscroll.likesCount || 0)
+        }
+    }, [dscroll.isLiked, dscroll.likesCount])
 
     useEffect(() => {
         const v = videoRef.current
@@ -94,7 +103,10 @@ function DscrollItem({ dscroll, isActive }) {
             if (tapCount.current >= 2) {
                 if (!liked) {
                     setLiked(true); setLikesCount(c => c + 1)
-                    api.post(`/posts/${dscroll._id}/like`).catch(() => { setLiked(false); setLikesCount(c => c - 1) })
+                    pendingLike.current = true
+                    api.post(`/posts/${dscroll._id}/like`)
+                        .catch(() => { setLiked(false); setLikesCount(c => c - 1) })
+                        .finally(() => { pendingLike.current = false })
                 }
                 const id = Date.now()
                 setHeartBursts(b => [...b, { id, ...lastPos.current }])
@@ -116,8 +128,13 @@ function DscrollItem({ dscroll, isActive }) {
 
     const handleLike = (e) => {
         e.stopPropagation()
-        const next = !liked; setLiked(next); setLikesCount(c => next ? c + 1 : c - 1)
-        ;(next ? api.post : api.delete)(`/posts/${dscroll._id}/like`).catch(() => { setLiked(!next); setLikesCount(c => c + (next ? -1 : 1)) })
+        const next = !liked
+        setLiked(next)
+        setLikesCount(c => next ? c + 1 : c - 1)
+        pendingLike.current = true
+        ;(next ? api.post : api.delete)(`/posts/${dscroll._id}/like`)
+            .catch(() => { setLiked(!next); setLikesCount(c => c + (next ? -1 : 1)) })
+            .finally(() => { pendingLike.current = false })
     }
 
     const handleShare = (e) => {
@@ -247,21 +264,12 @@ export default function Dscrolls() {
         queryKey: ['dscrolls'],
         queryFn: fetchDscrolls,
         getNextPageParam: (last) => last.nextCursor ?? undefined,
-        staleTime: 0,              // Always consider stale
-        refetchOnMount: 'always',  // Always refetch when component mounts
-        refetchOnWindowFocus: true, // Refetch when tab becomes active
+        staleTime: 30_000,          // 30s before considered stale
+        refetchOnMount: true,
+        refetchOnWindowFocus: false, // Don't refetch on focus — it resets liked state
     })
 
-    // Prefetch fresh data whenever the user returns to this page (visibility)
-    useEffect(() => {
-        const handleVisibility = () => {
-            if (document.visibilityState === 'visible') {
-                refetch()
-            }
-        }
-        document.addEventListener('visibilitychange', handleVisibility)
-        return () => document.removeEventListener('visibilitychange', handleVisibility)
-    }, [refetch])
+    // Removed aggressive visibility refetch — it was resetting liked state on every scroll
 
     const dscrolls = data?.pages.flatMap(p => p.data || []) ?? []
 
