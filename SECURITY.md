@@ -37,6 +37,20 @@ Instead, report it privately:
 - CORS restrictions
 - HTTPS enforced in production
 
+## If Credentials Were Leaked (e.g. in Git History)
+
+1. **Purge from history**  
+   Use `git filter-repo` (preferred) or `git filter-branch` to rewrite history and remove the secret from all commits. Do not interrupt the process.
+
+2. **Rotate credentials immediately**  
+   Treat the leaked value as compromised. In MongoDB Atlas: change the database user password (or create a new user and delete the old one). Update `MONGO_URI` in `.env` and in any deployment/config (e.g. Render) with the new credentials.
+
+3. **Update remote history**  
+   After rewriting history: `git push --force --all` and `git push --force --tags`. Collaborators should re-clone or hard-reset to the new history.
+
+4. **Prevent future leaks**  
+   Never commit `.env` (it is in `.gitignore`). Use `.env.example` with placeholders only. Consider a pre-commit or CI check that blocks commits containing connection strings or other secrets.
+
 ---
 
 Built by **Syed Mukheeth** · © 2026

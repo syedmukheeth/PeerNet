@@ -1,11 +1,15 @@
 'use strict';
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+require('dotenv').config();
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const MONGO_URI = 'mongodb+srv://syedmukheeth09_db_user:5l4CwqfEsozUBUOi@cluster0.m45p1td.mongodb.net/PeerNet?retryWrites=true&w=majority&appName=Cluster0';
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+    console.error('❌  MONGO_URI environment variable is not set. Aborting.');
+    process.exit(1);
+}
 
 const userSchema = new mongoose.Schema(
     {
