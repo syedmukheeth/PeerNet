@@ -194,7 +194,15 @@ export default function Messages() {
         loadConvos().then(convos => {
             if (paramConvoId) { const f = convos.find(c => c._id === paramConvoId); if (f) selectConvo(f) }
         }).catch(() => { setInitialLoad(false) })
-    }, []) // eslint-disable-line
+    }, []) // initial load only
+
+    // Sync active conversation when URL param changes (e.g. from notification)
+    useEffect(() => {
+        if (paramConvoId && activeConvo?._id !== paramConvoId) {
+            const f = conversations.find(c => c._id === paramConvoId)
+            if (f) selectConvo(f)
+        }
+    }, [paramConvoId, conversations]) // eslint-disable-line
 
     const selectConvo = async (convo) => {
         if (activeConvo?._id === convo._id) { setMobilePanel('chat'); return }
@@ -226,7 +234,7 @@ export default function Messages() {
         finally { setStarting(false) }
     }
 
-    useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, peerTyping])
+    useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'auto' }) }, [messages, peerTyping])
 
     const handleSend = async (e) => {
         e?.preventDefault()
@@ -419,20 +427,37 @@ export default function Messages() {
                                     onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
                                     <div style={{ position: 'relative', flexShrink: 0 }} onClick={e => { e.stopPropagation(); navigate(`/profile/${peer?._id}`) }}>
                                         <img src={pav} style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', display: 'block' }} alt="" />
-                                        <div style={{ position: 'absolute', bottom: 1, right: 1, width: 13, height: 13, background: 'var(--success)', borderRadius: '50%', border: '2.5px solid var(--surface)' }} />
+                                        {c.isOnline && (
+                                            <div style={{ position: 'absolute', bottom: 1, right: 1, width: 13, height: 13, background: 'var(--success)', borderRadius: '50%', border: '2.5px solid var(--surface)' }} />
+                                        )}
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, fontSize: 14 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: c.unreadCount > 0 ? 800 : 600, fontSize: 14 }}>
                                                 {peer?.username}
                                                 {peer?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13 }} />}
                                             </div>
                                             {c.lastMessage?.createdAt && (
-                                                <span style={{ fontSize: 11, color: 'var(--text-3)', flexShrink: 0 }}>{timeago(c.lastMessage.createdAt)}</span>
+                                                <span style={{ fontSize: 11, color: c.unreadCount > 0 ? 'var(--accent)' : 'var(--text-3)', flexShrink: 0, fontWeight: c.unreadCount > 0 ? 700 : 400 }}>
+                                                    {timeago(c.lastMessage.createdAt)}
+                                                </span>
                                             )}
                                         </div>
-                                        <div style={{ fontSize: 13, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {c.lastMessage?.body || 'Say hi 👋'}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <div style={{ 
+                                                fontSize: 13, 
+                                                color: c.unreadCount > 0 ? 'var(--text-1)' : 'var(--text-3)', 
+                                                whiteSpace: 'nowrap', 
+                                                overflow: 'hidden', 
+                                                textOverflow: 'ellipsis',
+                                                flex: 1,
+                                                fontWeight: c.unreadCount > 0 ? 700 : 400
+                                            }}>
+                                                {c.lastMessage?.body || 'Say hi 👋'}
+                                            </div>
+                                            {c.unreadCount > 0 && (
+                                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -473,8 +498,8 @@ export default function Messages() {
                                         {other.username}
                                         {other.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13 }} />}
                                     </div>
-                                    <div style={{ fontSize: 12, color: peerTyping ? 'var(--accent)' : 'var(--success)', marginTop: 1 }}>
-                                        {peerTyping ? 'typing…' : '● Active now'}
+                                    <div style={{ fontSize: 12, color: (activeConvo.isOnline || peerTyping) ? 'var(--success)' : 'var(--text-3)', marginTop: 1 }}>
+                                        {peerTyping ? 'typing…' : activeConvo.isOnline ? '● Active now' : 'Offline'}
                                     </div>
                                 </div>
                             </div>

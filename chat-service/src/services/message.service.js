@@ -27,20 +27,47 @@ const getUserConversations = async (userId) => {
     const cacheKey = `user:${userId}:conversations`;
 
     // Try cache first
+    let conversations;
     const cached = await redis.get(cacheKey);
     if (cached) {
-        return JSON.parse(cached);
+        conversations = JSON.parse(cached);
+    } else {
+        // Cache miss — fetch from DB
+        conversations = await Conversation.find({ participants: userId })
+            .populate('participants', 'username avatarUrl isVerified')
+            .populate('lastMessage')
+            .sort({ updatedAt: -1 });
+        
+        // Convert to plain objects to allow adding properties
+        conversations = conversations.map(c => c.toObject());
+
+        // Cache the result for 1 minute (short cache for better consistency)
+        await redis.setEx(cacheKey, 60, JSON.stringify(conversations));
     }
 
-    // Cache miss — fetch from DB
-    const conversations = await Conversation.find({ participants: userId })
-        .populate('participants', 'username avatarUrl isVerified')
-        .populate('lastMessage')
-        .sort({ updatedAt: -1 });
+    // Always fetch LIVE online status and unread counts even if conversations are cached
+    const enriched = await Promise.all(conversations.map(async (convo) => {
+        const peer = convo.participants.find(p => p._id.toString() !== userId.toString());
+        if (!peer) return convo;
 
-    // Cache the result for 5 minutes (300s)
-    await redis.setEx(cacheKey, 300, JSON.stringify(conversations));
-    return conversations;
+        // Check online status in Redis
+        const isOnline = await redis.get(`online:${peer._id.toString()}`);
+
+        // Count unread messages from this peer in this conversation
+        const unreadCount = await Message.countDocuments({
+            conversation: convo._id,
+            sender: peer._id,
+            isRead: false
+        });
+
+        return {
+            ...convo,
+            isOnline: !!isOnline,
+            unreadCount
+        };
+    }));
+
+    return enriched;
 };
 
 const getMessages = async (conversationId, userId, { limit = 30, cursor = null }) => {
