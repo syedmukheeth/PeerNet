@@ -225,7 +225,18 @@ export default function Layout() {
             }
         })
 
-        return () => { layoutSocket?.disconnect(); layoutSocket = null }
+        // Periodic ping to maintain online status
+        const pingInterval = setInterval(() => {
+            if (layoutSocket?.connected) {
+                layoutSocket.emit('ping_online')
+            }
+        }, 25_000)
+
+        return () => { 
+            clearInterval(pingInterval)
+            layoutSocket?.disconnect()
+            layoutSocket = null 
+        }
     }, [user, navigate])
 
     // ── Clear badges when actually ON the relevant page ────
