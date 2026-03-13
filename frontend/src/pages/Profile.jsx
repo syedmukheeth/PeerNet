@@ -8,6 +8,7 @@ import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAl
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
+import logoImg from '../assets/logo.png'
 
 
 export default function Profile() {
@@ -191,7 +192,10 @@ export default function Profile() {
                                 <HiBadgeCheck style={{ fontSize: 18, color: 'var(--accent)', flexShrink: 0 }} title="Verified" />
                             )}
                             {profile.isCreator && (
-                                <span className="badge-creator" title="Project Creator">Creator</span>
+                                <div className="badge-creator-wrap" title="Project Creator">
+                                    <img src={logoImg} alt="" className="creator-logo" />
+                                    <span className="badge-creator">Creator</span>
+                                </div>
                             )}
                         </div>
                         {isMe ? (
@@ -220,18 +224,24 @@ export default function Profile() {
                                 </motion.button>
                             </>
                         )}
-                        {/* Admin Controls */}
-                        {me?.role === 'admin' && !isMe && (
-                            <div className="admin-actions" style={{ display: 'flex', gap: 8 }}>
-                                <button className="btn btn-secondary btn-sm" onClick={handleToggleVerify}>
-                                    {profile.isVerified ? 'Unverify' : 'Verify'}
+                    </div>
+
+                    {/* Admin Dashboard Sidebar — Only for admins viewing others */}
+                    {me?.role === 'admin' && !isMe && (
+                        <div className="admin-profile-dashboard">
+                            <p className="admin-dashboard-title">Admin Controls</p>
+                            <div className="admin-dashboard-actions">
+                                <button className={`btn btn-sm ${profile.isVerified ? 'btn-secondary' : 'btn-primary'}`} 
+                                    onClick={handleToggleVerify}>
+                                    {profile.isVerified ? 'Unverify User' : 'Verify User'}
                                 </button>
-                                <button className="btn btn-secondary btn-sm" onClick={handleToggleCreator}>
+                                <button className={`btn btn-sm ${profile.isCreator ? 'btn-secondary' : 'btn-primary'}`} 
+                                    onClick={handleToggleCreator}>
                                     {profile.isCreator ? 'Remove Creator' : 'Make Creator'}
                                 </button>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* Row 2: stats — Instagram inline style */}
                     <div className="profile-stats">
