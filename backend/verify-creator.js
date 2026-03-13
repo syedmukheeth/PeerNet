@@ -13,13 +13,12 @@ async function run() {
         const username = 'syedmukheeth'; // Assuming this is the user
         const user = await User.findOneAndUpdate(
             { username },
-            { isCreator: true, isVerified: true, role: 'admin' },
+            { isVerified: true, role: 'admin' },
             { new: true }
         );
 
         if (user) {
             console.log(`User ${username} updated successfully:`);
-            console.log(`- isCreator: ${user.isCreator}`);
             console.log(`- isVerified: ${user.isVerified}`);
             console.log(`- role: ${user.role}`);
         } else {
@@ -30,7 +29,7 @@ async function run() {
             if (allUsers.length > 0) {
                 const firstUser = await User.findByIdAndUpdate(
                     allUsers[0]._id,
-                    { isCreator: true, isVerified: true, role: 'admin' },
+                    { isVerified: true, role: 'admin' },
                     { new: true }
                 );
                 console.log(`Updated first user found (${firstUser.username}) instead.`);

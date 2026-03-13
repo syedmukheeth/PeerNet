@@ -138,7 +138,6 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                             <Link to={`/profile/${author._id}`} className="post-author-name">{author.username}</Link>
                             {author.isVerified && <HiBadgeCheck className="verified" title="Verified" />}
-                            {author.isCreator && <span className="badge-creator-sm" title="Project Creator">Creator</span>}
                         </div>
                         <div className="post-author-time">{timeago(post.createdAt)}</div>
                     </div>

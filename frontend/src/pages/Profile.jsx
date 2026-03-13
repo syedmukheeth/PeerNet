@@ -110,15 +110,6 @@ export default function Profile() {
         }
     }
 
-    const handleToggleCreator = async () => {
-        try {
-            const { data } = await api.patch(`/admin/users/${id}/creator`)
-            setProfile(p => ({ ...p, isCreator: data.data.isCreator }))
-            toast.success(data.message)
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Action failed')
-        }
-    }
 
     if (loading) return (
         <div className="flex justify-center items-center" style={{ padding: '80px 0' }}>
@@ -191,12 +182,6 @@ export default function Profile() {
                             {profile.isVerified && (
                                 <HiBadgeCheck style={{ fontSize: 18, color: 'var(--accent)', flexShrink: 0 }} title="Verified" />
                             )}
-                            {profile.isCreator && (
-                                <div className="badge-creator-wrap" title="Project Creator">
-                                    <img src={logoImg} alt="" className="creator-logo" />
-                                    <span className="badge-creator">Creator</span>
-                                </div>
-                            )}
                         </div>
                         {isMe ? (
                             <button className="btn btn-secondary btn-sm" onClick={() => setEditProfile(true)}>Edit profile</button>
@@ -234,10 +219,6 @@ export default function Profile() {
                                 <button className={`btn btn-sm ${profile.isVerified ? 'btn-secondary' : 'btn-primary'}`} 
                                     onClick={handleToggleVerify}>
                                     {profile.isVerified ? 'Unverify User' : 'Verify User'}
-                                </button>
-                                <button className={`btn btn-sm ${profile.isCreator ? 'btn-secondary' : 'btn-primary'}`} 
-                                    onClick={handleToggleCreator}>
-                                    {profile.isCreator ? 'Remove Creator' : 'Make Creator'}
                                 </button>
                             </div>
                         </div>
