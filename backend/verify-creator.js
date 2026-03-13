@@ -10,7 +10,7 @@ async function run() {
         console.log('Connected to MongoDB');
 
         // Replace with your username
-        const username = 'syed_mukheeth'; // Assuming this is the user
+        const username = 'syedmukheeth'; // Assuming this is the user
         const user = await User.findOneAndUpdate(
             { username },
             { isCreator: true, isVerified: true, role: 'admin' },
