@@ -201,14 +201,27 @@ export default function Layout() {
             const myId = (user?._id || '').toString()
             if (senderId === myId) return  // skip own sent messages
 
-            if (!window.location.pathname.startsWith('/messages')) {
+            const path = window.location.pathname
+            const isAtMessages = path.startsWith('/messages')
+            
+            // Show toast if:
+            // 1. Not at /messages
+            // 2. OR at /messages but the conversation ID in URL doesn't match the msg conversationId
+            const urlConvoId = path.split('/').pop()
+            const isDifferentConvo = isAtMessages && urlConvoId !== 'messages' && urlConvoId !== msg.conversationId
+
+            if (!isAtMessages || (isAtMessages && isDifferentConvo)) {
                 msgRef.current += 1
                 setMsgCount(c => c + 1)
                 showMsgToast(msg)
-            } else {
+            } else if (isAtMessages) {
                 // Still update badge in sidebar even when on messages (different convo)
-                msgRef.current += 1
-                setMsgCount(c => c + 1)
+                // Actually, if we are in the SAME convo, we don't want to bump the badge
+                // because the Messages component will mark it as read immediately.
+                if (isDifferentConvo) {
+                    msgRef.current += 1
+                    setMsgCount(c => c + 1)
+                }
             }
         })
 
