@@ -154,7 +154,16 @@ export default function Messages() {
                 if (m.find(x => x._id === msg._id)) return m
                 return [...m, msg]
             })
-            setConversations(cs => cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg } : c))
+            setConversations(cs => {
+                const exists = cs.find(c => c._id === msg.conversationId)
+                if (exists) {
+                    return cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + 1 } : c)
+                } else {
+                    // New conversation from someone else — reload the list
+                    loadConvos()
+                    return cs
+                }
+            })
         })
         socket.on('messages_read', ({ conversationId, readBy }) => {
             if (activeConvoRef.current?._id === conversationId && readBy !== userRef.current?._id) {
@@ -204,10 +213,17 @@ export default function Messages() {
         }
     }, [paramConvoId, conversations]) // eslint-disable-line
 
+    // Periodic poll to keep status/unread accurate
+    useEffect(() => {
+        const poll = setInterval(loadConvos, 30_000)
+        return () => clearInterval(poll)
+    }, [])
+
     const selectConvo = async (convo) => {
         if (activeConvo?._id === convo._id) { setMobilePanel('chat'); return }
         if (activeConvo) socket?.emit('leave_conversation', activeConvo._id)
         setActiveConvo(convo); setMessages([]); setMobilePanel('chat'); setLoadingMessages(true)
+        setConversations(cs => cs.map(c => c._id === convo._id ? { ...c, unreadCount: 0 } : c))
         socket?.emit('join_conversation', convo._id)
         navigate(`/messages/${convo._id}`, { replace: true })
         try {
