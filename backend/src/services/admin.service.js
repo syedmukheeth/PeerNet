@@ -42,12 +42,4 @@ const toggleUserVerification = async (userId) => {
     return user;
 };
 
-const toggleUserCreator = async (userId) => {
-    const user = await User.findById(userId);
-    if (!user) throw new ApiError(404, 'User not found');
-    user.isCreator = !user.isCreator;
-    await user.save();
-    return user;
-};
-
-module.exports = { getUsers, deleteUser, deletePost, getPlatformStats, toggleUserVerification, toggleUserCreator };
+module.exports = { getUsers, deleteUser, deletePost, getPlatformStats, toggleUserVerification };

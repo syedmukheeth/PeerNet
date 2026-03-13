@@ -41,7 +41,6 @@ const userSchema = new mongoose.Schema(
         website: { type: String, default: '' },
         role: { type: String, enum: ['user', 'admin'], default: 'user' },
         isVerified: { type: Boolean, default: false },
-        isCreator: { type: Boolean, default: false },
         isPrivate: { type: Boolean, default: false },
         followersCount: { type: Number, default: 0, min: 0 },
         followingCount: { type: Number, default: 0, min: 0 },
