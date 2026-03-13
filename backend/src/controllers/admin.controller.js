@@ -33,4 +33,11 @@ const getStats = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-module.exports = { getUsers, deleteUser, deletePost, getStats };
+const toggleVerification = async (req, res, next) => {
+    try {
+        const user = await adminService.toggleUserVerification(req.params.id);
+        res.json({ success: true, data: user, message: `User verification ${user.isVerified ? 'enabled' : 'disabled'}` });
+    } catch (err) { next(err); }
+};
+
+module.exports = { getUsers, deleteUser, deletePost, getStats, toggleVerification };

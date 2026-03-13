@@ -34,4 +34,12 @@ const getPlatformStats = async () => {
     return { userCount, postCount };
 };
 
-module.exports = { getUsers, deleteUser, deletePost, getPlatformStats };
+const toggleUserVerification = async (userId) => {
+    const user = await User.findById(userId);
+    if (!user) throw new ApiError(404, 'User not found');
+    user.isVerified = !user.isVerified;
+    await user.save();
+    return user;
+};
+
+module.exports = { getUsers, deleteUser, deletePost, getPlatformStats, toggleUserVerification };
