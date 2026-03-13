@@ -99,6 +99,26 @@ export default function Profile() {
         }
     }
 
+    const handleToggleVerify = async () => {
+        try {
+            const { data } = await api.patch(`/admin/users/${id}/verify`)
+            setProfile(p => ({ ...p, isVerified: data.data.isVerified }))
+            toast.success(data.message)
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Action failed')
+        }
+    }
+
+    const handleToggleCreator = async () => {
+        try {
+            const { data } = await api.patch(`/admin/users/${id}/creator`)
+            setProfile(p => ({ ...p, isCreator: data.data.isCreator }))
+            toast.success(data.message)
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Action failed')
+        }
+    }
+
     if (loading) return (
         <div className="flex justify-center items-center" style={{ padding: '80px 0' }}>
             <div className="spinner" style={{ width: 36, height: 36 }} />
@@ -166,9 +186,14 @@ export default function Profile() {
                     {/* Row 1: username + buttons */}
                     <div className="profile-username-row">
                         <h1>{profile.username}</h1>
-                        {profile.isVerified && (
-                            <HiBadgeCheck style={{ fontSize: 18, color: 'var(--accent)', flexShrink: 0 }} />
-                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {profile.isVerified && (
+                                <HiBadgeCheck style={{ fontSize: 18, color: 'var(--accent)', flexShrink: 0 }} title="Verified" />
+                            )}
+                            {profile.isCreator && (
+                                <span className="badge-creator" title="Project Creator">Creator</span>
+                            )}
+                        </div>
                         {isMe ? (
                             <button className="btn btn-secondary btn-sm" onClick={() => setEditProfile(true)}>Edit profile</button>
                         ) : (
@@ -194,6 +219,17 @@ export default function Profile() {
                                     }
                                 </motion.button>
                             </>
+                        )}
+                        {/* Admin Controls */}
+                        {me?.role === 'admin' && !isMe && (
+                            <div className="admin-actions" style={{ display: 'flex', gap: 8 }}>
+                                <button className="btn btn-secondary btn-sm" onClick={handleToggleVerify}>
+                                    {profile.isVerified ? 'Unverify' : 'Verify'}
+                                </button>
+                                <button className="btn btn-secondary btn-sm" onClick={handleToggleCreator}>
+                                    {profile.isCreator ? 'Remove Creator' : 'Make Creator'}
+                                </button>
+                            </div>
                         )}
                     </div>
 

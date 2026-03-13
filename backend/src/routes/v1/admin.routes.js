@@ -19,6 +19,9 @@ router.delete('/posts/:id', ...guard, adminController.deletePost);
 // PATCH /api/v1/admin/users/:id/verify
 router.patch('/users/:id/verify', ...guard, adminController.toggleVerification);
 
+// PATCH /api/v1/admin/users/:id/creator
+router.patch('/users/:id/creator', ...guard, adminController.toggleCreator);
+
 // GET /api/v1/admin/stats
 router.get('/stats', ...guard, adminController.getStats);
 
