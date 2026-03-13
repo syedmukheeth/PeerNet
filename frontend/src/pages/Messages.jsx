@@ -417,7 +417,7 @@ export default function Messages() {
                                     }}
                                     onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--hover)' }}
                                     onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
-                                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                                    <div style={{ position: 'relative', flexShrink: 0 }} onClick={e => { e.stopPropagation(); navigate(`/profile/${peer?._id}`) }}>
                                         <img src={pav} style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', display: 'block' }} alt="" />
                                         <div style={{ position: 'absolute', bottom: 1, right: 1, width: 13, height: 13, background: 'var(--success)', borderRadius: '50%', border: '2.5px solid var(--surface)' }} />
                                     </div>
@@ -464,11 +464,11 @@ export default function Messages() {
                                 <button className="dm-back-btn btn btn-ghost btn-icon" onClick={() => { setMobilePanel('list'); navigate('/messages', { replace: true }) }}>
                                     <HiArrowLeft />
                                 </button>
-                                <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate(`/profile/${other?._id}`)}>
                                     <img src={otherAvatar} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block' }} alt="" />
                                     <div style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, background: 'var(--success)', borderRadius: '50%', border: '2px solid var(--surface)' }} />
                                 </div>
-                                <div style={{ flex: 1 }}>
+                                <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => navigate(`/profile/${other?._id}`)}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 700, fontSize: 14 }}>
                                         {other.username}
                                         {other.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13 }} />}
@@ -520,7 +520,8 @@ export default function Messages() {
                                             {/* Avatar for theirs, first in group */}
                                             {!isMine && isFirst && (
                                                 <img src={otherAvatar}
-                                                    style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginBottom: 2, display: 'block' }}
+                                                    onClick={() => navigate(`/profile/${other?._id}`)}
+                                                    style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginBottom: 2, display: 'block', cursor: 'pointer' }}
                                                     alt="" />
                                             )}
 
