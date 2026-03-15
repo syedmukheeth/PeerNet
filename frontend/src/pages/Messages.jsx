@@ -199,19 +199,29 @@ export default function Messages() {
         }
     }
 
+    // Initial load of conversations only
     useEffect(() => {
-        loadConvos().then(convos => {
-            if (paramConvoId) { const f = convos.find(c => c._id === paramConvoId); if (f) selectConvo(f) }
-        }).catch(() => { setInitialLoad(false) })
+        loadConvos().catch(() => { setInitialLoad(false) })
     }, []) // initial load only
 
-    // Sync active conversation when URL param changes (e.g. from notification)
+    // Single source of truth for active conversation: URL param + conversations list
     useEffect(() => {
-        if (paramConvoId && activeConvo?._id !== paramConvoId) {
-            const f = conversations.find(c => c._id === paramConvoId)
-            if (f) selectConvo(f)
+        if (!conversations.length) {
+            setActiveConvo(null)
+            return
         }
-    }, [paramConvoId, conversations]) // eslint-disable-line
+
+        if (paramConvoId) {
+            const match = conversations.find(c => c._id === paramConvoId)
+            if (match) {
+                setActiveConvo(match)
+                return
+            }
+        }
+
+        // Fallback: first conversation in the list
+        setActiveConvo(conversations[0])
+    }, [paramConvoId, conversations])
 
     // Periodic poll to keep status/unread accurate
     useEffect(() => {
