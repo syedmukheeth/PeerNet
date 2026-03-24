@@ -58,12 +58,22 @@ PeerNet is not just another social media clone; it's a sophisticated "Instagram-
   <table>
     <tr>
       <td width="50%">
-        <p align="center"><b>Login — Dark Mode</b></p>
-        <img src="./docs/images/login_dark.png" alt="Login Dark" />
+        <p align="center"><b>Feed & Explorer</b></p>
+        <img src="./docs/images/feed.png" alt="Feed" />
       </td>
       <td width="50%">
-        <p align="center"><b>Register — Light Mode</b></p>
-        <img src="./docs/images/register_light.png" alt="Register Light" />
+        <p align="center"><b>Real-Time Notifications</b></p>
+        <img src="./docs/images/notifications.png" alt="Notifications" />
+      </td>
+    </tr>
+    <tr>
+      <td width="50%">
+        <p align="center"><b>Personal Profile</b></p>
+        <img src="./docs/images/profile.png" alt="Profile" />
+      </td>
+      <td width="50%">
+        <p align="center"><b>Authentication — Dark/Light</b></p>
+        <img src="./docs/images/login_dark.png" alt="Login" />
       </td>
     </tr>
   </table>
