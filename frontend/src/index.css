@@ -38,7 +38,7 @@
 
   /* Shadows */
   --input-bg: #0C0C1A;
-  --overlay: rgba(4, 4, 18, 0.88);
+  --overlay: rgba(0, 0, 0, 0.70);
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.7);
   --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.80);
@@ -2211,11 +2211,13 @@ textarea {
 .modal-card {
   background: var(--surface);
   border: 1px solid var(--border-md);
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 26px;
   width: 100%;
   max-width: 500px;
   box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* ── Upload Zone ─────────────────────────────────────────── */
