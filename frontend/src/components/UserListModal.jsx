@@ -25,29 +25,14 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    style={{
-                        position: 'fixed', inset: 0, zIndex: 900,
-                        background: 'var(--overlay)',
-                        backdropFilter: 'blur(8px)',
-                        WebkitBackdropFilter: 'blur(8px)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: 20,
-                    }}>
+                    className="modal-overlay">
                     <motion.div
                         onClick={e => e.stopPropagation()}
                         initial={{ scale: 0.93, opacity: 0, y: 16 }}
                         animate={{ scale: 1, opacity: 1, y: 0, transition: { type: 'spring', damping: 20, stiffness: 300 } }}
                         exit={{ scale: 0.93, opacity: 0, y: 16 }}
-                        style={{
-                            background: 'var(--surface)',
-                            border: '1px solid var(--border-md)',
-                            borderRadius: 18,
-                            width: '100%', maxWidth: 400,
-                            maxHeight: '80vh',
-                            display: 'flex', flexDirection: 'column',
-                            overflow: 'hidden',
-                            boxShadow: 'var(--shadow-lg)',
-                        }}>
+                        className="modal-card"
+                        style={{ padding: 0, display: 'flex', flexDirection: 'column', maxHeight: '80vh', overflow: 'hidden', maxWidth: 400 }}>
 
                         {/* Header */}
                         <div style={{
