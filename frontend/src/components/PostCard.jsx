@@ -10,7 +10,7 @@ import {
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
-import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
+import { optimizeAvatarUrl, optimizeCloudinaryUrl } from '../utils/cloudinary'
 import EditPostModal from './EditPostModal'
 
 export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
