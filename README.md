@@ -1,5 +1,5 @@
-<div align="center">
-  <img src="./docs/images/banner.png" width="100%" alt="PeerNet Banner" />
+  <br />
+  <img src="./docs/images/logo.png" width="120" alt="PeerNet Logo" />
   
   <br />
 
