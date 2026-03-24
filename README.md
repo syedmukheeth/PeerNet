@@ -1,12 +1,12 @@
 <div align="center">
   <br />
   <img src="./docs/images/logo.png" width="120" alt="PeerNet Logo" />
-  
+  <br />
   <br />
 
   <h1>🚀 PeerNet — The Ultimate Social Ecosystem</h1>
   
-  <p align="center">
+  <p>
     <strong>Microservices · Real-Time · Production-Ready</strong>
     <br />
     A high-performance, full-stack social media platform engineered for scale and aesthetic excellence.
