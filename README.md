@@ -1,3 +1,4 @@
+<div align="center">
   <br />
   <img src="./docs/images/logo.png" width="120" alt="PeerNet Logo" />
   
