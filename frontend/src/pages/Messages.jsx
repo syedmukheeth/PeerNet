@@ -127,7 +127,11 @@ export default function Messages() {
     const typingTimer = useRef()
     const inputRef = useRef()
     const userRef = useRef(user)
+    const [suggestions, setSuggestions] = useState([])
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+    
     useEffect(() => { userRef.current = user }, [user])
+    useEffect(() => { activeConvoRef.current = activeConvo }, [activeConvo])
 
     const insertEmoji = (emojiObj) => {
         setText(t => t + emojiObj.emoji)
@@ -143,24 +147,26 @@ export default function Messages() {
         socket.on('new_message', (msg) => {
             const senderId = msg.sender?._id || msg.sender
             if (senderId === userRef.current?._id) return
-            
-            setMessages(m => {
-                // If this message belongs to the currently open conversation
-                if (activeConvoRef.current?._id === msg.conversationId) {
-                    // Mark as read immediately on the server
-                    api.patch(`conversations/${msg.conversationId}/messages/read`, {}, { baseURL: CHAT_BASE_URL }).catch(() => {})
-                    // Assume it's read locally since we are looking at it
-                    msg.isRead = true
-                }
-                if (m.find(x => x._id === msg._id)) return m
-                return [...m, msg]
-            })
+
+            if (activeConvoRef.current?._id === msg.conversationId) {
+                // Mark as read immediately on the server
+                api.patch(`conversations/${msg.conversationId}/messages/read`, {}, { baseURL: CHAT_BASE_URL }).catch(() => { })
+                
+                setMessages(m => {
+                    const exists = m.find(x => x._id === msg._id)
+                    if (exists) return m
+                    return [...m, { ...msg, isRead: true }]
+                })
+
+                // Trigger suggestion update on new incoming message context
+                fetchSuggestions(msg.conversationId)
+            }
+
             setConversations(cs => {
                 const exists = cs.find(c => c._id === msg.conversationId)
                 if (exists) {
                     return cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + 1 } : c)
                 } else {
-                    // New conversation from someone else — reload the list
                     loadConvos()
                     return cs
                 }
@@ -188,7 +194,6 @@ export default function Messages() {
         return () => { socket?.disconnect(); socket = null }
     }, [])
 
-    const activeConvoRef = useRef(activeConvo)
     useEffect(() => { activeConvoRef.current = activeConvo }, [activeConvo])
 
     const loadConvos = async () => {
@@ -230,24 +235,45 @@ export default function Messages() {
         return () => clearInterval(poll)
     }, [])
 
+    const fetchSuggestions = async (convoId) => {
+        if (!convoId) return setSuggestions([])
+        setLoadingSuggestions(true)
+        try {
+            const { data } = await api.get(`/conversations/${convoId}/suggestions`, { baseURL: CHAT_BASE_URL })
+            setSuggestions(data.suggestions || [])
+        } catch (err) {
+            console.warn("AI: Suggestion fetch failed:", err)
+            setSuggestions([])
+        } finally {
+            setLoadingSuggestions(false)
+        }
+    }
+
     const selectConvo = async (convo) => {
         if (activeConvo?._id === convo._id) { setMobilePanel('chat'); return }
         if (activeConvo) socket?.emit('leave_conversation', activeConvo._id)
-        setActiveConvo(convo); setMessages([]); setMobilePanel('chat'); setLoadingMessages(true)
+        
+        setActiveConvo(convo)
+        setMessages([])
+        setLoadingMessages(true)
+        setMobilePanel('chat')
+        setSuggestions([]) 
+        
         setConversations(cs => cs.map(c => c._id === convo._id ? { ...c, unreadCount: 0 } : c))
         socket?.emit('join_conversation', convo._id)
         navigate(`/messages/${convo._id}`, { replace: true })
+
         try {
-            const { data } = await api.get(`conversations/${convo._id}/messages`, { params: { limit: 50 }, baseURL: CHAT_BASE_URL })
+            const { data } = await api.get(`/conversations/${convo._id}/messages`, { params: { limit: 50 }, baseURL: CHAT_BASE_URL })
             setMessages(data.data || [])
-            // Mark messages as read on open
-            api.patch(`conversations/${convo._id}/messages/read`, {}, { baseURL: CHAT_BASE_URL }).catch(() => {})
-        } catch {
-            toast.error('Failed to load messages')
-        } finally {
-            setLoadingMessages(false)
-            setTimeout(() => inputRef.current?.focus(), 200)
-        }
+            await api.patch(`/conversations/${convo._id}/messages/read`, {}, { baseURL: CHAT_BASE_URL })
+            
+            // Smart replies
+            fetchSuggestions(convo._id)
+        } catch (err) { console.error("Chat fetch err:", err) }
+        finally { setLoadingMessages(false) }
+        
+        setTimeout(() => inputRef.current?.focus(), 200)
     }
 
     const startConvoWith = async (u) => {
@@ -292,6 +318,8 @@ export default function Messages() {
                 return [...m, data.data]
             })
             setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: data.data } : c))
+            setSuggestions([]) // Clear suggestions as context changed
+            fetchSuggestions(activeConvo._id) // Load new suggestions for next reply
         } catch {
             toast.error('Failed to send')
             setText(body)
@@ -650,6 +678,34 @@ export default function Messages() {
                                 {peerTyping && <TypingBubble />}
                                 <div ref={bottomRef} />
                             </div>
+
+                            {/* AI Suggestions Chips */}
+                            {!loadingMessages && suggestions.length > 0 && !peerTyping && !showEmoji && !filePreview && (
+                                <div className="fade-in" style={{
+                                    display: 'flex', gap: 8, padding: '12px 16px', 
+                                    overflowX: 'auto', background: 'transparent',
+                                    scrollbarWidth: 'none', msOverflowStyle: 'none'
+                                }}>
+                                    {suggestions.map((s, i) => (
+                                        <button key={i} 
+                                            onClick={() => { setText(s); inputRef.current?.focus(); }}
+                                            className="glass-card"
+                                            style={{
+                                                padding: '8px 16px', borderRadius: 18,
+                                                fontSize: 13, fontWeight: 600, color: 'var(--text-1)',
+                                                border: '1px solid var(--border-md)', cursor: 'pointer',
+                                                whiteSpace: 'nowrap', flexShrink: 0,
+                                                background: 'rgba(255,255,255,0.05)',
+                                                backdropFilter: 'blur(10px)'
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
 
                             {/* Input */}
                             <div style={{ flexShrink: 0, position: 'relative' }}>

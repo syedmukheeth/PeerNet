@@ -205,12 +205,14 @@ export default function Layout() {
             const isAtMessages = path.startsWith('/messages')
             
             // Show toast if:
-            // 1. Not at /messages
-            // 2. OR at /messages but the conversation ID in URL doesn't match the msg conversationId
+            // 1. Not exactly at '/messages' (e.g. at Home, Search, etc.)
+            // 2. OR at '/messages' index without an active conversation
+            // 3. OR at '/messages/:id' but the ID doesn't match the new message ID
             const urlConvoId = path.split('/').pop()
-            const isDifferentConvo = isAtMessages && urlConvoId !== 'messages' && urlConvoId !== msg.conversationId
+            const isAtMessagesIndex = path === '/messages' || path === '/messages/'
+            const isDifferentConvo = isAtMessages && !isAtMessagesIndex && urlConvoId !== msg.conversationId
 
-            if (!isAtMessages || (isAtMessages && isDifferentConvo)) {
+            if (!isAtMessages || isAtMessagesIndex || isDifferentConvo) {
                 msgRef.current += 1
                 setMsgCount(c => c + 1)
                 showMsgToast(msg)

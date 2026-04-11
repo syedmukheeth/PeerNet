@@ -42,4 +42,7 @@ router.patch(
     messageController.markAsRead
 );
 
+// GET /api/v1/conversations/:id/suggestions
+router.get('/:id/suggestions', authenticate, messageController.getSuggestions);
+
 module.exports = router;
