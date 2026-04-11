@@ -8,12 +8,13 @@ const logger = require('../config/logger');
 const consumer = kafka.consumer({ groupId: 'notification-group' });
 
 const initNotificationWorker = async () => {
-    await consumer.connect();
-    await consumer.subscribe({ topic: 'post_events', fromBeginning: false });
-    await consumer.subscribe({ topic: 'comment_events', fromBeginning: false });
-    await consumer.subscribe({ topic: 'user_events', fromBeginning: false });
+    try {
+        await consumer.connect();
+        await consumer.subscribe({ topic: 'post_events', fromBeginning: false });
+        await consumer.subscribe({ topic: 'comment_events', fromBeginning: false });
+        await consumer.subscribe({ topic: 'user_events', fromBeginning: false });
 
-    await consumer.run({
+        await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
             const event = JSON.parse(message.value.toString());
             const { eventId, type, payload } = event;
@@ -75,6 +76,9 @@ const initNotificationWorker = async () => {
     });
 
     logger.info('Kafka: Notification Worker started');
+    } catch (err) {
+        logger.error(`Kafka: Notification Worker failed to connect: ${err.message}`);
+    }
 };
 
 module.exports = { initNotificationWorker };
