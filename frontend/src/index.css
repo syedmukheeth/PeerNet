@@ -1447,7 +1447,122 @@ textarea {
   white-space: nowrap;
 }
 
-/* ── Profile ─────────────────────────────────────────────── */
+/* ── Auth Pages ──────────────────────────────────────────── */
+.auth-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  opacity: 0.4;
+  animation: orbFloat 10s ease-in-out infinite alternate;
+}
+
+.auth-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: rgba(124, 58, 237, 0.4);
+  top: -100px;
+  right: -100px;
+}
+
+.auth-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: rgba(6, 182, 212, 0.4);
+  bottom: -50px;
+  left: -100px;
+  animation-delay: -5s;
+}
+
+.auth-card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.auth-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.auth-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.auth-logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: var(--logo-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-sub {
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-2);
+  margin-bottom: 32px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-form .input {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.auth-switch a {
+  color: var(--accent);
+  font-weight: 600;
+  transition: color 150ms;
+}
+
+.auth-switch a:hover {
+  filter: brightness(1.2);
+}
+
 /* ── Profile ─────────────────────────────────────────────── */
 
 /* Outer page wrapper — Instagram uses ~930px max */
