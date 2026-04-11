@@ -25,6 +25,7 @@ export default function PostDetail() {
     const [likesCount, setLikesCount] = useState(0)
     const [saved, setSaved] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [notFound, setNotFound] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
     const [replyingTo, setReplyingTo] = useState(null)
@@ -48,8 +49,10 @@ export default function PostDetail() {
             setLikesCount(pd.data.likesCount || 0)
             setSaved(pd.data.isSaved || false)
             setComments(cd.data || [])
-        }).catch(() => toast.error('Post not found'))
-            .finally(() => setLoading(false))
+        }).catch((err) => {
+            console.error('Post Detail Error:', err)
+            setNotFound(true)
+        }).finally(() => setLoading(false))
     }, [id])
 
     // Close menu on outside click
@@ -203,7 +206,19 @@ export default function PostDetail() {
     }, [replyingTo])
 
     if (loading) return <PostDetailSkeleton />
-    if (!post) return null
+
+    if (notFound || !post) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center', gap: 16 }}>
+                <div style={{ fontSize: 64 }}>🕵️‍♂️</div>
+                <h2 style={{ color: 'var(--text-1)' }}>Content Not Found</h2>
+                <p style={{ color: 'var(--text-3)', maxWidth: 300 }}>This content might have been deleted or the link is incorrect.</p>
+                <Link to="/" className="btn btn-primary" style={{ padding: '10px 24px', borderRadius: 24, fontWeight: 700 }}>
+                    Go Home
+                </Link>
+            </div>
+        )
+    }
 
     const author = post.author || {}
     const avatar = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username}&background=6366F1&color=fff`

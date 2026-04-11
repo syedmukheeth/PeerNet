@@ -11,7 +11,7 @@ const notificationSchema = new mongoose.Schema(
             enum: ['like', 'comment', 'reply', 'follow', 'mention', 'message'],
             required: true,
         },
-        entityId: { type: mongoose.Schema.Types.ObjectId, default: null },
+        entityId: { type: mongoose.Schema.Types.ObjectId, refPath: 'entityModel', default: null },
         entityModel: { type: String, enum: ['Post', 'Comment', 'Dscroll', 'Message', null], default: null },
         isRead: { type: Boolean, default: false },
     },

@@ -1,6 +1,7 @@
 'use strict';
 
 const Post = require('./Post');
+const Dscroll = require('../dscroll/Dscroll');
 const User = require('../user/User');
 const Like = require('./Like');
 const SavedPost = require('./SavedPost');
@@ -66,7 +67,22 @@ const getPost = async (postId, userId) => {
     if (cached) {
         post = JSON.parse(cached);
     } else {
+        // Try Post first
         post = await Post.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
+        
+        // If not found, try Dscroll
+        if (!post) {
+            const dscroll = await Dscroll.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
+            if (dscroll) {
+                post = {
+                    ...dscroll,
+                    mediaUrl: dscroll.videoUrl,
+                    mediaType: 'video',
+                    isDscroll: true
+                };
+            }
+        }
+
         if (!post || post.isArchived) throw new ApiError(404, 'Post not found');
         if (redis) await redis.setEx(cacheKey, POST_CACHE_TTL, JSON.stringify(post));
     }
@@ -74,8 +90,9 @@ const getPost = async (postId, userId) => {
     let isLiked = false;
     let isSaved = false;
     if (userId) {
+        const targetModel = post.isDscroll ? 'Dscroll' : 'Post';
         const [like, saved] = await Promise.all([
-            Like.findOne({ user: userId, targetId: postId, targetModel: 'Post' }),
+            Like.findOne({ user: userId, targetId: postId, targetModel }),
             SavedPost.findOne({ user: userId, post: postId }),
         ]);
         isLiked = Boolean(like);

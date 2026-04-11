@@ -110,6 +110,15 @@ export default function Layout() {
                             fontSize: 10, border: '2px solid var(--surface)',
                         }}>{typeEmoji[notif.type]}</div>
                     </div>
+                    {notif.entityId && (
+                        <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border)' }}>
+                             <img 
+                                src={notif.entityId.mediaUrl || notif.entityId.videoUrl || notif.entityId.thumbnailUrl} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                alt="" 
+                            />
+                        </div>
+                    )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-1)', lineHeight: 1.3 }}>
                             {notif.sender?.username}

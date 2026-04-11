@@ -9,8 +9,11 @@ const createNotification = async ({ recipient, sender, type, entityId, entityMod
 
     const notification = await Notification.create({ recipient, sender, type, entityId, entityModel });
 
-    // Populate sender details for real-time delivery
-    await notification.populate('sender', 'username avatarUrl isVerified');
+    // Populate sender and entity details for real-time delivery
+    await notification.populate([
+        { path: 'sender', select: 'username avatarUrl isVerified' },
+        { path: 'entityId' }
+    ]);
 
     // Push real-time notification cross-service via Redis
     const redis = getRedisOptional();
@@ -34,6 +37,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
 
     const notifications = await Notification.find(query)
         .populate('sender', 'username avatarUrl isVerified')
+        .populate('entityId')
         .sort({ createdAt: -1 })
         .limit(limit + 1);
 
