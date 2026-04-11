@@ -5,6 +5,7 @@ const Post = require('../post/Post');
 const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
 const notificationService = require('../notification/notification.service');
+const { updatePostScore } = require('../feed/feed.fanout');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
     const post = await Post.findById(postId);
@@ -12,6 +13,11 @@ const addComment = async (postId, userId, { body, parentComment }) => {
 
     const comment = await Comment.create({ post: postId, author: userId, body, parentComment: parentComment || null });
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
+
+    // Update score in feeds
+    Post.findById(postId).then(p => {
+        if (p) updatePostScore(p).catch(() => {});
+    });
 
     // Notify post author
     notificationService.createNotification({
@@ -67,6 +73,11 @@ const deleteComment = async (commentId, userId) => {
 
     await comment.deleteOne();
     await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
+
+    // Update score in feeds
+    Post.findById(comment.post).then(p => {
+        if (p) updatePostScore(p).catch(() => {});
+    });
 };
 
 const likeComment = async (commentId, userId) => {

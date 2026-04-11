@@ -42,7 +42,7 @@ const { registerSchema, loginSchema } = require('../../validators/auth.validator
  *                 type: string
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User registered successfully. Set-Cookie header contains refreshToken.
  */
 
 // POST /api/v1/auth/register
@@ -61,16 +61,17 @@ router.post('/register', authLimiter, validate(registerSchema), authController.r
  *           schema:
  *             type: object
  *             required:
- *               - emailOrUsername
+ *               - email
  *               - password
  *             properties:
- *               emailOrUsername:
+ *               email:
  *                 type: string
+ *                 description: Email or Username
  *               password:
  *                 type: string
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Login successful. Set-Cookie header contains refreshToken.
  */
 // POST /api/v1/auth/login
 router.post('/login', authLimiter, validate(loginSchema), authController.login);
@@ -83,9 +84,11 @@ router.post('/login', authLimiter, validate(loginSchema), authController.login);
  *     tags: [Auth]
  *     responses:
  *       200:
- *         description: Token refreshed
+ *         description: Token refreshed. Reads refreshToken from cookie.
+ *       401:
+ *         description: Invalid or missing refresh token.
  */
-// POST /api/v1/auth/refresh  (reads httpOnly cookie)
+// POST /api/v1/auth/refresh (reads httpOnly cookie)
 router.post('/refresh', authController.refresh);
 
 /**
@@ -98,7 +101,7 @@ router.post('/refresh', authController.refresh);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Logout successful
+ *         description: Logout successful. Clears refreshToken cookie.
  */
 // POST /api/v1/auth/logout
 router.post('/logout', authenticate, authController.logout);

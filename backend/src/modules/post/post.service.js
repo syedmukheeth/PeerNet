@@ -8,6 +8,7 @@ const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudi
 const { getRedisOptional } = require('../../config/redis');
 const ApiError = require('../../utils/ApiError');
 const notificationService = require('../notification/notification.service');
+const feedFanout = require('../feed/feed.fanout');
 
 const POST_CACHE_TTL = 300; // 5 min
 
@@ -41,12 +42,8 @@ const createPost = async (userId, { caption, location, tags }, file) => {
 
     const redis = getRedisOptional();
     if (redis) {
-        try {
-            const keys = await redis.keys(`feed:${userId}:cursor:*`);
-            if (keys.length) await redis.del(keys);
-        } catch (e) {
-            console.error('Failed to clear feed cache on new post', e);
-        }
+        // Trigger background fan-out to followers' ranked feeds
+        feedFanout.fanoutPost(post).catch(e => console.error('Fanout failed:', e));
     }
 
     return post;
@@ -114,6 +111,12 @@ const likePost = async (postId, userId) => {
     try {
         await Like.create({ user: userId, targetId: postId, targetModel: 'Post' });
         await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
+        
+        // Update score in feeds
+        Post.findById(postId).then(p => {
+            if (p) feedFanout.updatePostScore(p).catch(() => {});
+        });
+
         const redis = getRedisOptional();
         if (redis) await redis.del(`post:${postId}`);
         notificationService.createNotification({
@@ -134,6 +137,12 @@ const unlikePost = async (postId, userId) => {
     const like = await Like.findOneAndDelete({ user: userId, targetId: postId, targetModel: 'Post' });
     if (!like) throw new ApiError(404, 'Like not found');
     await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
+
+    // Update score in feeds
+    Post.findById(postId).then(p => {
+        if (p) feedFanout.updatePostScore(p).catch(() => {});
+    });
+
     const redis = getRedisOptional();
     if (redis) await redis.del(`post:${postId}`);
     return { liked: false };
