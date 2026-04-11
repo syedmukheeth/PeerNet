@@ -170,9 +170,18 @@ const getSavedPosts = async (userId, { limit, cursor }) => {
         .sort({ createdAt: -1 })
         .limit(limit + 1);
 
+    // If a post was deleted, d.post might be null. Filter them out and optionally clean up.
+    const validDocs = docs.filter(d => {
+        if (!d.post) {
+            SavedPost.findByIdAndDelete(d._id).catch(() => {});
+            return false;
+        }
+        return true;
+    });
+
     const hasMore = docs.length > limit;
-    const results = hasMore ? docs.slice(0, limit) : docs;
-    const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
+    const results = hasMore ? validDocs.slice(0, limit) : validDocs;
+    const nextCursor = hasMore ? docs[docs.length - 1].createdAt.toISOString() : null;
 
     return { data: results.map((d) => d.post), nextCursor, hasMore };
 };

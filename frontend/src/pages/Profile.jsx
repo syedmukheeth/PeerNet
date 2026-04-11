@@ -301,23 +301,26 @@ export default function Profile() {
                 return (
                     <>
                         <div className="profile-grid">
-                            {displayPosts.map((p, i) => (
-                                <Link key={p._id} to={`/posts/${p._id}`} className="profile-grid-item"
-                                    style={{ animationDelay: `${i * 40}ms` }}>
-                                    {p.mediaType === 'video'
-                                        ? <video src={p.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
-                                        : <img src={p.mediaUrl} alt="" loading="lazy" />
-                                    }
-                                    <div className="profile-grid-overlay">
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <HiHeart /> {p.likesCount || 0}
-                                        </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <HiChat /> {p.commentsCount || 0}
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))}
+                            {displayPosts.map((p, i) => {
+                                if (!p) return null;
+                                return (
+                                    <Link key={p._id} to={`/posts/${p._id}`} className="profile-grid-item"
+                                        style={{ animationDelay: `${i * 40}ms` }}>
+                                        {p.mediaType === 'video'
+                                            ? <video src={p.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+                                            : <img src={p.mediaUrl} alt="" loading="lazy" />
+                                        }
+                                        <div className="profile-grid-overlay">
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <HiHeart /> {p.likesCount || 0}
+                                            </span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <HiChat /> {p.commentsCount || 0}
+                                            </span>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
                         </div>
                         {displayPosts.length === 0 && (
                             <div className="empty-state" style={{ paddingTop: 60 }}>
