@@ -250,9 +250,38 @@ export default function Messages() {
         }
     }
 
+    const loadMessages = async (convoId) => {
+        if (!convoId) return
+        setLoadingMessages(true)
+        try {
+            const { data } = await api.get(`/conversations/${convoId}/messages`, { params: { limit: 50 }, baseURL: CHAT_BASE_URL })
+            setMessages(data.data || [])
+            await api.patch(`/conversations/${convoId}/messages/read`, {}, { baseURL: CHAT_BASE_URL })
+            
+            // Smart replies
+            if (convoId) fetchSuggestions(convoId)
+        } catch (err) { 
+            console.error("Chat fetch err:", err) 
+        } finally { 
+            setLoadingMessages(false) 
+        }
+    }
+
+    // Effect: Load messages when active convo changes
+    useEffect(() => {
+        if (activeConvo?._id) {
+            loadMessages(activeConvo._id)
+            socket?.emit('join_conversation', activeConvo._id)
+        }
+        return () => {
+            if (activeConvo?._id) {
+                socket?.emit('leave_conversation', activeConvo._id)
+            }
+        }
+    }, [activeConvo?._id])
+
     const selectConvo = async (convo) => {
         if (activeConvo?._id === convo._id) { setMobilePanel('chat'); return }
-        if (activeConvo) socket?.emit('leave_conversation', activeConvo._id)
         
         setActiveConvo(convo)
         setMessages([])
@@ -261,18 +290,9 @@ export default function Messages() {
         setSuggestions([]) 
         
         setConversations(cs => cs.map(c => c._id === convo._id ? { ...c, unreadCount: 0 } : c))
-        socket?.emit('join_conversation', convo._id)
         navigate(`/messages/${convo._id}`, { replace: true })
 
-        try {
-            const { data } = await api.get(`/conversations/${convo._id}/messages`, { params: { limit: 50 }, baseURL: CHAT_BASE_URL })
-            setMessages(data.data || [])
-            await api.patch(`/conversations/${convo._id}/messages/read`, {}, { baseURL: CHAT_BASE_URL })
-            
-            // Smart replies
-            fetchSuggestions(convo._id)
-        } catch (err) { console.error("Chat fetch err:", err) }
-        finally { setLoadingMessages(false) }
+        // useEffect handles data loading!
         
         setTimeout(() => inputRef.current?.focus(), 200)
     }
