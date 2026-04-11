@@ -28,12 +28,25 @@ const addComment = async (postId, userId, { body, parentComment }) => {
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
     // Notify via Event Bus
-    publishEvent('comment_events', 'COMMENT_ADDED', {
-        commentId: comment._id,
-        postId,
-        authorId: userId,
-        postAuthorId: post.author
-    });
+    if (parentComment) {
+        const parent = await Comment.findById(parentComment);
+        if (parent) {
+            publishEvent('comment_events', 'REPLY_ADDED', {
+                commentId: comment._id,
+                postId,
+                authorId: userId,
+                parentCommentAuthorId: parent.author,
+                type: 'reply' // explicitly pass type for worker
+            });
+        }
+    } else {
+        publishEvent('comment_events', 'COMMENT_ADDED', {
+            commentId: comment._id,
+            postId,
+            authorId: userId,
+            postAuthorId: post.author
+        });
+    }
 
     await comment.populate('author', 'username avatarUrl');
     return comment;
@@ -89,10 +102,19 @@ const deleteComment = async (commentId, userId) => {
 };
 
 const likeComment = async (commentId, userId) => {
-    await Comment.findById(commentId).orFail(new ApiError(404, 'Comment not found'));
+    const comment = await Comment.findById(commentId).orFail(new ApiError(404, 'Comment not found'));
     try {
         await Like.create({ user: userId, targetId: commentId, targetModel: 'Comment' });
         await Comment.findByIdAndUpdate(commentId, { $inc: { likesCount: 1 } });
+
+        // Notify via Event Bus
+        publishEvent('comment_events', 'COMMENT_LIKED', {
+            commentId,
+            userId,
+            authorId: comment.author,
+            postId: comment.post
+        });
+
         return { liked: true };
     } catch (err) {
         if (err.code === 11000) throw new ApiError(409, 'Already liked');

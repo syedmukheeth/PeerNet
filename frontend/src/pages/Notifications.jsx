@@ -23,6 +23,12 @@ const typeConfig = {
         text: 'commented on your post',
         emoji: '💬',
     },
+    reply: {
+        icon: HiChatAlt2,
+        gradient: 'linear-gradient(135deg,#6366F1,#A78BFA)',
+        text: 'replied to your comment',
+        emoji: '💬',
+    },
     follow: {
         icon: HiUserAdd,
         gradient: 'linear-gradient(135deg,#10B981,#06C8FF)',
@@ -70,6 +76,19 @@ function NotifRow({ n, index, onFollowBack }) {
         } catch {
             setFollowed(false)
         }
+    }
+
+    const getActionText = () => {
+        if (n.type === 'like') {
+            if (n.entityModel === 'Comment') return 'liked your comment'
+            if (n.entityModel === 'Dscroll') return 'liked your dscroll'
+            return 'liked your post'
+        }
+        if (n.type === 'comment') {
+            if (n.entityModel === 'Dscroll') return 'commented on your dscroll'
+            return 'commented on your post'
+        }
+        return cfg.text
     }
 
     return (
@@ -123,7 +142,7 @@ function NotifRow({ n, index, onFollowBack }) {
                     {n.sender?.isVerified && (
                         <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13, marginLeft: 3, verticalAlign: 'middle' }} />
                     )}
-                    <span style={{ fontWeight: 400, color: 'var(--text-2)', marginLeft: 4 }}>{cfg.text}</span>
+                    <span style={{ fontWeight: 400, color: 'var(--text-2)', marginLeft: 4 }}>{getActionText()}</span>
                 </p>
                 <p style={{ fontSize: 12, color: 'var(--text-3)', margin: '3px 0 0', lineHeight: 1 }}>
                     {timeago(n.createdAt)}

@@ -2,7 +2,6 @@
 
 const postService = require('./post.service');
 const feedService = require('../feed/feed.service');
-const notificationService = require('../notification/notification.service');
 const { parsePagination } = require('../../utils/pagination.utils');
 
 const getFeed = async (req, res, next) => {
@@ -51,14 +50,6 @@ const updatePost = async (req, res, next) => {
 const likePost = async (req, res, next) => {
     try {
         const result = await postService.likePost(req.params.id, req.user._id);
-        // Fire notification async
-        notificationService.createNotification({
-            recipient: req.params.id, // Will be resolved to post author in service
-            sender: req.user._id,
-            type: 'like',
-            entityId: req.params.id,
-            entityModel: 'Post',
-        }).catch(() => { });
         res.json({ success: true, data: result });
     } catch (err) { next(err); }
 };
