@@ -9,6 +9,7 @@ const storyRoutes = require('../../modules/story/story.routes');
 const dscrollRoutes = require('../../modules/dscroll/dscroll.routes');
 const notificationRoutes = require('../../modules/notification/notification.service').routes || require('../../modules/notification/notification.routes');
 const adminRoutes = require('../../modules/admin/admin.routes');
+const chatRoutes = require('../../modules/chat/chat.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -18,5 +19,6 @@ router.use('/stories', storyRoutes);
 router.use('/dscrolls', dscrollRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
+router.use('/chats', chatRoutes);
 
 module.exports = router;

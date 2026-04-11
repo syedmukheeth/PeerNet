@@ -4,8 +4,7 @@ const Comment = require('./Comment');
 const Post = require('../post/Post');
 const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
-const notificationService = require('../notification/notification.service');
-const { updatePostScore } = require('../feed/feed.fanout');
+const { publishEvent } = require('../../config/kafka');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
     const post = await Post.findById(postId);
@@ -14,19 +13,13 @@ const addComment = async (postId, userId, { body, parentComment }) => {
     const comment = await Comment.create({ post: postId, author: userId, body, parentComment: parentComment || null });
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
-    // Update score in feeds
-    Post.findById(postId).then(p => {
-        if (p) updatePostScore(p).catch(() => {});
+    // Notify via Event Bus
+    publishEvent('comment_events', 'COMMENT_ADDED', {
+        commentId: comment._id,
+        postId,
+        authorId: userId,
+        postAuthorId: post.author
     });
-
-    // Notify post author
-    notificationService.createNotification({
-        recipient: post.author,
-        sender: userId,
-        type: 'comment',
-        entityId: postId,
-        entityModel: 'Post',
-    }).catch(() => { });
 
     await comment.populate('author', 'username avatarUrl');
     return comment;
@@ -74,9 +67,10 @@ const deleteComment = async (commentId, userId) => {
     await comment.deleteOne();
     await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
 
-    // Update score in feeds
-    Post.findById(comment.post).then(p => {
-        if (p) updatePostScore(p).catch(() => {});
+    // Notify via Event Bus
+    publishEvent('comment_events', 'COMMENT_DELETED', {
+        commentId: comment._id,
+        postId: comment.post
     });
 };
 

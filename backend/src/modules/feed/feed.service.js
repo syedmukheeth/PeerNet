@@ -4,6 +4,7 @@ const Post = require('../post/Post');
 const Like = require('../post/Like');
 const SavedPost = require('../post/SavedPost');
 const Follower = require('../user/Follower');
+const postService = require('../post/post.service');
 const { getRedisOptional } = require('../../config/redis');
 const { calculateScore, MinHeap } = require('../../utils/rank.utils');
 
@@ -40,14 +41,8 @@ const getFeed = async (userId, { limit = 20, page = 1 }) => {
         return { data: [], hasMore: false };
     }
 
-    // Fetch actual post documents for the IDs we got
-    const posts = await Post.find({ _id: { $in: postIds }, isArchived: false })
-        .populate('author', 'username fullName avatarUrl isVerified')
-        .lean();
-
-    // Sort the fetched posts back into the ranked order from Redis
-    const postMap = new Map(posts.map(p => [p._id.toString(), p]));
-    const rankedResults = postIds.map(id => postMap.get(id)).filter(Boolean);
+    // Fetch actual post documents using bulk cache-aside logic
+    const rankedResults = await postService.getPostsByIds(postIds);
 
     // Enrich with user-specific likes/saves
     const enrichedResults = await _enrichPosts(rankedResults, userId);

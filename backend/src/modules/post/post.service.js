@@ -7,8 +7,7 @@ const SavedPost = require('./SavedPost');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const { getRedisOptional } = require('../../config/redis');
 const ApiError = require('../../utils/ApiError');
-const notificationService = require('../notification/notification.service');
-const feedFanout = require('../feed/feed.fanout');
+const { publishEvent } = require('../../config/kafka');
 
 const POST_CACHE_TTL = 300; // 5 min
 
@@ -40,11 +39,13 @@ const createPost = async (userId, { caption, location, tags }, file) => {
 
     await User.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } });
 
-    const redis = getRedisOptional();
-    if (redis) {
-        // Trigger background fan-out to followers' ranked feeds
-        feedFanout.fanoutPost(post).catch(e => console.error('Fanout failed:', e));
-    }
+    // Trigger asynchronous processing via Kafka
+    publishEvent('post_events', 'POST_CREATED', {
+        postId: post._id,
+        authorId: userId,
+        body: post.body,
+        createdAt: post.createdAt
+    });
 
     return post;
 };
@@ -112,9 +113,11 @@ const likePost = async (postId, userId) => {
         await Like.create({ user: userId, targetId: postId, targetModel: 'Post' });
         await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
         
-        // Update score in feeds
-        Post.findById(postId).then(p => {
-            if (p) feedFanout.updatePostScore(p).catch(() => {});
+        // Notify via Event Bus
+        publishEvent('post_events', 'POST_LIKED', {
+            postId,
+            userId,
+            authorId: post.author
         });
 
         const redis = getRedisOptional();
@@ -138,9 +141,10 @@ const unlikePost = async (postId, userId) => {
     if (!like) throw new ApiError(404, 'Like not found');
     await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
 
-    // Update score in feeds
-    Post.findById(postId).then(p => {
-        if (p) feedFanout.updatePostScore(p).catch(() => {});
+    // Notify via Event Bus
+    publishEvent('post_events', 'POST_UNLIKED', {
+        postId,
+        userId
     });
 
     const redis = getRedisOptional();
@@ -205,9 +209,51 @@ const getUserPosts = async (userId, { limit, cursor }) => {
     return { data: results, nextCursor, hasMore };
 };
 
+const getPostsByIds = async (postIds) => {
+    if (!postIds || postIds.length === 0) return [];
+    
+    const redis = getRedisOptional();
+    const cacheKeys = postIds.map(id => `post:${id}`);
+    
+    let cachedPosts = [];
+    if (redis) {
+        const results = await redis.mGet(cacheKeys);
+        cachedPosts = results.map(r => r ? JSON.parse(r) : null);
+    } else {
+        cachedPosts = postIds.map(() => null);
+    }
+
+    const missingIds = postIds.filter((_, i) => !cachedPosts[i]);
+    
+    if (missingIds.length > 0) {
+        const dbPosts = await Post.find({ _id: { $in: missingIds } })
+            .populate('author', 'username fullName avatarUrl isVerified')
+            .lean();
+        
+        const dbPostMap = new Map(dbPosts.map(p => [p._id.toString(), p]));
+        
+        // Fill missing indices and cache them
+        const pipeline = redis ? redis.multi() : null;
+        
+        postIds.forEach((id, i) => {
+            if (!cachedPosts[i]) {
+                const post = dbPostMap.get(id.toString());
+                if (post) {
+                    cachedPosts[i] = post;
+                    if (pipeline) pipeline.setEx(`post:${id}`, POST_CACHE_TTL, JSON.stringify(post));
+                }
+            }
+        });
+        
+        if (pipeline) await pipeline.exec();
+    }
+
+    return cachedPosts.filter(Boolean);
+};
+
 module.exports = {
     createPost, getPost, updatePost, deletePost,
     likePost, unlikePost,
     savePost, unsavePost, getSavedPosts,
-    getUserPosts,
+    getUserPosts, getPostsByIds,
 };
