@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
         // withCredentials ensures the browser stores the httpOnly refreshToken cookie
         const { data } = await api.post('/auth/login', { email: identifier, password }, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        // Note: refreshToken is in an httpOnly cookie — never in response body
+        localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)
         return data.data.user
     }
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     const register = async (payload) => {
         const { data } = await api.post('/auth/register', payload, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        // Note: refreshToken is in an httpOnly cookie — never in response body
+        localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)
         return data.data.user
     }
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     const loginGoogle = async (token) => {
         const { data } = await api.post('/auth/google', { token }, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        // Note: refreshToken is in an httpOnly cookie — never in response body
+        localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)
         return data.data.user
     }
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     const loginGuest = async () => {
         const { data } = await api.post('/auth/guest', {}, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        // Note: refreshToken is in an httpOnly cookie — never in response body
+        localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)
         return data.data.user
     }

@@ -59,16 +59,28 @@ const bootstrap = async () => {
             io.adapter(createAdapter(pubClient, subClient));
             logger.info('Socket.io Redis adapter automatically attached');
 
-            // --- Cross-Service Notification Bridge ---
-            const notifSub = redisClient.duplicate();
-            notifSub.on('error', (err) => logger.error(`Redis notifSub error: ${err.message}`));
-            await notifSub.connect();
-            await notifSub.subscribe('peernet:notifications', (message) => {
+            const crossServiceSub = redisClient.duplicate();
+            crossServiceSub.on('error', (err) => logger.error(`Redis crossServiceSub error: ${err.message}`));
+            await crossServiceSub.connect();
+            
+            await crossServiceSub.subscribe(['peernet:notifications', 'peernet:messages'], (message, channel) => {
                 try {
-                    const { recipient, notification } = JSON.parse(message);
-                    io.to(`user:${recipient}`).emit('new_notification', notification);
+                    const data = JSON.parse(message);
+                    if (channel === 'peernet:notifications') {
+                        const { recipient, notification } = data;
+                        io.to(`user:${recipient}`).emit('new_notification', notification);
+                    } else if (channel === 'peernet:messages') {
+                        const { recipient, message: chatMsg, type, messageId, conversationId } = data;
+                        if (type === 'MESSAGE_EDITED') {
+                            io.to(`user:${recipient}`).emit('message_edited', chatMsg);
+                        } else if (type === 'MESSAGE_DELETED') {
+                            io.to(`user:${recipient}`).emit('message_deleted', { messageId, conversationId });
+                        } else {
+                            io.to(`user:${recipient}`).emit('new_message', chatMsg);
+                        }
+                    }
                 } catch (e) {
-                    logger.error(`Failed to process incoming Redis notification: ${e.message}`);
+                    logger.error(`Failed to process incoming Redis message [${channel}]: ${e.message}`);
                 }
             });
         } catch (err) {
