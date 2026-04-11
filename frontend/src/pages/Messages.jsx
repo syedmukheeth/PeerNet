@@ -129,6 +129,7 @@ export default function Messages() {
     const userRef = useRef(user)
     const [suggestions, setSuggestions] = useState([])
     const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+    const activeConvoRef = useRef(activeConvo)
     
     useEffect(() => { userRef.current = user }, [user])
     useEffect(() => { activeConvoRef.current = activeConvo }, [activeConvo])
