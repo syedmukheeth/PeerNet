@@ -36,10 +36,12 @@ const getFeed = async (userId, { limit = 20, page = 1 }) => {
         }
     }
 
-    // Fallback or Cold Cache Hydration: If still no IDs, we fetch directly from DB (simpler version or force hydration)
+    // Fallback or Cold Cache Hydration: If still no IDs, we fetch directly from DB
     if (postIds.length === 0) {
-        // This might happen if user follows no one or no one posted in 30 days
-        return { data: [], hasMore: false };
+        // This happens if Redis is offline or if hydrateFeed didn't find enough "following" content
+        // Force a direct discovery-based feed fetch
+        const directPosts = await _getDirectFeed(userId, limit, page);
+        return { data: directPosts, hasMore: directPosts.length === limit };
     }
 
     // Fetch actual post documents using bulk cache-aside logic
@@ -139,6 +141,69 @@ const hydrateFeed = async (userId) => {
         pipeline.expire(redisKey, 86400 * 7); // Cache for 7 days
         await pipeline.exec();
     }
+};
+
+/** 
+ * Direct DB Fallback: Fetches posts directly from MongoDB if Redis is empty or offline.
+ * Reuses the same ranking logic as hydrateFeed but returns documents immediately.
+ */
+const _getDirectFeed = async (userId, limit, page) => {
+    // 1. Get authors (Following + Self)
+    const followRelations = await Follower.find({ follower: userId }).select('following').lean();
+    const followingIds = followRelations.map(f => f.following);
+    followingIds.push(userId);
+
+    // 2. Fetch all potential candidates (Followed + Discovery)
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
+
+    // Initial pool: Following
+    let posts = await Post.find({
+        author: { $in: followingIds },
+        createdAt: { $gt: cutoff },
+        isArchived: false
+    }).lean();
+
+    // Discovery pool if needed
+    if (posts.length < limit) {
+        const discovery = await Post.find({
+            author: { $nin: followingIds },
+            isArchived: false,
+            $or: [
+                { likesCount: { $gt: 0 } },
+                { commentsCount: { $gt: 0 } },
+                { createdAt: { $gt: cutoff } }
+            ]
+        }).sort({ likesCount: -1, createdAt: -1 }).limit(100).lean();
+        posts = [...posts, ...discovery];
+    }
+
+    // Desperation Fallback
+    if (posts.length === 0) {
+        posts = await Post.find({ isArchived: false }).sort({ createdAt: -1 }).limit(50).lean();
+    }
+
+    // 3. Simple Ranking & Personalization (No heap needed for small direct batches)
+    const user = await User.findById(userId).select('categoryAffinity').lean();
+    const affinity = user?.categoryAffinity || new Map();
+
+    const ranked = posts.map(p => {
+        let score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
+        if (p.tags) {
+            let boost = 0;
+            p.tags.forEach(t => {
+                const w = affinity.get ? affinity.get(t) : affinity[t];
+                if (w) boost += Math.log1p(w);
+            });
+            score *= (1 + boost);
+        }
+        return { ...p, score };
+    }).sort((a, b) => b.score - a.score);
+
+    // 4. Paginate and Enrich
+    const start = (page - 1) * limit;
+    const paginated = ranked.slice(start, start + limit);
+    return _enrichPosts(paginated, userId);
 };
 
 /** Private helper to add isLiked and isSaved flags to posts for a specific user */
