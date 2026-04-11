@@ -12,9 +12,10 @@ const getFeed = async (req, res, next) => {
         
         // Attach diagnostic tier header
         const tier = result.data?.[0]?.logicTier || 'cache-zset';
+        const dbCount = result.data?.[0]?._dbCount || 0;
         res.setHeader('X-PeerNet-Feed-Tier', tier);
         
-        res.json({ success: true, ...result });
+        res.json({ success: true, _debug: { tier, dbCount }, ...result });
     } catch (err) { next(err); }
 };
 

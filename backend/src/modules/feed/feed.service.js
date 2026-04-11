@@ -197,23 +197,26 @@ const _getDirectFeed = async (userId, limit, cursor) => {
         });
     }
 
-    console.log(`[FEED_TIER] User: ${userId} Tier: ${tier} Count: ${posts.length}`);
+    // NUCLEAR FALLBACK: If STILL empty, bypass EVERY filter (Archives, Cursors, etc.)
+    if (posts.length === 0) {
+        tier = 'nuclear';
+        posts = await Post.find({}).sort({ createdAt: -1 }).limit(10).lean();
+    }
 
-    // 3. Simple Ranking & Personalization
-    const user = await User.findById(userId).select('categoryAffinity').lean();
-    const affinity = user?.categoryAffinity || new Map();
+    const rawCount = await Post.countDocuments({});
+    console.log(`[FEED_TIER] User: ${userId} Tier: ${tier} Count: ${posts.length} DB_Total: ${rawCount}`);
 
     const ranked = posts.map(p => {
         let score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
-        if (p.tags) {
+        if (p.tags && p.tags.length > 0) {
             let boost = 0;
-            p.tags.forEach(t => {
-                const w = affinity.get ? affinity.get(t) : affinity[t];
-                if (w) boost += Math.log1p(w);
+            p.tags.forEach(tag => {
+                const weight = affinity.get ? affinity.get(tag) : affinity[tag];
+                if (weight) boost += Math.log1p(weight);
             });
             score *= (1 + boost);
         }
-        return { ...p, score, logicTier: tier };
+        return { ...p, score, logicTier: tier, _dbCount: rawCount };
     }).sort((a, b) => b.score - a.score);
 
     // 4. Slicing
