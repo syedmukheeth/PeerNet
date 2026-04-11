@@ -12,12 +12,19 @@ const addComment = async (postId, userId, { body, parentComment }) => {
     if (!post) throw new ApiError(404, 'Post not found');
 
     // AI Toxicity Check
-    const toxicity = await checkToxicity(body);
-    if (toxicity > 0.7) {
-        throw new ApiError(400, 'Comment rejected by community safety guidelines');
+    const toxicityScore = await checkToxicity(body);
+    if (toxicityScore > 0.7) {
+        throw new ApiError(400, 'Comment rejected by AI Community Safety Filter');
     }
 
-    const comment = await Comment.create({ post: postId, author: userId, body, parentComment: parentComment || null });
+    const comment = await Comment.create({ 
+        post: postId, 
+        author: userId, 
+        body, 
+        parentComment: parentComment || null,
+        isAiVerified: true,
+        toxicityScore
+    });
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
     // Notify via Event Bus

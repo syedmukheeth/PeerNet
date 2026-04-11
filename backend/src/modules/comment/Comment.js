@@ -8,6 +8,8 @@ const commentSchema = new mongoose.Schema(
         author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         body: { type: String, required: true, maxlength: 300 },
         likesCount: { type: Number, default: 0, min: 0 },
+        isAiVerified: { type: Boolean, default: false },
+        toxicityScore: { type: Number, default: 0 },
         parentComment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: null },
     },
     { timestamps: true },
