@@ -3,30 +3,29 @@ import axios from 'axios'
 const rawApiUrl = import.meta.env.VITE_API_URL;
 const rawChatApiUrl = import.meta.env.VITE_CHAT_API_URL;
 
-// Active production server detected from your Socket logs: peernet-5mtc
-const PRODUCTION_BACKEND_FALLBACK = 'https://peernet-5mtc.onrender.com/api/v1';
-
-// Auto-inference from CHAT URL if main API URL is missing but CHAT is defined
-const fallback = rawChatApiUrl 
-    ? (rawChatApiUrl.endsWith('/api/v1') ? rawChatApiUrl : `${rawChatApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : PRODUCTION_BACKEND_FALLBACK;
+// Main API server (posts, feed, auth, etc.)
+const MAIN_API = 'https://peernet-5u5q.onrender.com/api/v1';
 
 const BASE_URL = rawApiUrl 
     ? (rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : (window.location.hostname.includes('vercel.app') ? fallback : '/api/v1'); 
+    : (window.location.hostname.includes('vercel.app') ? MAIN_API : '/api/v1'); 
 
+// Chat / Socket server is peernet-5mtc — kept separate
 export const CHAT_BASE_URL = rawChatApiUrl 
     ? (rawChatApiUrl.endsWith('/api/v1') ? rawChatApiUrl : `${rawChatApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : (window.location.hostname.includes('vercel.app') ? fallback : 'http://localhost:3001/api/v1');
+    : (window.location.hostname.includes('vercel.app') ? 'https://peernet-5mtc.onrender.com/api/v1' : 'http://localhost:3001/api/v1');
 
 
 export const SOCKET_URL = import.meta.env.VITE_CHAT_API_URL
     ? import.meta.env.VITE_CHAT_API_URL.replace(/\/api\/v1\/?$/, '')
-    : 'http://localhost:3001'
+    : (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('peernet')
+        ? 'https://peernet-5mtc.onrender.com'
+        : 'http://localhost:3001')
 
 const api = axios.create({
     baseURL: BASE_URL,
     headers: { 'Content-Type': 'application/json' },
+    withCredentials: true, // Required to send httpOnly refreshToken cookie cross-origin
 })
 
 // Attach access token to every request
@@ -59,11 +58,17 @@ api.interceptors.response.use(
             original._retry = true
             isRefreshing = true
             try {
+                // The backend reads refreshToken from an httpOnly cookie — we must send
+                // withCredentials:true so the browser includes cross-origin cookies.
+                // The body payload is kept as a fallback for environments where cookies work.
                 const rt = localStorage.getItem('refreshToken')
-                const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken: rt })
-                const { accessToken, refreshToken } = data.data
+                const { data } = await axios.post(
+                    `${BASE_URL}/auth/refresh`,
+                    rt ? { refreshToken: rt } : {},
+                    { withCredentials: true }
+                )
+                const { accessToken } = data.data
                 localStorage.setItem('accessToken', accessToken)
-                localStorage.setItem('refreshToken', refreshToken)
                 queue.forEach((p) => p.resolve(accessToken))
                 queue = []
                 original.headers.Authorization = `Bearer ${accessToken}`

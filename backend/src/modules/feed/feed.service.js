@@ -155,14 +155,20 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
 
     const queryBase = { isArchived: { $ne: true } };
-    if (cursor) queryBase.createdAt = { $lt: new Date(cursor) };
 
-    // Initial pool: Following
-    let posts = await Post.find({
+    // Initial pool: Following posts
+    // When cursor exists: get posts older than cursor
+    // When no cursor: get posts from the last HYDRATE_TIMEFRAME_DAYS
+    const followingQuery = {
         ...queryBase,
         author: { $in: followingIds },
         createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: cutoff },
-    }).lean();
+    };
+
+    let posts = await Post.find(followingQuery).lean();
+
+    // Set cursor filter on queryBase AFTER following query, for discovery/desperation queries
+    if (cursor) queryBase.createdAt = { $lt: new Date(cursor) };
 
     // Discovery pool: If we have less than the limit, fill with global content
     if (posts.length < limit) {
@@ -251,7 +257,7 @@ const _getDirectFeed = async (userId, limit, cursor) => {
 
     // 4. Slicing
     const paginated = ranked.slice(0, limit);
-    return _enrichPosts(paginated, userId);
+    return await _enrichPosts(paginated, userId);
 };
 
 /** Private helper to add isLiked and isSaved flags to posts for a specific user */
