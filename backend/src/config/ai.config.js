@@ -65,4 +65,34 @@ const checkToxicity = async (text) => {
     }
 };
 
-module.exports = { generateCaption, checkToxicity };
+/**
+ * Generates 3 short context-aware reply suggestions based on post caption and/or parent comment.
+ */
+const generateSuggestions = async ({ caption, commentText }) => {
+    try {
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        
+        const context = `Post caption: "${caption || 'No caption'}"` + 
+                        (commentText ? `\nReplying to comment: "${commentText}"` : '');
+        
+        const prompt = `${context}
+        Based on the above context, suggest exactly 3 short, engaging, and friendly social media replies. 
+        Each reply should be no more than 10 words. 
+        Return ONLY a JSON object with a single key "suggestions" which is an array of 3 strings.`;
+        
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const textResponse = response.text();
+        
+        const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) return ["Nice post!", "Love this", "Great view"];
+        
+        const json = JSON.parse(jsonMatch[0]);
+        return json.suggestions || ["Nice post!", "Love this", "Great view"];
+    } catch (err) {
+        logger.error(`AI: Suggestion generation failed: ${err.message}`);
+        return ["Nice post!", "Love this", "Great view"];
+    }
+};
+
+module.exports = { generateCaption, checkToxicity, generateSuggestions };
