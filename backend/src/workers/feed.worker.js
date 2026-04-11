@@ -10,11 +10,12 @@ const logger = require('../config/logger');
 const consumer = kafka.consumer({ groupId: 'feed-group' });
 
 const initFeedWorker = async () => {
-    await consumer.connect();
-    await consumer.subscribe({ topic: 'post_events', fromBeginning: false });
-    await consumer.subscribe({ topic: 'comment_events', fromBeginning: false });
+    try {
+        await consumer.connect();
+        await consumer.subscribe({ topic: 'post_events', fromBeginning: false });
+        await consumer.subscribe({ topic: 'comment_events', fromBeginning: false });
 
-    await consumer.run({
+        await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
             const event = JSON.parse(message.value.toString());
             const { eventId, type, payload } = event;
@@ -85,6 +86,9 @@ const initFeedWorker = async () => {
     });
 
     logger.info('Kafka: Feed Worker started');
+    } catch (err) {
+        logger.error(`Kafka: Feed Worker failed to connect: ${err.message}`);
+    }
 };
 
 module.exports = { initFeedWorker };
