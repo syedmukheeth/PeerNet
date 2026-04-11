@@ -55,7 +55,14 @@ const initSocket = async (server) => {
     // ── 3. Connection Handler ──────────────────────────────────────────────
     const registerSocketHandlers = require('../modules/chat/chat.socket');
     io.on('connection', (socket) => {
-        const userId = socket.user.id || socket.user._id;
+        // Priority: socket.user.userId (JWT payload) -> socket.user.id -> socket.user._id
+        const userId = (socket.user.userId || socket.user.id || socket.user._id || '').toString();
+        
+        if (!userId) {
+            logger.warn(`Socket connected with no valid user ID: ${socket.id}`);
+            return;
+        }
+
         logger.info(`Socket connected: ${socket.id} (User: ${userId})`);
         
         // Join personal room for targeted notifications/messages
