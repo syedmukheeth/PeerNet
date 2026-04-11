@@ -5,6 +5,7 @@ const Message = require('../models/Message');
 const { uploadToCloudinary } = require('../utils/cloudinary.utils');
 const ApiError = require('../utils/ApiError');
 const { getRedis } = require('../config/redis');
+const { checkToxicity, generateChatSuggestions } = require('../config/ai.config');
 
 const getOrCreateConversation = async (userId, targetUserId) => {
     if (userId.toString() === targetUserId.toString()) {
@@ -117,6 +118,16 @@ const sendMessage = async (conversationId, senderId, { body }, file) => {
         mediaPublicId,
     });
 
+    // Run toxicity check in the background for efficiency — could also be blocking if desired
+    // For now, we'll let it be blocking so the user knows immediately if they are toxic
+    if (body) {
+        const score = await checkToxicity(body);
+        if (score > 0.8) {
+            await message.deleteOne();
+            throw new ApiError(400, 'Message blocked due to toxic content');
+        }
+    }
+
     await Conversation.findByIdAndUpdate(conversationId, {
         lastMessage: message._id,
         updatedAt: new Date(),
@@ -127,7 +138,16 @@ const sendMessage = async (conversationId, senderId, { body }, file) => {
     // Invalidate conversation cache for all participants
     const redis = getRedis();
     for (const p of conversation.participants) {
-        await redis.del(`user:${p.toString()}:conversations`);
+        const pId = p.toString();
+        await redis.del(`user:${pId}:conversations`);
+        
+        // Notify recipient real-time via Redis relay
+        if (pId !== senderId.toString()) {
+            await redis.publish('peernet:messages', JSON.stringify({
+                recipient: pId,
+                message: message
+            }));
+        }
     }
 
     return message;
@@ -166,7 +186,15 @@ const editMessage = async (messageId, userId, newBody) => {
     if (conversation) {
         const redis = getRedis();
         for (const p of conversation.participants) {
-            await redis.del(`user:${p.toString()}:conversations`);
+            const pId = p.toString();
+            await redis.del(`user:${pId}:conversations`);
+            
+            // Notify real-time via Redis relay
+            await redis.publish('peernet:messages', JSON.stringify({
+                recipient: pId,
+                type: 'MESSAGE_EDITED',
+                message: message
+            }));
         }
     }
 
@@ -205,7 +233,16 @@ const deleteMessage = async (messageId, userId) => {
     if (conversation) {
         const redis = getRedis();
         for (const p of conversation.participants) {
-            await redis.del(`user:${p.toString()}:conversations`);
+            const pId = p.toString();
+            await redis.del(`user:${pId}:conversations`);
+            
+            // Notify real-time via Redis relay
+            await redis.publish('peernet:messages', JSON.stringify({
+                recipient: pId,
+                type: 'MESSAGE_DELETED',
+                messageId: messageId.toString(),
+                conversationId: conversationId.toString()
+            }));
         }
     }
 
@@ -224,5 +261,16 @@ const markMessagesAsRead = async (conversationId, userId) => {
     return result;
 };
 
-module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage, getConversationById, markMessagesAsRead };
+const getSmartReplies = async (conversationId) => {
+    // Fetch last 5 messages to provide context to AI
+    const messages = await Message.find({ conversation: conversationId })
+        .populate('sender', 'username')
+        .sort({ createdAt: -1 })
+        .limit(5);
+    
+    // Reverse for chronological order for the AI
+    return generateChatSuggestions(messages.reverse());
+};
+
+module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage, getConversationById, markMessagesAsRead, getSmartReplies };
 

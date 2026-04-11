@@ -41,15 +41,11 @@ const sendMessage = async (req, res, next) => {
         // Emit real-time events
         const io = getIO() || req.app.get('io');
         if (io) {
-            // Build a plain-object payload with conversationId attached
             const msgObj = message.toObject ? message.toObject() : { ...message };
             const payload = { ...msgObj, conversationId: req.params.id };
 
-            // 1. Broadcast to the conversation room (active chat viewers get the message inline)
             io.to(`conversation:${req.params.id}`).emit('new_message', payload);
 
-            // 2. Also emit to every participant's personal room so Layout.jsx
-            //    can show the notification badge / toast even on other pages.
             const convo = await messageService.getConversationById(req.params.id);
             if (convo) {
                 for (const participantId of convo.participants) {
@@ -115,4 +111,20 @@ const markAsRead = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-module.exports = { getConversations, createOrGetConversation, getMessages, sendMessage, editMessage, deleteMessage, markAsRead };
+const getSuggestions = async (req, res, next) => {
+    try {
+        const suggestions = await messageService.getSmartReplies(req.params.id);
+        res.status(200).send({ success: true, suggestions });
+    } catch (err) { next(err); }
+};
+
+module.exports = {
+    getConversations,
+    createOrGetConversation,
+    getMessages,
+    sendMessage,
+    editMessage,
+    deleteMessage,
+    markAsRead,
+    getSuggestions,
+};

@@ -55,13 +55,51 @@ const initSocket = async (server) => {
     // ── 3. Connection Handler ──────────────────────────────────────────────
     const registerSocketHandlers = require('../modules/chat/chat.socket');
     io.on('connection', (socket) => {
-        logger.info(`Socket connected: ${socket.id} (User: ${socket.user.id})`);
+        const userId = socket.user.id || socket.user._id;
+        logger.info(`Socket connected: ${socket.id} (User: ${userId})`);
+        
+        // Join personal room for targeted notifications/messages
+        socket.join(`user:${userId}`);
+        
         registerSocketHandlers(io, socket);
         
         socket.on('disconnect', () => {
             logger.info(`Socket disconnected: ${socket.id}`);
         });
     });
+
+    // ── 4. Global Redis Notification Relay (Cross-Service Bridge) ────────────
+    const relayClient = pubClient.duplicate();
+    await relayClient.connect();
+    
+    // Subscribe to notification and message channels
+    await relayClient.subscribe(['peernet:notifications', 'peernet:messages'], (message, channel) => {
+        try {
+            const data = JSON.parse(message);
+            if (channel === 'peernet:notifications') {
+                // Parse: { recipient, notification }
+                const { recipient, notification } = data;
+                io.to(`user:${recipient}`).emit('new_notification', notification);
+                logger.debug(`Relayed notification to user:${recipient}`);
+            } else if (channel === 'peernet:messages') {
+                // Parse: { recipient, message, type?, messageId?, conversationId? }
+                const { recipient, message: chatMsg, type, messageId, conversationId } = data;
+                
+                if (type === 'MESSAGE_EDITED') {
+                    io.to(`user:${recipient}`).emit('message_edited', chatMsg);
+                } else if (type === 'MESSAGE_DELETED') {
+                    io.to(`user:${recipient}`).emit('message_deleted', { messageId, conversationId });
+                } else {
+                    // Default: new message
+                    io.to(`user:${recipient}`).emit('new_message', chatMsg);
+                }
+                logger.debug(`Relayed ${type || 'new_message'} to user:${recipient}`);
+            }
+        } catch (err) {
+            logger.error(`Relay Error [${channel}]: ${err.message}`);
+        }
+    });
+    logger.info('Socket.io: Redis Relay Subscriber active');
 
     return io;
 };

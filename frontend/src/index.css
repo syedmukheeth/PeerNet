@@ -646,8 +646,8 @@ textarea {
 
 /* ── Custom Scrollbar (Slim Stick) ───────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -674,9 +674,9 @@ textarea {
 /* ── Layout ──────────────────────────────────────────────── */
 .app-layout {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
   min-height: 100dvh;
-  --sidebar-w: 240px;
+  --sidebar-w: clamp(200px, 15vw, 240px);
   transition: grid-template-columns 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -711,8 +711,8 @@ textarea {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  padding: 12px 12px 24px;
-  gap: 2px;
+  padding: 8px 12px 24px;
+  gap: 0px;
   overflow-y: auto;
   overflow-x: clip;
   transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -808,7 +808,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 10px;
+  padding: 9px 12px;
   border-radius: 10px;
   color: var(--text-2);
   opacity: 0.75;
@@ -1090,10 +1090,10 @@ textarea {
 /* ── Feed: two-column layout ─────────────────────────────── */
 .feed-layout {
   display: flex;
-  gap: 36px;
+  gap: min(4vw, 36px);
   align-items: flex-start;
   justify-content: center;
-  max-width: 860px;
+  max-width: 980px;
   margin: 0 auto;
 }
 
@@ -1104,7 +1104,7 @@ textarea {
 }
 
 .feed-right-panel {
-  width: 260px;
+  width: clamp(240px, 20vw, 300px);
   flex-shrink: 0;
   position: sticky;
   top: 28px;
@@ -2208,9 +2208,10 @@ textarea {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 52px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    background: rgba(var(--surface-rgb, 10, 10, 10), 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-md);
     z-index: 100;
   }
 

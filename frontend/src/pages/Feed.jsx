@@ -47,50 +47,53 @@ function RightPanel() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
             {/* ── Profile mini card ─────────────── */}
-            <div style={{
+            <div className="glass-card" style={{
                 display: 'flex', alignItems: 'center', gap: 14,
-                padding: '16px 20px', 
-                background: 'var(--surface)',
-                borderRadius: 16,
-                border: '1px solid var(--border)',
-                boxShadow: 'var(--shadow-sm)',
-                marginBottom: 24
-            }}>
-                <div onClick={() => navigate(`/profile/${user?._id}`)}
-                    style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
+                padding: '16px 18px', 
+                borderRadius: 12,
+                marginBottom: 24,
+                transition: 'transform 0.2s',
+                cursor: 'pointer'
+            }} onClick={() => navigate(`/profile/${user?._id}`)}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
                     <img src={myAvatar}
                         style={{
-                            width: 50, height: 50, borderRadius: '50%',
+                            width: 52, height: 52, borderRadius: '50%',
                             objectFit: 'cover', display: 'block',
-                            border: '2.5px solid var(--accent)',
+                            border: '2px solid var(--accent)',
                             padding: 2
                         }}
                         alt="" />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <Link to={`/profile/${user?._id}`}
-                            style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-1)', textDecoration: 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: '100%' }}>
+                        <span style={{ 
+                            fontWeight: 800, fontSize: 13.5, color: 'var(--text-1)',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                        }}>
                             {user?.username}
-                        </Link>
+                        </span>
                         {user?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14, flexShrink: 0 }} />}
                     </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
                         {user?.fullName || 'PeerNet user'}
                     </div>
                 </div>
-                <Link to={`/profile/${user?._id}`}
+                <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/profile/${user?._id}`) }}
                     className="btn btn-xs"
                     style={{ 
-                        background: 'var(--accent-subtle)', 
-                        color: 'var(--accent)', 
+                        background: 'rgba(255,255,255,0.08)', 
+                        color: 'var(--text-2)', 
                         fontWeight: 700,
-                        borderRadius: 20,
-                        padding: '6px 14px',
-                        border: '1px solid var(--accent-ring)'
+                        borderRadius: 18,
+                        padding: '5px 12px',
+                        border: '1px solid var(--border-md)',
+                        fontSize: 11,
+                        flexShrink: 0  // Added to prevent overlap
                     }}>
                     Switch
-                </Link>
+                </button>
             </div>
 
             {/* ── Suggested for you ─────────────── */}
