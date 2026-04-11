@@ -4,6 +4,7 @@ const Post = require('../post/Post');
 const Like = require('../post/Like');
 const SavedPost = require('../post/SavedPost');
 const Follower = require('../user/Follower');
+const User = require('../user/User');
 const postService = require('../post/post.service');
 const { getRedisOptional } = require('../../config/redis');
 const { calculateScore, MinHeap } = require('../../utils/rank.utils');
@@ -74,11 +75,31 @@ const hydrateFeed = async (userId) => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
 
-    const posts = await Post.find({
+    let posts = await Post.find({
         author: { $in: followingIds },
         createdAt: { $gt: cutoff },
         isArchived: false
     }).lean();
+
+    // 4. Discovery Fallback: If feed is thin, pull global viral/recent posts
+    if (posts.length < 10) {
+        const discoveryPosts = await Post.find({
+            author: { $nin: followingIds }, // Don't duplicate Following/Self
+            createdAt: { $gt: cutoff },
+            isArchived: false,
+            // Fallback to any post if platform is young, otherwise prioritize engagement
+            $or: [
+                { likesCount: { $gt: 0 } },
+                { commentsCount: { $gt: 0 } },
+                { createdAt: { $gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } // Or very fresh (last 7 days)
+            ]
+        })
+        .sort({ likesCount: -1, createdAt: -1 })
+        .limit(50)
+        .lean();
+        
+        posts = [...posts, ...discoveryPosts];
+    }
 
     // 4. Rank posts using Min-Heap to find top K
     const heap = new MinHeap(MAX_FEED_SIZE);
