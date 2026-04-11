@@ -4,8 +4,8 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const Post = require('../models/Post');
+const User = require('../modules/user/User');
+const Post = require('../modules/post/Post');
 const connectDB = require('../config/db');
 const logger = require('../config/logger');
 

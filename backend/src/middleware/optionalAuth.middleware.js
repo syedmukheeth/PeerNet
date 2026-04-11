@@ -1,7 +1,7 @@
 'use strict';
 
 const { verifyAccessToken } = require('../utils/jwt.utils');
-const User = require('../models/User');
+const User = require('../modules/user/User');
 
 const optionalAuth = async (req, _res, next) => {
     try {
