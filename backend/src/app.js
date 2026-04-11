@@ -15,6 +15,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const { globalLimiter } = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./config/logger');
+const { tracingMiddleware } = require('./middleware/tracing.middleware');
+const { metricsMiddleware, getMetricsEndpoint } = require('./config/metrics.config');
 const v1Router = require('./routes/v1');
 const ApiError = require('./utils/ApiError');
 
@@ -27,7 +29,11 @@ const createApp = () => {
     // ── Disable ETags — prevents 304 responses that bypass our Redis cache ──────
     app.set('etag', false);
 
-    // ── Force no browser caching on all API routes ───────────────────────────────
+    // ── 0. Observability (Tracing & Metrics) ─────────────────────────────────
+    app.use(tracingMiddleware);
+    app.use(metricsMiddleware);
+
+    // ── 1. No Browser Caching ────────────────────────────────────────────────
     app.use('/api', (_req, res, next) => {
         res.set('Cache-Control', 'no-store');
         next();
@@ -75,8 +81,9 @@ const createApp = () => {
     // ── Global rate limiter ──────────────────────────────────────────────────────
     app.use(globalLimiter);
 
-    // ── Health check ─────────────────────────────────────────────────────────
-    app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV }));
+    // ── Health check & Metrics ────────────────────────────────────────────────
+    app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV, traceId: _req.id }));
+    app.get('/metrics', getMetricsEndpoint);
 
     // ── Swagger API Documentation ────────────────────────────────────────────────
     const setupSwagger = require('./docs/swagger');

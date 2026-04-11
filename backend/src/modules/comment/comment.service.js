@@ -5,10 +5,17 @@ const Post = require('../post/Post');
 const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
 const { publishEvent } = require('../../config/kafka');
+const { checkToxicity } = require('../../config/ai.config');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
     const post = await Post.findById(postId);
     if (!post) throw new ApiError(404, 'Post not found');
+
+    // AI Toxicity Check
+    const toxicity = await checkToxicity(body);
+    if (toxicity > 0.7) {
+        throw new ApiError(400, 'Comment rejected by community safety guidelines');
+    }
 
     const comment = await Comment.create({ post: postId, author: userId, body, parentComment: parentComment || null });
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });

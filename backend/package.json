@@ -21,6 +21,7 @@
   "author": "PeerNet",
   "license": "MIT",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@socket.io/redis-adapter": "^8.3.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
@@ -38,6 +39,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.1.1",
     "node-cron": "^3.0.3",
+    "prom-client": "^15.1.3",
     "redis": "^4.7.0",
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",

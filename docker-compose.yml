@@ -5,15 +5,22 @@ services:
     build:
       context: .
       target: runner
-    container_name: peernet_app
-    restart: unless-stopped
+    # Removed container_name and ports to allow horizontal scaling (docker-compose scale)
+    restart: always
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     env_file: .env
     environment:
       - NODE_ENV=production
       - MONGO_URI=mongodb://mongo:27017/peernet
       - REDIS_URL=redis://redis:6379
-    ports:
-      - '3000:3000'
     depends_on:
       mongo:
         condition: service_healthy
@@ -100,6 +107,34 @@ services:
     networks:
       - peernet_net
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: peernet_prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - '9090:9090'
+    networks:
+      - peernet_net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: peernet_grafana
+    ports:
+      - '3100:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - peernet_net
+
 networks:
   peernet_net:
     driver: bridge
@@ -108,3 +143,5 @@ volumes:
   mongo_data:
   redis_data:
   app_logs:
+  prometheus_data:
+  grafana_data:
