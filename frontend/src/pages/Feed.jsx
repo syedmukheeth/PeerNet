@@ -49,15 +49,21 @@ function RightPanel() {
             {/* ── Profile mini card ─────────────── */}
             <div style={{
                 display: 'flex', alignItems: 'center', gap: 14,
-                paddingBottom: 20, borderBottom: '1px solid var(--border)',
+                padding: '16px 20px', 
+                background: 'var(--surface)',
+                borderRadius: 16,
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-sm)',
+                marginBottom: 24
             }}>
                 <div onClick={() => navigate(`/profile/${user?._id}`)}
                     style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
                     <img src={myAvatar}
                         style={{
-                            width: 54, height: 54, borderRadius: '50%',
+                            width: 50, height: 50, borderRadius: '50%',
                             objectFit: 'cover', display: 'block',
-                            border: '2px solid var(--border-md)',
+                            border: '2.5px solid var(--accent)',
+                            padding: 2
                         }}
                         alt="" />
                 </div>
@@ -74,7 +80,15 @@ function RightPanel() {
                     </div>
                 </div>
                 <Link to={`/profile/${user?._id}`}
-                    style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', flexShrink: 0, textDecoration: 'none' }}>
+                    className="btn btn-xs"
+                    style={{ 
+                        background: 'var(--accent-subtle)', 
+                        color: 'var(--accent)', 
+                        fontWeight: 700,
+                        borderRadius: 20,
+                        padding: '6px 14px',
+                        border: '1px solid var(--accent-ring)'
+                    }}>
                     Switch
                 </Link>
             </div>
