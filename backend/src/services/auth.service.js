@@ -162,7 +162,7 @@ const googleLogin = async (token) => {
             fullName: name || username,
             avatarUrl: picture,
             passwordHash,
-            isVerified: true
+            isVerified: false
         });
     }
 
@@ -188,6 +188,23 @@ const guestLogin = async () => {
             passwordHash,
             bio: 'This is a temporary guest account.'
         });
+
+    }
+
+    // AUTO-FOLLOW ADMINS: Ensure interviewer sees content immediately on every login
+    try {
+        const Follower = require('../models/Follower');
+        const admins = await User.find({ role: 'admin' });
+        for (const admin of admins) {
+            const isFollowing = await Follower.exists({ follower: user._id, following: admin._id });
+            if (!isFollowing) {
+                await Follower.create({ follower: user._id, following: admin._id });
+                await User.findByIdAndUpdate(user._id, { $inc: { followingCount: 1 } });
+                await User.findByIdAndUpdate(admin._id, { $inc: { followersCount: 1 } });
+            }
+        }
+    } catch (err) {
+        console.error('Failed to auto-follow admins for guest', err);
     }
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
