@@ -1,5 +1,6 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const Post = require('../post/Post');
 const Like = require('../post/Like');
 const SavedPost = require('../post/SavedPost');
@@ -230,6 +231,10 @@ const _getDirectFeed = async (userId, limit, cursor) => {
 
     const dbName = mongoose.connection.name;
     console.log(`[FEED_TIER] User: ${userId} Tier: ${tier} Count: ${posts.length} DB_Total: ${rawCount} DB_Name: ${dbName}`);
+
+    // Fetch affinity for personalization ranking
+    const currentUser = await User.findById(userId).select('categoryAffinity').lean();
+    const affinity = currentUser?.categoryAffinity || {};
 
     const ranked = posts.map(p => {
         let score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
