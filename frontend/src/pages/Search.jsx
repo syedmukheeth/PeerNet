@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
 import { HiSearch, HiBadgeCheck } from 'react-icons/hi'
 import toast from 'react-hot-toast'
+import { ListItemSkeleton } from '../components/SkeletonLoader'
 
 const pageVariants = { initial: { opacity: 0 }, animate: { opacity: 1, transition: { duration: 0.25 } } }
 
@@ -47,6 +48,12 @@ export default function Search() {
                 <input placeholder="Search by name or username…" value={q} onChange={handleSearch} autoFocus />
                 {loading && <div className="spinner" style={{ width: 16, height: 16 }} />}
             </div>
+
+            {loading && q.length >= 2 && (
+                <div style={{ display: 'flex', flexDirection: 'column', marginTop: '20px' }}>
+                    {[...Array(5)].map((_, i) => <ListItemSkeleton key={i} />)}
+                </div>
+            )}
 
             <AnimatePresence>
                 {results.length > 0 && (

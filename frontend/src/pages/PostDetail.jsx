@@ -12,6 +12,7 @@ import {
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'
+import { PostDetailSkeleton } from '../components/SkeletonLoader'
 
 export default function PostDetail() {
     const { id } = useParams()
@@ -30,6 +31,8 @@ export default function PostDetail() {
     const [replyData, setReplyData] = useState({}) // { commentId: { replies: [], loading: false, show: false } }
     const [isScanning, setIsScanning] = useState(false)
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+    const [suggestions, setSuggestions] = useState([])
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false)
     const inputRef = useRef()
     const menuRef = useRef()
     const commentsEndRef = useRef()
@@ -153,7 +156,53 @@ export default function PostDetail() {
         }
     }
 
-    if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}><div className="spinner" /></div>
+    const handleDeleteComment = async (commentId, isReply, parentId) => {
+        if (!confirm('Delete this comment?')) return
+        try {
+            await api.delete(`/comments/${commentId}`)
+            if (isReply) {
+                setReplyData(prev => ({
+                    ...prev,
+                    [parentId]: {
+                        ...prev[parentId],
+                        replies: prev[parentId].replies.filter(r => r._id !== commentId)
+                    }
+                }))
+            } else {
+                setComments(prev => prev.filter(c => c._id !== commentId))
+            }
+            setPost(p => ({ ...p, commentsCount: (p.commentsCount || 1) - 1 }))
+            toast.success('Comment deleted')
+        } catch (err) {
+            toast.error('Failed to delete comment')
+        }
+    }
+
+    const fetchAISuggestions = async (commentText = null) => {
+        if (!post) return
+        setLoadingSuggestions(true)
+        try {
+            const { data } = await api.post('/ai/suggest-replies', {
+                caption: post.caption,
+                commentText
+            })
+            setSuggestions(data.data || [])
+        } catch (err) {
+            console.error('AI Suggestion error:', err)
+        } finally {
+            setLoadingSuggestions(false)
+        }
+    }
+
+    useEffect(() => {
+        if (replyingTo) {
+            fetchAISuggestions(replyingTo.body)
+        } else {
+            setSuggestions([])
+        }
+    }, [replyingTo])
+
+    if (loading) return <PostDetailSkeleton />
     if (!post) return null
 
     const author = post.author || {}
@@ -297,6 +346,15 @@ export default function PostDetail() {
                                                 >
                                                     {replyingTo?._id === c._id ? 'Cancel reply' : 'Reply'}
                                                 </button>
+                                                {user?._id === (c.author?._id || c.author) && (
+                                                    <button 
+                                                        onClick={() => handleDeleteComment(c._id, false)}
+                                                        style={{ background: 'none', border: 'none', color: 'var(--error)', opacity: 0.7, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                                                        title="Delete comment"
+                                                    >
+                                                        <HiTrash size={12} />
+                                                    </button>
+                                                )}
                                             </div>
 
                                             {/* Replies Toggle */}
@@ -335,7 +393,18 @@ export default function PostDetail() {
                                                                             />
                                                                         )}
                                                                     </div>
-                                                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>{timeago(reply.createdAt)}</div>
+                                                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, display: 'flex', gap: 10, alignItems: 'center' }}>
+                                                                        <span>{timeago(reply.createdAt)}</span>
+                                                                        {user?._id === (reply.author?._id || reply.author) && (
+                                                                            <button 
+                                                                                onClick={() => handleDeleteComment(reply._id, true, c._id)}
+                                                                                style={{ background: 'none', border: 'none', color: 'var(--error)', opacity: 0.7, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                                                                                title="Delete reply"
+                                                                            >
+                                                                                <HiTrash size={11} />
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         )
@@ -385,8 +454,47 @@ export default function PostDetail() {
                                 style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt="" />
                             <div style={{ flex: 1, position: 'relative' }}>
                                 {replyingTo && (
-                                    <div style={{ position: 'absolute', bottom: '100%', left: 0, fontSize: 11, color: 'var(--text-3)', paddingBottom: 6 }}>
-                                        Replying to <strong>{replyingTo.author?.username}</strong>
+                                    <div style={{ position: 'absolute', bottom: '100%', left: 0, width: '100%', paddingBottom: 6 }}>
+                                        {/* AI Suggestions Chips */}
+                                        {suggestions.length > 0 && (
+                                            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'none' }} className="no-scrollbar">
+                                                {suggestions.map((s, idx) => (
+                                                    <motion.button
+                                                        key={idx}
+                                                        initial={{ opacity: 0, y: 5 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: idx * 0.1 }}
+                                                        onClick={() => setBody(s)}
+                                                        type="button"
+                                                        style={{
+                                                            whiteSpace: 'nowrap',
+                                                            padding: '6px 14px',
+                                                            borderRadius: 20,
+                                                            background: 'var(--surface)',
+                                                            border: '1px solid var(--border-md)',
+                                                            color: 'var(--text-2)',
+                                                            fontSize: 12,
+                                                            fontWeight: 600,
+                                                            cursor: 'pointer',
+                                                            boxShadow: 'var(--shadow-sm)',
+                                                            backdropFilter: 'blur(10px)',
+                                                        }}
+                                                        whileHover={{ background: 'var(--hover)', color: 'var(--text-1)', scale: 1.02 }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                    >
+                                                        {s}
+                                                    </motion.button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {loadingSuggestions && (
+                                            <div style={{ fontSize: 10, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                                                <div className="spinner" style={{ width: 10, height: 10 }} /> Thinking of replies...
+                                            </div>
+                                        )}
+                                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                                            Replying to <strong>{replyingTo.author?.username}</strong>
+                                        </div>
                                     </div>
                                 )}
                                 <input

@@ -7,6 +7,7 @@ import { HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, Hi
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
 import EmojiPicker from 'emoji-picker-react'
+import { ChatListSkeleton, MessageBubblesSkeleton } from '../components/SkeletonLoader'
 
 let socket = null
 
@@ -432,9 +433,7 @@ export default function Messages() {
                     {/* Convo items */}
                     <div style={{ flex: 1, overflowY: 'auto' }}>
                         {(initialLoad || starting) ? (
-                            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 20px' }}>
-                                <div className="spinner" />
-                            </div>
+                            <ChatListSkeleton />
                         ) : null}
                         
                         {!initialLoad && filteredConvos.map(c => {
@@ -533,9 +532,7 @@ export default function Messages() {
                             {/* Messages */}
                             <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 {loadingMessages ? (
-                                    <div style={{ margin: 'auto' }}>
-                                        <div className="spinner" />
-                                    </div>
+                                    <MessageBubblesSkeleton />
                                 ) : messages.length === 0 && (
                                     <div style={{ textAlign: 'center', margin: 'auto', color: 'var(--text-3)' }}>
                                         <img src={otherAvatar} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 14px', display: 'block' }} alt="" />

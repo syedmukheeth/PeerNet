@@ -10,6 +10,7 @@ const dscrollRoutes = require('../../modules/dscroll/dscroll.routes');
 const notificationRoutes = require('../../modules/notification/notification.service').routes || require('../../modules/notification/notification.routes');
 const adminRoutes = require('../../modules/admin/admin.routes');
 const chatRoutes = require('../../modules/chat/chat.routes');
+const aiRoutes = require('../../modules/ai/ai.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -20,5 +21,6 @@ router.use('/dscrolls', dscrollRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/chats', chatRoutes);
+router.use('/ai', aiRoutes);
 
 module.exports = router;

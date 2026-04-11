@@ -8,6 +8,7 @@ import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAl
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
+import { ProfileSkeleton, GridSkeleton } from '../components/SkeletonLoader'
 
 
 
@@ -111,11 +112,8 @@ export default function Profile() {
     }
 
 
-    if (loading) return (
-        <div className="flex justify-center items-center" style={{ padding: '80px 0' }}>
-            <div className="spinner" style={{ width: 36, height: 36 }} />
-        </div>
-    )
+    if (loading) return <ProfileSkeleton />
+
     if (!profile) return (
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 60 }}>User not found</p>
     )
@@ -292,11 +290,7 @@ export default function Profile() {
                     emptyDesc = isMe ? 'Save posts to view them here' : ''
                 }
 
-                if (isLoading) return (
-                    <div className="flex justify-center" style={{ padding: 60 }}>
-                        <div className="spinner" style={{ width: 36, height: 36 }} />
-                    </div>
-                )
+                if (isLoading) return <GridSkeleton />
 
                 return (
                     <>

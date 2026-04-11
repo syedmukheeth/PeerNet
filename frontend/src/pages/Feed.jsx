@@ -248,8 +248,8 @@ export default function Feed() {
                         </div>
                     )}
                     {loading && posts.length > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
-                            <div className="spinner" />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 10 }}>
+                            <PostSkeleton />
                         </div>
                     )}
                     {!loading && posts.length === 0 && (
