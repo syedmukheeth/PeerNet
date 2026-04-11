@@ -67,8 +67,9 @@ api.interceptors.response.use(
                     rt ? { refreshToken: rt } : {},
                     { withCredentials: true }
                 )
-                const { accessToken } = data.data
+                const { accessToken, refreshToken } = data.data
                 localStorage.setItem('accessToken', accessToken)
+                localStorage.setItem('refreshToken', refreshToken)
                 queue.forEach((p) => p.resolve(accessToken))
                 queue = []
                 original.headers.Authorization = `Bearer ${accessToken}`
