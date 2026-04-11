@@ -40,4 +40,24 @@ const logout = async (req, res, next) => {
     }
 };
 
-module.exports = { register, login, refresh, logout };
+const googleLogin = async (req, res, next) => {
+    try {
+        const { token } = req.body;
+        if (!token) return res.status(400).json({ success: false, message: 'Google token required' });
+        const { user, accessToken, refreshToken } = await authService.googleLogin(token);
+        res.json({ success: true, data: { user, accessToken, refreshToken } });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const guestLogin = async (req, res, next) => {
+    try {
+        const { user, accessToken, refreshToken } = await authService.guestLogin();
+        res.json({ success: true, data: { user, accessToken, refreshToken } });
+    } catch (err) {
+        next(err);
+    }
+};
+
+module.exports = { register, login, refresh, logout, googleLogin, guestLogin };

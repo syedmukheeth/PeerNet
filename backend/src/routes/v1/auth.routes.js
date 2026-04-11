@@ -103,4 +103,10 @@ router.post('/refresh', authController.refresh);
 // POST /api/v1/auth/logout
 router.post('/logout', authenticate, authController.logout);
 
+// POST /api/v1/auth/google
+router.post('/google', authLimiter, authController.googleLogin);
+
+// POST /api/v1/auth/guest
+router.post('/guest', authLimiter, authController.guestLogin);
+
 module.exports = router;

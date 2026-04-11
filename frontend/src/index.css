@@ -1563,6 +1563,30 @@ textarea {
   filter: brightness(1.2);
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  gap: 16px;
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-social-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 /* ── Profile ─────────────────────────────────────────────── */
 
 /* Outer page wrapper — Instagram uses ~930px max */
