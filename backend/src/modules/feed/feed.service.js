@@ -249,9 +249,26 @@ const _getDirectFeed = async (userId, limit, cursor) => {
         return { ...p, score, logicTier: tier, _dbCount: rawCount, _dbName: dbName };
     }).sort((a, b) => b.score - a.score);
 
-    // 4. Slicing
+    // 4. Slice to page size
     const paginated = ranked.slice(0, limit);
-    return await _enrichPosts(paginated, userId);
+
+    // 5. Populate author — lean() returns raw ObjectIds, PostCard needs username/avatarUrl/etc.
+    const postIds = paginated.map(p => p._id);
+    const populatedPosts = await Post.find({ _id: { $in: postIds } })
+        .populate('author', 'username fullName avatarUrl isVerified')
+        .lean();
+
+    // Re-merge score/tier metadata from ranked into the populated docs
+    const metaMap = new Map(paginated.map(p => [p._id.toString(), p]));
+    const mergedPosts = populatedPosts.map(p => ({
+        ...p,
+        score: metaMap.get(p._id.toString())?.score,
+        logicTier: metaMap.get(p._id.toString())?.logicTier,
+        _dbCount: metaMap.get(p._id.toString())?._dbCount,
+        _dbName: metaMap.get(p._id.toString())?._dbName,
+    })).sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    return await _enrichPosts(mergedPosts, userId);
 };
 
 /** Private helper to add isLiked and isSaved flags to posts for a specific user */
