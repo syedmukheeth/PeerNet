@@ -12,7 +12,7 @@ const createNotification = async ({ recipient, sender, type, entityId, entityMod
     // Populate sender and entity details for real-time delivery
     await notification.populate([
         { path: 'sender', select: 'username avatarUrl isVerified' },
-        { path: 'entityId' }
+        { path: 'entityId', options: { strictPopulate: false } }
     ]);
 
     // Push real-time notification cross-service via Redis

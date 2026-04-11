@@ -51,7 +51,8 @@ const addComment = async (postId, userId, { body, parentComment }) => {
                 postId,
                 authorId: userId,
                 parentCommentAuthorId: parent.author,
-                type: 'reply' // explicitly pass type for worker
+                type: 'reply',
+                postModel: targetModel
             });
         }
     } else {
@@ -59,7 +60,8 @@ const addComment = async (postId, userId, { body, parentComment }) => {
             commentId: comment._id,
             postId,
             authorId: userId,
-            postAuthorId: post.author
+            postAuthorId: post.author,
+            postModel: targetModel
         });
     }
 
@@ -132,7 +134,8 @@ const likeComment = async (commentId, userId) => {
             commentId,
             userId,
             authorId: comment.author,
-            postId: comment.post
+            postId: comment.post,
+            postModel: comment.postModel || 'Post' // fallback to Post
         });
 
         return { liked: true };

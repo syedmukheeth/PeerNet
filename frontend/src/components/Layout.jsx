@@ -110,13 +110,25 @@ export default function Layout() {
                             fontSize: 10, border: '2px solid var(--surface)',
                         }}>{typeEmoji[notif.type]}</div>
                     </div>
-                    {notif.entityId && (
-                        <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border)' }}>
+                    {notif.entityId && typeof notif.entityId === 'object' && (
+                        <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border)', background: 'var(--hover)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                              <img 
                                 src={notif.entityId.mediaUrl || notif.entityId.videoUrl || notif.entityId.thumbnailUrl} 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'block';
+                                }}
                                 alt="" 
                             />
+                            <div style={{ display: 'none', color: 'var(--text-3)', fontSize: 16 }}>
+                                {notif.type === 'like' ? '❤️' : '💬'}
+                            </div>
+                        </div>
+                    )}
+                    {notif.entityId && typeof notif.entityId !== 'object' && (
+                         <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--hover)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 16, border: '1px solid var(--border)' }}>
+                            {notif.type === 'like' ? '❤️' : '💬'}
                         </div>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
