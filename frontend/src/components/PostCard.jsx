@@ -126,39 +126,43 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     return (
         <>
             <motion.div className="post-card"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}>
-                {/* Header */}
-                <div className="post-header">
-                    <Link to={`/profile/${author._id}`}>
-                        <img src={avatarUrl} className="avatar avatar-md" alt={author.username} />
+                initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                style={{ overflow: 'hidden', position: 'relative' }}>
+                
+                {/* Header with glass effect */}
+                <div className="post-header glass-header" style={{ padding: '12px 14px' }}>
+                    <Link to={`/profile/${author._id}`} style={{ position: 'relative' }}>
+                        <img src={avatarUrl} className="avatar" style={{ width: 38, height: 38, border: '1.5px solid var(--border-md)' }} alt={author.username} />
                     </Link>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, marginLeft: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Link to={`/profile/${author._id}`} className="post-author-name">{author.username}</Link>
-                            {author.isVerified && <HiBadgeCheck className="verified" title="Verified" />}
+                            <Link to={`/profile/${author._id}`} className="post-author-name" style={{ fontSize: 13.5, fontWeight: 700 }}>{author.username}</Link>
+                            {author.isVerified && <HiBadgeCheck className="verified" style={{ fontSize: 14 }} title="Verified" />}
                         </div>
-                        <div className="post-author-time">{timeago(post.createdAt)}</div>
+                        <div className="post-author-time" style={{ fontSize: 11, opacity: 0.7 }}>{timeago(post.createdAt)}</div>
                     </div>
                     <div style={{ position: 'relative' }} ref={menuRef}>
                         <motion.button className="btn btn-ghost btn-icon-sm"
-                            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                            whileHover={{ background: 'rgba(255,255,255,0.08)' }} whileTap={{ scale: 0.9 }}
                             onClick={() => setMenuOpen(o => !o)}>
-                            <HiDotsHorizontal style={{ fontSize: 18 }} />
+                            <HiDotsHorizontal style={{ fontSize: 18, color: 'var(--text-3)' }} />
                         </motion.button>
                         <AnimatePresence>
                             {menuOpen && (
-                                <motion.div className="post-options-menu"
+                                <motion.div className="post-options-menu glass-card"
                                     initial={{ opacity: 0, y: -6, scale: 0.96 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -6, scale: 0.96 }}
-                                    transition={{ duration: 0.15 }}>
+                                    transition={{ duration: 0.15 }}
+                                    style={{ border: '1px solid var(--border-md)', boxShadow: 'var(--shadow-lg)' }}>
                                     {isOwner ? (
                                         <>
                                             <button className="post-options-item" onClick={() => { setMenuOpen(false); setEditOpen(true) }}>
                                                 <HiPencil /> Edit caption
                                             </button>
+                                            <div className="ig-more-divider" style={{ margin: '4px 0', opacity: 0.5 }} />
                                             <button className="post-options-item danger" onClick={() => { setMenuOpen(false); handleDelete() }}>
                                                 <HiTrash /> Delete post
                                             </button>
@@ -209,26 +213,27 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     )}
                 </div>
 
-                {/* Actions */}
-                <div className="post-actions">
+                {/* Actions with glass effect */}
+                <div className="post-actions glass-footer" style={{ padding: '8px 12px', marginTop: 0 }}>
                     <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`}
                         onClick={handleLike}
-                        whileTap={{ scale: 0.85 }}>
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.9 }}>
                         {liked
-                            ? <HiHeart style={{ fontSize: 23 }} />
-                            : <HiOutlineHeart style={{ fontSize: 23 }} />
+                            ? <HiHeart style={{ fontSize: 24, color: 'var(--error)' }} />
+                            : <HiOutlineHeart style={{ fontSize: 24 }} />
                         }
-                        <span>{likesCount.toLocaleString()}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600 }}>{likesCount.toLocaleString()}</span>
                     </motion.button>
 
-                    <Link to={`/posts/${post._id}`} className="post-action-btn">
-                        <HiChatAlt2 style={{ fontSize: 21 }} />
-                        <span>{post.commentsCount || 0}</span>
+                    <Link to={`/posts/${post._id}`} className="post-action-btn" style={{ padding: '6px 10px' }}>
+                        <HiChatAlt2 style={{ fontSize: 22 }} />
+                        <span style={{ fontSize: 13, fontWeight: 600 }}>{post.commentsCount || 0}</span>
                     </Link>
 
-                    {/* Share button */}
                     <motion.button className="post-action-btn"
-                        whileTap={{ scale: 0.85 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={() => {
                             const url = `${window.location.origin}/posts/${post._id}`
                             if (navigator.share) {
@@ -239,16 +244,17 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                                     .catch(() => toast.error('Copy failed'))
                             }
                         }}>
-                        <HiShare style={{ fontSize: 21 }} />
+                        <HiShare style={{ fontSize: 22 }} />
                     </motion.button>
 
                     <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`}
                         onClick={handleSave}
                         style={{ marginLeft: 'auto' }}
-                        whileTap={{ scale: 0.85 }}>
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.9 }}>
                         {saved
-                            ? <HiBookmark style={{ fontSize: 21 }} />
-                            : <HiOutlineBookmark style={{ fontSize: 21 }} />
+                            ? <HiBookmark style={{ fontSize: 22, color: 'var(--accent)' }} />
+                            : <HiOutlineBookmark style={{ fontSize: 22 }} />
                         }
                     </motion.button>
                 </div>

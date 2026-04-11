@@ -345,10 +345,10 @@ export default function Layout() {
                 </nav>
 
                 {/* More button — bottom */}
-                <div className="sidebar-more-wrap" ref={moreRef}>
+                <div className="sidebar-more-wrap" style={{ marginTop: 'auto', paddingTop: 12, paddingBottom: 12 }} ref={moreRef}>
                     <AnimatePresence>
                         {showMore && (
-                            <motion.div className="ig-more-popup"
+                            <motion.div className="ig-more-popup glass-card"
                                 initial={{ opacity: 0, y: 8, scale: 0.96 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 8, scale: 0.96 }}
