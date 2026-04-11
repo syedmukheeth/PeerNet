@@ -57,7 +57,7 @@ const initNotificationWorker = async () => {
                             sender: payload.authorId,
                             type: 'comment',
                             entityId: payload.postId,
-                            entityModel: 'Post',
+                            entityModel: payload.postModel || 'Post',
                         });
                         break;
 

@@ -74,7 +74,8 @@ api.interceptors.response.use(
                 queue = []
                 original.headers.Authorization = `Bearer ${accessToken}`
                 return api(original)
-            } catch {
+            } catch (refreshErr) {
+                console.error('[AXIOS] Refresh Failed:', refreshErr.response?.status, refreshErr.message)
                 queue.forEach((p) => p.reject(err))
                 queue = []
                 localStorage.removeItem('accessToken')
@@ -83,6 +84,9 @@ api.interceptors.response.use(
             } finally {
                 isRefreshing = false
             }
+        }
+        if (err.response?.status === 403) {
+            console.error('[AXIOS] Forbidden (403):', err.config.url)
         }
         return Promise.reject(err)
     },
