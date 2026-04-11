@@ -6,7 +6,7 @@ import api from '../api/axios'
 import {
     HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
     HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
-    HiBadgeCheck, HiEmojiHappy,
+    HiBadgeCheck, HiEmojiHappy, HiShieldCheck,
 } from 'react-icons/hi'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
@@ -27,6 +27,7 @@ export default function PostDetail() {
     const [editOpen, setEditOpen] = useState(false)
     const [replyingTo, setReplyingTo] = useState(null)
     const [replyData, setReplyData] = useState({}) // { commentId: { replies: [], loading: false, show: false } }
+    const [isScanning, setIsScanning] = useState(false)
     const inputRef = useRef()
     const menuRef = useRef()
     const commentsEndRef = useRef()
@@ -83,6 +84,7 @@ export default function PostDetail() {
         e.preventDefault()
         if (!user) { toast.error('Please sign in to comment'); return navigate('/login'); }
         if (!body.trim()) return
+        setIsScanning(true)
         try {
             const payload = { body }
             if (replyingTo) payload.parentComment = replyingTo._id
@@ -108,6 +110,7 @@ export default function PostDetail() {
             setBody('')
             setReplyingTo(null)
         } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
+        finally { setIsScanning(false) }
     }
 
     const toggleReplies = async (commentId) => {
@@ -264,6 +267,12 @@ export default function PostDetail() {
                                                     </Link>
                                                 </strong>
                                                 {c.body}
+                                                {c.isAiVerified && (
+                                                    <HiShieldCheck 
+                                                        style={{ color: '#10B981', fontSize: 13, marginLeft: 4, verticalAlign: 'middle', cursor: 'help' }} 
+                                                        title="AI Verified Safe" 
+                                                    />
+                                                )}
                                             </div>
                                             <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, display: 'flex', gap: 12, alignItems: 'center' }}>
                                                 <span>{timeago(c.createdAt)}</span>
@@ -308,6 +317,12 @@ export default function PostDetail() {
                                                                             </Link>
                                                                         </strong>
                                                                         {reply.body}
+                                                                        {reply.isAiVerified && (
+                                                                            <HiShieldCheck 
+                                                                                style={{ color: '#10B981', fontSize: 12, marginLeft: 4, verticalAlign: 'middle', cursor: 'help' }} 
+                                                                                title="AI Verified Safe" 
+                                                                            />
+                                                                        )}
                                                                     </div>
                                                                     <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>{timeago(reply.createdAt)}</div>
                                                                 </div>
@@ -363,8 +378,8 @@ export default function PostDetail() {
                                     }} />
                             </div>
                             {body.trim() && (
-                                <button type="submit" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>
-                                    Post
+                                <button type="submit" disabled={isScanning} style={{ background: 'none', border: 'none', cursor: isScanning ? 'default' : 'pointer', color: isScanning ? 'var(--text-3)' : 'var(--accent)', fontWeight: 700, fontSize: 13 }}>
+                                    {isScanning ? 'AI Scanning...' : 'Post'}
                                 </button>
                             )}
                         </form>
