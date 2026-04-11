@@ -18,42 +18,37 @@ const HYDRATE_TIMEFRAME_DAYS = 30;
  * 2. If Redis is cold, hydrates from MongoDB using a ranking algorithm.
  * 3. Enriches post objects with user-specific data (isLiked, isSaved).
  */
-const getFeed = async (userId, { limit = 20, page = 1 }) => {
+const getFeed = async (userId, { limit = 20, cursor = null }) => {
     const redis = getRedisOptional();
     const redisKey = `feed:user:${userId}`;
-    const start = (page - 1) * limit;
-    const end = start + limit - 1;
 
     let postIds = [];
     if (redis) {
-        // Try getting IDs from ranked sorted set
-        postIds = await redis.zRange(redisKey, start, end, { REV: true });
+        // Try getting IDs from ranked sorted set (Simple offset for now, or fallback)
+        // For deep cursors, we prefer DB fallback to ensure consistency
+        if (!cursor) {
+            postIds = await redis.zRange(redisKey, 0, limit - 1, { REV: true });
+        }
         
-        // If empty, hydrate the cache
-        if (postIds.length === 0 && page === 1) {
+        // If empty or has cursor, we might needs fresh data or precise cursor handling
+        if (postIds.length === 0 && !cursor) {
             await hydrateFeed(userId);
-            postIds = await redis.zRange(redisKey, start, end, { REV: true });
+            postIds = await redis.zRange(redisKey, 0, limit - 1, { REV: true });
         }
     }
 
-    // Fallback or Cold Cache Hydration: If still no IDs, we fetch directly from DB
-    if (postIds.length === 0) {
-        // This happens if Redis is offline or if hydrateFeed didn't find enough "following" content
-        // Force a direct discovery-based feed fetch
-        const directPosts = await _getDirectFeed(userId, limit, page);
-        return { data: directPosts, hasMore: directPosts.length === limit };
+    // Fallback or Cold Cache/Cursor Handling: Direct DB query is most reliable for cursors
+    if (postIds.length === 0 || cursor) {
+        const directPosts = await _getDirectFeed(userId, limit, cursor);
+        const nextCursor = directPosts.length === limit ? directPosts[directPosts.length - 1].createdAt : null;
+        return { data: directPosts, hasMore: !!nextCursor, nextCursor };
     }
 
-    // Fetch actual post documents using bulk cache-aside logic
     const rankedResults = await postService.getPostsByIds(postIds);
-
-    // Enrich with user-specific likes/saves
     const enrichedResults = await _enrichPosts(rankedResults, userId);
-
-    const totalInFeed = redis ? await redis.zCard(redisKey) : rankedResults.length;
-    const hasMore = start + limit < totalInFeed;
-
-    return { data: enrichedResults, hasMore };
+    
+    const nextCursor = (enrichedResults.length === limit) ? enrichedResults[enrichedResults.length - 1].createdAt : null;
+    return { data: enrichedResults, hasMore: !!nextCursor, nextCursor };
 };
 
 /**
@@ -147,7 +142,7 @@ const hydrateFeed = async (userId) => {
  * Direct DB Fallback: Fetches posts directly from MongoDB if Redis is empty or offline.
  * Reuses the same ranking logic as hydrateFeed but returns documents immediately.
  */
-const _getDirectFeed = async (userId, limit, page) => {
+const _getDirectFeed = async (userId, limit, cursor) => {
     // 1. Get authors (Following + Self)
     const followRelations = await Follower.find({ follower: userId }).select('following').lean();
     const followingIds = followRelations.map(f => f.following);
@@ -157,22 +152,25 @@ const _getDirectFeed = async (userId, limit, page) => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
 
+    const queryBase = { isArchived: false };
+    if (cursor) queryBase.createdAt = { $lt: new Date(cursor) };
+
     // Initial pool: Following
     let posts = await Post.find({
+        ...queryBase,
         author: { $in: followingIds },
-        createdAt: { $gt: cutoff },
-        isArchived: false
+        createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: cutoff },
     }).lean();
 
     // Discovery pool if needed
     if (posts.length < limit) {
         const discovery = await Post.find({
+            ...queryBase,
             author: { $nin: followingIds },
-            isArchived: false,
             $or: [
                 { likesCount: { $gt: 0 } },
                 { commentsCount: { $gt: 0 } },
-                { createdAt: { $gt: cutoff } }
+                { createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: cutoff } }
             ]
         }).sort({ likesCount: -1, createdAt: -1 }).limit(100).lean();
         posts = [...posts, ...discovery];
@@ -180,10 +178,10 @@ const _getDirectFeed = async (userId, limit, page) => {
 
     // Desperation Fallback
     if (posts.length === 0) {
-        posts = await Post.find({ isArchived: false }).sort({ createdAt: -1 }).limit(50).lean();
+        posts = await Post.find(queryBase).sort({ createdAt: -1 }).limit(50).lean();
     }
 
-    // 3. Simple Ranking & Personalization (No heap needed for small direct batches)
+    // 3. Simple Ranking & Personalization
     const user = await User.findById(userId).select('categoryAffinity').lean();
     const affinity = user?.categoryAffinity || new Map();
 
@@ -200,9 +198,8 @@ const _getDirectFeed = async (userId, limit, page) => {
         return { ...p, score };
     }).sort((a, b) => b.score - a.score);
 
-    // 4. Paginate and Enrich
-    const start = (page - 1) * limit;
-    const paginated = ranked.slice(start, start + limit);
+    // 4. Slicing (Limit-only here since Mongo handled cursor) and Enrich
+    const paginated = ranked.slice(0, limit);
     return _enrichPosts(paginated, userId);
 };
 
