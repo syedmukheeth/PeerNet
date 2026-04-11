@@ -2,7 +2,7 @@
 
 const { verifyAccessToken } = require('../utils/jwt.utils');
 const ApiError = require('../utils/ApiError');
-const User = require('../models/User');
+const User = require('../modules/user/User');
 
 const authenticate = async (req, _res, next) => {
     try {

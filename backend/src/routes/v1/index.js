@@ -1,14 +1,14 @@
 'use strict';
 
 const router = require('express').Router();
-const authRoutes = require('./auth.routes');
-const userRoutes = require('./user.routes');
-const postRoutes = require('./post.routes');
-const commentRoutes = require('./comment.routes');
-const storyRoutes = require('./story.routes');
-const dscrollRoutes = require('./dscroll.routes');
-const notificationRoutes = require('./notification.routes');
-const adminRoutes = require('./admin.routes');
+const authRoutes = require('../../modules/auth/auth.routes');
+const userRoutes = require('../../modules/user/user.routes');
+const postRoutes = require('../../modules/post/post.routes');
+const commentRoutes = require('../../modules/comment/comment.routes');
+const storyRoutes = require('../../modules/story/story.routes');
+const dscrollRoutes = require('../../modules/dscroll/dscroll.routes');
+const notificationRoutes = require('../../modules/notification/notification.service').routes || require('../../modules/notification/notification.routes');
+const adminRoutes = require('../../modules/admin/admin.routes');
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);

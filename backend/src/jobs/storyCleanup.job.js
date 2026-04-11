@@ -1,7 +1,7 @@
 'use strict';
 
 const cron = require('node-cron');
-const Story = require('../models/Story');
+const Story = require('../modules/story/Story');
 const { deleteFromCloudinary } = require('../utils/cloudinary.utils');
 const logger = require('../config/logger');
 
