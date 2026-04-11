@@ -11,7 +11,8 @@ const { getRedisOptional } = require('../../config/redis');
 const { calculateScore, MinHeap } = require('../../utils/rank.utils');
 
 const MAX_FEED_SIZE = 500;
-const HYDRATE_TIMEFRAME_DAYS = 30;
+// How far back to look for discovery/global posts (not applied to followed-user posts)
+const DISCOVERY_TIMEFRAME_DAYS = 365;
 
 /**
  * Ranked Feed System:
@@ -25,14 +26,9 @@ const getFeed = async (userId, { limit = 20, cursor = null }) => {
 
     let postIds = [];
     if (redis) {
-        // Try getting IDs from ranked sorted set (Simple offset for now, or fallback)
-        // For deep cursors, we prefer DB fallback to ensure consistency
         if (!cursor) {
-            postIds = await redis.zRange(redisKey, 0, limit - 1, { REV: true });
-        }
-        
-        // If empty or has cursor, we might needs fresh data or precise cursor handling
-        if (postIds.length === 0 && !cursor) {
+            // Always flush + re-hydrate so the cache is never stale from old date-cutoff data
+            await redis.del(redisKey);
             await hydrateFeed(userId);
             postIds = await redis.zRange(redisKey, 0, limit - 1, { REV: true });
         }
@@ -69,32 +65,31 @@ const hydrateFeed = async (userId) => {
     const user = await User.findById(userId).select('categoryAffinity').lean();
     const affinity = user?.categoryAffinity || new Map();
 
-    // 3. Fetch recent posts from authors
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
-
+    // 3. Fetch ALL posts from followed users — no date cutoff. On a small platform
+    //    you must show everything your connections ever posted.
     let posts = await Post.find({
         author: { $in: followingIds },
-        createdAt: { $gt: cutoff },
-        isArchived: false
+        isArchived: { $ne: true },  // $ne:true also matches docs without the field
     }).lean();
 
-    // 4. Discovery Fallback: If feed is thin, pull global viral/recent posts
+    // 4. Discovery Fallback: If feed is thin, pull global posts from last year
     if (posts.length < 10) {
+        const discoveryCutoff = new Date();
+        discoveryCutoff.setDate(discoveryCutoff.getDate() - DISCOVERY_TIMEFRAME_DAYS);
+
         const discoveryPosts = await Post.find({
-            author: { $nin: followingIds }, // Don't duplicate Following/Self
-            isArchived: false,
-            // Prioritize recent/engagement, but allow older posts if platform is young
+            author: { $nin: followingIds },
+            isArchived: { $ne: true },
             $or: [
                 { likesCount: { $gt: 0 } },
                 { commentsCount: { $gt: 0 } },
-                { createdAt: { $gt: cutoff } } // Last 30 days
+                { createdAt: { $gt: discoveryCutoff } },
             ]
         })
         .sort({ likesCount: -1, createdAt: -1 })
         .limit(50)
         .lean();
-        
+
         posts = [...posts, ...discoveryPosts];
     }
 
@@ -151,18 +146,14 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     followingIds.push(userId);
 
     // 2. Fetch all potential candidates (Followed + Discovery)
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
-
     const queryBase = { isArchived: { $ne: true } };
 
-    // Initial pool: Following posts
-    // When cursor exists: get posts older than cursor
-    // When no cursor: get posts from the last HYDRATE_TIMEFRAME_DAYS
+    // Initial pool: ALL posts from followed users (+ self) — no date cutoff.
+    // Users should always see everything their connections posted, regardless of age.
     const followingQuery = {
         ...queryBase,
         author: { $in: followingIds },
-        createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: cutoff },
+        ...(cursor ? { createdAt: { $lt: new Date(cursor) } } : {}),
     };
 
     let posts = await Post.find(followingQuery).lean();
@@ -170,19 +161,22 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     // Set cursor filter on queryBase AFTER following query, for discovery/desperation queries
     if (cursor) queryBase.createdAt = { $lt: new Date(cursor) };
 
-    // Discovery pool: If we have less than the limit, fill with global content
+    // Discovery pool: If we have less than the limit, fill with global content (last year)
     if (posts.length < limit) {
         tier = 'discovery';
+        const discoveryCutoff = new Date();
+        discoveryCutoff.setDate(discoveryCutoff.getDate() - DISCOVERY_TIMEFRAME_DAYS);
+
         const discovery = await Post.find({
             ...queryBase,
             author: { $nin: followingIds },
             $or: [
                 { likesCount: { $gt: 0 } },
                 { commentsCount: { $gt: 0 } },
-                { createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: cutoff } }
+                { createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: discoveryCutoff } },
             ]
         }).sort({ likesCount: -1, createdAt: -1 }).limit(100).lean();
-        
+
         // Merge without duplicates
         const postSet = new Set(posts.map(p => p._id.toString()));
         discovery.forEach(p => {
