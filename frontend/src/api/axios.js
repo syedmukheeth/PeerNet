@@ -1,9 +1,11 @@
 import axios from 'axios'
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
+const PRODUCTION_BACKEND = 'https://peernet-5u5q.onrender.com/api/v1';
+
 const BASE_URL = rawApiUrl 
     ? (rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : '/api/v1'; // This triggers Vercel Proxy in production
+    : (window.location.hostname.includes('vercel.app') ? PRODUCTION_BACKEND : '/api/v1'); 
 
 const rawChatApiUrl = import.meta.env.VITE_CHAT_API_URL;
 export const CHAT_BASE_URL = rawChatApiUrl 
