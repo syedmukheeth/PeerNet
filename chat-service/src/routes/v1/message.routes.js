@@ -8,6 +8,9 @@ const { uploadMedia } = require('../../middleware/upload.middleware');
 // GET /api/v1/conversations
 router.get('/', authenticate, messageController.getConversations);
 
+// GET /api/v1/conversations/unread-count
+router.get('/unread-count', authenticate, messageController.getUnreadCount);
+
 // POST /api/v1/conversations  (create or get existing)
 router.post('/', authenticate, messageController.createOrGetConversation);
 

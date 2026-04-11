@@ -9,7 +9,7 @@ import {
     HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiUser
 } from 'react-icons/hi'
 import { useTheme } from '../context/ThemeContext'
-import api, { SOCKET_URL } from '../api/axios'
+import api, { SOCKET_URL, CHAT_BASE_URL } from '../api/axios'
 import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
 import logoImg from '../assets/logo.png'
@@ -62,12 +62,7 @@ export default function Layout() {
             api.get('/notifications?limit=1')
                 .then(({ data }) => {
                     const serverCount = data.unreadCount || 0
-                    if (serverCount > unreadRef.current) {
-                        // Server has MORE unread than we know about → bump badge (polling delivered it)
-                        setUnreadCount(serverCount)
-                        unreadRef.current = serverCount
-                    } else if (serverCount < unreadRef.current) {
-                        // They read on another tab/device
+                    if (serverCount !== unreadRef.current) {
                         setUnreadCount(serverCount)
                         unreadRef.current = serverCount
                     }
@@ -75,8 +70,27 @@ export default function Layout() {
                 .catch(() => { })
         }
 
-        syncNotifCount()                           // immediate
-        const poll = setInterval(syncNotifCount, 30_000)   // every 30s fallback
+        const syncMsgCount = () => {
+            // Use CHAT_BASE_URL from axios.js
+            api.get(`${CHAT_BASE_URL}/conversations/unread-count`)
+                .then(({ data }) => {
+                    const serverCount = data.count || 0
+                    if (serverCount !== msgRef.current) {
+                        setMsgCount(serverCount)
+                        msgRef.current = serverCount
+                    }
+                })
+                .catch(() => { })
+        }
+
+        syncNotifCount()
+        syncMsgCount()
+
+        const poll = setInterval(() => {
+            syncNotifCount()
+            syncMsgCount()
+        }, 30_000)
+
         return () => clearInterval(poll)
     }, [user])
 
@@ -198,11 +212,18 @@ export default function Layout() {
         })
 
         layoutSocket.on('connect', () => {
-            // Re-sync counts after reconnect (e.g. Render cold-start, tab wake)
+            // Re-sync notifications
             api.get('/notifications?limit=1').then(({ data }) => {
                 const c = data.unreadCount || 0
                 unreadRef.current = c
                 setUnreadCount(c)
+            }).catch(() => { })
+
+            // Re-sync messages via CHAT_BASE_URL (different microservice)
+            api.get(`${CHAT_BASE_URL}/conversations/unread-count`).then(({ data }) => {
+                const c = data.count || 0
+                msgRef.current = c
+                setMsgCount(c)
             }).catch(() => { })
         })
 

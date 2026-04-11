@@ -272,5 +272,29 @@ const getSmartReplies = async (conversationId) => {
     return generateChatSuggestions(messages.reverse());
 };
 
-module.exports = { getOrCreateConversation, getUserConversations, getMessages, sendMessage, editMessage, deleteMessage, getConversationById, markMessagesAsRead, getSmartReplies };
+const getTotalUnreadCount = async (userId) => {
+    // Count all messages where the user is NOT the sender AND the message is unread
+    // We also need to ensure the user is a participant in the conversation
+    const conversations = await Conversation.find({ participants: userId }).select('_id');
+    const conversationIds = conversations.map(c => c._id);
+
+    return Message.countDocuments({
+        conversation: { $in: conversationIds },
+        sender: { $ne: userId },
+        isRead: false
+    });
+};
+
+module.exports = { 
+    getOrCreateConversation, 
+    getUserConversations, 
+    getMessages, 
+    sendMessage, 
+    editMessage, 
+    deleteMessage, 
+    getConversationById, 
+    markMessagesAsRead, 
+    getSmartReplies,
+    getTotalUnreadCount
+};
 

@@ -118,6 +118,13 @@ const getSuggestions = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+const getUnreadCount = async (req, res, next) => {
+    try {
+        const count = await messageService.getTotalUnreadCount(req.user._id);
+        res.json({ success: true, count });
+    } catch (err) { next(err); }
+};
+
 module.exports = {
     getConversations,
     createOrGetConversation,
@@ -127,4 +134,5 @@ module.exports = {
     deleteMessage,
     markAsRead,
     getSuggestions,
+    getUnreadCount,
 };
