@@ -143,6 +143,7 @@ const hydrateFeed = async (userId) => {
  * Reuses the same ranking logic as hydrateFeed but returns documents immediately.
  */
 const _getDirectFeed = async (userId, limit, cursor) => {
+    let tier = 'following';
     // 1. Get authors (Following + Self)
     const followRelations = await Follower.find({ follower: userId }).select('following').lean();
     const followingIds = followRelations.map(f => f.following);
@@ -152,7 +153,7 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
 
-    const queryBase = { isArchived: false };
+    const queryBase = { isArchived: { $ne: true } };
     if (cursor) queryBase.createdAt = { $lt: new Date(cursor) };
 
     // Initial pool: Following
@@ -162,8 +163,9 @@ const _getDirectFeed = async (userId, limit, cursor) => {
         createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: cutoff },
     }).lean();
 
-    // Discovery pool if needed
+    // Discovery pool: If we have less than the limit, fill with global content
     if (posts.length < limit) {
+        tier = 'discovery';
         const discovery = await Post.find({
             ...queryBase,
             author: { $nin: followingIds },
@@ -173,13 +175,29 @@ const _getDirectFeed = async (userId, limit, cursor) => {
                 { createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: cutoff } }
             ]
         }).sort({ likesCount: -1, createdAt: -1 }).limit(100).lean();
-        posts = [...posts, ...discovery];
+        
+        // Merge without duplicates
+        const postSet = new Set(posts.map(p => p._id.toString()));
+        discovery.forEach(p => {
+            if (!postSet.has(p._id.toString())) posts.push(p);
+        });
     }
 
-    // Desperation Fallback
-    if (posts.length === 0) {
-        posts = await Post.find(queryBase).sort({ createdAt: -1 }).limit(50).lean();
+    // Desperation Fallback: If still thin, pull absolute anything regardless of cutoff
+    if (posts.length < limit) {
+        tier = 'desperation';
+        const absoluteFallback = await Post.find(queryBase)
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .lean();
+            
+        const postSet = new Set(posts.map(p => p._id.toString()));
+        absoluteFallback.forEach(p => {
+            if (!postSet.has(p._id.toString())) posts.push(p);
+        });
     }
+
+    console.log(`[FEED_TIER] User: ${userId} Tier: ${tier} Count: ${posts.length}`);
 
     // 3. Simple Ranking & Personalization
     const user = await User.findById(userId).select('categoryAffinity').lean();
@@ -195,10 +213,10 @@ const _getDirectFeed = async (userId, limit, cursor) => {
             });
             score *= (1 + boost);
         }
-        return { ...p, score };
+        return { ...p, score, logicTier: tier };
     }).sort((a, b) => b.score - a.score);
 
-    // 4. Slicing (Limit-only here since Mongo handled cursor) and Enrich
+    // 4. Slicing
     const paginated = ranked.slice(0, limit);
     return _enrichPosts(paginated, userId);
 };

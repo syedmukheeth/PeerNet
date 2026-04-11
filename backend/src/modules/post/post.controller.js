@@ -9,6 +9,11 @@ const getFeed = async (req, res, next) => {
     try {
         const { limit, cursor } = parsePagination(req.query);
         const result = await feedService.getFeed(req.user._id, { limit, cursor });
+        
+        // Attach diagnostic tier header
+        const tier = result.data?.[0]?.logicTier || 'cache-zset';
+        res.setHeader('X-PeerNet-Feed-Tier', tier);
+        
         res.json({ success: true, ...result });
     } catch (err) { next(err); }
 };
