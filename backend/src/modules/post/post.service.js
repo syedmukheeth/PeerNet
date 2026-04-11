@@ -129,13 +129,6 @@ const likePost = async (postId, userId) => {
 
         const redis = getRedisOptional();
         if (redis) await redis.del(`post:${postId}`);
-        notificationService.createNotification({
-            recipient: post.author,
-            sender: userId,
-            type: 'like',
-            entityId: postId,
-            entityModel: 'Post',
-        }).catch(() => { });
         return { liked: true };
     } catch (err) {
         if (err.code === 11000) throw new ApiError(409, 'Already liked');

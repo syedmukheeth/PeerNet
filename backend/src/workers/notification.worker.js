@@ -12,6 +12,7 @@ const initNotificationWorker = async () => {
         await consumer.connect();
         await consumer.subscribe({ topic: 'post_events', fromBeginning: false });
         await consumer.subscribe({ topic: 'comment_events', fromBeginning: false });
+        await consumer.subscribe({ topic: 'dscroll_events', fromBeginning: false });
         await consumer.subscribe({ topic: 'user_events', fromBeginning: false });
 
         await consumer.run({
@@ -47,6 +48,36 @@ const initNotificationWorker = async () => {
                             type: 'comment',
                             entityId: payload.postId,
                             entityModel: 'Post',
+                        });
+                        break;
+
+                    case 'REPLY_ADDED':
+                        await notificationService.createNotification({
+                            recipient: payload.parentCommentAuthorId,
+                            sender: payload.authorId,
+                            type: 'reply',
+                            entityId: payload.commentId,
+                            entityModel: 'Comment',
+                        });
+                        break;
+
+                    case 'COMMENT_LIKED':
+                        await notificationService.createNotification({
+                            recipient: payload.authorId,
+                            sender: payload.userId,
+                            type: 'like',
+                            entityId: payload.commentId,
+                            entityModel: 'Comment',
+                        });
+                        break;
+
+                    case 'DSCROLL_LIKED':
+                        await notificationService.createNotification({
+                            recipient: payload.authorId,
+                            sender: payload.userId,
+                            type: 'like',
+                            entityId: payload.dscrollId,
+                            entityModel: 'Dscroll',
                         });
                         break;
 
