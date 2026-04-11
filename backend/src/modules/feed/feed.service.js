@@ -85,13 +85,12 @@ const hydrateFeed = async (userId) => {
     if (posts.length < 10) {
         const discoveryPosts = await Post.find({
             author: { $nin: followingIds }, // Don't duplicate Following/Self
-            createdAt: { $gt: cutoff },
             isArchived: false,
-            // Fallback to any post if platform is young, otherwise prioritize engagement
+            // Prioritize recent/engagement, but allow older posts if platform is young
             $or: [
                 { likesCount: { $gt: 0 } },
                 { commentsCount: { $gt: 0 } },
-                { createdAt: { $gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } // Or very fresh (last 7 days)
+                { createdAt: { $gt: cutoff } } // Last 30 days
             ]
         })
         .sort({ likesCount: -1, createdAt: -1 })

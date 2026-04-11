@@ -7,9 +7,12 @@ import ThemeToggle from '../components/ThemeToggle'
 import logo from '../assets/logo.png'
 import { GoogleLogin } from '@react-oauth/google'
 
+import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
+
 export default function Register() {
     const [form, setForm] = useState({ username: '', email: '', fullName: '', password: '' })
     const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const { register, loginGoogle, loginGuest } = useAuth()
     const navigate = useNavigate()
 
@@ -79,8 +82,42 @@ export default function Register() {
                     {fields.map(({ k, label, placeholder, type }) => (
                         <div key={k} className="input-group">
                             <label>{label}</label>
-                            <input className="input" type={type} placeholder={placeholder}
-                                value={form[k]} onChange={set(k)} required />
+                            {k === 'password' ? (
+                                <div className="password-input-wrap" style={{ position: 'relative' }}>
+                                    <input 
+                                        className="input" 
+                                        type={showPassword ? 'text' : 'password'} 
+                                        placeholder={placeholder}
+                                        style={{ paddingRight: '45px' }}
+                                        value={form[k]} 
+                                        onChange={set(k)} 
+                                        required 
+                                    />
+                                    <button
+                                        type="button"
+                                        className="password-toggle"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            color: 'var(--text-muted)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '5px'
+                                        }}
+                                    >
+                                        {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
+                                    </button>
+                                </div>
+                            ) : (
+                                <input className="input" type={type} placeholder={placeholder}
+                                    value={form[k]} onChange={set(k)} required />
+                            )}
                         </div>
                     ))}
                     <motion.button className="btn btn-primary w-full" type="submit"
