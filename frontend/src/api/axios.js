@@ -3,7 +3,7 @@ import axios from 'axios'
 const rawApiUrl = import.meta.env.VITE_API_URL;
 const BASE_URL = rawApiUrl 
     ? (rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : '/api/v1';
+    : '/api/v1'; // This triggers Vercel Proxy in production
 
 const rawChatApiUrl = import.meta.env.VITE_CHAT_API_URL;
 export const CHAT_BASE_URL = rawChatApiUrl 

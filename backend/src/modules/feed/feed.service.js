@@ -100,6 +100,14 @@ const hydrateFeed = async (userId) => {
         posts = [...posts, ...discoveryPosts];
     }
 
+    // 5. Desperation Fallback: If still empty (e.g. cluster is very old), pull absolute latest
+    if (posts.length === 0) {
+        posts = await Post.find({ isArchived: false })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .lean();
+    }
+
     // 4. Rank posts using Min-Heap to find top K
     const heap = new MinHeap(MAX_FEED_SIZE);
     posts.forEach(p => {
