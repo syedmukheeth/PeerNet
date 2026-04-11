@@ -69,10 +69,26 @@ export const AuthProvider = ({ children }) => {
         _setUser(null)
     }
 
+    const loginGoogle = async (token) => {
+        const { data } = await api.post('/auth/google', { token })
+        localStorage.setItem('accessToken', data.data.accessToken)
+        localStorage.setItem('refreshToken', data.data.refreshToken)
+        _setUser(data.data.user)
+        return data.data.user
+    }
+
+    const loginGuest = async () => {
+        const { data } = await api.post('/auth/guest')
+        localStorage.setItem('accessToken', data.data.accessToken)
+        localStorage.setItem('refreshToken', data.data.refreshToken)
+        _setUser(data.data.user)
+        return data.data.user
+    }
+
     const updateUser = (updates) => _setUser({ ...user, ...updates })
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, fetchMe, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, fetchMe, updateUser, loginGoogle, loginGuest }}>
             {children}
         </AuthContext.Provider>
     )

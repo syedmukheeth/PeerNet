@@ -130,4 +130,73 @@ const logout = async (refreshToken) => {
     }
 };
 
-module.exports = { register, login, refresh, logout };
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const googleLogin = async (token) => {
+    const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+
+    let user = await User.findOne({ email }).select('+passwordHash');
+    if (!user) {
+        const usernameBase = email.split('@')[0].replace(/[^a-zA-Z0-9_.]/g, '');
+        let username = usernameBase;
+        // Ensure username is unique
+        let count = 1;
+        while (await User.exists({ username })) {
+            username = `${usernameBase}${count}`;
+            count++;
+        }
+        
+        // Generate a random secure password for the google user to satisfy the schema
+        const randomPassword = require('crypto').randomBytes(16).toString('hex');
+        const passwordHash = await User.hashPassword(randomPassword);
+
+        user = await User.create({
+            email,
+            username,
+            fullName: name || username,
+            avatarUrl: picture,
+            passwordHash,
+            isVerified: true
+        });
+    }
+
+    const accessToken = signAccessToken({ userId: user._id, role: user.role });
+    const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
+    await _setToken(jti, '0');
+
+    const userObj = user.toJSON();
+    // In case passwordHash is still there (though toJSON removes it)
+    delete userObj.passwordHash;
+    return { user: userObj, accessToken, refreshToken };
+};
+
+const guestLogin = async () => {
+    let user = await User.findOne({ username: 'guest' }).select('+passwordHash');
+    if (!user) {
+        const randomPassword = require('crypto').randomBytes(16).toString('hex');
+        const passwordHash = await User.hashPassword(randomPassword);
+        user = await User.create({
+            username: 'guest',
+            email: 'guest@peernet.app',
+            fullName: 'Guest User',
+            passwordHash,
+            bio: 'This is a temporary guest account.'
+        });
+    }
+
+    const accessToken = signAccessToken({ userId: user._id, role: user.role });
+    const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
+    await _setToken(jti, '0');
+
+    const userObj = user.toJSON();
+    delete userObj.passwordHash;
+    return { user: userObj, accessToken, refreshToken };
+};
+
+module.exports = { register, login, refresh, logout, googleLogin, guestLogin };

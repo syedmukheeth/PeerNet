@@ -5,11 +5,12 @@ import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
 import logo from '../assets/logo.png'
+import { GoogleLogin } from '@react-oauth/google'
 
 export default function Register() {
     const [form, setForm] = useState({ username: '', email: '', fullName: '', password: '' })
     const [loading, setLoading] = useState(false)
-    const { register } = useAuth()
+    const { register, loginGoogle, loginGuest } = useAuth()
     const navigate = useNavigate()
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -23,6 +24,28 @@ export default function Register() {
             navigate('/')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Registration failed')
+        } finally { setLoading(false) }
+    }
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setLoading(true)
+        try {
+            await loginGoogle(credentialResponse.credential)
+            toast.success('Joined PeerNet with Google!')
+            navigate('/')
+        } catch (err) {
+            toast.error('Google registration failed')
+        } finally { setLoading(false) }
+    }
+
+    const handleGuestLogin = async () => {
+        setLoading(true)
+        try {
+            await loginGuest()
+            toast.success('Welcome, Guest!')
+            navigate('/')
+        } catch (err) {
+            toast.error('Guest login failed')
         } finally { setLoading(false) }
     }
 
@@ -68,6 +91,32 @@ export default function Register() {
                         {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Create Account'}
                     </motion.button>
                 </form>
+
+                <div className="auth-divider">
+                    <span>OR</span>
+                </div>
+
+                <div className="auth-social-wrap">
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => toast.error('Google registration failed')}
+                            theme="filled_black"
+                            shape="pill"
+                            width="100%"
+                        />
+                    </div>
+
+                    <motion.button
+                        className="btn btn-secondary w-full"
+                        onClick={handleGuestLogin}
+                        disabled={loading}
+                        style={{ height: 40, marginTop: 12, fontSize: '13px' }}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}>
+                        Try as Guest
+                    </motion.button>
+                </div>
 
                 <p className="auth-switch">
                     Already have an account? <Link to="/login">Sign in</Link>
