@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
+import EmojiPicker from 'emoji-picker-react';
 import {
     HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
     HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
@@ -28,9 +29,11 @@ export default function PostDetail() {
     const [replyingTo, setReplyingTo] = useState(null)
     const [replyData, setReplyData] = useState({}) // { commentId: { replies: [], loading: false, show: false } }
     const [isScanning, setIsScanning] = useState(false)
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const inputRef = useRef()
     const menuRef = useRef()
     const commentsEndRef = useRef()
+    const emojiRef = useRef()
 
     useEffect(() => {
         Promise.all([
@@ -53,6 +56,14 @@ export default function PostDetail() {
         document.addEventListener('mousedown', h)
         return () => document.removeEventListener('mousedown', h)
     }, [menuOpen])
+
+    // Close emoji picker on outside click
+    useEffect(() => {
+        if (!showEmojiPicker) return
+        const h = (e) => { if (emojiRef.current && !emojiRef.current.contains(e.target)) setShowEmojiPicker(false) }
+        document.addEventListener('mousedown', h)
+        return () => document.removeEventListener('mousedown', h)
+    }, [showEmojiPicker])
 
     const handleLike = async () => {
         if (!user) { toast.error('Please sign in to like posts'); return navigate('/login'); }
@@ -345,9 +356,19 @@ export default function PostDetail() {
                             <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={handleLike} whileTap={{ scale: 0.85 }}>
                                 {liked ? <HiHeart style={{ fontSize: 24 }} /> : <HiOutlineHeart style={{ fontSize: 24 }} />}
                             </motion.button>
-                            <button className="post-action-btn" onClick={() => inputRef.current?.focus()}>
-                                <HiEmojiHappy style={{ fontSize: 22 }} />
-                            </button>
+                            <div style={{ position: 'relative' }} ref={emojiRef}>
+                                <button className="post-action-btn" onClick={() => setShowEmojiPicker(p => !p)}>
+                                    <HiEmojiHappy style={{ fontSize: 22 }} />
+                                </button>
+                                {showEmojiPicker && (
+                                    <div style={{ position: 'absolute', bottom: '100%', left: 0, zIndex: 100, marginBottom: 8 }}>
+                                        <EmojiPicker 
+                                            theme="dark"
+                                            onEmojiClick={(e) => setBody(prev => prev + e.emoji)}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                             <button className="post-action-btn" onClick={handleShare}>
                                 <HiShare style={{ fontSize: 22 }} />
                             </button>
