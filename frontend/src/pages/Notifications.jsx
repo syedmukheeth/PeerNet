@@ -178,18 +178,41 @@ function NotifRow({ n, index, onFollowBack }) {
                             Following
                         </span>
                     )
-                ) : n.entityId ? (
-                    <Link to={(n.entityModel === 'Post' || n.entityModel === 'Dscroll') ? `/posts/${n.entityId._id || n.entityId}` : '#'}>
-                        <img
-                            src={n.entityId.mediaUrl || n.entityId.videoUrl || n.entityId.thumbnailUrl}
-                            alt=""
-                            style={{
-                                width: 44, height: 44, borderRadius: 8,
-                                objectFit: 'cover', display: 'block',
-                                border: '1px solid var(--border)',
-                            }}
-                        />
+                ) : (n.entityId && typeof n.entityId === 'object') ? (
+                    <Link to={(n.entityModel === 'Post' || n.entityModel === 'Dscroll') ? `/posts/${n.entityId._id}` : '#'}>
+                        <div style={{
+                            width: 44, height: 44, borderRadius: 8,
+                            overflow: 'hidden', border: '1px solid var(--border)',
+                            background: 'var(--hover)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            <img
+                                src={n.entityId.mediaUrl || n.entityId.videoUrl || n.entityId.thumbnailUrl}
+                                alt=""
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'block';
+                                }}
+                                style={{
+                                    width: '100%', height: '100%',
+                                    objectFit: 'cover', display: 'block',
+                                }}
+                            />
+                            <div style={{ display: 'none', color: 'var(--text-3)', fontSize: 18 }}>
+                                {n.type === 'like' ? '❤️' : '💬'}
+                            </div>
+                        </div>
                     </Link>
+                ) : n.entityId ? (
+                    /* If entityId is still a string (unpopulated), show a subtle fallback icon */
+                    <div style={{
+                        width: 44, height: 44, borderRadius: 8,
+                        background: 'var(--hover)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: 'var(--text-3)', fontSize: 18, border: '1px solid var(--border)'
+                    }}>
+                        {n.type === 'like' ? '❤️' : '💬'}
+                    </div>
                 ) : null}
             </div>
         </motion.div>

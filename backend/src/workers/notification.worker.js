@@ -31,15 +31,25 @@ const initNotificationWorker = async () => {
 
             try {
                 switch (type) {
-                    case 'POST_LIKED':
+                    case 'POST_LIKED': {
+                        const { authorId, userId, postId } = payload;
+                        if (!authorId || !userId || !postId) {
+                            logger.warn(`NotificationWorker: Missing data for POST_LIKED: ${JSON.stringify(payload)}`);
+                            break;
+                        }
+                        if (authorId.toString() === userId.toString()) {
+                            logger.debug(`NotificationWorker: Skipping self-like for post ${postId}`);
+                            break;
+                        }
                         await notificationService.createNotification({
-                            recipient: payload.authorId,
-                            sender: payload.userId,
+                            recipient: authorId,
+                            sender: userId,
                             type: 'like',
-                            entityId: payload.postId,
+                            entityId: postId,
                             entityModel: 'Post',
                         });
                         break;
+                    }
                     
                     case 'COMMENT_ADDED':
                         await notificationService.createNotification({
