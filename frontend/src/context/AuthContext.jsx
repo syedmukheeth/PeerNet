@@ -44,25 +44,25 @@ export const AuthProvider = ({ children }) => {
     }, [fetchMe])
 
     const login = async (identifier, password) => {
-        const { data } = await api.post('/auth/login', { email: identifier, password })
+        // withCredentials ensures the browser stores the httpOnly refreshToken cookie
+        const { data } = await api.post('/auth/login', { email: identifier, password }, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        localStorage.setItem('refreshToken', data.data.refreshToken)
+        // Note: refreshToken is in an httpOnly cookie — never in response body
         _setUser(data.data.user)
         return data.data.user
     }
 
     const register = async (payload) => {
-        const { data } = await api.post('/auth/register', payload)
+        const { data } = await api.post('/auth/register', payload, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        localStorage.setItem('refreshToken', data.data.refreshToken)
+        // Note: refreshToken is in an httpOnly cookie — never in response body
         _setUser(data.data.user)
         return data.data.user
     }
 
     const logout = async () => {
         try {
-            const rt = localStorage.getItem('refreshToken')
-            await api.post('/auth/logout', { refreshToken: rt })
+            await api.post('/auth/logout', {}, { withCredentials: true })
         } catch { /* ignore */ }
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
@@ -70,17 +70,17 @@ export const AuthProvider = ({ children }) => {
     }
 
     const loginGoogle = async (token) => {
-        const { data } = await api.post('/auth/google', { token })
+        const { data } = await api.post('/auth/google', { token }, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        localStorage.setItem('refreshToken', data.data.refreshToken)
+        // Note: refreshToken is in an httpOnly cookie — never in response body
         _setUser(data.data.user)
         return data.data.user
     }
 
     const loginGuest = async () => {
-        const { data } = await api.post('/auth/guest')
+        const { data } = await api.post('/auth/guest', {}, { withCredentials: true })
         localStorage.setItem('accessToken', data.data.accessToken)
-        localStorage.setItem('refreshToken', data.data.refreshToken)
+        // Note: refreshToken is in an httpOnly cookie — never in response body
         _setUser(data.data.user)
         return data.data.user
     }
