@@ -1,16 +1,24 @@
 import axios from 'axios'
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
-const PRODUCTION_BACKEND = 'https://peernet-5u5q.onrender.com/api/v1';
+const rawChatApiUrl = import.meta.env.VITE_CHAT_API_URL;
+
+// Active production server detected from your Socket logs: peernet-5mtc
+const PRODUCTION_BACKEND_FALLBACK = 'https://peernet-5mtc.onrender.com/api/v1';
+
+// Auto-inference from CHAT URL if main API URL is missing but CHAT is defined
+const fallback = rawChatApiUrl 
+    ? (rawChatApiUrl.endsWith('/api/v1') ? rawChatApiUrl : `${rawChatApiUrl.replace(/\/+$/, '')}/api/v1`)
+    : PRODUCTION_BACKEND_FALLBACK;
 
 const BASE_URL = rawApiUrl 
     ? (rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : (window.location.hostname.includes('vercel.app') ? PRODUCTION_BACKEND : '/api/v1'); 
+    : (window.location.hostname.includes('vercel.app') ? fallback : '/api/v1'); 
 
-const rawChatApiUrl = import.meta.env.VITE_CHAT_API_URL;
 export const CHAT_BASE_URL = rawChatApiUrl 
     ? (rawChatApiUrl.endsWith('/api/v1') ? rawChatApiUrl : `${rawChatApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : 'http://localhost:3001/api/v1';
+    : (window.location.hostname.includes('vercel.app') ? fallback : 'http://localhost:3001/api/v1');
+
 
 export const SOCKET_URL = import.meta.env.VITE_CHAT_API_URL
     ? import.meta.env.VITE_CHAT_API_URL.replace(/\/api\/v1\/?$/, '')
