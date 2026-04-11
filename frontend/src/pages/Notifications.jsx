@@ -178,10 +178,10 @@ function NotifRow({ n, index, onFollowBack }) {
                             Following
                         </span>
                     )
-                ) : n.post?.mediaUrl ? (
-                    <Link to={n.post?._id ? `/posts/${n.post._id}` : '#'}>
+                ) : n.entityId ? (
+                    <Link to={(n.entityModel === 'Post' || n.entityModel === 'Dscroll') ? `/posts/${n.entityId._id || n.entityId}` : '#'}>
                         <img
-                            src={n.post.mediaUrl}
+                            src={n.entityId.mediaUrl || n.entityId.videoUrl || n.entityId.thumbnailUrl}
                             alt=""
                             style={{
                                 width: 44, height: 44, borderRadius: 8,

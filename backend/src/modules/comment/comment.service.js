@@ -2,14 +2,23 @@
 
 const Comment = require('./Comment');
 const Post = require('../post/Post');
+const Dscroll = require('../dscroll/Dscroll');
 const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
 const { publishEvent } = require('../../config/kafka');
 const { checkToxicity } = require('../../config/ai.config');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
-    const post = await Post.findById(postId);
-    if (!post) throw new ApiError(404, 'Post not found');
+    // Try Post first
+    let post = await Post.findById(postId);
+    let targetModel = 'Post';
+
+    if (!post) {
+        post = await Dscroll.findById(postId);
+        targetModel = 'Dscroll';
+    }
+
+    if (!post) throw new ApiError(404, 'Post or Video not found');
 
     // AI Toxicity Check
     const toxicityScore = await checkToxicity(body);
@@ -25,7 +34,13 @@ const addComment = async (postId, userId, { body, parentComment }) => {
         isAiVerified: true,
         toxicityScore
     });
-    await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
+
+    // Update count on the correct model
+    if (targetModel === 'Post') {
+        await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
+    } else {
+        await Dscroll.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
+    }
 
     // Notify via Event Bus
     if (parentComment) {
@@ -92,7 +107,12 @@ const deleteComment = async (commentId, userId) => {
     }
 
     await comment.deleteOne();
-    await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
+    
+    // Update count on correct model (Post or Dscroll)
+    const postUpdated = await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
+    if (!postUpdated) {
+        await Dscroll.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
+    }
 
     // Notify via Event Bus
     publishEvent('comment_events', 'COMMENT_DELETED', {
