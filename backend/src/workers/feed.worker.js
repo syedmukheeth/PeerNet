@@ -3,6 +3,7 @@
 const { kafka } = require('../config/kafka');
 const { fanoutPost, updatePostScore } = require('../modules/feed/feed.fanout');
 const Post = require('../modules/post/Post');
+const User = require('../modules/user/User');
 const { getRedisOptional } = require('../config/redis');
 const logger = require('../config/logger');
 
@@ -41,6 +42,16 @@ const initFeedWorker = async () => {
                         const post = await Post.findById(payload.postId);
                         if (post) {
                             await updatePostScore(post);
+                            
+                            // Behavioral Personalization: Update User Category Affinity
+                            if (type === 'POST_LIKED' && post.tags && post.tags.length > 0) {
+                                const update = {};
+                                post.tags.forEach(tag => {
+                                    update[`categoryAffinity.${tag}`] = 1;
+                                });
+                                await User.findByIdAndUpdate(payload.userId, { $inc: update });
+                            }
+
                             // Invalidate individual post cache
                             if (redis) await redis.del(`post:${payload.postId}`);
                         }

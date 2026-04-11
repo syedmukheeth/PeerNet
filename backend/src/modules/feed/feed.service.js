@@ -66,7 +66,11 @@ const hydrateFeed = async (userId) => {
     const followingIds = followRelations.map(f => f.following);
     followingIds.push(userId); // Include self
 
-    // 2. Fetch recent posts from authors
+    // 2. Fetch User Category Affinities for Personalization
+    const user = await User.findById(userId).select('categoryAffinity').lean();
+    const affinity = user?.categoryAffinity || new Map();
+
+    // 3. Fetch recent posts from authors
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - HYDRATE_TIMEFRAME_DAYS);
 
@@ -76,10 +80,21 @@ const hydrateFeed = async (userId) => {
         isArchived: false
     }).lean();
 
-    // 3. Rank posts using Min-Heap to find top K
+    // 4. Rank posts using Min-Heap to find top K
     const heap = new MinHeap(MAX_FEED_SIZE);
     posts.forEach(p => {
-        const score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
+        let score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
+        
+        // Personalization Boost: If post tags match high-affinity categories
+        if (p.tags && p.tags.length > 0) {
+            let boost = 0;
+            p.tags.forEach(tag => {
+                const weight = affinity.get ? affinity.get(tag) : affinity[tag];
+                if (weight) boost += Math.log1p(weight); // Logarithmic growth to prevent saturation
+            });
+            score *= (1 + boost);
+        }
+        
         heap.push({ id: p._id.toString(), score });
     });
 

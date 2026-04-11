@@ -5,13 +5,14 @@ const Dscroll = require('./Dscroll');
 const Like = require('../post/Like');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
+const User = require('../user/User');
 const { getRedisOptional } = require('../../config/redis');
+const logger = require('../../config/logger');
 
 const createDscroll = async (userId, { caption, tags }, file) => {
     if (!file) throw new ApiError(400, 'Video file is required');
 
-    console.log('[DscrollService] createDscroll start');
-    console.log('[DscrollService] file:', { path: file.path, mimetype: file.mimetype, size: file.size, originalname: file.originalname });
+    if (!file) throw new ApiError(400, 'Video file is required');
 
     let uploadResult;
     try {
@@ -19,9 +20,9 @@ const createDscroll = async (userId, { caption, tags }, file) => {
             folder: 'peernet/dscrolls',
             resource_type: 'video',
         });
-        console.log('[DscrollService] Cloudinary upload success:', uploadResult.secure_url);
+        logger.info(`DscrollService: Cloudinary upload success - ${uploadResult.secure_url}`);
     } catch (cloudErr) {
-        console.error('[DscrollService] Cloudinary upload FAILED:', cloudErr.message);
+        logger.error(`DscrollService: Cloudinary upload FAILED - ${cloudErr.message}`);
         throw cloudErr;
     }
 
@@ -42,7 +43,6 @@ const createDscroll = async (userId, { caption, tags }, file) => {
         tags: parsedTags,
     });
 
-    const User = require('../user/User');
     await User.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } });
 
     const redis = getRedisOptional();
@@ -51,7 +51,7 @@ const createDscroll = async (userId, { caption, tags }, file) => {
             const keys = await redis.keys(`feed:${userId}:cursor:*`);
             if (keys.length) await redis.del(keys);
         } catch (e) {
-            console.error('Failed to clear feed cache on new dscroll', e);
+            logger.error(`DscrollService: Failed to clear feed cache - ${e.message}`);
         }
     }
 

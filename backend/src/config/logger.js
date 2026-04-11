@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
+const { getRequestId } = require('../middleware/tracing.middleware');
 
 const { combine, timestamp, errors, json, colorize, printf } = winston.format;
 
@@ -16,14 +17,24 @@ const devFormat = combine(
     colorize(),
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     errors({ stack: true }),
-    printf(({ level, message, timestamp, stack }) =>
-        stack
-            ? `[${timestamp}] ${level}: ${message}\n${stack}`
-            : `[${timestamp}] ${level}: ${message}`,
-    ),
+    printf(({ level, message, timestamp, stack }) => {
+        const requestId = getRequestId();
+        const trace = requestId ? ` [${requestId}]` : '';
+        return stack
+            ? `[${timestamp}]${trace} ${level}: ${message}\n${stack}`
+            : `[${timestamp}]${trace} ${level}: ${message}`;
+    }),
 );
 
-const prodFormat = combine(timestamp(), errors({ stack: true }), json());
+const prodFormat = combine(
+    timestamp(),
+    errors({ stack: true }),
+    printf((info) => {
+        const requestId = getRequestId();
+        if (requestId) info.requestId = requestId;
+        return JSON.stringify(info);
+    }),
+);
 
 // ── Transports ────────────────────────────────────────────────────────────────
 const transports = [

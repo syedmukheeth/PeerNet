@@ -1,13 +1,14 @@
 'use strict';
 
 const chatService = require('./chat.service');
+const logger = require('../../config/logger');
 
 module.exports = (io, socket) => {
     
     // Join a specific chat room
     socket.on('join_room', (conversationId) => {
         socket.join(conversationId);
-        console.log(`User ${socket.user.id} joined room: ${conversationId}`);
+        logger.info(`User ${socket.user.id} joined room: ${conversationId}`);
     });
 
     // Leave a specific chat room

@@ -8,6 +8,7 @@ const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudi
 const { getRedisOptional } = require('../../config/redis');
 const ApiError = require('../../utils/ApiError');
 const { publishEvent } = require('../../config/kafka');
+const { generateCaption } = require('../../config/ai.config');
 
 const POST_CACHE_TTL = 300; // 5 min
 
@@ -27,12 +28,18 @@ const createPost = async (userId, { caption, location, tags }, file) => {
             ? tags.split(',').map((t) => t.trim()).filter(Boolean)
             : [];
 
+    // AI Auto-Captioning
+    let finalCaption = caption;
+    if (!finalCaption && !isVideo) { // Gemini Vision works best with images
+        finalCaption = await generateCaption(file.path, file.mimetype);
+    }
+
     const post = await Post.create({
         author: userId,
         mediaUrl: secure_url,
         mediaPublicId: public_id,
         mediaType: isVideo ? 'video' : 'image',
-        caption,
+        caption: finalCaption,
         location,
         tags: parsedTags,
     });
