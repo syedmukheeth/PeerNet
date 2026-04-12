@@ -3132,3 +3132,67 @@ textarea::placeholder {
   flex-wrap: wrap;
 }
 
+/* ──────────────────────────────────────────────────────────
+   POST DETAIL SPLIT-VIEW LAYOUT (Instagram style)
+────────────────────────────────────────────────────────── */
+.post-detail-card {
+  display: flex;
+  flex-direction: row;
+  max-height: calc(100vh - 140px);
+  min-height: 450px;
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+[data-theme="light"] .post-detail-card {
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.post-detail-media {
+  flex: 1 1 auto;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0; 
+}
+
+.post-detail-media img,
+.post-detail-media video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.post-detail-info {
+  flex: 0 0 350px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border-md);
+  background: var(--surface);
+}
+
+@media (max-width: 800px) {
+  .post-detail-card {
+    flex-direction: column;
+    max-height: none;
+    min-height: 0;
+  }
+  
+  .post-detail-media {
+    max-height: 70vh;
+    flex: unset;
+  }
+  
+  .post-detail-info {
+    flex: unset;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border-md);
+  }
+}
+
