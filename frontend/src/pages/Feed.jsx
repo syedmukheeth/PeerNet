@@ -74,7 +74,7 @@ function RightPanel() {
                         </span>
                         {user?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14, flexShrink: 0 }} />}
                     </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, marginTop: 1, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {user?.fullName || 'PeerNet user'}
                     </div>
                 </div>
@@ -153,11 +153,10 @@ function RightPanel() {
             <div style={{ paddingLeft: 18, paddingRight: 18, marginTop: 4 }}>
                 <div style={{ 
                     borderTop: '1px solid var(--border)', 
-                    paddingTop: 14,
+                    paddingTop: 16,
                     display: 'flex', 
                     flexDirection: 'column', 
-                    gap: 5,
-                    opacity: 0.6
+                    gap: 6,
                 }}>
                     <a
                         href="https://www.linkedin.com/in/syedmukheeth"
@@ -165,10 +164,12 @@ function RightPanel() {
                         rel="noopener noreferrer"
                         style={{
                             display: 'inline-flex', alignItems: 'center', gap: 6,
-                            fontSize: 12, color: 'var(--accent)', fontWeight: 600,
-                            textDecoration: 'none',
-                        }}>
-                        <FaLinkedin style={{ fontSize: 13 }} />
+                            fontSize: 12.5, color: 'var(--accent)', fontWeight: 800,
+                            textDecoration: 'none', transition: 'filter 0.2s',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.2)'}
+                        onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
+                        <FaLinkedin style={{ fontSize: 13, color: '#0A66C2' }} />
                         Syed Mukheeth
                     </a>
                     <p style={{ fontSize: 10.5, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>

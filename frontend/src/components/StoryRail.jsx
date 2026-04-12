@@ -161,7 +161,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                         <div style={{ display: 'flex', gap: 8 }}>
                             {/* Pause / Play */}
                             <button onClick={togglePause}
-                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {paused
                                     ? <HiPlay style={{ color: '#fff', fontSize: 16 }} />
                                     : <HiPause style={{ color: '#fff', fontSize: 16 }} />
@@ -170,13 +170,13 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
                             {/* Three-dots menu */}
                             <button onClick={() => setMenuOpen(o => !o)}
-                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <HiDotsVertical style={{ color: '#fff', fontSize: 18 }} />
                             </button>
 
                             {/* Close */}
                             <button onClick={onClose}
-                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <HiX style={{ color: '#fff', fontSize: 18 }} />
                             </button>
                         </div>
@@ -189,7 +189,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                         <motion.div
                             style={{
                                 position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20,
-                                background: 'rgba(15,15,20,0.92)', backdropFilter: 'blur(24px)',
+                                background: 'rgba(10,10,12,0.98)',
                                 borderTop: '1px solid rgba(255,255,255,0.1)',
                                 borderRadius: '20px 20px 0 0', padding: '8px 0 28px',
                             }}

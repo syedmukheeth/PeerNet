@@ -107,8 +107,7 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
                                 onClick={() => { setFile(null); setPreview(null) }}
                                 style={{
                                     position: 'absolute', top: 10, right: 10,
-                                    background: 'rgba(0,0,0,0.5)', color: '#fff',
-                                    backdropFilter: 'blur(8px)',
+                                    background: 'rgba(0,0,0,0.7)', color: '#fff',
                                     border: '1px solid rgba(255,255,255,0.2)',
                                 }}>
                                 Change

@@ -572,7 +572,6 @@ export default function PostDetail() {
                                                             fontWeight: 600,
                                                             cursor: 'pointer',
                                                             boxShadow: 'var(--shadow-sm)',
-                                                            backdropFilter: 'blur(10px)',
                                                         }}
                                                         whileHover={{ background: 'var(--hover)', color: 'var(--text-1)', scale: 1.02 }}
                                                         whileTap={{ scale: 0.98 }}

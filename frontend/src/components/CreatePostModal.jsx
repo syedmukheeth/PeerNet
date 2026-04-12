@@ -72,8 +72,15 @@ export default function CreatePostModal({ onClose }) {
                 exit={{ opacity: 0, y: 20, scale: 0.97 }}
                 transition={{ duration: 0.22, ease: 'easeOut' }}
                 onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <h2 className="t-heading" style={{ fontSize: 17 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                    <h2 style={{ 
+                        fontSize: 20, 
+                        fontWeight: 800, 
+                        background: 'var(--logo-gradient)', 
+                        WebkitBackgroundClip: 'text', 
+                        WebkitTextFillColor: 'transparent',
+                        fontFamily: 'Syne, Inter, sans-serif'
+                    }}>
                         {isVideo ? '🎬 New Dscroll' : '📸 New Post'}
                     </h2>
                     <motion.button className="btn btn-ghost btn-icon-sm" onClick={onClose} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -129,10 +136,17 @@ export default function CreatePostModal({ onClose }) {
                     rows={3} style={{ marginTop: 4, resize: 'none' }} />
 
                 <motion.button className="btn btn-primary w-full"
-                    style={{ marginTop: 14, height: 46 }}
+                    style={{ 
+                        marginTop: 20, 
+                        height: 52, 
+                        fontSize: 15, 
+                        fontWeight: 700,
+                        boxShadow: '0 8px 24px var(--accent-ring)'
+                    }}
                     onClick={handleSubmit}
                     disabled={loading || !file}
-                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    whileHover={{ scale: 1.01, boxShadow: '0 12px 32px var(--accent-ring)' }} 
+                    whileTap={{ scale: 0.98 }}>
                     {loading
                         ? <><span className="spinner" style={{ width: 18, height: 18 }} />&nbsp;Uploading...</>
                         : isVideo ? '🎬 Share Dscroll' : '✅ Share Post'

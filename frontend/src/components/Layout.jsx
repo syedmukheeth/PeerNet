@@ -191,7 +191,7 @@ export default function Layout() {
             style: {
                 background: 'var(--surface)', color: 'var(--text-1)',
                 border: '1px solid var(--border-md)', borderRadius: 16,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.25)', backdropFilter: 'blur(20px)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
                 padding: '12px 16px', maxWidth: 340,
             },
         })
@@ -227,7 +227,7 @@ export default function Layout() {
             style: {
                 background: 'var(--surface)', color: 'var(--text-1)',
                 border: '1px solid var(--border-md)', borderRadius: 16,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.25)', backdropFilter: 'blur(20px)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
                 padding: '12px 16px', maxWidth: 340,
             },
         })

@@ -222,7 +222,7 @@ function DscrollItem({ dscroll, isActive }) {
                         transition={{ duration: 0.15 }}
                     >
                         <div style={{
-                            width: 60, height: 60, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
+                            width: 60, height: 60, borderRadius: '50%', background: 'rgba(0,0,0,0.8)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fff', paddingLeft: 4,
                         }}>▶</div>
                     </motion.div>
@@ -359,7 +359,7 @@ export default function Dscrolls() {
                     onClick={() => navigate(-1)}
                     style={{
                         position: 'absolute', top: 16, left: 16, zIndex: 220,
-                        background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                        background: 'rgba(0,0,0,0.7)',
                         border: 'none', borderRadius: '50%', width: 36, height: 36,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         cursor: 'pointer', color: '#fff', fontSize: 19,
@@ -371,7 +371,7 @@ export default function Dscrolls() {
                     onClick={() => { queryClient.invalidateQueries({ queryKey: ['dscrolls'] }) }}
                     style={{
                         position: 'absolute', top: 16, right: 16, zIndex: 220,
-                        background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(10px)',
+                        background: 'rgba(0,0,0,0.7)',
                         border: 'none', borderRadius: '50%', width: 36, height: 36,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         cursor: 'pointer', color: '#fff', fontSize: 19,

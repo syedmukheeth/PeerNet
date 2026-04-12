@@ -729,10 +729,8 @@ export default function Messages() {
                                             style={{
                                                 padding: '8px 16px', borderRadius: 18,
                                                 fontSize: 13, fontWeight: 600, color: 'var(--text-1)',
+                                                background: 'var(--hover)',
                                                 border: '1px solid var(--border-md)', cursor: 'pointer',
-                                                whiteSpace: 'nowrap', flexShrink: 0,
-                                                background: 'rgba(255,255,255,0.05)',
-                                                backdropFilter: 'blur(10px)'
                                             }}
                                             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                                             onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
