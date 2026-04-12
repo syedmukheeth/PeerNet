@@ -77,6 +77,18 @@ export default function Layout() {
         }
     }, [user])
 
+    // ── Global Badge Sync ────────────────────────────────────
+    // Expose a way for sub-pages to trigger a re-sync of counts
+    // after they mark items as read.
+    useEffect(() => {
+        const handleSync = () => {
+            console.log('[Layout] Manual sync triggered')
+            syncAllCounts()
+        }
+        window.addEventListener('peernet:sync-counts', handleSync)
+        return () => window.removeEventListener('peernet:sync-counts', handleSync)
+    }, [syncAllCounts])
+
     // ── Management: Polling + Visibility + Mount ───────────────────────────
     useEffect(() => {
         if (!user) return
@@ -235,16 +247,12 @@ export default function Layout() {
         }
     }, [socket, user, syncAllCounts])
 
-    // ── Clear badges when actually ON the relevant page ────
+    // ── Sidebar Highlighting Only ──
     useEffect(() => {
-        if (location.pathname === '/notifications') {
-            setUnreadCount(0)
-            unreadRef.current = 0
-        }
-        if (location.pathname.startsWith('/messages')) {
-            setMsgCount(0)
-            msgRef.current = 0
-        }
+        // We no longer nuke badges here. 
+        // Badges are now server-consistent. 
+        // We only clear them if the user is on the page AND we've successfully 
+        // told the server to mark them as read (handled in Notifications.jsx and Messages.jsx).
     }, [location.pathname])
 
     const handleNavClick = (to) => {

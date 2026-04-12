@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import api, { SOCKET_URL } from '../api/axios'
+import api from '../api/axios'
 import { Link } from 'react-router-dom'
 import { timeago } from '../utils/timeago'
-import { io } from 'socket.io-client'
+import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
 import {
     HiBell, HiHeart, HiChatAlt2, HiUserAdd, HiCheck, HiBadgeCheck, HiAtSymbol
 } from 'react-icons/hi'
-
-/* ── type config ─────────────────────────────────────────── */
 const typeConfig = {
     like: {
         icon: HiHeart,
@@ -249,12 +247,12 @@ function NotifSkeleton() {
 
 /* ── Main component ───────────────────────────────────────── */
 export default function Notifications() {
-    useAuth()
+    const { user } = useAuth()
     const [notifs, setNotifs] = useState([])
     const [unread, setUnread] = useState(0)
     const [loading, setLoading] = useState(true)
     const [hasNew, setHasNew] = useState(false)
-    const socketRef = useRef(null)
+    const socket = useSocket(user)
 
     const load = async () => {
         try {
@@ -267,41 +265,40 @@ export default function Notifications() {
 
     useEffect(() => {
         load()
-
-        // Real-time: subscribe to new_notification events
-        const token = localStorage.getItem('accessToken')
-        if (token) {
-            socketRef.current = io(SOCKET_URL, {
-                auth: { token },
-                path: '/socket.io',
-                transports: ['websocket', 'polling'],
-            })
-            socketRef.current.on('new_notification', (notif) => {
-                setNotifs(prev => [{ ...notif, isRead: false }, ...prev])
-                setUnread(u => u + 1)
-                setHasNew(true)
-            })
-        }
-
-        return () => {
-            socketRef.current?.disconnect()
-            socketRef.current = null
-        }
     }, [])
 
+    useEffect(() => {
+        if (!socket) return
+        
+        socket.on('new_notification', (notif) => {
+            setNotifs(prev => [{ ...notif, isRead: false }, ...prev])
+            setUnread(u => u + 1)
+            setHasNew(true)
+        })
+
+        return () => {
+            socket.off('new_notification')
+        }
+    }, [socket])
+
     const markRead = async () => {
-        await api.patch('/notifications/read').catch(() => { })
-        setUnread(0)
-        setNotifs(n => n.map(x => ({ ...x, isRead: true })))
-        setHasNew(false)
+        try {
+            await api.patch('/notifications/read')
+            setUnread(0)
+            setNotifs(n => n.map(x => ({ ...x, isRead: true })))
+            setHasNew(false)
+            // Tell the sidebar to refresh its badge count immediately
+            window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+        } catch (err) {
+            console.warn('Failed to mark notifications read:', err)
+        }
     }
 
-    // Auto-mark read when page opens after 1.5 seconds
+    // Auto-mark read when page opens
     useEffect(() => {
-        const t = setTimeout(() => {
-            if (unread > 0) markRead()
-        }, 1500)
-        return () => clearTimeout(t)
+        if (unread > 0) {
+            markRead()
+        }
     }, [unread])
 
     const groups = groupByTime(notifs)
