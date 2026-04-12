@@ -2,7 +2,11 @@
  * Lightweight timeago formatter — avoids CommonJS/ESM issues with timeago.js
  */
 export function timeago(date) {
-    const seconds = Math.floor((Date.now() - new Date(date)) / 1000)
+    if (!date) return ''
+    const d = new Date(date)
+    if (isNaN(d.getTime())) return '' // Invalid Date protection
+    
+    const seconds = Math.floor((Date.now() - d) / 1000)
     if (seconds < 60) return 'just now'
     const minutes = Math.floor(seconds / 60)
     if (minutes < 60) return `${minutes}m`
@@ -12,5 +16,5 @@ export function timeago(date) {
     if (days < 7) return `${days}d`
     const weeks = Math.floor(days / 7)
     if (weeks < 5) return `${weeks}w`
-    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
