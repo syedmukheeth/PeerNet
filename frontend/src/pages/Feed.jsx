@@ -74,7 +74,7 @@ function RightPanel() {
                         </span>
                         {user?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14, flexShrink: 0 }} />}
                     </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.8 }}>
+                    <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {user?.fullName || 'PeerNet user'}
                     </div>
                 </div>
