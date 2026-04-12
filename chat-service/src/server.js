@@ -16,8 +16,7 @@ const logger = require('./config/logger');
 const { initChatSocket } = require('./sockets/chat.socket');
 const { setIO } = require('./utils/socket.utils');
 
-// Prevent collision with the main backend (port 3000) defined in root .env
-const PORT = process.env.CHAT_PORT || 3001;
+const PORT = process.env.PORT || 3001;
 
 const bootstrap = async () => {
     // ── 1. Connect MongoDB BEFORE anything else ───────────────────────────────
@@ -39,10 +38,16 @@ const bootstrap = async () => {
     const httpServer = http.createServer(app);
 
     // ── 4. Attach Socket.io ───────────────────────────────────────────────────
-    const originsArray = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
+    const allowedOrigins = [
+        'https://peer-net-indol.vercel.app',
+        'https://peernet.vercel.app',
+        ...(process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean)
+    ];
+
     const io = new SocketServer(httpServer, {
         cors: {
-            origin: originsArray.length > 0 ? originsArray : "*",
+            origin: allowedOrigins.length > 0 ? allowedOrigins : "*",
+            methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
             credentials: true,
         },
     });
