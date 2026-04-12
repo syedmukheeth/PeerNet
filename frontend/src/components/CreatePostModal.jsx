@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
-import { motion } from 'framer-motion'
-import { HiX, HiPhotograph, HiVideoCamera, HiSparkles, HiPencilAlt } from 'react-icons/hi'
+import { motion, AnimatePresence } from 'framer-motion'
+import { HiX, HiPhotograph, HiVideoCamera, HiSparkles, HiPencilAlt, HiCheckCircle } from 'react-icons/hi'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -28,7 +28,7 @@ export default function CreatePostModal({ onClose }) {
     ]
 
     const generateAICaption = async () => {
-        if (!file || isVideo) return // Vision works better for static images
+        if (!file || isVideo) return 
         setGeneratingAI(true)
         try {
             const fd = new FormData()
@@ -69,7 +69,6 @@ export default function CreatePostModal({ onClose }) {
                 await queryClient.invalidateQueries({ queryKey: ['feed'] })
                 onClose()
             } else {
-                // Robust video detection
                 const isVideoUpload =
                     file.type?.startsWith('video/') ||
                     /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(file.name || '') ||
@@ -108,204 +107,157 @@ export default function CreatePostModal({ onClose }) {
         : false
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <motion.div className="modal-card"
-                initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.97 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
-                onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <div style={{ display: 'flex', gap: 16 }}>
-                        <button 
-                            className={`btn-tab ${!isTextMode ? 'active' : ''}`}
-                            onClick={() => setIsTextMode(false)}
-                            style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: 6, 
-                                fontSize: 13, 
-                                fontWeight: 700,
-                                opacity: !isTextMode ? 1 : 0.5
-                            }}
-                        >
-                            <HiPhotograph /> MEDIA
-                        </button>
-                        <button 
-                            className={`btn-tab ${isTextMode ? 'active' : ''}`}
-                            onClick={() => setIsTextMode(true)}
-                            style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: 6, 
-                                fontSize: 13, 
-                                fontWeight: 700,
-                                opacity: isTextMode ? 1 : 0.5
-                            }}
-                        >
-                            <HiPencilAlt /> TEXT
-                        </button>
+        <AnimatePresence>
+            <div className="modal-overlay" onClick={onClose}>
+                <motion.div className="modal-card"
+                    initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.97 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                    onClick={e => e.stopPropagation()}>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+                        <div className="creative-tabs">
+                            <div 
+                                className={`creative-tab ${!isTextMode ? 'active' : ''}`}
+                                onClick={() => setIsTextMode(false)}>
+                                <HiPhotograph /> MEDIA
+                            </div>
+                            <div 
+                                className={`creative-tab ${isTextMode ? 'active' : ''}`}
+                                onClick={() => setIsTextMode(true)}>
+                                <HiPencilAlt /> TEXT
+                            </div>
+                        </div>
+                        <motion.button className="btn btn-ghost btn-icon-sm" onClick={onClose} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                            <HiX style={{ fontSize: 18 }} />
+                        </motion.button>
                     </div>
-                    <motion.button className="btn btn-ghost btn-icon-sm" onClick={onClose} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <HiX style={{ fontSize: 18 }} />
-                    </motion.button>
-                </div>
 
-                {isTextMode ? (
-                    <div style={{ 
-                        height: 280, 
-                        background: backgroundColor, 
-                        borderRadius: 16, 
-                        marginBottom: 16,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: 24,
-                        transition: 'background 0.3s ease',
-                        position: 'relative',
-                        boxShadow: 'inset 0 0 100px rgba(0,0,0,0.2)'
-                    }}>
-                        <textarea 
-                            className="text-post-input"
-                            placeholder="What's on your mind?"
-                            value={caption}
-                            onChange={e => setCaption(e.target.value)}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'white',
-                                fontSize: 24,
-                                fontWeight: 800,
-                                textAlign: 'center',
-                                width: '100%',
-                                maxHeight: '100%',
-                                resize: 'none',
-                                outline: 'none',
-                                fontFamily: 'Syne, Inter, sans-serif'
-                            }}
-                        />
-                        <div style={{ 
-                            position: 'absolute', 
-                            bottom: 16, 
-                            left: 16, 
-                            right: 16, 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            gap: 8 
+                    {isTextMode ? (
+                        <div className="story-text-preview" style={{ background: backgroundColor, minHeight: 280, borderRadius: 16 }}>
+                            <textarea 
+                                placeholder="What's on your mind?"
+                                value={caption}
+                                onChange={e => setCaption(e.target.value)}
+                                style={{ fontSize: 26 }}
+                            />
+                            <div style={{ position: 'absolute', bottom: 16, display: 'flex', gap: 8 }}>
+                                {bgPresets.map(preset => (
+                                    <motion.button
+                                        key={preset.name}
+                                        onClick={() => setBackgroundColor(preset.value)}
+                                        whileHover={{ scale: 1.2 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        style={{
+                                            width: 24, height: 24, borderRadius: '50%',
+                                            background: preset.value,
+                                            border: backgroundColor === preset.value ? '2px solid white' : '2px solid transparent',
+                                            cursor: 'pointer'
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ) : !preview ? (
+                        <div
+                            className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
+                            onClick={() => inputRef.current.click()}
+                            onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                            onDragLeave={() => setDragOver(false)}
+                            onDrop={handleDrop}>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 14, fontSize: 40 }}>
+                                <HiPhotograph style={{ color: 'var(--accent)' }} />
+                                <HiVideoCamera style={{ color: 'var(--text-3)' }} />
+                            </div>
+                            <p className="t-title" style={{ marginBottom: 6 }}>Drop photo or video here</p>
+                            <p className="t-small">or click to browse</p>
+                            <input ref={inputRef} type="file" accept="image/*,video/*" hidden onChange={handleFile} />
+                        </div>
+                    ) : (
+                        <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', marginBottom: 14, maxHeight: 320, background: 'var(--surface)' }}>
+                            {isVideo
+                                ? <video src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} controls playsInline />
+                                : <img src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} alt="" />
+                            }
+                            <button className="btn btn-secondary btn-sm"
+                                onClick={() => { setFile(null); setPreview(null) }}
+                                style={{ position: 'absolute', top: 12, right: 12, borderRadius: 8 }}>
+                                Change
+                            </button>
+                        </div>
+                    )}
+
+                    {isVideo && (
+                        <div style={{
+                            margin: '8px 0 12px',
+                            padding: '12px',
+                            background: 'var(--accent-subtle)',
+                            borderRadius: 12,
+                            fontSize: 13,
+                            color: 'var(--accent)',
+                            border: '1px solid var(--accent-ring)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10
                         }}>
-                            {bgPresets.map(preset => (
+                            <HiVideoCamera /> 📱 This will be posted as a Dscroll (short video)
+                        </div>
+                    )}
+
+                    {!isTextMode && (
+                        <div style={{ position: 'relative' }}>
+                            <textarea className="input" placeholder="Write a caption…"
+                                value={caption} onChange={e => setCaption(e.target.value)}
+                                rows={3} style={{ marginTop: 4, resize: 'none', paddingRight: 40, borderRadius: 12 }} />
+                            
+                            {preview && !isVideo && (
                                 <motion.button
-                                    key={preset.name}
-                                    onClick={() => setBackgroundColor(preset.value)}
-                                    whileHover={{ scale: 1.2 }}
+                                    className="btn-ai-sparkle"
+                                    onClick={generateAICaption}
+                                    disabled={generatingAI}
+                                    whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     style={{
-                                        width: 24,
-                                        height: 24,
-                                        borderRadius: '50%',
-                                        background: preset.value,
-                                        border: backgroundColor === preset.value ? '2px solid white' : '2px solid transparent',
-                                        cursor: 'pointer'
+                                        position: 'absolute',
+                                        right: 12,
+                                        bottom: 12,
+                                        background: 'var(--logo-gradient)',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        color: 'white',
+                                        padding: '6px',
+                                        display: 'flex',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 12px var(--accent-ring)'
                                     }}
-                                />
-                            ))}
+                                    title="Suggest AI Caption"
+                                >
+                                    {generatingAI ? <span className="spinner-sm" /> : <HiSparkles />}
+                                </motion.button>
+                            )}
                         </div>
-                    </div>
-                ) : !preview ? (
-                    <div
-                        className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
-                        onClick={() => inputRef.current.click()}
-                        onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-                        onDragLeave={() => setDragOver(false)}
-                        onDrop={handleDrop}>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 14, fontSize: 40 }}>
-                            <HiPhotograph style={{ color: 'var(--accent)' }} />
-                            <HiVideoCamera style={{ color: 'var(--text-3)' }} />
-                        </div>
-                        <p className="t-title" style={{ marginBottom: 6 }}>Drop photo or video here</p>
-                        <p className="t-small">or click to browse</p>
-                        <input ref={inputRef} type="file" accept="image/*,video/*,.mp4,.mov,.avi,.webm,.mkv,.3gp" hidden onChange={handleFile} />
-                    </div>
-                ) : (
-                    <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 14, maxHeight: 320, background: 'var(--card)' }}>
-                        {isVideo
-                            ? <video src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} controls playsInline />
-                            : <img src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} alt="" />
+                    )}
+
+                    <motion.button className="btn btn-primary w-full"
+                        style={{ 
+                            marginTop: 20, 
+                            height: 52, 
+                            fontSize: 15, 
+                            fontWeight: 700,
+                            boxShadow: '0 8px 24px var(--accent-ring)'
+                        }}
+                        onClick={handleSubmit}
+                        disabled={loading || (!isTextMode && !file) || (isTextMode && !caption.trim())}
+                        whileHover={{ scale: 1.01, boxShadow: '0 12px 32px var(--accent-ring)' }} 
+                        whileTap={{ scale: 0.98 }}>
+                        {loading
+                            ? <><span className="spinner" style={{ width: 18, height: 18 }} />&nbsp;Sharing...</>
+                            : isTextMode ? <><HiCheckCircle /> Share Status</> : (isVideo ? <><HiVideoCamera /> Share Dscroll</> : <><HiCheckCircle /> Share Post</>)
                         }
-                        <button className="btn btn-secondary btn-sm"
-                            onClick={() => { setFile(null); setPreview(null) }}
-                            style={{ position: 'absolute', top: 10, right: 10 }}>
-                            Change
-                        </button>
-                    </div>
-                )}
-
-                {isVideo && (
-                    <div style={{
-                        margin: '8px 0 12px',
-                        padding: '10px 12px',
-                        background: 'rgba(99,102,241,0.1)',
-                        borderRadius: 8,
-                        fontSize: 13,
-                        color: 'var(--accent)',
-                        border: '1px solid rgba(99,102,241,0.2)',
-                    }}>
-                        📱 This will be posted as a Dscroll (short video)
-                    </div>
-                )}
-
-                {!isTextMode && (
-                    <div style={{ position: 'relative' }}>
-                        <textarea className="input" placeholder="Write a caption…"
-                            value={caption} onChange={e => setCaption(e.target.value)}
-                            rows={3} style={{ marginTop: 4, resize: 'none', paddingRight: 40 }} />
-                        
-                        {preview && !isVideo && (
-                            <motion.button
-                                className="btn-ai-sparkle"
-                                onClick={generateAICaption}
-                                disabled={generatingAI}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                style={{
-                                    position: 'absolute',
-                                    right: 12,
-                                    bottom: 12,
-                                    background: 'var(--logo-gradient)',
-                                    border: 'none',
-                                    borderRadius: 8,
-                                    color: 'white',
-                                    padding: '6px',
-                                    display: 'flex',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 4px 12px var(--accent-ring)'
-                                }}
-                                title="Suggest AI Caption"
-                            >
-                                {generatingAI ? <span className="spinner-sm" /> : <HiSparkles />}
-                            </motion.button>
-                        )}
-                    </div>
-                )}
-
-                <motion.button className="btn btn-primary w-full"
-                    style={{ 
-                        marginTop: 20, 
-                        height: 52, 
-                        fontSize: 15, 
-                        fontWeight: 700,
-                        boxShadow: '0 8px 24px var(--accent-ring)'
-                    }}
-                    onClick={handleSubmit}
-                    disabled={loading || (!isTextMode && !file) || (isTextMode && !caption.trim())}
-                    whileHover={{ scale: 1.01, boxShadow: '0 12px 32px var(--accent-ring)' }} 
-                    whileTap={{ scale: 0.98 }}>
-                    {loading
-                        ? <><span className="spinner" style={{ width: 18, height: 18 }} />&nbsp;Sharing...</>
-                        : isTextMode ? '✨ Share Status' : (isVideo ? '🎬 Share Dscroll' : '✅ Share Post')
-                    }
-                </motion.button>
-            </motion.div>
-        </div>
+                    </motion.button>
+                </motion.div>
+            </div>
+        </AnimatePresence>
     )
 }

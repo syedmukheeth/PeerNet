@@ -5,9 +5,17 @@ const mongoose = require('mongoose');
 const storySchema = new mongoose.Schema(
     {
         author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-        mediaUrl: { type: String, required: true },
-        mediaPublicId: { type: String, required: true },
-        mediaType: { type: String, enum: ['image', 'video'], default: 'image' },
+        mediaUrl: { 
+            type: String, 
+            required: function() { return this.mediaType !== 'text'; } 
+        },
+        mediaPublicId: { 
+            type: String, 
+            required: function() { return this.mediaType !== 'text'; } 
+        },
+        mediaType: { type: String, enum: ['image', 'video', 'text'], default: 'image' },
+        content: { type: String, trim: true },
+        backgroundColor: { type: String, default: '#000000' },
         viewers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         expiresAt: {
             type: Date,

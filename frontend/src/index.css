@@ -219,23 +219,108 @@ textarea {
   color: inherit;
 }
 
-/* ── Scrollbar ───────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 5px;
+/* ── Creative Tabs System ─────────────────────────────────── */
+.creative-tabs {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  width: fit-content;
+  margin-bottom: 24px;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-md);
+.creative-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
   border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-3);
+.creative-tab:hover {
+  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.03);
 }
+
+.creative-tab.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px var(--accent-ring);
+}
+
+/* ── Modal & UI Hardening ─────────────────────────────────── */
+.modal-card {
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+  max-width: 480px;
+  width: 95%;
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-zone {
+  border: 2px dashed var(--border-md);
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.upload-zone:hover {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  transform: scale(0.99);
+}
+
+/* ── Story Text Content ───────────────────────────────────── */
+.story-text-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  min-height: 400px;
+  width: 100%;
+  border-radius: 16px;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  position: relative;
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.3);
+}
+
+.story-text-preview textarea {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  text-align: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  resize: none !important;
+  outline: none !important;
+  line-height: 1.2 !important;
+}
+
+/* ── Base & Scrollbar ────────────────────────────────────── */
 
 /* ── Typography ──────────────────────────────────────────── */
 .t-display {

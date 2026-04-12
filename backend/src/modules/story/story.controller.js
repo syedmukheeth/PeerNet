@@ -4,7 +4,7 @@ const storyService = require('./story.service');
 
 const createStory = async (req, res, next) => {
     try {
-        const story = await storyService.createStory(req.user._id, req.file);
+        const story = await storyService.createStory(req.user._id, req.file, req.body);
         res.status(201).json({ success: true, data: story });
     } catch (err) { next(err); }
 };

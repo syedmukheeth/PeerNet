@@ -5,7 +5,19 @@ const Follower = require('../user/Follower');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 
-const createStory = async (userId, file) => {
+const createStory = async (userId, file, data = {}) => {
+    // 1. Text Story Path
+    if (data.mediaType === 'text') {
+        if (!data.content) throw new ApiError(400, 'Story content is required');
+        return Story.create({
+            author: userId,
+            mediaType: 'text',
+            content: data.content,
+            backgroundColor: data.backgroundColor || '#000000'
+        });
+    }
+
+    // 2. Media Story Path
     if (!file) throw new ApiError(400, 'Media file is required');
 
     const isVideo = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
@@ -22,16 +34,7 @@ const createStory = async (userId, file) => {
     });
 };
 
-const getStoriesFromFollowing = async (userId) => {
-    const relations = await Follower.find({ follower: userId }).select('following').lean();
-    const ids = relations.map((f) => f.following);
-    ids.push(userId);
-
-    const now = new Date();
-    return Story.find({ author: { $in: ids }, expiresAt: { $gt: now } })
-        .populate('author', 'username avatarUrl')
-        .sort({ createdAt: -1 });
-};
+// ... getStories and others ...
 
 const deleteStory = async (storyId, userId) => {
     const story = await Story.findById(storyId);
@@ -39,7 +42,12 @@ const deleteStory = async (storyId, userId) => {
     if (story.author.toString() !== userId.toString()) {
         throw new ApiError(403, 'Not authorised');
     }
-    await deleteFromCloudinary(story.mediaPublicId, story.mediaType === 'video' ? 'video' : 'image');
+    
+    // Only delete from Cloudinary if it's NOT a text story
+    if (story.mediaType !== 'text') {
+        await deleteFromCloudinary(story.mediaPublicId, story.mediaType === 'video' ? 'video' : 'image');
+    }
+    
     await story.deleteOne();
 };
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
@@ -35,14 +35,29 @@ function SettingsRow({ icon, label, value, danger, onClick, chevron = true }) {
 export default function Settings() {
     const { user, logout } = useAuth()
     const navigate = useNavigate()
+    const [mounted, setMounted] = useState(false)
 
     // Profile update state
     const [editMode, setEditMode] = useState(null) // 'username' | 'email' | null
     const [profileDraft, setProfileDraft] = useState({ 
-        username: user?.username || '', 
-        email: user?.email || '' 
+        username: '', 
+        email: '' 
     })
     const [updateLoading, setUpdateLoading] = useState(false)
+
+    // ── Hydration & Context Sync ────────────────────────────────
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (user) {
+            setProfileDraft({
+                username: user.username || '',
+                email: user.email || ''
+            })
+        }
+    }, [user])
 
     // Change password state
     const [showPwForm, setShowPwForm] = useState(false)
@@ -98,6 +113,14 @@ export default function Settings() {
     const handleLogout = async () => {
         await logout()
         navigate('/login', { replace: true })
+    }
+
+    if (!mounted || !user) {
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '100px 0' }}>
+                <div className="spinner" style={{ width: 30, height: 30 }} />
+            </div>
+        )
     }
 
     return (
