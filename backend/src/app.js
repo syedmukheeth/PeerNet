@@ -19,6 +19,8 @@ const { tracingMiddleware } = require('./middleware/tracing.middleware');
 const { metricsMiddleware, getMetricsEndpoint } = require('./config/metrics.config');
 const v1Router = require('./routes/v1');
 const ApiError = require('./utils/ApiError');
+const notificationService = require('./modules/notification/notification.service');
+const { authenticate } = require('./middleware/auth.middleware');
 
 const createApp = () => {
     const app = express();
@@ -85,9 +87,15 @@ const createApp = () => {
     app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV, traceId: _req.id }));
     app.get('/metrics', getMetricsEndpoint);
 
-    // ── Swagger API Documentation ────────────────────────────────────────────────
-    const setupSwagger = require('./docs/swagger');
-    setupSwagger(app);
+    // 🚀 GLOBAL BYPASS: Direct mounting to ensure these critical sync endpoints never 404
+    app.get('/api/v1/notifications/unread-count', authenticate, async (req, res) => {
+        try {
+            const count = await notificationService.getUnreadCount(req.user._id);
+            res.json({ count });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
 
     // ── API routes ───────────────────────────────────────────────────────────────
     app.use('/api/v1', v1Router);

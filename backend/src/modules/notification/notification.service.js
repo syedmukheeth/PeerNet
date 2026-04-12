@@ -128,9 +128,34 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
             }
         });
 
+    const results = notifications.slice(0, limit);
     const hasMore = notifications.length > limit;
-    const results = hasMore ? notifications.slice(0, limit) : notifications;
     
+    // 🚑 SELF-HEALING REPAIR PASS
+    // If population failed (ID is still a string), attempt manual recovery for thumbnails
+    for (let notif of results) {
+        if (notif.entityId && typeof notif.entityId !== 'object') {
+            try {
+                let repairEntity = null;
+                const modelName = notif.entityModel;
+                if (modelName === 'Post') {
+                    repairEntity = await Post.findById(notif.entityId).select('mediaUrl thumbnailUrl videoUrl body caption');
+                } else if (modelName === 'Dscroll') {
+                    repairEntity = await Dscroll.findById(notif.entityId).select('mediaUrl thumbnailUrl videoUrl body caption');
+                } else if (modelName === 'Comment') {
+                    repairEntity = await Comment.findById(notif.entityId).populate('post', 'mediaUrl thumbnailUrl videoUrl');
+                }
+                
+                if (repairEntity) {
+                    notif.entityId = repairEntity; // Manually assign the repaired entity
+                    // console.log(`[REPAIR] Fixed thumbnail for notif: ${notif._id}`);
+                }
+            } catch (repairErr) {
+                // Fail silently, formatter will handle the null thumbnail gracefully
+            }
+        }
+    }
+
     // Normalize data for the frontend (predictable thumbnails)
     const formattedResults = results.map(n => formatNotification(n));
     

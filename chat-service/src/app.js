@@ -17,6 +17,8 @@ const errorHandler = require('./middleware/errorHandler');
 const logger = require('./config/logger');
 const v1Router = require('./routes/v1');
 const ApiError = require('./utils/ApiError');
+const messageController = require('./controllers/message.controller');
+const { authenticate } = require('./middleware/auth.middleware');
 
 const createApp = () => {
     const app = express();
@@ -68,6 +70,9 @@ const createApp = () => {
 
     // ── Health check ─────────────────────────────────────────────────────────
     app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV }));
+
+    // 🚀 GLOBAL BYPASS: Direct mounting to ensure these critical sync endpoints never 404
+    app.get('/api/v1/conversations/unread-count', authenticate, messageController.getUnreadCount);
 
     // ── API routes ───────────────────────────────────────────────────────────────
     app.use('/api/v1', v1Router);
