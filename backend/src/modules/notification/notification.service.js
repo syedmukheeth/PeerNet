@@ -3,6 +3,36 @@
 const Notification = require('./Notification');
 const { getRedisOptional } = require('../../config/redis');
 
+const formatNotification = (notif) => {
+    const obj = notif.toObject ? notif.toObject() : notif;
+    const e = obj.entityId;
+    
+    // Normalization logic: Extract thumbnail and target link from any entity type
+    let thumbnail = null;
+    let targetId = null;
+
+    if (e && typeof e === 'object') {
+        const isComment = obj.entityModel === 'Comment' || obj.entityModel === 'Reply';
+        const targetEntity = isComment && e.post ? e.post : e;
+        
+        thumbnail = targetEntity.mediaUrl || targetEntity.thumbnailUrl || targetEntity.videoUrl;
+        targetId = (isComment && e.post) ? e.post._id : e._id;
+    }
+
+    return {
+        ...obj,
+        thumbnail,
+        targetId,
+        _id: obj._id.toString(),
+        sender: obj.sender ? {
+            _id: obj.sender._id?.toString() || obj.sender.toString(),
+            username: obj.sender.username,
+            avatarUrl: obj.sender.avatarUrl,
+            isVerified: obj.sender.isVerified
+        } : null
+    };
+};
+
 const createNotification = async (data) => {
     try {
         const notification = await Notification.create(data);
@@ -17,23 +47,16 @@ const createNotification = async (data) => {
             }
         ]);
 
+        const formatted = formatNotification(notification);
+
         // Broadcast to Redis for real-time delivery (to Chat Service)
         const redis = getRedisOptional();
         if (redis) {
             try {
-                // BIG TECH: Explicitly construct the broadcast payload to ensure 
-                // it contains everything needed for the UI toast without extra DB hits.
                 const payload = {
                     recipient: notification.recipient.toString(),
-                    notification: {
-                        ...notification.toObject(),
-                        _id: notification._id.toString(),
-                        sender: {
-                            _id: notification.sender._id.toString(),
-                            username: notification.sender.username,
-                            avatarUrl: notification.sender.avatarUrl
-                        }
-                    }
+                    type: 'new_notification',
+                    notification: formatted
                 };
 
                 await redis.publish('peernet:notifications', JSON.stringify(payload));
@@ -42,7 +65,7 @@ const createNotification = async (data) => {
             }
         }
 
-        return notification;
+        return formatted;
     } catch (err) {
         console.error(`NotificationService: Create FAILED - ${err.message}`);
         throw err;
@@ -90,8 +113,12 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
 
     const hasMore = notifications.length > limit;
     const results = hasMore ? notifications.slice(0, limit) : notifications;
+    
+    // Normalize data for the frontend
+    const formattedResults = results.map(n => formatNotification(n));
+    
     const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
-    return { data: results, nextCursor, hasMore };
+    return { data: formattedResults, nextCursor, hasMore };
 };
 
 const markAllRead = async (userId) => {

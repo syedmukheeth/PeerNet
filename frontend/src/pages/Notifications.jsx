@@ -112,14 +112,6 @@ function NotifRow({ n, index, onFollowBack }) {
         return cfg.text
     }
 
-    const getThumbnail = () => {
-        const e = n.entityId
-        if (!e || typeof e !== 'object') return null
-        
-        // If it's a comment or reply, the preview image should be the original post
-        const target = (n.entityModel === 'Comment' && e.post) ? e.post : e
-        return target.mediaUrl || target.thumbnailUrl || target.videoUrl
-    }
 
     return (
         <motion.div
@@ -248,8 +240,8 @@ function NotifRow({ n, index, onFollowBack }) {
                             Following
                         </span>
                     )
-                ) : (n.entityId && typeof n.entityId === 'object') ? (
-                    <Link to={(n.entityModel === 'Post' || n.entityModel === 'Dscroll' || (n.entityModel === 'Comment' && n.entityId.post)) ? `/posts/${(n.entityModel === 'Comment' ? n.entityId.post?._id : n.entityId._id)}` : '#'}>
+                ) : n.thumbnail ? (
+                    <Link to={n.targetId ? `/posts/${n.targetId}` : '#'}>
                         <div style={{
                             width: 48, height: 48, borderRadius: 10,
                             overflow: 'hidden', border: '1px solid var(--border)',
@@ -258,7 +250,7 @@ function NotifRow({ n, index, onFollowBack }) {
                             boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                         }}>
                             <img
-                                src={getThumbnail()}
+                                src={n.thumbnail}
                                 alt=""
                                 onError={(e) => {
                                     e.target.style.display = 'none';
@@ -387,7 +379,11 @@ export default function Notifications() {
             // Check if it's from ourselves (mostly for testing/robustness)
             if (notif.sender?._id === user?._id) return
 
-            setNotifs(prev => [{ ...notif, isRead: false }, ...prev])
+            setNotifs(prev => {
+                // DE-DUPLICATION: Ensure we don't add the same notification twice
+                if (prev.find(x => x._id === notif._id)) return prev;
+                return [{ ...notif, isRead: false }, ...prev];
+            })
             setUnread(u => u + 1)
             setHasNew(true)
         })
