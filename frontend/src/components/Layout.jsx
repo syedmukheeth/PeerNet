@@ -215,51 +215,25 @@ export default function Layout() {
             if (!isAtMessages) showMsgToast(msg)
         })
 
-        socket.on('connect', syncAllCounts)
+        socket.on('connect', () => {
+            syncAllCounts()
+            // Periodic ping to maintain online status
+            socket.emit('ping_online')
+        })
+
+        const pingInterval = setInterval(() => {
+            if (socket?.connected) {
+                socket.emit('ping_online')
+            }
+        }, 25_000)
 
         return () => {
             socket.off('new_notification')
             socket.off('new_message')
             socket.off('connect')
+            clearInterval(pingInterval)
         }
     }, [socket, user, syncAllCounts])
-            
-            // Show toast if:
-            // 1. Not exactly at '/messages' (e.g. at Home, Search, etc.)
-            // 2. OR at '/messages' index without an active conversation
-            // 3. OR at '/messages/:id' but the ID doesn't match the new message ID
-            const urlConvoId = path.split('/').pop()
-            const isAtMessagesIndex = path === '/messages' || path === '/messages/'
-            const isDifferentConvo = isAtMessages && !isAtMessagesIndex && urlConvoId !== msg.conversationId
-
-            if (!isAtMessages || isAtMessagesIndex || isDifferentConvo) {
-                msgRef.current += 1
-                setMsgCount(c => c + 1)
-                showMsgToast(msg)
-            } else if (isAtMessages) {
-                // Still update badge in sidebar even when on messages (different convo)
-                // Actually, if we are in the SAME convo, we don't want to bump the badge
-                // because the Messages component will mark it as read immediately.
-                if (isDifferentConvo) {
-                    msgRef.current += 1
-                    setMsgCount(c => c + 1)
-                }
-            }
-        })
-
-        // Periodic ping to maintain online status
-        const pingInterval = setInterval(() => {
-            if (layoutSocket?.connected) {
-                layoutSocket.emit('ping_online')
-            }
-        }, 25_000)
-
-        return () => { 
-            clearInterval(pingInterval)
-            layoutSocket?.disconnect()
-            layoutSocket = null 
-        }
-    }, [user, navigate])
 
     // ── Clear badges when actually ON the relevant page ────
     useEffect(() => {

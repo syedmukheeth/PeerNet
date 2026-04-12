@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { io } from 'socket.io-client'
 import { SOCKET_URL } from '../api/axios'
 
@@ -7,56 +7,51 @@ import { SOCKET_URL } from '../api/axios'
  * Handles singleton connection, auto-refresh on token change, 
  * and robust error handling.
  */
-let socket = null
+let socketInstance = null
 
 export const useSocket = (user) => {
-    const socketRef = useRef(null)
+    const [socket, setSocket] = useState(null)
 
     useEffect(() => {
         if (!user) {
-            if (socket) {
-                socket.disconnect()
-                socket = null
+            if (socketInstance) {
+                socketInstance.disconnect()
+                socketInstance = null
+                setSocket(null)
             }
             return
         }
 
         const token = localStorage.getItem('accessToken')
 
-        if (!socket) {
-            socket = io(SOCKET_URL, {
+        if (!socketInstance) {
+            socketInstance = io(SOCKET_URL, {
                 auth: { token },
-                transports: ['websocket', 'polling'], // Fallback for restrictive firewalls
+                transports: ['websocket', 'polling'],
                 reconnection: true,
                 reconnectionAttempts: 10,
                 reconnectionDelay: 2000,
             })
 
-            socket.on('connect', () => {
-                console.log('[SOCKET] Connected:', socket.id)
+            socketInstance.on('connect', () => {
+                console.log('[SOCKET] Connected:', socketInstance.id)
+                setSocket(socketInstance)
             })
 
-            socket.on('connect_error', (err) => {
-                console.warn('[SOCKET] Connect Error:', err.message)
-                // If token is invalid, the axios interceptor (if called nearby) 
-                // will handle refresh, and we'll reconnect on the next token change.
+            socketInstance.on('disconnect', () => {
+                console.log('[SOCKET] Disconnected')
             })
+
+            setSocket(socketInstance)
         } else {
-            // Update token on existing connection if it changed
-            socket.auth.token = token
-            // Many Socket.io versions require a manual disconnect/connect or a custom event to 
-            // re-authenticate mid-stream if the token changed while the socket was "connected" but idle.
-            // But for now, updating the auth object usually works for the next reconnection.
+            socketInstance.auth.token = token
+            setSocket(socketInstance)
         }
 
-        socketRef.current = socket
-
-        // Cleanup on unmount or user change
         return () => {
-            // We don't necessarily disconnect here to keep the singleton "warm" 
-            // unless the user logged out (handled at top).
+            // Cleanup logic if needed
         }
     }, [user])
 
-    return socketRef.current
+    return socket
 }
