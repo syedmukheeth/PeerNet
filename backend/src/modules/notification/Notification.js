@@ -2,6 +2,11 @@
 
 const mongoose = require('mongoose');
 
+// Ensure models are registered for dynamic refPath population
+require('../post/Post');
+require('../comment/Comment');
+require('../dscroll/Dscroll');
+
 const notificationSchema = new mongoose.Schema(
     {
         recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

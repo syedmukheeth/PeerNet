@@ -7,8 +7,8 @@ const Dscroll = require('../dscroll/Dscroll');
 const { getRedisOptional } = require('../../config/redis');
 
 const formatNotification = (notif) => {
-    // Standardize to a plain object
-    const obj = notif.toObject ? notif.toObject() : notif;
+    // Standardize to a plain object without losing populated data
+    const obj = notif.toObject ? notif.toObject({ virtuals: true, getters: true }) : notif;
     const e = obj.entityId;
     
     let thumbnail = null;
@@ -16,18 +16,23 @@ const formatNotification = (notif) => {
 
     // ULTRA-DEFENSIVE MAPPING: 
     // We search the entire object tree for anything that looks like a media URL.
-    if (e && typeof e === 'object') {
-        const getMedia = (target) => target.mediaUrl || target.thumbnailUrl || target.videoUrl || null;
-        
-        // 1. Try the entity itself (for Post/Dscroll)
-        thumbnail = getMedia(e);
-        
-        // 2. Try nested post (for Comment/Reply)
-        if (!thumbnail && e.post) {
-            thumbnail = getMedia(e.post);
-            targetId = e.post._id || e.post;
+    if (e) {
+        if (typeof e === 'object') {
+            const getMedia = (target) => target.mediaUrl || target.thumbnailUrl || target.videoUrl || null;
+            
+            // 1. Try the entity itself (for Post/Dscroll)
+            thumbnail = getMedia(e);
+            
+            // 2. Try nested post (for Comment/Reply)
+            if (!thumbnail && e.post) {
+                thumbnail = getMedia(e.post);
+                targetId = e.post._id || e.post;
+            } else {
+                targetId = e._id || e;
+            }
         } else {
-            targetId = e._id || e;
+            // If e is just a string ID, we store it as targetId but thumbnail stays null
+            targetId = e;
         }
     }
 
@@ -121,13 +126,12 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
                 select: 'mediaUrl thumbnailUrl videoUrl',
                 options: { strictPopulate: false }
             }
-        })
-        .lean();
+        });
 
     const hasMore = notifications.length > limit;
     const results = hasMore ? notifications.slice(0, limit) : notifications;
     
-    // Normalize data for the frontend
+    // Normalize data for the frontend (predictable thumbnails)
     const formattedResults = results.map(n => formatNotification(n));
     
     const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
