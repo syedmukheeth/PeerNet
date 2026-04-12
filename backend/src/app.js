@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -47,6 +48,19 @@ const createApp = () => {
 
     // ── 🚀 API Routes ─────────────────────────────────────────────────────────
     app.use('/api/v1', routes);
+
+    // ── 📄 Static Files & SPA Fallback ─────────────────────────────────────────
+    // Serve frontend static assets from public/ folder
+    app.use(express.static(path.join(__dirname, '../public')));
+
+    // SPA Fallback: handle all navigation routes by serving index.html
+    app.get('*', (req, res, next) => {
+        // Skip fallback if request is specifically for API or Has File Extension
+        if (req.path.startsWith('/api/v1') || path.extname(req.path)) {
+            return next();
+        }
+        res.sendFile(path.join(__dirname, '../public/index.html'));
+    });
 
     // ── ❌ Error Handling ──────────────────────────────────────────────────────
     app.use((req, res) => {
