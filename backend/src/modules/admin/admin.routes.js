@@ -7,19 +7,17 @@ const { requireAdmin } = require('../../middleware/admin.middleware');
 
 const guard = [authenticate, requireAdmin];
 
-// GET /api/v1/admin/users
+// Users
 router.get('/users', ...guard, adminController.getUsers);
+router.delete('/users/:userId', ...guard, adminController.deleteUser);
+router.patch('/users/:userId/verify', ...guard, adminController.verifyUser);
 
-// DELETE /api/v1/admin/users/:id
-router.delete('/users/:id', ...guard, adminController.deleteUser);
+// Content
+router.get('/posts', ...guard, adminController.getPosts);
+router.delete('/posts/:postId', ...guard, adminController.deletePost);
+router.delete('/stories/:storyId', ...guard, adminController.deleteStory);
 
-// DELETE /api/v1/admin/posts/:id
-router.delete('/posts/:id', ...guard, adminController.deletePost);
-
-// PATCH /api/v1/admin/users/:id/verify
-router.patch('/users/:id/verify', ...guard, adminController.toggleVerification);
-
-// GET /api/v1/admin/stats
+// Analytics
 router.get('/stats', ...guard, adminController.getStats);
 
 module.exports = router;

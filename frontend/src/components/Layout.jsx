@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiUser
+    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiUser, HiShieldCheck
 } from 'react-icons/hi'
 import { useTheme } from '../context/ThemeContext'
 import api, { chatApi } from '../api/axios'
@@ -205,6 +205,19 @@ export default function Layout() {
                             </>
                         )}
                     </NavLink>
+
+                    {user?.role === 'admin' && (
+                        <NavLink to="/admin" className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
+                            {({ isActive }) => (
+                                <>
+                                    <span className="ig-icon-wrap">
+                                        <HiShieldCheck className="ig-icon text-accent" style={{ opacity: isActive ? 1 : 0.6 }} />
+                                    </span>
+                                    <span className="ig-label">Admin Console</span>
+                                </>
+                            )}
+                        </NavLink>
+                    )}
                 </nav>
 
                 <div className="sidebar-more-wrap mt-auto py-3" ref={moreRef}>

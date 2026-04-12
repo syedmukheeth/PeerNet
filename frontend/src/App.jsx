@@ -18,6 +18,7 @@ const PostDetail = lazy(() => import('./pages/PostDetail'))
 const Settings = lazy(() => import('./pages/Settings'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Terms = lazy(() => import('./pages/Terms'))
+const Admin = lazy(() => import('./pages/Admin'))
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -27,6 +28,17 @@ const ProtectedRoute = ({ children }) => {
     </div>
   )
   return user ? children : <Navigate to="/login" replace />
+}
+
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth()
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
+      <div className="spinner" style={{ width: 40, height: 40 }} />
+    </div>
+  )
+  if (!user || user.role !== 'admin') return <Navigate to="/" replace />
+  return children
 }
 
 const GuestRoute = ({ children }) => {
@@ -75,6 +87,7 @@ export default function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="privacy" element={<Privacy />} />
               <Route path="terms" element={<Terms />} />
+              <Route path="admin" element={<AdminRoute><Admin /></AdminRoute>} />
             </Route>
             
             {/* Public/Shared routes (can be viewed without login) */}

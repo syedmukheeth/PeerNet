@@ -2,6 +2,8 @@
 
 const User = require('../user/User');
 const Post = require('../post/Post');
+const Story = require('../story/Story');
+const Dscroll = require('../dscroll/Dscroll');
 const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 
@@ -12,6 +14,14 @@ const getUsers = async ({ limit = 20, skip = 0, search = '' }) => {
         User.countDocuments(query),
     ]);
     return { users, total };
+};
+
+const getPosts = async ({ limit = 20, skip = 0 }) => {
+    const [posts, total] = await Promise.all([
+        Post.find().populate('author', 'username avatarUrl').sort({ createdAt: -1 }).limit(limit).skip(skip),
+        Post.countDocuments(),
+    ]);
+    return { posts, total };
 };
 
 const deleteUser = async (userId) => {
@@ -26,12 +36,20 @@ const deletePost = async (postId) => {
     await deleteFromCloudinary(post.mediaPublicId, post.mediaType === 'video' ? 'video' : 'image');
 };
 
+const deleteStory = async (storyId) => {
+    const story = await Story.findByIdAndDelete(storyId);
+    if (!story) throw new ApiError(404, 'Story not found');
+    if (story.mediaPublicId) await deleteFromCloudinary(story.mediaPublicId);
+};
+
 const getPlatformStats = async () => {
-    const [userCount, postCount] = await Promise.all([
+    const [userCount, postCount, storyCount, dscrollCount] = await Promise.all([
         User.countDocuments(),
-        Post.countDocuments(),
+        Post.countDocuments({ mediaType: { $ne: 'video' } }),
+        Story.countDocuments(),
+        Dscroll.countDocuments() || Post.countDocuments({ mediaType: 'video' }),
     ]);
-    return { userCount, postCount };
+    return { userCount, postCount, storyCount, dscrollCount };
 };
 
 const toggleUserVerification = async (userId) => {
@@ -42,4 +60,12 @@ const toggleUserVerification = async (userId) => {
     return user;
 };
 
-module.exports = { getUsers, deleteUser, deletePost, getPlatformStats, toggleUserVerification };
+module.exports = { 
+    getUsers, 
+    getPosts,
+    deleteUser, 
+    deletePost, 
+    deleteStory,
+    getPlatformStats, 
+    toggleUserVerification 
+};

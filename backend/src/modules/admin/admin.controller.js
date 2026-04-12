@@ -1,43 +1,58 @@
 'use strict';
 
 const adminService = require('./admin.service');
-const { parsePagination } = require('../../utils/pagination.utils');
+const catchAsync = require('../../utils/catchAsync');
 
-const getUsers = async (req, res, next) => {
-    try {
-        const { limit } = parsePagination(req.query);
-        const skip = parseInt(req.query.skip, 10) || 0;
-        const result = await adminService.getUsers({ limit, skip, search: req.query.q || '' });
-        res.json({ success: true, ...result });
-    } catch (err) { next(err); }
+const getUsers = catchAsync(async (req, res) => {
+    const { limit, skip, search } = req.query;
+    const data = await adminService.getUsers({ 
+        limit: parseInt(limit) || 20, 
+        skip: parseInt(skip) || 0, 
+        search 
+    });
+    res.json({ success: true, ...data });
+});
+
+const getPosts = catchAsync(async (req, res) => {
+    const { limit, skip } = req.query;
+    const data = await adminService.getPosts({ 
+        limit: parseInt(limit) || 20, 
+        skip: parseInt(skip) || 0 
+    });
+    res.json({ success: true, ...data });
+});
+
+const deleteUser = catchAsync(async (req, res) => {
+    await adminService.deleteUser(req.params.userId || req.params.id);
+    res.json({ success: true, message: 'User deleted' });
+});
+
+const deletePost = catchAsync(async (req, res) => {
+    await adminService.deletePost(req.params.postId || req.params.id);
+    res.json({ success: true, message: 'Post deleted' });
+});
+
+const deleteStory = catchAsync(async (req, res) => {
+    await adminService.deleteStory(req.params.storyId);
+    res.json({ success: true, message: 'Story deleted' });
+});
+
+const getStats = catchAsync(async (req, res) => {
+    const stats = await adminService.getPlatformStats();
+    res.json({ success: true, data: stats });
+});
+
+const verifyUser = catchAsync(async (req, res) => {
+    const user = await adminService.toggleUserVerification(req.params.userId || req.params.id);
+    res.json({ success: true, data: user, message: 'Verification toggled' });
+});
+
+module.exports = {
+    getUsers,
+    getPosts,
+    deleteUser,
+    deletePost,
+    deleteStory,
+    getStats,
+    verifyUser,
 };
-
-const deleteUser = async (req, res, next) => {
-    try {
-        await adminService.deleteUser(req.params.id);
-        res.json({ success: true, message: 'User deleted' });
-    } catch (err) { next(err); }
-};
-
-const deletePost = async (req, res, next) => {
-    try {
-        await adminService.deletePost(req.params.id);
-        res.json({ success: true, message: 'Post deleted' });
-    } catch (err) { next(err); }
-};
-
-const getStats = async (req, res, next) => {
-    try {
-        const stats = await adminService.getPlatformStats();
-        res.json({ success: true, data: stats });
-    } catch (err) { next(err); }
-};
-
-const toggleVerification = async (req, res, next) => {
-    try {
-        const user = await adminService.toggleUserVerification(req.params.id);
-        res.json({ success: true, data: user, message: `User verification ${user.isVerified ? 'enabled' : 'disabled'}` });
-    } catch (err) { next(err); }
-};
-
-module.exports = { getUsers, deleteUser, deletePost, getStats, toggleVerification };
