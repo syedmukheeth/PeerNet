@@ -1,6 +1,6 @@
 {
     "name": "chat-service",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "Real-time Chat Microservice for PeerNet",
     "main": "src/server.js",
     "scripts": {
