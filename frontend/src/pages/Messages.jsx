@@ -464,12 +464,13 @@ export default function Messages() {
     const other = activeConvo ? getOther(activeConvo) : null
     const otherAvatar = other?.avatarUrl || (other ? `https://ui-avatars.com/api/?name=${other.username}&background=6366F1&color=fff` : null)
 
-    const filteredConvos = conversations.filter(c => {
-        if (!convoSearch.trim()) return true
-        const peer = getOther(c)
-        if (!peer) return false
-        const s = convoSearch.toLowerCase()
-        return peer.username?.toLowerCase().includes(s) || peer.fullName?.toLowerCase().includes(s)
+    const filteredConvos = (conversations || []).filter(c => {
+        if (!c) return false;
+        if (!convoSearch.trim()) return true;
+        const peer = getOther(c);
+        if (!peer) return false;
+        const s = convoSearch.toLowerCase();
+        return (peer.username || '').toLowerCase().includes(s) || (peer.fullName || '').toLowerCase().includes(s);
     })
 
     return (

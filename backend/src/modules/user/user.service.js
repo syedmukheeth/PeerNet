@@ -52,9 +52,15 @@ const updateProfile = async (userId, updates, avatarFile) => {
     }
 
     if (updates.username) {
-        updates.username = updates.username.toLowerCase().replace(/\s+/g, '_');
+        updates.username = updates.username.toLowerCase().trim().replace(/\s+/g, '_');
         const existing = await User.findOne({ username: updates.username, _id: { $ne: userId } });
         if (existing) throw new ApiError(409, 'Username is already taken');
+    }
+
+    if (updates.email) {
+        updates.email = updates.email.toLowerCase().trim();
+        const existing = await User.findOne({ email: updates.email, _id: { $ne: userId } });
+        if (existing) throw new ApiError(409, 'Email is already associated with another account');
     }
 
     Object.assign(user, updates);

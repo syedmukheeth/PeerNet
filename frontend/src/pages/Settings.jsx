@@ -36,6 +36,14 @@ export default function Settings() {
     const { user, logout } = useAuth()
     const navigate = useNavigate()
 
+    // Profile update state
+    const [editMode, setEditMode] = useState(null) // 'username' | 'email' | null
+    const [profileDraft, setProfileDraft] = useState({ 
+        username: user?.username || '', 
+        email: user?.email || '' 
+    })
+    const [updateLoading, setUpdateLoading] = useState(false)
+
     // Change password state
     const [showPwForm, setShowPwForm] = useState(false)
     const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
@@ -66,6 +74,27 @@ export default function Settings() {
         }
     }
 
+    const handleUpdateProfile = async () => {
+        if (!profileDraft.username.trim() || !profileDraft.email.trim()) {
+            return toast.error('Fields cannot be empty')
+        }
+        setUpdateLoading(true)
+        try {
+            await api.patch('/users/me', {
+                username: profileDraft.username.trim(),
+                email: profileDraft.email.trim()
+            })
+            toast.success('Profile updated!')
+            setEditMode(null)
+            // Hard refresh to update context (could be improved with a local context update)
+            window.location.reload()
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to update profile')
+        } finally {
+            setUpdateLoading(false)
+        }
+    }
+
     const handleLogout = async () => {
         await logout()
         navigate('/login', { replace: true })
@@ -80,20 +109,63 @@ export default function Settings() {
 
             {/* Account Info */}
             <SettingsSection title="Account">
-                <SettingsRow
-                    icon={<HiUser />}
-                    label="Username"
-                    value={`@${user?.username}`}
-                    chevron={false}
-                    onClick={() => { }}
-                />
-                <SettingsRow
-                    icon={<HiShieldCheck />}
-                    label="Email"
-                    value={user?.email}
-                    chevron={false}
-                    onClick={() => { }}
-                />
+                <div className={`settings-row ${editMode === 'username' ? 'active' : ''}`}>
+                    <div className="settings-row-icon"><HiUser /></div>
+                    <div className="settings-row-content">
+                        <span className="settings-row-label">Username</span>
+                        {editMode === 'username' ? (
+                            <input
+                                className="input input-sm"
+                                style={{ marginTop: 8 }}
+                                value={profileDraft.username}
+                                onChange={(e) => setProfileDraft(d => ({ ...d, username: e.target.value }))}
+                                autoFocus
+                            />
+                        ) : (
+                            <span className="settings-row-value">@{user?.username}</span>
+                        )}
+                    </div>
+                    {editMode === 'username' ? (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="btn btn-ghost btn-xs" onClick={() => setEditMode(null)}>Cancel</button>
+                            <button className="btn btn-primary btn-xs" onClick={handleUpdateProfile} disabled={updateLoading}>Save</button>
+                        </div>
+                    ) : (
+                        <button className="settings-edit-btn" onClick={() => {
+                            setProfileDraft({ username: user?.username, email: user?.email })
+                            setEditMode('username')
+                        }}>Edit</button>
+                    )}
+                </div>
+
+                <div className={`settings-row ${editMode === 'email' ? 'active' : ''}`}>
+                    <div className="settings-row-icon"><HiShieldCheck /></div>
+                    <div className="settings-row-content">
+                        <span className="settings-row-label">Email</span>
+                        {editMode === 'email' ? (
+                            <input
+                                className="input input-sm"
+                                style={{ marginTop: 8 }}
+                                value={profileDraft.email}
+                                onChange={(e) => setProfileDraft(d => ({ ...d, email: e.target.value }))}
+                                autoFocus
+                            />
+                        ) : (
+                            <span className="settings-row-value">{user?.email}</span>
+                        )}
+                    </div>
+                    {editMode === 'email' ? (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="btn btn-ghost btn-xs" onClick={() => setEditMode(null)}>Cancel</button>
+                            <button className="btn btn-primary btn-xs" onClick={handleUpdateProfile} disabled={updateLoading}>Save</button>
+                        </div>
+                    ) : (
+                        <button className="settings-edit-btn" onClick={() => {
+                            setProfileDraft({ username: user?.username, email: user?.email })
+                            setEditMode('email')
+                        }}>Edit</button>
+                    )}
+                </div>
             </SettingsSection>
 
             {/* Security */}

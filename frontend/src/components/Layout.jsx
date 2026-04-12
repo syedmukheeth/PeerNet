@@ -208,60 +208,85 @@ export default function Layout() {
     }, [navigate])
 
     // ── Real-time socket events ──────────────────────────────────────────
+    // 1. Static Global Listeners (Independent of navigation)
     useEffect(() => {
         if (!socket || !user) return
 
-        socket.on('new_notification', (notif) => {
+        const onNewNotif = (notif) => {
             unreadRef.current += 1
             setUnreadCount(unreadRef.current)
             showNotifToast(notif)
-        })
+        }
 
-        socket.on('notification_removed', () => {
-            console.log('🛰️ [SOCKET] Notification removed');
-            unreadRef.current = Math.max(0, unreadRef.current - 1);
-            setUnreadCount(unreadRef.current);
-        });
+        const onNotifRemoved = () => {
+            console.log('🛰️ [SOCKET] Notification removed')
+            unreadRef.current = Math.max(0, unreadRef.current - 1)
+            setUnreadCount(unreadRef.current)
+        }
 
-        socket.on('sync_counts', () => {
-             console.log('[Layout] Real-time sync signal received')
-             syncAllCounts()
-        })
+        const onSyncSignal = () => {
+            console.log('[Layout] Real-time sync signal received')
+            syncAllCounts()
+        }
 
-        socket.on('new_message', (msg) => {
+        const onConnect = () => {
+            console.log('🔌 [SOCKET] Connected')
+            syncAllCounts()
+            socket.emit('ping_online')
+        }
+
+        socket.on('new_notification', onNewNotif)
+        socket.on('notification_removed', onNotifRemoved)
+        socket.on('sync_counts', onSyncSignal)
+        socket.on('connect', onConnect)
+
+        // Initial check
+        if (socket.connected) {
+            syncAllCounts()
+            socket.emit('ping_online')
+        }
+
+        return () => {
+            socket.off('new_notification', onNewNotif)
+            socket.off('notification_removed', onNotifRemoved)
+            socket.off('sync_counts', onSyncSignal)
+            socket.off('connect', onConnect)
+        }
+    }, [socket, user, syncAllCounts, showNotifToast])
+
+    // 2. Contextual Message Listeners (Depends on route)
+    useEffect(() => {
+        if (!socket || !user) return
+
+        const onNewMessage = (msg) => {
             const senderId = (msg.sender?._id || msg.sender || '').toString()
             if (senderId === user?._id?.toString()) return
 
             msgRef.current += 1
             setMsgCount(msgRef.current)
             
-            const isInMessages = location.pathname.startsWith('/messages');
-            const isThisConvo = location.pathname === `/messages/${msg.conversationId}`;
+            const isInMessages = location.pathname.startsWith('/messages')
+            const isThisConvo = location.pathname === `/messages/${msg.conversationId}`
 
             if (!isInMessages || !isThisConvo) {
                 showMsgToast(msg)
             }
-        })
-
-        socket.on('connect', () => {
-            syncAllCounts()
-            // Periodic ping to maintain online status
-            socket.emit('ping_online')
-        })
-
-        const pingInterval = setInterval(() => {
-            if (socket?.connected) {
-                socket.emit('ping_online')
-            }
-        }, 25_000)
-
-        return () => {
-            socket.off('new_notification')
-            socket.off('notification_removed')
-            socket.off('new_message')
-            clearInterval(pingInterval)
         }
-    }, [socket, user, syncAllCounts, location.pathname, showNotifToast, showMsgToast])
+
+        socket.on('new_message', onNewMessage)
+        return () => {
+            socket.off('new_message', onNewMessage)
+        }
+    }, [socket, user, location.pathname, showMsgToast])
+
+    // 3. Infrastructure Heartbeat
+    useEffect(() => {
+        if (!socket) return
+        const pingInterval = setInterval(() => {
+            if (socket?.connected) socket.emit('ping_online')
+        }, 25_000)
+        return () => clearInterval(pingInterval)
+    }, [socket])
 
     // ── Sidebar Highlighting Only ──
     useEffect(() => {
