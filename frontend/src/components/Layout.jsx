@@ -13,6 +13,7 @@ import { useSocket } from '../hooks/useSocket'
 import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
 import FeedbackModal from './FeedbackModal'
+import { FaLinkedin } from 'react-icons/fa'
 import logoImg from '../assets/logo.png'
 
 const links = [
@@ -230,6 +231,9 @@ export default function Layout() {
                                 <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
                                     <HiCog size={20} /> <span>Settings</span>
                                 </NavLink>
+                                <button className="ig-more-item" onClick={() => { setShowMore(false); navigate('/login') }}>
+                                    <span>Switch accounts</span>
+                                </button>
                                 <div className="ig-more-divider" />
                                 <button className="ig-more-item text-error" onClick={handleLogout}>
                                     <HiLogout size={20} /> <span>Log out</span>
@@ -264,16 +268,29 @@ export default function Layout() {
                     <AnimatePresence mode="wait"><Outlet /></AnimatePresence>
                 </div>
 
-                <footer className="site-footer mt-auto border-t border-border p-6">
-                    <div className="site-footer__inner flex flex-wrap justify-between items-center gap-4">
-                        <div className="flex items-center gap-4 text-sm text-text-3">
-                            <span className="font-bold text-text-1">PeerNet</span>
-                            <Link to="/legal/privacy" className="hover:text-text-1">Privacy</Link>
-                            <Link to="/legal/terms" className="hover:text-text-1">Terms</Link>
-                            <button onClick={() => setShowFeedback(true)} className="hover:text-text-1 bg-transparent border-none p-0 cursor-pointer">Report Bug</button>
+                <footer className="site-footer mt-auto py-8 px-6 border-t border-border">
+                    <div className="site-footer__inner flex flex-wrap justify-between items-end gap-6 max-w-[1200px] mx-auto">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center gap-6 text-[13px] font-medium text-text-3">
+                                <Link to="/legal/privacy" className="hover:text-text-1">Privacy</Link>
+                                <Link to="/legal/terms" className="hover:text-text-1">Terms</Link>
+                                <button onClick={() => setShowFeedback(true)} className="hover:text-text-1">Report Bug</button>
+                                <button onClick={() => navigate('/login')} className="text-accent font-bold hover:brightness-110">Switch account</button>
+                            </div>
+                            <p className="text-[11px] text-text-3 opacity-60 m-0">
+                                © 2026 PeerNet from Syed Mukheeth · Built with Passion in India
+                            </p>
                         </div>
-                        <div className="text-xs text-text-3 flex items-center gap-1">
-                            Built with ❤️ by <a href="https://linkedin.com/in/syedmukheeth" target="_blank" className="text-accent underline">Syed Mukheeth</a>
+                        
+                        <div className="flex items-center gap-3">
+                            <a
+                                href="https://www.linkedin.com/in/syedmukheeth"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-[14px] font-bold text-accent hover:brightness-125 transition-all no-underline">
+                                <FaLinkedin size={18} style={{ color: '#0A66C2' }} />
+                                <span>Syed Mukheeth</span>
+                            </a>
                         </div>
                     </div>
                 </footer>

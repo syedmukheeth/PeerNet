@@ -909,7 +909,7 @@ textarea {
 
 /* Logo row */
 .sidebar-logo-row {
-  padding: 16px 4px 20px;
+  padding: 24px 12px 28px;
   display: flex;
   align-items: center;
 }
@@ -937,8 +937,7 @@ textarea {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  flex: 1;
+  gap: 4px;
 }
 
 /* ── Core link item — Instagram style ── */
