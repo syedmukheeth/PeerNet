@@ -274,30 +274,50 @@ export default function Layout() {
                     <AnimatePresence mode="wait"><Outlet /></AnimatePresence>
                 </div>
 
-                <footer className="site-footer mt-auto py-8 px-6 border-t border-border">
-                    <div className="site-footer__inner flex flex-wrap justify-between items-end gap-6 max-w-[1200px] mx-auto">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex items-center gap-6 text-[13px] font-medium text-text-3">
-                                <Link to="/legal/privacy" className="hover:text-text-1">Privacy</Link>
-                                <Link to="/legal/terms" className="hover:text-text-1">Terms</Link>
-                                <button onClick={() => setShowFeedback(true)} className="hover:text-text-1">Report Bug</button>
-                                <button onClick={() => navigate('/login')} className="text-accent font-bold hover:brightness-110">Switch account</button>
-                            </div>
-                            <p className="text-[11px] text-text-3 opacity-60 m-0">
-                                © 2026 PeerNet from Syed Mukheeth · Built with Passion in India
+                <footer className="site-footer">
+                    <div className="site-footer__inner">
+
+                        {/* Left: Brand + Links */}
+                        <div className="site-footer__left">
+                            <Link to="/" className="site-footer__brand">
+                                <img src={logoImg} alt="PeerNet" className="site-footer__logo" />
+                                <span className="peernetLogo" style={{ fontSize: 16 }}>PeerNet</span>
+                            </Link>
+                            <p className="site-footer__tagline">
+                                A professional network built for the next generation.
                             </p>
+                            <div className="site-footer__links">
+                                <Link to="/legal/privacy" className="site-footer__link">Privacy</Link>
+                                <Link to="/legal/terms" className="site-footer__link">Terms</Link>
+                                <button onClick={() => setShowFeedback(true)} className="site-footer__link">Report Bug</button>
+                                <button onClick={() => navigate('/login')} className="site-footer__link site-footer__link--accent">Switch account</button>
+                            </div>
                         </div>
-                        
-                        <div className="flex items-center gap-3">
+
+                        {/* Right: Creator card */}
+                        <div className="site-footer__right">
                             <a
                                 href="https://www.linkedin.com/in/syedmukheeth"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-[14px] font-bold text-accent hover:brightness-125 transition-all no-underline">
-                                <FaLinkedin size={18} style={{ color: '#0A66C2' }} />
-                                <span>Syed Mukheeth</span>
+                                className="site-footer__creator-card"
+                            >
+                                <div className="site-footer__creator-inner">
+                                    <FaLinkedin size={20} className="site-footer__li-icon" />
+                                    <div>
+                                        <p className="site-footer__creator-name">Syed Mukheeth</p>
+                                        <p className="site-footer__creator-sub">Creator & Developer</p>
+                                    </div>
+                                </div>
+                                <span className="site-footer__creator-cta">Connect ↗</span>
                             </a>
                         </div>
+
+                    </div>
+                    <div className="site-footer__bottom">
+                        <span>© 2026 PeerNet</span>
+                        <span className="site-footer__dot">·</span>
+                        <span>Built with Passion in India 🇮🇳</span>
                     </div>
                 </footer>
             </main>

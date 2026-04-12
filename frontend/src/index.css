@@ -3684,3 +3684,211 @@ textarea::placeholder {
   gap: 12px;
   max-width: 400px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Premium Site Footer — Digital Obsidian
+   ═══════════════════════════════════════════════════════════ */
+.site-footer {
+  position: relative;
+  margin-top: auto;
+  padding: 40px 32px 28px;
+  overflow: hidden;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--border) 30%,
+    var(--accent-ring) 50%,
+    var(--border) 70%,
+    transparent
+  );
+}
+
+.site-footer__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto 28px;
+  flex-wrap: wrap;
+}
+
+.site-footer__left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.site-footer__logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.site-footer__tagline {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 0;
+  max-width: 260px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+.site-footer__links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+}
+
+.site-footer__link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 200ms ease;
+  letter-spacing: 0.01em;
+}
+
+.site-footer__link:hover {
+  color: var(--text-1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.site-footer__link--accent {
+  color: var(--accent);
+  background: var(--accent-low);
+}
+
+.site-footer__link--accent:hover {
+  background: rgba(79, 122, 255, 0.2);
+  color: var(--text-1);
+}
+
+.site-footer__right {
+  flex-shrink: 0;
+}
+
+.site-footer__creator-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-decoration: none;
+  transition: all 300ms var(--ease-out);
+  min-width: 240px;
+  cursor: pointer;
+}
+
+.site-footer__creator-card:hover {
+  border-color: #0A66C2;
+  background: rgba(10, 102, 194, 0.06);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(10, 102, 194, 0.15);
+}
+
+.site-footer__creator-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-footer__li-icon {
+  color: #0A66C2;
+  flex-shrink: 0;
+  transition: transform 300ms ease;
+}
+
+.site-footer__creator-card:hover .site-footer__li-icon {
+  transform: scale(1.15);
+}
+
+.site-footer__creator-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-1);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.site-footer__creator-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 2px 0 0;
+  font-weight: 500;
+}
+
+.site-footer__creator-cta {
+  font-size: 11px;
+  font-weight: 800;
+  color: #0A66C2;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 250ms ease;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-footer__creator-card:hover .site-footer__creator-cta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.site-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  opacity: 0.55;
+  letter-spacing: 0.03em;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.site-footer__dot { opacity: 0.4; }
+
+@media (max-width: 640px) {
+  .site-footer {
+    padding: 32px 20px 24px;
+  }
+  .site-footer__inner {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .site-footer__creator-card {
+    min-width: unset;
+    width: 100%;
+  }
+}
