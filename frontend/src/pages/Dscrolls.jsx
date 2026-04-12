@@ -136,12 +136,12 @@ function DscrollItem({ dscroll, isActive }) {
                 }
             }
             tapCount.current = 0
-        }, 230)
+        }, 220)
     }, [liked, likesCount, dscroll._id])
 
     const handleLike = (e) => {
-        e.stopPropagation()
-        if (pendingLike.current) return  // prevent double-tap race
+        if (e) e.stopPropagation()
+        if (pendingLike.current) return
         const next = !liked
         const nextCount = next ? likesCount + 1 : likesCount - 1
         localLiked.current = next

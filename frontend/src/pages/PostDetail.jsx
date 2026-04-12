@@ -91,16 +91,55 @@ export default function PostDetail() {
 
     const handleLike = async () => {
         if (!user) { toast.error('Please sign in to like posts'); return navigate('/login'); }
-        const next = !liked; setLiked(next); setLikesCount(c => next ? c + 1 : c - 1)
-        try { next ? await api.post(`/posts/${id}/like`) : await api.delete(`/posts/${id}/like`) }
-        catch { setLiked(!next); setLikesCount(c => next ? c - 1 : c + 1) }
+        const next = !liked;
+        setLiked(next);
+        setLikesCount(c => next ? c + 1 : c - 1);
+        
+        // Optimistically update the feed cache if it exists
+        queryClient.setQueryData(['feed'], (old) => {
+            if (!old) return old;
+            return {
+                ...old,
+                pages: old.pages.map(p => ({
+                    ...p,
+                    data: p.data.map(post => String(post._id) === String(id) ? { ...post, isLiked: next, likesCount: next ? post.likesCount + 1 : post.likesCount - 1 } : post)
+                }))
+            }
+        });
+
+        try { 
+            next ? await api.post(`/posts/${id}/like`) : await api.delete(`/posts/${id}/like`) 
+        } catch { 
+            setLiked(!next); 
+            setLikesCount(c => next ? c - 1 : c + 1);
+            // Revert feed cache
+            queryClient.invalidateQueries({ queryKey: ['feed'] });
+        }
     }
 
     const handleSave = async () => {
         if (!user) { toast.error('Please sign in to save posts'); return navigate('/login'); }
         const next = !saved; setSaved(next)
-        try { next ? await api.post(`/posts/${id}/save`) : await api.delete(`/posts/${id}/save`) }
-        catch { setSaved(!next) }
+        
+        // Optimistically update the feed cache if it exists
+        queryClient.setQueryData(['feed'], (old) => {
+            if (!old) return old;
+            return {
+                ...old,
+                pages: old.pages.map(p => ({
+                    ...p,
+                    data: p.data.map(post => String(post._id) === String(id) ? { ...post, isSaved: next } : post)
+                }))
+            }
+        });
+
+        try { 
+            next ? await api.post(`/posts/${id}/save`) : await api.delete(`/posts/${id}/save`) 
+            toast.success(next ? 'Saved' : 'Removed from saved')
+        } catch { 
+            setSaved(!next);
+            queryClient.invalidateQueries({ queryKey: ['feed'] });
+        }
     }
 
     const handleShare = () => {

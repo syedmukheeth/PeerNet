@@ -20,6 +20,8 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [saved, setSaved] = useState(post.isSaved || false)
     const [isLikePending, setIsLikePending] = useState(false)
     const pendingLike = useRef(false) // true while a like/unlike API call is in-flight
+    const localLiked = useRef(null)     // user's intended liked state; null = defer to server
+    const localCount = useRef(null)     // user's intended count; null = defer to server
     const [lastTap, setLastTap] = useState(0)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
@@ -27,11 +29,23 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
 
-    // Sync liked state from server data, but only when no API call is in-flight
+    // Sync liked state from server data, but only when no local override is active
     useEffect(() => {
-        if (!pendingLike.current) {
+        if (localLiked.current !== null && !pendingLike.current) {
+            // If server finally matches our local intent, we can release the override
+            if (post.isLiked === localLiked.current) {
+                localLiked.current = null;
+                localCount.current = null;
+            }
+        }
+
+        if (localLiked.current === null) {
             setLiked(post.isLiked || false)
             setLikesCount(post.likesCount || 0)
+        } else {
+            // Keep the local override visible
+            setLiked(localLiked.current)
+            setLikesCount(localCount.current)
         }
     }, [post.isLiked, post.likesCount])
 
@@ -64,25 +78,30 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     }, [menuOpen])
 
     const handleLike = async () => {
-        if (isLikePending || pendingLike.current) return  // prevent double-click race
         const newLiked = !liked
         pendingLike.current = true
+        localLiked.current = newLiked
+        const newCount = newLiked ? likesCount + 1 : likesCount - 1
+        localCount.current = newCount
+        
         setLiked(newLiked)
         setIsLikePending(true)
-        const newCount = newLiked ? likesCount + 1 : likesCount - 1
         setLikesCount(newCount)
         onLikeToggle?.(post._id, newLiked, newCount)
         try {
             if (newLiked) await api.post(`/posts/${post._id}/like`)
             else await api.delete(`/posts/${post._id}/like`)
         } catch (err) {
-            // 409 = already liked (server state ahead of us), keep liked=true
             if (err.response?.status === 409) {
+                localLiked.current = true
+                localCount.current = likesCount + 1
                 setLiked(true)
                 setLikesCount(likesCount + 1)
                 onLikeToggle?.(post._id, true, likesCount + 1)
             } else {
-                // genuine error — revert
+                // genuine error — revert local override
+                localLiked.current = !newLiked
+                localCount.current = likesCount
                 setLiked(!newLiked)
                 setLikesCount(likesCount)
                 onLikeToggle?.(post._id, !newLiked, likesCount)

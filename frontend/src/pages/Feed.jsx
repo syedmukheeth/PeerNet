@@ -216,7 +216,7 @@ export default function Feed() {
                 ...oldData,
                 pages: oldData.pages.map(page => ({
                     ...page,
-                    data: page.data.map(post => post._id === postId ? { ...post, isLiked: liked, likesCount } : post)
+                    data: page.data.map(post => String(post._id) === String(postId) ? { ...post, isLiked: liked, likesCount } : post)
                 }))
             }
         })
@@ -229,7 +229,7 @@ export default function Feed() {
                 ...oldData,
                 pages: oldData.pages.map(page => ({
                     ...page,
-                    data: page.data.filter(post => post._id !== postId)
+                    data: page.data.filter(post => String(post._id) !== String(postId))
                 }))
             }
         })
@@ -242,7 +242,7 @@ export default function Feed() {
                 ...oldData,
                 pages: oldData.pages.map(page => ({
                     ...page,
-                    data: page.data.map(post => post._id === postId ? { ...post, ...updated } : post)
+                    data: page.data.map(post => String(post._id) === String(postId) ? { ...post, ...updated } : post)
                 }))
             }
         })
