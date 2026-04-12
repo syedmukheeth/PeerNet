@@ -160,7 +160,7 @@ export default function Messages() {
             if (senderId !== userRef.current?._id) {
                 if (activeConvoRef.current?._id === msg.conversationId) {
                     // Mark as read immediately on the server
-                    chatApi.patch(`conversations/${msg.conversationId}/messages/read`, {})
+                    chatApi.patch(`${msg.conversationId}/messages/read`, {})
                         .then(() => { window.dispatchEvent(new CustomEvent('peernet:sync-counts')) })
                         .catch(() => { })
                     
@@ -204,7 +204,7 @@ export default function Messages() {
 
     const loadConvos = async () => {
         try {
-            const { data } = await chatApi.get(`conversations`)
+            const { data } = await chatApi.get('')
             const convos = data.data || []; setConversations(convos); return convos
         } finally {
             setInitialLoad(false)
@@ -245,7 +245,7 @@ export default function Messages() {
         if (!convoId) return setSuggestions([])
         setLoadingSuggestions(true)
         try {
-            const { data } = await chatApi.get(`/conversations/${convoId}/suggestions`)
+            const { data } = await chatApi.get(`${convoId}/suggestions`)
             setSuggestions(data.suggestions || [])
         } catch (err) {
             console.warn("AI: Suggestion fetch failed:", err)
@@ -259,9 +259,9 @@ export default function Messages() {
         if (!convoId) return
         setLoadingMessages(true)
         try {
-            const { data } = await chatApi.get(`/conversations/${convoId}/messages`, { params: { limit: 50 } })
+            const { data } = await chatApi.get(`${convoId}/messages`, { params: { limit: 50 } })
             setMessages(data.data || [])
-            await chatApi.patch(`/conversations/${convoId}/messages/read`, {})
+            await chatApi.patch(`${convoId}/messages/read`, {})
             
             // Tell the sidebar to refresh its message count instantly
             window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
@@ -308,7 +308,7 @@ export default function Messages() {
     const startConvoWith = async (u) => {
         setShowNewConvo(false); setStarting(true)
         try {
-            const { data } = await chatApi.post(`conversations`, { targetUserId: u._id })
+            const { data } = await chatApi.post('', { targetUserId: u._id })
             const fresh = await loadConvos()
             const found = fresh.find(c => c._id === data.data._id) || { ...data.data, participants: [user, u] }
             await selectConvo(found)

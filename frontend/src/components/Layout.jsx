@@ -80,7 +80,7 @@ export default function Layout() {
 
         // 2. Messages Sync
         try {
-            const res = await chatApi.get('/conversations/unread-count');
+            const res = await chatApi.get('unread-count');
             setMsgCount(res.data.count || 0);
             msgRef.current = res.data.count || 0;
             console.log('✅ [SYNC] Messages:', res.data.count);
