@@ -31,6 +31,7 @@ const initChatSocket = (io) => {
 
         // Join personal room
         socket.join(`user:${userId}`);
+        logger.info(`User ${userId} joined their personal notification room`);
 
         // ── Events ──────────────────────────────────────────────────────────────
 

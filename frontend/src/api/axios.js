@@ -62,6 +62,10 @@ const applyInterceptors = (instance) => {
                     const { accessToken, refreshToken } = data.data
                     localStorage.setItem('accessToken', accessToken)
                     localStorage.setItem('refreshToken', refreshToken)
+
+                    // Nuclear Fix: Notify other hooks (like useSocket) that the token has changed
+                    window.dispatchEvent(new CustomEvent('peernet:token-refreshed', { detail: { accessToken } }))
+
                     queue.forEach((p) => p.resolve(accessToken))
                     queue = []
                     original.headers.Authorization = `Bearer ${accessToken}`
