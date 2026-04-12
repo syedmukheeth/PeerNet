@@ -95,4 +95,23 @@ const generateSuggestions = async ({ caption, commentText }) => {
     }
 };
 
-module.exports = { generateCaption, checkToxicity, generateSuggestions };
+/**
+ * Optimizes an existing caption for better engagement.
+ */
+const optimizeCaption = async (text) => {
+    try {
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        
+        const prompt = `Rewrite the following social media caption to be more engaging, catchy, and professional (max 30 words). Keep the original intent and do not use generic hashtags unless they add real value.
+        Caption: "${text}"`;
+        
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text().trim();
+    } catch (err) {
+        logger.error(`AI: Caption optimization failed: ${err.message}`);
+        return text; // Fallback to original text
+    }
+};
+
+module.exports = { generateCaption, checkToxicity, generateSuggestions, optimizeCaption };

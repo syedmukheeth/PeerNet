@@ -12,8 +12,25 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [generatingAI, setGeneratingAI] = useState(false)
     const [dragOver, setDragOver] = useState(false)
     const inputRef = useRef()
+
+    const optimizeAICaption = async () => {
+        if (!content.trim()) return
+        setGeneratingAI(true)
+        try {
+            const { data } = await api.post('/ai/optimize-caption', { text: content })
+            if (data.success) {
+                setContent(data.data.optimized)
+                toast.success('AI: Story optimized! ✨')
+            }
+        } catch {
+            toast.error('AI: Failed to optimize text')
+        } finally {
+            setGeneratingAI(false)
+        }
+    }
 
     const bgPresets = [
         { name: 'Indigo Flare', value: 'linear-gradient(135deg, #6366F1, #A78BFA)' },
@@ -109,15 +126,31 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
 
                     {/* Content Area */}
                     {isTextMode ? (
-                        <div className="story-text-preview" style={{ background: backgroundColor }}>
+                        <div className="story-text-preview" style={{ background: backgroundColor, minHeight: 280 }}>
                             <textarea 
                                 placeholder="Start typing..."
                                 value={content}
                                 onChange={e => setContent(e.target.value)}
                                 autoFocus
+                                style={{ padding: '40px 30px', fontSize: 24 }}
                             />
+
+                            {content.length > 3 && (
+                                <motion.button
+                                    className="btn-ai-sparkle"
+                                    onClick={optimizeAICaption}
+                                    disabled={generatingAI}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    style={{ bottom: 20, right: 20 }}
+                                    title="Optimize with AI"
+                                >
+                                    {generatingAI ? <span className="spinner-sm" /> : <HiSparkles />}
+                                </motion.button>
+                            )}
+
                             {/* Preset Picker */}
-                            <div style={{ position: 'absolute', bottom: 20, display: 'flex', gap: 10 }}>
+                            <div style={{ position: 'absolute', bottom: 20, left: 20, display: 'flex', gap: 10 }}>
                                 {bgPresets.map(preset => (
                                     <motion.button
                                         key={preset.name}

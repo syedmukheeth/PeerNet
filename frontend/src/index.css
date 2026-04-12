@@ -527,11 +527,12 @@ textarea {
   background: var(--input-bg);
   border: 1px solid var(--border-md);
   border-radius: 10px;
-  padding: 11px 14px;
+  padding: 10px 14px;
   color: var(--text-1);
-  font-size: 14px;
+  font-size: 14.5px;
   outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  transition: all 180ms ease;
+  line-height: 1.5;
 }
 
 .input::placeholder {
@@ -542,6 +543,44 @@ textarea {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-ring);
   background: var(--surface);
+}
+
+.btn-ai-sparkle {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: var(--logo-gradient);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--accent-ring);
+  transition: all 150ms ease;
+  z-index: 5;
+}
+
+.btn-ai-sparkle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px var(--accent-ring);
+}
+
+.btn-ai-sparkle:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-ai-sparkle .spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
 .input-group {

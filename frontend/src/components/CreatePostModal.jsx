@@ -47,6 +47,22 @@ export default function CreatePostModal({ onClose }) {
         }
     }
 
+    const optimizeAICaption = async () => {
+        if (!caption.trim()) return
+        setGeneratingAI(true)
+        try {
+            const { data } = await api.post('/ai/optimize-caption', { text: caption })
+            if (data.success) {
+                setCaption(data.data.optimized)
+                toast.success('AI: Caption optimized! ✨')
+            }
+        } catch {
+            toast.error('AI: Failed to optimize caption')
+        } finally {
+            setGeneratingAI(false)
+        }
+    }
+
     const processFile = (f) => { if (!f) return; setFile(f); setPreview(URL.createObjectURL(f)) }
     const handleFile = (e) => processFile(e.target.files[0])
     const handleDrop = useCallback((e) => { e.preventDefault(); setDragOver(false); processFile(e.dataTransfer.files[0]) }, [])
@@ -135,14 +151,29 @@ export default function CreatePostModal({ onClose }) {
                     </div>
 
                     {isTextMode ? (
-                        <div className="story-text-preview" style={{ background: backgroundColor, minHeight: 280, borderRadius: 16 }}>
+                        <div className="story-text-preview" style={{ background: backgroundColor, minHeight: 220, borderRadius: 16 }}>
                             <textarea 
                                 placeholder="What's on your mind?"
                                 value={caption}
                                 onChange={e => setCaption(e.target.value)}
-                                style={{ fontSize: 26 }}
+                                style={{ fontSize: 22, padding: '24px 20px' }}
                             />
-                            <div style={{ position: 'absolute', bottom: 16, display: 'flex', gap: 8 }}>
+                            
+                            {caption.length > 5 && (
+                                <motion.button
+                                    className="btn-ai-sparkle"
+                                    onClick={optimizeAICaption}
+                                    disabled={generatingAI}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    style={{ bottom: 16, right: 16 }}
+                                    title="AI Optimize Status"
+                                >
+                                    {generatingAI ? <span className="spinner-sm" /> : <HiSparkles />}
+                                </motion.button>
+                            )}
+
+                            <div style={{ position: 'absolute', bottom: 16, left: 16, display: 'flex', gap: 8 }}>
                                 {bgPresets.map(preset => (
                                     <motion.button
                                         key={preset.name}
@@ -175,10 +206,10 @@ export default function CreatePostModal({ onClose }) {
                             <input ref={inputRef} type="file" accept="image/*,video/*" hidden onChange={handleFile} />
                         </div>
                     ) : (
-                        <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', marginBottom: 14, maxHeight: 320, background: 'var(--surface)' }}>
+                        <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', marginBottom: 12, maxHeight: 280, background: 'var(--surface)' }}>
                             {isVideo
-                                ? <video src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} controls playsInline />
-                                : <img src={preview} style={{ width: '100%', maxHeight: 320, objectFit: 'cover' }} alt="" />
+                                ? <video src={preview} style={{ width: '100%', maxHeight: 280, objectFit: 'cover' }} controls playsInline />
+                                : <img src={preview} style={{ width: '100%', maxHeight: 280, objectFit: 'cover' }} alt="" />
                             }
                             <button className="btn btn-secondary btn-sm"
                                 onClick={() => { setFile(null); setPreview(null) }}
@@ -191,17 +222,17 @@ export default function CreatePostModal({ onClose }) {
                     {isVideo && (
                         <div style={{
                             margin: '8px 0 12px',
-                            padding: '12px',
+                            padding: '10px 12px',
                             background: 'var(--accent-subtle)',
                             borderRadius: 12,
-                            fontSize: 13,
+                            fontSize: 12.5,
                             color: 'var(--accent)',
                             border: '1px solid var(--accent-ring)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 10
                         }}>
-                            <HiVideoCamera /> 📱 This will be posted as a Dscroll (short video)
+                            <HiVideoCamera /> 📱 Posted as a Dscroll (short video)
                         </div>
                     )}
 
@@ -209,39 +240,26 @@ export default function CreatePostModal({ onClose }) {
                         <div style={{ position: 'relative' }}>
                             <textarea className="input" placeholder="Write a caption…"
                                 value={caption} onChange={e => setCaption(e.target.value)}
-                                rows={3} style={{ marginTop: 4, resize: 'none', paddingRight: 40, borderRadius: 12 }} />
+                                rows={2} style={{ marginTop: 4, resize: 'none', paddingRight: 40, borderRadius: 12 }} />
                             
-                            {preview && !isVideo && (
+                            {(preview && !isVideo) || caption.trim().length > 3 ? (
                                 <motion.button
                                     className="btn-ai-sparkle"
-                                    onClick={generateAICaption}
+                                    onClick={caption.trim().length > 0 ? optimizeAICaption : generateAICaption}
                                     disabled={generatingAI}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
-                                    style={{
-                                        position: 'absolute',
-                                        right: 12,
-                                        bottom: 12,
-                                        background: 'var(--logo-gradient)',
-                                        border: 'none',
-                                        borderRadius: 8,
-                                        color: 'white',
-                                        padding: '6px',
-                                        display: 'flex',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 4px 12px var(--accent-ring)'
-                                    }}
-                                    title="Suggest AI Caption"
+                                    title={caption.trim().length > 0 ? "Optimize with AI" : "Suggest AI Caption"}
                                 >
                                     {generatingAI ? <span className="spinner-sm" /> : <HiSparkles />}
                                 </motion.button>
-                            )}
+                            ) : null}
                         </div>
                     )}
 
                     <motion.button className="btn btn-primary w-full"
                         style={{ 
-                            marginTop: 20, 
+                            marginTop: 16, 
                             height: 52, 
                             fontSize: 15, 
                             fontWeight: 700,

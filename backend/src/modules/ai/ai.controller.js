@@ -28,6 +28,31 @@ const generateCaption = async (req, res, next) => {
     }
 };
 
+/**
+ * Handles optimizing an existing text caption.
+ */
+const optimizeCaption = async (req, res, next) => {
+    try {
+        const { text } = req.body;
+        if (!text || text.trim().length === 0) {
+            throw new ApiError(400, 'Text content is required for optimization');
+        }
+
+        const optimized = await aiConfig.optimizeCaption(text);
+
+        res.json({
+            success: true,
+            data: {
+                optimized,
+                model: 'gemini-1.5-flash'
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
-    generateCaption
+    generateCaption,
+    optimizeCaption
 };

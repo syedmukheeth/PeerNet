@@ -13,5 +13,6 @@ router.use(authenticate);
  * @access  Private
  */
 router.post('/generate-caption', uploadMedia.single('media'), aiController.generateCaption);
+router.post('/optimize-caption', aiController.optimizeCaption);
 
 module.exports = router;
