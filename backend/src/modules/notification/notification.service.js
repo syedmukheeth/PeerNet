@@ -51,8 +51,12 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
 
     const notifications = await Notification.find(query)
         .populate('sender', 'username avatarUrl isVerified')
-        // strictPopulate set to false allows population even if entityModel is missing on legacy documents
-        .populate({ path: 'entityId', options: { strictPopulate: false } })
+        .populate({
+            path: 'entityId',
+            options: { strictPopulate: false },
+            // Populate nested author if the entity is a Comment
+            populate: { path: 'author', select: 'username avatarUrl', options: { strictPopulate: false } }
+        })
         .sort({ createdAt: -1 })
         .limit(limit + 1);
 
