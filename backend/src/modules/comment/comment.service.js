@@ -7,6 +7,7 @@ const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
 const { publishEvent } = require('../../config/kafka');
 const { checkToxicity } = require('../../config/ai.config');
+const notificationService = require('../notification/notification.service');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
     // Try Post first
@@ -42,27 +43,28 @@ const addComment = async (postId, userId, { body, parentComment }) => {
         await Dscroll.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
     }
 
-    // Notify via Event Bus
+    // Notify via Direct Notification Service (Reliable Real-Time)
     if (parentComment) {
         const parent = await Comment.findById(parentComment);
-        if (parent) {
-            publishEvent('comment_events', 'REPLY_ADDED', {
-                commentId: comment._id,
-                postId,
-                authorId: userId,
-                parentCommentAuthorId: parent.author,
+        if (parent && parent.author.toString() !== userId.toString()) {
+            await notificationService.createNotification({
+                recipient: parent.author,
+                sender: userId,
                 type: 'reply',
-                postModel: targetModel
+                entityId: comment._id,
+                entityModel: 'Comment'
             });
         }
     } else {
-        publishEvent('comment_events', 'COMMENT_ADDED', {
-            commentId: comment._id,
-            postId,
-            authorId: userId,
-            postAuthorId: post.author,
-            postModel: targetModel
-        });
+        if (post.author.toString() !== userId.toString()) {
+            await notificationService.createNotification({
+                recipient: post.author,
+                sender: userId,
+                type: 'comment',
+                entityId: comment._id,
+                entityModel: 'Comment'
+            });
+        }
     }
 
     await comment.populate('author', 'username avatarUrl');
@@ -129,14 +131,16 @@ const likeComment = async (commentId, userId) => {
         await Like.create({ user: userId, targetId: commentId, targetModel: 'Comment' });
         await Comment.findByIdAndUpdate(commentId, { $inc: { likesCount: 1 } });
 
-        // Notify via Event Bus
-        publishEvent('comment_events', 'COMMENT_LIKED', {
-            commentId,
-            userId,
-            authorId: comment.author,
-            postId: comment.post,
-            postModel: comment.postModel || 'Post' // fallback to Post
-        });
+        // Notify via Direct Notification Service (Reliable Real-Time)
+        if (comment.author.toString() !== userId.toString()) {
+            await notificationService.createNotification({
+                recipient: comment.author,
+                sender: userId,
+                type: 'like',
+                entityId: commentId,
+                entityModel: 'Comment'
+            });
+        }
 
         return { liked: true };
     } catch (err) {

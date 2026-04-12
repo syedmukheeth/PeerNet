@@ -10,6 +10,7 @@ const { getRedisOptional } = require('../../config/redis');
 const ApiError = require('../../utils/ApiError');
 const { publishEvent } = require('../../config/kafka');
 const { generateCaption } = require('../../config/ai.config');
+const notificationService = require('../notification/notification.service');
 
 const POST_CACHE_TTL = 300; // 5 min
 
@@ -137,12 +138,16 @@ const likePost = async (postId, userId) => {
         await Like.create({ user: userId, targetId: postId, targetModel: 'Post' });
         await Post.findByIdAndUpdate(postId, { $inc: { likesCount: 1 } });
         
-        // Notify via Event Bus
-        publishEvent('post_events', 'POST_LIKED', {
-            postId,
-            userId,
-            authorId: post.author
-        });
+        // Notify via Direct Notification Service (Reliable Real-Time)
+        if (post.author.toString() !== userId.toString()) {
+            await notificationService.createNotification({
+                recipient: post.author,
+                sender: userId,
+                type: 'like',
+                entityId: postId,
+                entityModel: 'Post'
+            });
+        }
 
         const redis = getRedisOptional();
         if (redis) await redis.del(`post:${postId}`);
