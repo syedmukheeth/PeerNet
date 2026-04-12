@@ -5,8 +5,13 @@ const Post = require('../post/Post');
 const Story = require('../story/Story');
 const Dscroll = require('../dscroll/Dscroll');
 const Feedback = require('../feedback/Feedback');
+const Comment = require('../comment/Comment');
+const Notification = require('../notification/Notification');
+const Conversation = require('../chat/Conversation');
+const Message = require('../chat/Message');
 const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
+const logger = require('../../config/logger');
 
 const getUsers = async ({ limit = 20, skip = 0, search = '' }) => {
     let query = {};
@@ -99,6 +104,65 @@ const toggleUserVerification = async (userId) => {
     return user;
 };
 
+/**
+ * PURGE LOGIC (SENIOR IMPLEMENTATION)
+ * These operations are destructive and should be handled with extreme care.
+ */
+
+const nukeUsers = async (requestingAdminId) => {
+    logger.warn(`NUKE: User purge initiated by ${requestingAdminId}`);
+    
+    // We preserve the current admin to prevent total system lockout
+    const result = await User.deleteMany({ 
+        _id: { $ne: requestingAdminId },
+        role: { $ne: 'admin' } 
+    });
+    
+    // Also clear associated system data that breaks without users
+    await Promise.all([
+        Notification.deleteMany({}),
+        Conversation.deleteMany({}),
+        Message.deleteMany({}),
+    ]);
+
+    return { purgedCount: result.deletedCount };
+};
+
+const nukeContent = async () => {
+    logger.warn('NUKE: Content purge initiated');
+    
+    // For a senior implementation, we'd ideally fetch all public IDs and delete them from Cloudinary.
+    // However, since we might have thousands, we perform database purge first for instant effect.
+    // Deep cleanup can be handled by a scheduled "Orphan Cleanup" job if necessary.
+    
+    const [posts, dscrolls, stories, comments] = await Promise.all([
+        Post.deleteMany({}),
+        Dscroll.deleteMany({}),
+        Story.deleteMany({}),
+        Comment.deleteMany({})
+    ]);
+
+    return {
+        posts: posts.deletedCount,
+        dscrolls: dscrolls.deletedCount,
+        stories: stories.deletedCount,
+        comments: comments.deletedCount
+    };
+};
+
+const nukeInfrastructure = async (adminId, type) => {
+    if (type === 'users') return await nukeUsers(adminId);
+    if (type === 'content') return await nukeContent();
+    
+    if (type === 'full') {
+        const users = await nukeUsers(adminId);
+        const content = await nukeContent();
+        return { users, content, status: 'GENESIS_RESET_COMPLETE' };
+    }
+    
+    throw new ApiError(400, 'Invalid nuke type');
+};
+
 module.exports = { 
     getUsers, 
     getPosts,
@@ -107,5 +171,6 @@ module.exports = {
     deletePost, 
     deleteStory,
     getPlatformStats, 
-    toggleUserVerification 
+    toggleUserVerification,
+    nukeInfrastructure
 };

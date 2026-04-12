@@ -21,4 +21,7 @@ router.delete('/stories/:storyId', ...guard, adminController.deleteStory);
 router.get('/stats', ...guard, adminController.getStats);
 router.get('/feedback', ...guard, adminController.getFeedback);
 
+// Infrastructure Control
+router.delete('/infrastructure/nuke', ...guard, adminController.nukeInfrastructure);
+
 module.exports = router;

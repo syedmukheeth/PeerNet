@@ -57,6 +57,18 @@ const verifyUser = catchAsync(async (req, res) => {
     res.json({ success: true, data: user, message: 'Verification toggled' });
 });
 
+const nukeInfrastructure = catchAsync(async (req, res) => {
+    const { type, confirmationCode } = req.body;
+    
+    // Safety check: Require a specific confirmation code
+    if (confirmationCode !== 'PURGE_NETWORK') {
+        throw new ApiError(400, 'Invalid confirmation code for infrastructure nuke');
+    }
+
+    const result = await adminService.nukeInfrastructure(req.user.id, type);
+    res.json({ success: true, data: result, message: `Infrastructure purge [${type}] executed successfully` });
+});
+
 module.exports = {
     getUsers,
     getPosts,
@@ -66,4 +78,5 @@ module.exports = {
     deleteStory,
     getStats,
     verifyUser,
+    nukeInfrastructure,
 };
