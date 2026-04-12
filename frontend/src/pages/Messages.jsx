@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import api, { SOCKET_URL, CHAT_BASE_URL } from '../api/axios'
-import { io } from 'socket.io-client'
+import api, { CHAT_BASE_URL } from '../api/axios'
+import { useSocket } from '../hooks/useSocket'
 import { HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiDocument, HiDownload, HiPaperAirplane, HiTrash } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
 import EmojiPicker from 'emoji-picker-react'
 import { ChatListSkeleton, MessageBubblesSkeleton } from '../components/SkeletonLoader'
 
-let socket = null
+
 
 
 
@@ -140,18 +140,22 @@ export default function Messages() {
         inputRef.current?.focus()
     }
 
-    /* socket */
+    const socket = useSocket(user)
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken')
-        socket = io(SOCKET_URL, { auth: { token }, path: '/socket.io', transports: ['websocket', 'polling'] })
+        if (!socket) return
+
         socket.on('new_message', (msg) => {
             const senderId = msg.sender?._id || msg.sender
             if (senderId === userRef.current?._id) return
 
             if (activeConvoRef.current?._id === msg.conversationId) {
                 // Mark as read immediately on the server
-                api.patch(`conversations/${msg.conversationId}/messages/read`, {}, { baseURL: CHAT_BASE_URL }).catch(() => { })
+                api.patch(`conversations/${msg.conversationId}/messages/read`, {}, { baseURL: CHAT_BASE_URL })
+                    .then(() => {
+                        window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+                    })
+                    .catch(() => { })
                 
                 setMessages(m => {
                     const exists = m.find(x => x._id === msg._id)
@@ -161,6 +165,9 @@ export default function Messages() {
 
                 // Trigger suggestion update on new incoming message context
                 fetchSuggestions(msg.conversationId)
+            } else {
+                // If not in this conversation, we still need to tell the sidebar to update
+                window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
             }
 
             setConversations(cs => {
@@ -187,13 +194,19 @@ export default function Messages() {
         })
         socket.on('message_deleted', ({ messageId }) => {
             setMessages(m => m.filter(x => x._id !== messageId))
-            // We do not re-fetch the entire conversation's lastMessage here yet, 
-            // but the next refresh will auto-correct it if the last message was deleted.
         })
         socket.on('user_typing', () => setPeerTyping(true))
         socket.on('user_stop_typing', () => setPeerTyping(false))
-        return () => { socket?.disconnect(); socket = null }
-    }, [])
+        
+        return () => {
+            socket.off('new_message')
+            socket.off('messages_read')
+            socket.off('message_edited')
+            socket.off('message_deleted')
+            socket.off('user_typing')
+            socket.off('user_stop_typing')
+        }
+    }, [socket])
 
     useEffect(() => { activeConvoRef.current = activeConvo }, [activeConvo])
 
@@ -258,6 +271,9 @@ export default function Messages() {
             setMessages(data.data || [])
             await api.patch(`/conversations/${convoId}/messages/read`, {}, { baseURL: CHAT_BASE_URL })
             
+            // Tell the sidebar to refresh its message count instantly
+            window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+
             // Smart replies
             if (convoId) fetchSuggestions(convoId)
         } catch (err) { 
