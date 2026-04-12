@@ -475,11 +475,12 @@ export default function Messages() {
 
     return (
         <>
-            {/* Full-screen fixed DM overlay, starts right of the sidebar */}
+            {/* DM view fills the layout-container (flex:1 of main-col) */}
             <div className="dm-wrapper" style={{
-                position: 'fixed', top: 0, right: 0, bottom: 0,
-                left: 'var(--sidebar-w, 240px)',
-                display: 'flex', background: 'var(--bg)', zIndex: 20,
+                display: 'flex',
+                background: 'var(--bg)',
+                height: '100%',
+                overflow: 'hidden',
             }}>
 
                 {/* ─── LEFT: conversation list ─────────────────── */}
@@ -911,9 +912,6 @@ export default function Messages() {
                     )}
                 </div>
             </div>
-
-            {/* Spacer behind the fixed panel */}
-            <div style={{ height: '100dvh' }} />
 
             {showNewConvo && <NewConvoModal onClose={() => setShowNewConvo(false)} onStart={startConvoWith} />}
         </>

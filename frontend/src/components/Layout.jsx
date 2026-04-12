@@ -262,7 +262,7 @@ export default function Layout() {
                 </div>
             </aside>
 
-            <main className="main-col overflow-y-auto h-[100dvh]" ref={mainRef}>
+            <main className="main-col flex flex-col h-[100dvh] overflow-hidden" ref={mainRef}>
                 <header className="mobile-top-header">
                     <Link to="/" className="flex items-center gap-2 no-underline">
                         <img src={logoImg} alt="PN" className="w-7 h-7 rounded-lg" />
@@ -278,7 +278,7 @@ export default function Layout() {
                     </div>
                 </header>
 
-                <div className="layout-container min-h-[calc(100dvh-120px)]">
+                <div className="layout-container flex-1 min-h-0 overflow-y-auto">
                     <AnimatePresence mode="wait"><Outlet /></AnimatePresence>
                 </div>
 
