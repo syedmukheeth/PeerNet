@@ -4,47 +4,66 @@ const { Kafka } = require('kafkajs');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('./logger');
 
-const kafka = new Kafka({
-    clientId: 'peernet-api',
-    brokers: [process.env.KAFKA_BROKER || 'localhost:9092'],
-    retry: {
-        initialRetryTime: 100,
-        retries: 8
-    }
-});
+// ── 🚀 OPTIONAL KAFKA LOGIC ──────────────────────────────────────────────────
+// Only initialize if a broker is explicitly defined. 
+// On many cloud platforms (Render), we don't want to stall on localhost:9092.
+const isKafkaEnabled = !!process.env.KAFKA_BROKER;
 
-const producer = kafka.producer({
-    // Enable idempotence for exactly-once semantics
-    // This ensures no duplicates due to network retries
-    idempotent: true,
-    maxInFlightRequests: 1,
-});
+let kafka = null;
+let producer = null;
 
+if (isKafkaEnabled) {
+    kafka = new Kafka({
+        clientId: 'peernet-api',
+        brokers: [process.env.KAFKA_BROKER],
+        retry: {
+            initialRetryTime: 300,
+            retries: 3 // Reduced retries to prevent startup hangs
+        }
+    });
+
+    producer = kafka.producer({
+        idempotent: true,
+        maxInFlightRequests: 1,
+    });
+} else {
+    logger.warn('Kafka: DISBALED (KAFKA_BROKER env var missing). Operating in standalone mode.');
+}
+
+/**
+ * Connects the producer to the broker.
+ * Fails gracefully if Kafka is unavailable.
+ */
 const initProducer = async () => {
+    if (!isKafkaEnabled) return;
     try {
         await producer.connect();
         logger.info('Kafka: Producer connected');
     } catch (err) {
-        logger.error(`Kafka: Producer failed to connect: ${err.message}`);
+        logger.error(`Kafka: Producer connection failed (Non-Fatal): ${err.message}`);
     }
 };
 
 /**
- * Publishes an event to a Kafka topic.
- * @param {string} topic - Topic name (e.g. 'post_events')
- * @param {string} type - Event type (e.g. 'POST_CREATED')
- * @param {object} payload - Event data
+ * High-performance event publishing.
+ * In Standalone mode, this simply logs the event instead of failing.
  */
 const publishEvent = async (topic, type, payload) => {
-    try {
-        const eventId = uuidv4();
-        const message = {
-            eventId,
-            type,
-            payload,
-            timestamp: new Date().toISOString(),
-        };
+    const eventId = uuidv4();
+    const message = {
+        eventId,
+        type,
+        payload,
+        timestamp: new Date().toISOString(),
+    };
 
+    if (!isKafkaEnabled) {
+        // Standalone Fallback
+        logger.info(`[OFFLINE-EVT] ${topic}: ${type} [${eventId}]`);
+        return;
+    }
+
+    try {
         await producer.send({
             topic,
             messages: [
@@ -54,15 +73,16 @@ const publishEvent = async (topic, type, payload) => {
                 },
             ],
         });
-
-        logger.info(`Kafka: Event published to ${topic}: ${type} [${eventId}]`);
+        logger.info(`Kafka: Published to ${topic}: ${type}`);
     } catch (err) {
-        logger.error(`Kafka: Failed to publish event: ${err.message}`);
+        logger.error(`Kafka: Publish FAILED: ${err.message}`);
     }
 };
 
 const disconnectProducer = async () => {
-    await producer.disconnect();
+    if (isKafkaEnabled && producer) {
+        await producer.disconnect();
+    }
 };
 
-module.exports = { initProducer, publishEvent, disconnectProducer, kafka };
+module.exports = { initProducer, publishEvent, disconnectProducer, kafka, isKafkaEnabled };
