@@ -48,13 +48,13 @@ const formatNotification = (notif, hydratedEntity = null) => {
                 thumbnail = getMedia(parent);
                 targetId = parent._id?.toString();
             }
-            // Build navigation URL: always go to the parent post
+            // Build navigation URL: always go to the parent post and pass the commentId
             if (targetId) {
-                targetUrl = `/posts/${targetId}`;
+                targetUrl = `/posts/${targetId}?commentId=${obj.entityId}`;
             } else {
                 // Fallback: use raw ObjectId stored in e.post or e.dscroll
                 const rawParentId = e.post?.toString() || e.dscroll?.toString();
-                targetUrl = rawParentId ? `/posts/${rawParentId}` : '/';
+                targetUrl = rawParentId ? `/posts/${rawParentId}?commentId=${obj.entityId}` : '/';
             }
         }
     }
@@ -182,13 +182,14 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
             .lean()
     ]);
 
-    // Build a map of all parent post IDs we still need for comments with unpopulated post
+    // Helper to check if a field is an unpopulated ObjectId
+    const isUnpopulated = (val) => val && (!val._id || typeof val.author === 'undefined');
+
     const commentPostIds = [];
     const commentDscrollIds = [];
     comments.forEach(c => {
-        // If post/dscroll is still an ObjectId (not populated), queue for manual lookup
-        if (c.post && typeof c.post !== 'object') commentPostIds.push(c.post);
-        if (c.dscroll && typeof c.dscroll !== 'object') commentDscrollIds.push(c.dscroll);
+        if (isUnpopulated(c.post)) commentPostIds.push(c.post.toString());
+        if (isUnpopulated(c.dscroll)) commentDscrollIds.push(c.dscroll.toString());
     });
 
     const [extraPosts, extraDscrolls] = await Promise.all([
@@ -201,10 +202,10 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
 
     // Patch comments: replace bare ObjectId with the fetched document
     comments.forEach(c => {
-        if (c.post && typeof c.post !== 'object') {
+        if (isUnpopulated(c.post)) {
             c.post = extraPostsMap.get(c.post.toString()) || c.post;
         }
-        if (c.dscroll && typeof c.dscroll !== 'object') {
+        if (isUnpopulated(c.dscroll)) {
             c.dscroll = extraDscrollsMap.get(c.dscroll.toString()) || c.dscroll;
         }
     });
