@@ -7,10 +7,14 @@ const createNotification = async (data) => {
     try {
         const notification = await Notification.create(data);
 
-        // Populate for real-time delivery
+        // Populate for real-time delivery (Deep Sync for comment thumbnails)
         await notification.populate([
             { path: 'sender', select: 'username avatarUrl isVerified' },
-            { path: 'entityId', options: { strictPopulate: false } }
+            { 
+                path: 'entityId', 
+                options: { strictPopulate: false },
+                populate: { path: 'post', select: 'mediaUrl thumbnailUrl videoUrl', options: { strictPopulate: false } }
+            }
         ]);
 
         // Broadcast to Redis for real-time delivery (to Chat Service)
@@ -42,6 +46,27 @@ const createNotification = async (data) => {
     } catch (err) {
         console.error(`NotificationService: Create FAILED - ${err.message}`);
         throw err;
+    }
+};
+
+const removeNotification = async (filter) => {
+    try {
+        const notification = await Notification.findOne(filter);
+        if (!notification) return;
+
+        await Notification.deleteOne({ _id: notification._id });
+
+        // Broadcast removal to real-time clients
+        const redis = getRedisOptional();
+        if (redis) {
+            await redis.publish('peernet:notifications', JSON.stringify({
+                recipient: notification.recipient.toString(),
+                type: 'notification_removed',
+                notificationId: notification._id.toString()
+            }));
+        }
+    } catch (err) {
+        console.error(`NotificationService: Remove FAILED - ${err.message}`);
     }
 };
 

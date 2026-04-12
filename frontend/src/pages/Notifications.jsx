@@ -262,14 +262,15 @@ function NotifRow({ n, index, onFollowBack }) {
                                 alt=""
                                 onError={(e) => {
                                     e.target.style.display = 'none';
-                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';
+                                    const sibling = e.target.parentNode.querySelector('.fallback-icon');
+                                    if (sibling) sibling.style.display = 'flex';
                                 }}
                                 style={{
                                     width: '100%', height: '100%',
                                     objectFit: 'cover', display: 'block',
                                 }}
                             />
-                            <div style={{ display: 'none', color: 'var(--text-3)', fontSize: 18 }}>
+                            <div className="fallback-icon" style={{ display: 'none', color: 'var(--text-3)', fontSize: 18 }}>
                                 {n.type === 'like' ? '❤️' : '💬'}
                             </div>
                         </div>
@@ -391,10 +392,17 @@ export default function Notifications() {
             setHasNew(true)
         })
 
+        socket.on('notification_removed', (payload) => {
+            setNotifs(prev => prev.filter(n => n._id !== payload.notificationId))
+            // If it was an unread notif, decrement the count
+            setUnread(u => Math.max(0, u - 1))
+        })
+
         return () => {
             socket.off('new_notification')
+            socket.off('notification_removed')
         }
-    }, [socket])
+    }, [socket, user])
 
     const markRead = async () => {
         try {

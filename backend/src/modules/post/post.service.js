@@ -169,6 +169,13 @@ const unlikePost = async (postId, userId) => {
         userId
     });
 
+    // Sync with Notifications: Remove the like alert
+    await notificationService.removeNotification({
+        sender: userId,
+        entityId: postId,
+        type: 'like'
+    });
+
     const redis = getRedisOptional();
     if (redis) await redis.del(`post:${postId}`);
     return { liked: false };

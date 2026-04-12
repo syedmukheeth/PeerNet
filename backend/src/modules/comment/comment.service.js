@@ -118,10 +118,10 @@ const deleteComment = async (commentId, userId) => {
         await Dscroll.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
     }
 
-    // Notify via Event Bus
-    publishEvent('comment_events', 'COMMENT_DELETED', {
-        commentId: comment._id,
-        postId: comment.post
+    // Sync with Notifications: Remove the comment alert
+    await notificationService.removeNotification({
+        entityId: comment._id,
+        type: 'comment'
     });
 };
 
