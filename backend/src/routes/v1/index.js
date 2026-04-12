@@ -17,15 +17,6 @@ const { authenticate } = require('../../middleware/auth.middleware');
 // 🚀 NUCLEAR BYPASS: Diagnostic and Heartbeat routes defined directly to ensure visibility
 router.get('/ping', (_req, res) => res.json({ status: 'pong', version: 'v2.bypass', timestamp: new Date() }));
 
-router.get('/notifications/unread-count', authenticate, async (req, res) => {
-    try {
-        const count = await notificationService.getUnreadCount(req.user._id);
-        res.json({ count });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/posts', postRoutes);

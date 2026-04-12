@@ -1,9 +1,8 @@
 'use strict';
 
-// Load .env for local dev; on Render vars are injected into process.env automatically
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-require('dotenv').config(); // fallback to cwd/.env (no-op if already loaded)
+require('dotenv').config();
 
 const express = require('express');
 const helmet = require('helmet');
@@ -19,95 +18,68 @@ const { tracingMiddleware } = require('./middleware/tracing.middleware');
 const { metricsMiddleware, getMetricsEndpoint } = require('./config/metrics.config');
 const v1Router = require('./routes/v1');
 const ApiError = require('./utils/ApiError');
-const notificationService = require('./modules/notification/notification.service');
+const notificationController = require('./modules/notification/notification.controller');
 const { authenticate } = require('./middleware/auth.middleware');
 
 const createApp = () => {
     const app = express();
-
-    // ── Trust proxy (for accurate IP behind Nginx) ──────────────────────────────
     app.set('trust proxy', 1);
-
-    // ── Disable ETags — prevents 304 responses that bypass our Redis cache ──────
     app.set('etag', false);
 
-    // ── 0. Observability (Tracing & Metrics) ─────────────────────────────────
     app.use(tracingMiddleware);
     app.use(metricsMiddleware);
 
-    // ── 1. No Browser Caching ────────────────────────────────────────────────
-    app.use('/api', (_req, res, next) => {
-        res.set('Cache-Control', 'no-store');
-        next();
-    });
-
-    // ── Security headers ─────────────────────────────────────────────────────────
+    // ── Pre-Route Security ───────────────────────────────────────────────────────
     app.use(helmet());
-
-    // ── CORS ─────────────────────────────────────────────────────────────────────
+    
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
-    app.use(
-        cors({
-            origin: (origin, cb) => {
-                // Allow requests with no origin (mobile, curl, server-to-server)
-                if (!origin) return cb(null, true);
-                // Always allow localhost development
-                if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return cb(null, true);
-                // Always allow any Vercel preview/prod deployment
-                if (origin.endsWith('.vercel.app')) return cb(null, true);
-                // Allow explicitly listed origins from env
-                if (allowedOrigins.includes(origin)) return cb(null, true);
-                cb(new Error(`CORS: origin ${origin} not allowed`));
-            },
-            credentials: true,
-        }),
-    );
+    app.use(cors({
+        origin: (origin, cb) => {
+            if (!origin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1') || origin.endsWith('.vercel.app')) return cb(null, true);
+            if (allowedOrigins.includes(origin)) return cb(null, true);
+            cb(new Error(`CORS: origin ${origin} not allowed`));
+        },
+        credentials: true,
+    }));
 
-    // ── Body parsing ─────────────────────────────────────────────────────────────
     app.use(express.json({ limit: '100mb' }));
     app.use(express.urlencoded({ extended: true, limit: '100mb' }));
     app.use(cookieParser());
-
-    // ── NoSQL injection sanitization ─────────────────────────────────────────────
     app.use(mongoSanitize());
 
-    // ── HTTP request logging ─────────────────────────────────────────────────────
     if (process.env.NODE_ENV !== 'test') {
-        app.use(
-            morgan('combined', {
-                stream: { write: (msg) => logger.info(msg.trim()) },
-            }),
-        );
+        app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
     }
 
-    // ── Global rate limiter ──────────────────────────────────────────────────────
-    app.use(globalLimiter);
-
-    // ── Health check & Metrics ────────────────────────────────────────────────
-    app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV, traceId: _req.id }));
-    app.get('/metrics', getMetricsEndpoint);
-
-    // 🚀 GLOBAL BYPASS: Direct mounting to ensure these critical sync endpoints never 404
-    app.get('/api/v1/notifications/unread-count', authenticate, async (req, res) => {
-        try {
-            const count = await notificationService.getUnreadCount(req.user._id);
-            res.json({ count });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
+    // 🚀 NEW: Diagnostic Tracer (Log every sync attempts)
+    app.use((req, res, next) => {
+        if (req.url.includes('unread-count')) {
+            console.log(`[SYNC-TRACE] ${req.method} ${req.url} - Headers: ${JSON.stringify(req.headers['authorization'] ? 'Present' : 'Missing')}`);
         }
+        next();
     });
+
+    // 🚀 GLOBAL BYPASS: Absolute top-level routes to prevent 404s
+    // Mounted at root and /api/v1 to handle all proxy variations
+    const syncRoutes = ['/notifications/unread-count', '/api/v1/notifications/unread-count'];
+    app.get(syncRoutes, authenticate, notificationController.getUnreadCount);
+    app.get(['/ping', '/api/v1/ping'], (_req, res) => res.json({ status: 'ok', time: new Date() }));
+    app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));
+
+    // ── Standard Middlewares ──────────────────────────────────────────────────────
+    app.use(globalLimiter);
+    app.get('/metrics', getMetricsEndpoint);
 
     // ── API routes ───────────────────────────────────────────────────────────────
     app.use('/api/v1', v1Router);
 
-    // ── 404 handler ──────────────────────────────────────────────────────────────
-    app.use((req, _res, next) =>
-        next(new ApiError(404, `Route ${req.method} ${req.originalUrl} not found`)),
-    );
+    // 404 handler
+    app.use((req, _res, next) => {
+        console.warn(`[404] ${req.method} ${req.originalUrl}`);
+        next(new ApiError(404, `Route ${req.method} ${req.originalUrl} not found`));
+    });
 
-    // ── Centralized error handler ─────────────────────────────────────────────────
     app.use(errorHandler);
-
     return app;
 };
 
