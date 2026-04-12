@@ -8,8 +8,7 @@ import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAl
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
-import { ProfileSkeleton, GridSkeleton } from '../components/SkeletonLoader'
-
+import logoImg from '../assets/logo.png'
 
 
 export default function Profile() {
@@ -112,8 +111,11 @@ export default function Profile() {
     }
 
 
-    if (loading) return <ProfileSkeleton />
-
+    if (loading) return (
+        <div className="flex justify-center items-center" style={{ padding: '80px 0' }}>
+            <div className="spinner" style={{ width: 36, height: 36 }} />
+        </div>
+    )
     if (!profile) return (
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 60 }}>User not found</p>
     )
@@ -290,31 +292,32 @@ export default function Profile() {
                     emptyDesc = isMe ? 'Save posts to view them here' : ''
                 }
 
-                if (isLoading) return <GridSkeleton />
+                if (isLoading) return (
+                    <div className="flex justify-center" style={{ padding: 60 }}>
+                        <div className="spinner" style={{ width: 36, height: 36 }} />
+                    </div>
+                )
 
                 return (
                     <>
                         <div className="profile-grid">
-                            {displayPosts.map((p, i) => {
-                                if (!p) return null;
-                                return (
-                                    <Link key={p._id} to={`/posts/${p._id}`} className="profile-grid-item"
-                                        style={{ animationDelay: `${i * 40}ms` }}>
-                                        {p.mediaType === 'video'
-                                            ? <video src={p.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
-                                            : <img src={p.mediaUrl} alt="" loading="lazy" />
-                                        }
-                                        <div className="profile-grid-overlay">
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <HiHeart /> {p.likesCount || 0}
-                                            </span>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <HiChat /> {p.commentsCount || 0}
-                                            </span>
-                                        </div>
-                                    </Link>
-                                );
-                            })}
+                            {displayPosts.map((p, i) => (
+                                <Link key={p._id} to={`/posts/${p._id}`} className="profile-grid-item"
+                                    style={{ animationDelay: `${i * 40}ms` }}>
+                                    {p.mediaType === 'video'
+                                        ? <video src={p.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+                                        : <img src={p.mediaUrl} alt="" loading="lazy" />
+                                    }
+                                    <div className="profile-grid-overlay">
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <HiHeart /> {p.likesCount || 0}
+                                        </span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <HiChat /> {p.commentsCount || 0}
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))}
                         </div>
                         {displayPosts.length === 0 && (
                             <div className="empty-state" style={{ paddingTop: 60 }}>
