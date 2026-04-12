@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
@@ -18,6 +18,8 @@ export default function PostDetail() {
     const { id } = useParams()
     const { user } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
+    const urlCommentId = new URLSearchParams(location.search).get('commentId')
     const [post, setPost] = useState(null)
     const [comments, setComments] = useState([])
     const [body, setBody] = useState('')
@@ -54,6 +56,22 @@ export default function PostDetail() {
             setNotFound(true)
         }).finally(() => setLoading(false))
     }, [id])
+
+    // Auto-scroll and flash target comment if provided via URL
+    useEffect(() => {
+        if (urlCommentId && comments.length > 0) {
+            setTimeout(() => {
+                const el = document.getElementById(`comment-${urlCommentId}`)
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    const originalBg = el.style.backgroundColor || 'transparent'
+                    el.style.backgroundColor = 'rgba(99, 102, 241, 0.15)'
+                    el.style.transition = 'background-color 0.8s ease'
+                    setTimeout(() => el.style.backgroundColor = originalBg, 2000)
+                }
+            }, 300)
+        }
+    }, [comments, urlCommentId])
 
     // Close menu on outside click
     useEffect(() => {
@@ -336,7 +354,7 @@ export default function PostDetail() {
                             comments.map(c => {
                                 const cav = c.author?.avatarUrl || `https://ui-avatars.com/api/?name=${c.author?.username}&background=6366F1&color=fff`
                                 return (
-                                    <div key={c._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                                    <div id={`comment-${c._id}`} key={c._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '4px 6px', borderRadius: 8 }}>
                                         <Link to={`/profile/${c.author?._id}`}>
                                             <img src={cav} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} alt="" />
                                         </Link>
@@ -396,7 +414,7 @@ export default function PostDetail() {
                                                     {replyData[c._id]?.replies?.map(reply => {
                                                         const rav = reply.author?.avatarUrl || `https://ui-avatars.com/api/?name=${reply.author?.username}&background=6366F1&color=fff`
                                                         return (
-                                                            <div key={reply._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                                                            <div id={`comment-${reply._id}`} key={reply._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '4px 6px', borderRadius: 8 }}>
                                                                 <Link to={`/profile/${reply.author?._id}`}>
                                                                     <img src={rav} style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} alt="" />
                                                                 </Link>
