@@ -107,7 +107,7 @@ export default function Admin() {
     }
 
     return (
-        <div className="admin-page fade-in pb-20">
+        <div className="admin-page fade-in pb-20 p-6 md:p-10 lg:p-12 max-w-7xl mx-auto">
             {/* Header Area */}
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                 <div>

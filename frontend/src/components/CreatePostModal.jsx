@@ -238,9 +238,9 @@ export default function CreatePostModal({ onClose }) {
 
                     {!isTextMode && (
                         <div style={{ position: 'relative' }}>
-                            <textarea className="input" placeholder="Write a caption…"
+                            <textarea className="modal-textarea" placeholder="Write a caption…"
                                 value={caption} onChange={e => setCaption(e.target.value)}
-                                rows={2} style={{ marginTop: 4, resize: 'none', paddingRight: 40, borderRadius: 12 }} />
+                                rows={2} style={{ marginTop: 4 }} />
                             
                             {(preview && !isVideo) || caption.trim().length > 3 ? (
                                 <motion.button

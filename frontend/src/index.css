@@ -813,7 +813,8 @@ textarea {
 .app-layout {
   display: grid;
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   --sidebar-w: clamp(200px, 15vw, 240px);
   transition: grid-template-columns 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1644,6 +1645,32 @@ textarea {
   font-size: 12px;
   color: var(--text-3);
   white-space: nowrap;
+}
+
+/* ── Modal & Form Inputs ──────────────────────────────────── */
+.modal-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.modal-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 3px var(--accent-low);
+}
+
+.modal-textarea::placeholder {
+  color: var(--text-3);
 }
 
 /* ── Auth Pages ──────────────────────────────────────────── */

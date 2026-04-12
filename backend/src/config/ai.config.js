@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  */
 const generateCaption = async (filePath, mimeType) => {
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         const imageBuffer = fs.readFileSync(filePath);
         
         const prompt = "Describe this media in a short, engaging social media caption (max 20 words). Do not use hashtags.";
@@ -40,7 +40,7 @@ const generateCaption = async (filePath, mimeType) => {
  */
 const checkToxicity = async (text) => {
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         
         const prompt = `Classify the following text for toxicity (hate speech, harassment, severe insults). 
         Return ONLY a JSON object with a single key "toxicityScore" between 0 and 1. 
@@ -70,7 +70,7 @@ const checkToxicity = async (text) => {
  */
 const generateSuggestions = async ({ caption, commentText }) => {
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         
         const context = `Post caption: "${caption || 'No caption'}"` + 
                         (commentText ? `\nReplying to comment: "${commentText}"` : '');
@@ -100,7 +100,7 @@ const generateSuggestions = async ({ caption, commentText }) => {
  */
 const optimizeCaption = async (text) => {
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         
         const prompt = `Rewrite the following social media caption to be more engaging, catchy, and professional (max 30 words). Keep the original intent and do not use generic hashtags unless they add real value.
         Caption: "${text}"`;

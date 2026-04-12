@@ -20,7 +20,7 @@ const generateCaption = async (req, res, next) => {
             success: true,
             data: {
                 caption,
-                model: 'gemini-1.5-flash'
+                model: 'gemini-2.5-flash'
             }
         });
     } catch (err) {
@@ -44,7 +44,7 @@ const optimizeCaption = async (req, res, next) => {
             success: true,
             data: {
                 optimized,
-                model: 'gemini-1.5-flash'
+                model: 'gemini-2.5-flash'
             }
         });
     } catch (err) {
