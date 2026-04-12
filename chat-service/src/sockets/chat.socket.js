@@ -30,8 +30,8 @@ const initChatSocket = (io) => {
         await redis.setEx(`online:${userId}`, ONLINE_TTL, '1');
 
         // Join personal room
-        socket.join(`user:${userId}`);
-        logger.info(`User ${userId} joined their personal notification room`);
+        socket.join(`user:${userId.toString()}`);
+        logger.info(`User ${userId.toString()} joined their personal notification room`);
 
         // ── Events ──────────────────────────────────────────────────────────────
 
