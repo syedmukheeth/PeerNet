@@ -119,7 +119,7 @@ export default function Admin() {
     }
 
     return (
-        <div className="admin-page fade-in pb-20 p-6 md:p-10 lg:p-12 max-w-[1400px] mx-auto min-h-screen">
+        <div className="admin-page fade-in pb-20 p-6 md:p-10 lg:p-12 max-w-[1400px] mx-auto">
             {/* Header Area */}
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 glass-card p-6 md:p-8 rounded-[32px] relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent pointer-events-none" />
