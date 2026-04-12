@@ -85,7 +85,7 @@ const createNotification = async (data) => {
         let hydrated = null;
         if (data.entityModel === 'Post') hydrated = await Post.findById(data.entityId).lean();
         else if (data.entityModel === 'Dscroll') hydrated = await Dscroll.findById(data.entityId).lean();
-        else if (data.entityModel === 'Comment') hydrated = await Comment.findById(data.entityId).populate(['post', 'dscroll']).lean();
+        else if (data.entityModel === 'Comment') hydrated = await Comment.findById(data.entityId).populate({ path: 'post', strictPopulate: false }).populate({ path: 'dscroll', strictPopulate: false }).lean();
 
         const sender = await User.findById(data.sender).select('username avatarUrl isVerified').lean();
         notification.sender = sender;
