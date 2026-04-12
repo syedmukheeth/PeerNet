@@ -4,49 +4,76 @@ const Notification = require('./Notification');
 const Post = require('../post/Post');
 const Comment = require('../comment/Comment');
 const Dscroll = require('../dscroll/Dscroll');
+const User = require('../user/User');
 const { getRedisOptional } = require('../../config/redis');
 
-const formatNotification = (notif) => {
-    // Standardize to a plain object without losing populated data
-    const obj = notif.toObject ? notif.toObject({ virtuals: true, getters: true }) : notif;
-    const e = obj.entityId;
+/**
+ * The "Absolute Truth" Formatter
+ * Standardizes notifications, extracts thumbnails, and calculates precise navigation URLs.
+ */
+const formatNotification = (notif, hydratedEntity = null) => {
+    // 1. Convert to plain object
+    const obj = notif.toObject ? notif.toObject({ virtuals: true, getters: true }) : { ...notif };
+    
+    // 2. Resolve the target entity (use the passed hydrate or the existing populated one)
+    const e = hydratedEntity || obj.entityId;
     
     let thumbnail = null;
+    let targetUrl = '/';
     let targetId = null;
+    const type = obj.type;
 
-    // ULTRA-DEFENSIVE MAPPING: 
-    // We search the entire object tree for anything that looks like a media URL.
     if (e) {
-        if (typeof e === 'object') {
-            const getMedia = (target) => target.mediaUrl || target.thumbnailUrl || target.videoUrl || null;
-            
-            // 1. Try the entity itself (for Post/Dscroll)
+        // High-fidelity extraction logic
+        const getMedia = (target) => {
+            if (!target) return null;
+            // Support for Post media, Dscroll thumbnailUrl, or raw videoUrl
+            return target.mediaUrl || target.thumbnailUrl || (target.mediaType === 'video' ? target.videoUrl : null);
+        };
+        
+        if (obj.entityModel === 'Post') {
             thumbnail = getMedia(e);
-            
-            // 2. Try nested post (for Comment/Reply)
-            if (!thumbnail && e.post) {
-                thumbnail = getMedia(e.post);
-                targetId = e.post._id || e.post;
-            } else {
-                targetId = e._id || e;
+            targetId = e._id?.toString() || e.toString();
+            targetUrl = `/posts/${targetId}`;
+        } else if (obj.entityModel === 'Dscroll') {
+            // For reels, prioritize the thumbnail
+            thumbnail = e.thumbnailUrl || e.videoUrl || null;
+            targetId = e._id?.toString() || e.toString();
+            targetUrl = `/dscrolls`; 
+        } else if (obj.entityModel === 'Comment') {
+            // REACH THROUGH logic for comments: look for Post OR Dscroll links
+            const parent = e.post || e.dscroll;
+            if (parent && typeof parent === 'object') {
+                thumbnail = getMedia(parent);
+                targetId = parent._id?.toString() || parent.toString();
             }
-        } else {
-            // If e is just a string ID, we store it as targetId but thumbnail stays null
-            targetId = e;
+            
+            // Link to detail if resolved
+            if (targetId) targetUrl = `/posts/${targetId}`;
+            else targetUrl = `/posts/${e.post || e.dscroll || ''}`;
         }
+    }
+
+    // Standardize sender
+    const sender = obj.sender && typeof obj.sender === 'object' ? {
+        _id: obj.sender._id?.toString() || obj.sender.toString(),
+        username: obj.sender.username,
+        avatarUrl: obj.sender.avatarUrl,
+        isVerified: obj.sender.isVerified
+    } : null;
+
+    // 🚀 PRODUCTION TRACER: Log generated thumbnail
+    if (process.env.NODE_ENV !== 'test') {
+        console.log(`[NOTIF-THUMB] ID: ${obj._id} - Type: ${obj.type} - Thumb: ${thumbnail || 'NONE'}`);
     }
 
     return {
         ...obj,
-        thumbnail,
-        targetId: targetId?.toString() || null,
         _id: obj._id.toString(),
-        sender: obj.sender ? {
-            _id: obj.sender._id?.toString() || obj.sender.toString(),
-            username: obj.sender.username,
-            avatarUrl: obj.sender.avatarUrl,
-            isVerified: obj.sender.isVerified
-        } : null
+        thumbnail,
+        targetUrl,
+        targetId: targetId || (e?._id?.toString() || e?.toString()),
+        sender
     };
 };
 
@@ -54,37 +81,30 @@ const createNotification = async (data) => {
     try {
         const notification = await Notification.create(data);
 
-        // Populate for real-time delivery (Deep Sync for comment thumbnails)
-        await notification.populate([
-            { path: 'sender', select: 'username avatarUrl isVerified' },
-            { 
-                path: 'entityId', 
-                options: { strictPopulate: false },
-                populate: { path: 'post', select: 'mediaUrl thumbnailUrl videoUrl', options: { strictPopulate: false } }
-            }
-        ]);
+        // Manual Hydration for single creation (Double-checking reliability)
+        let hydrated = null;
+        if (data.entityModel === 'Post') hydrated = await Post.findById(data.entityId).lean();
+        else if (data.entityModel === 'Dscroll') hydrated = await Dscroll.findById(data.entityId).lean();
+        else if (data.entityModel === 'Comment') hydrated = await Comment.findById(data.entityId).populate(['post', 'dscroll']).lean();
 
-        const formatted = formatNotification(notification);
+        const sender = await User.findById(data.sender).select('username avatarUrl isVerified').lean();
+        notification.sender = sender;
 
-        // Broadcast to Redis for real-time delivery (to Chat Service)
+        const formatted = formatNotification(notification, hydrated);
+
+        // Broadcast to Redis for real-time delivery
         const redis = getRedisOptional();
         if (redis) {
-            try {
-                const payload = {
-                    recipient: notification.recipient.toString(),
-                    type: 'new_notification',
-                    notification: formatted
-                };
-
-                await redis.publish('peernet:notifications', JSON.stringify(payload));
-            } catch (redisErr) {
-                console.error(`[NOTIF-REDIS] Publish FAILED: ${redisErr.message}`);
-            }
+            await redis.publish('peernet:notifications', JSON.stringify({
+                recipient: data.recipient.toString(),
+                type: 'new_notification',
+                notification: formatted
+            }));
         }
 
         return formatted;
     } catch (err) {
-        console.error(`NotificationService: Create FAILED - ${err.message}`);
+        console.error(`[NOTIF-SERVICE] Create FAILED: ${err.message}`);
         throw err;
     }
 };
@@ -93,10 +113,8 @@ const removeNotification = async (filter) => {
     try {
         const notification = await Notification.findOne(filter);
         if (!notification) return;
-
         await Notification.deleteOne({ _id: notification._id });
 
-        // Broadcast removal to real-time clients
         const redis = getRedisOptional();
         if (redis) {
             await redis.publish('peernet:notifications', JSON.stringify({
@@ -106,60 +124,55 @@ const removeNotification = async (filter) => {
             }));
         }
     } catch (err) {
-        console.error(`NotificationService: Remove FAILED - ${err.message}`);
+        console.error(`[NOTIF-SERVICE] Remove FAILED: ${err.message}`);
     }
 };
 
+/**
+ * The "BULK HYDRATION" Engine (Refined)
+ * Grouped FETCH + Manual STITCH to bypass Mongoose populate instability.
+ */
 const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const query = { recipient: userId };
     if (cursor) query.createdAt = { $lt: new Date(cursor) };
 
+    // Stage 1: Raw fetch
     const notifications = await Notification.find(query)
         .sort({ createdAt: -1 })
         .limit(limit + 1)
-        .populate('sender', 'username avatarUrl isVerified')
-        .populate({
-            path: 'entityId',
-            options: { strictPopulate: false },
-            populate: { 
-                path: 'post', 
-                select: 'mediaUrl thumbnailUrl videoUrl',
-                options: { strictPopulate: false }
-            }
-        });
+        .populate('sender', 'username avatarUrl isVerified');
 
-    const results = notifications.slice(0, limit);
+    const rawResults = notifications.slice(0, limit);
     const hasMore = notifications.length > limit;
-    
-    // 🚑 SELF-HEALING REPAIR PASS
-    // If population failed (ID is still a string), attempt manual recovery for thumbnails
-    for (let notif of results) {
-        if (notif.entityId && typeof notif.entityId !== 'object') {
-            try {
-                let repairEntity = null;
-                const modelName = notif.entityModel;
-                if (modelName === 'Post') {
-                    repairEntity = await Post.findById(notif.entityId).select('mediaUrl thumbnailUrl videoUrl body caption');
-                } else if (modelName === 'Dscroll') {
-                    repairEntity = await Dscroll.findById(notif.entityId).select('mediaUrl thumbnailUrl videoUrl body caption');
-                } else if (modelName === 'Comment') {
-                    repairEntity = await Comment.findById(notif.entityId).populate('post', 'mediaUrl thumbnailUrl videoUrl');
-                }
-                
-                if (repairEntity) {
-                    notif.entityId = repairEntity; // Manually assign the repaired entity
-                    // console.log(`[REPAIR] Fixed thumbnail for notif: ${notif._id}`);
-                }
-            } catch (repairErr) {
-                // Fail silently, formatter will handle the null thumbnail gracefully
-            }
-        }
-    }
 
-    // Normalize data for the frontend (predictable thumbnails)
-    const formattedResults = results.map(n => formatNotification(n));
-    
-    const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
+    // Stage 2: Entity ID collection
+    const grouped = { Post: [], Comment: [], Dscroll: [] };
+    rawResults.forEach(n => {
+        if (n.entityId && grouped[n.entityModel]) {
+            grouped[n.entityModel].push(n.entityId);
+        }
+    });
+
+    // Stage 3: Bulk Manual Hydration
+    const [posts, dscrolls, comments] = await Promise.all([
+        Post.find({ _id: { $in: grouped.Post } }).lean(),
+        Dscroll.find({ _id: { $in: grouped.Dscroll } }).lean(),
+        Comment.find({ _id: { $in: grouped.Comment } }).populate(['post', 'dscroll']).lean()
+    ]);
+
+    // Lookup table
+    const entitiesMap = new Map();
+    posts.forEach(p => entitiesMap.set(p._id.toString(), p));
+    dscrolls.forEach(d => entitiesMap.set(d._id.toString(), d));
+    comments.forEach(c => entitiesMap.set(c._id.toString(), c));
+
+    // Stage 4: Formatted Stitching
+    const formattedResults = rawResults.map(n => {
+        const hydrated = entitiesMap.get(n.entityId?.toString());
+        return formatNotification(n, hydrated);
+    });
+
+    const nextCursor = hasMore ? rawResults[rawResults.length - 1].createdAt.toISOString() : null;
     return { data: formattedResults, nextCursor, hasMore };
 };
 

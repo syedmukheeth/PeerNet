@@ -1,9 +1,8 @@
 'use strict';
 
-// Load .env for local dev; on Render vars are injected into process.env automatically
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-require('dotenv').config(); // fallback to cwd/.env (no-op if already loaded)
+require('dotenv').config();
 
 const express = require('express');
 const helmet = require('helmet');
@@ -22,69 +21,52 @@ const { authenticate } = require('./middleware/auth.middleware');
 
 const createApp = () => {
     const app = express();
-
-    // ── Trust proxy (for accurate IP behind Nginx) ──────────────────────────────
     app.set('trust proxy', 1);
 
-    // ── Security headers ─────────────────────────────────────────────────────────
     app.use(helmet());
-
-    // ── CORS ─────────────────────────────────────────────────────────────────────
+    
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
-    app.use(
-        cors({
-            origin: (origin, cb) => {
-                // Allow requests with no origin (mobile, curl, server-to-server)
-                if (!origin) return cb(null, true);
-                // Always allow localhost development
-                if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return cb(null, true);
-                // Always allow any Vercel preview/prod deployment
-                if (origin.endsWith('.vercel.app')) return cb(null, true);
-                // Allow explicitly listed origins from env
-                if (allowedOrigins.includes(origin)) return cb(null, true);
-                cb(new Error(`CORS: origin ${origin} not allowed`));
-            },
-            credentials: true,
-        }),
-    );
+    app.use(cors({
+        origin: (origin, cb) => {
+            if (!origin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1') || origin.endsWith('.vercel.app')) return cb(null, true);
+            if (allowedOrigins.includes(origin)) return cb(null, true);
+            cb(new Error(`CORS: origin ${origin} not allowed`));
+        },
+        credentials: true,
+    }));
 
-    // ── Body parsing ─────────────────────────────────────────────────────────────
     app.use(express.json({ limit: '100mb' }));
     app.use(express.urlencoded({ extended: true, limit: '100mb' }));
     app.use(cookieParser());
-
-    // ── NoSQL injection sanitization ─────────────────────────────────────────────
     app.use(mongoSanitize());
 
-    // ── HTTP request logging ─────────────────────────────────────────────────────
     if (process.env.NODE_ENV !== 'test') {
-        app.use(
-            morgan('combined', {
-                stream: { write: (msg) => logger.info(msg.trim()) },
-            }),
-        );
+        app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
     }
 
-    // ── Global rate limiter ──────────────────────────────────────────────────────
+    // 🚀 NEW: Diagnostic Tracer (Log every sync attempts)
+    app.use((req, res, next) => {
+        if (req.url.includes('unread-count')) {
+            console.log(`[CHAT-SYNC-TRACE] ${req.method} ${req.url}`);
+        }
+        next();
+    });
+
+    // 🚀 GLOBAL BYPASS: Absolute top-level routes to prevent 404s
+    const chatSyncPaths = ['/conversations/unread-count', '/api/v1/conversations/unread-count'];
+    app.get(chatSyncPaths, authenticate, messageController.getUnreadCount);
+    app.get(['/health', '/', '/ping'], (_req, res) => res.json({ status: 'ok', service: 'chat' }));
+
     app.use(globalLimiter);
-
-    // ── Health check ─────────────────────────────────────────────────────────
-    app.get(['/health', '/'], (_req, res) => res.json({ status: 'ok', environment: process.env.NODE_ENV }));
-
-    // 🚀 GLOBAL BYPASS: Direct mounting to ensure these critical sync endpoints never 404
-    app.get('/api/v1/conversations/unread-count', authenticate, messageController.getUnreadCount);
 
     // ── API routes ───────────────────────────────────────────────────────────────
     app.use('/api/v1', v1Router);
 
-    // ── 404 handler ──────────────────────────────────────────────────────────────
     app.use((req, _res, next) =>
         next(new ApiError(404, `Route ${req.method} ${req.originalUrl} not found`)),
     );
 
-    // ── Centralized error handler ─────────────────────────────────────────────────
     app.use(errorHandler);
-
     return app;
 };
 
