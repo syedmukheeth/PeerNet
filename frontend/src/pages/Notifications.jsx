@@ -79,7 +79,7 @@ function NotifRow({ n, index, onFollowBack }) {
             transition={{ delay: index * 0.02 }}
             style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px',
-                background: '#000', cursor: 'pointer', position: 'relative'
+                background: 'var(--bg-primary)', cursor: 'pointer', position: 'relative'
             }}
         >
             <Link to={`/profile/${n.sender?._id}`} style={{ position: 'relative', flexShrink: 0 }}>
@@ -87,13 +87,13 @@ function NotifRow({ n, index, onFollowBack }) {
                 {!n.isRead && (
                     <div style={{
                         position: 'absolute', top: -2, right: -2, width: 12, height: 12,
-                        borderRadius: '50%', background: '#0095F6', border: '2px solid #000'
+                        borderRadius: '50%', background: 'var(--accent)', border: '2px solid var(--bg-primary)'
                     }} />
                 )}
             </Link>
 
-            <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.4, color: '#fff' }}>
-                <Link to={`/profile/${n.sender?._id}`} style={{ fontWeight: 600, color: '#fff', textDecoration: 'none' }}>
+            <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.4, color: 'var(--text-primary)' }}>
+                <Link to={`/profile/${n.sender?._id}`} style={{ fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}>
                     {n.sender?.username}
                 </Link>
                 {n.sender?.isVerified && <HiBadgeCheck style={{ color: '#0095f6', fontSize: 14, marginLeft: 3, verticalAlign: 'middle', display: 'inline' }} />}
@@ -127,7 +127,7 @@ function NotifRow({ n, index, onFollowBack }) {
                             style={{ width: 44, height: 44, borderRadius: 4, objectFit: 'cover', border: '0.5px solid #262626' }}
                             onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
                         />
-                        <div style={{ display: 'none', width: 44, height: 44, background: '#121212', borderRadius: 4, alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                        <div style={{ display: 'none', width: 44, height: 44, background: 'var(--hover)', borderRadius: 4, alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
                             {cfg.emoji}
                         </div>
                     </Link>
@@ -142,11 +142,11 @@ function NotifRow({ n, index, onFollowBack }) {
 function NotifSkeleton() {
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#121212' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--hover)' }} />
             <div style={{ flex: 1 }}>
-                <div style={{ height: 12, width: '60%', borderRadius: 4, background: '#121212' }} />
+                <div style={{ height: 12, width: '60%', borderRadius: 4, background: 'var(--hover)' }} />
             </div>
-            <div style={{ width: 44, height: 44, borderRadius: 4, background: '#121212' }} />
+            <div style={{ width: 44, height: 44, borderRadius: 4, background: 'var(--hover)' }} />
         </div>
     )
 }
@@ -195,7 +195,7 @@ export default function Notifications() {
     const earlier = notifs.filter(n => (now - new Date(n.createdAt)) >= 86400000);
 
     return (
-        <div style={{ minHeight: '100dvh', background: '#000', color: '#fff', maxWidth: 600, margin: '0 auto' }}>
+        <div style={{ minHeight: '100dvh', background: 'var(--bg-primary)', color: 'var(--text-primary)', maxWidth: 600, margin: '0 auto' }}>
             <div style={{ padding: '16px 16px 8px' }}>
                 <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Notifications</h1>
             </div>
@@ -204,13 +204,13 @@ export default function Notifications() {
                 [...Array(8)].map((_, i) => <NotifSkeleton key={i} />)
             ) : notifs.length === 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 16 }}>
-                    <div style={{ width: 80, height: 80, borderRadius: '50%', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>🔔</div>
+                    <div style={{ width: 80, height: 80, borderRadius: '50%', border: '2px solid var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>🔔</div>
                     <p style={{ fontWeight: 600 }}>No notifications yet</p>
                 </div>
             ) : (
                 <div style={{ paddingBottom: 60 }}>
                     {today.length > 0 && (
-                        <div style={{ borderBottom: '1px solid #121212', paddingBottom: 16 }}>
+                        <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
                             <SectionLabel label="Today" />
                             {today.map((n, i) => <NotifRow key={n._id} n={n} index={i} />)}
                         </div>
