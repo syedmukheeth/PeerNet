@@ -956,9 +956,8 @@ textarea {
   overflow-x: clip;
   background: var(--surface);
   border-right: 1px solid var(--border);
-  transition: all 400ms var(--ease-out);
-  position: relative;
-  z-index: 50;
+  transition: width 400ms var(--ease-out);
+  z-index: 10;
 }
 
 .sidebar::after {
@@ -966,13 +965,14 @@ textarea {
   position: absolute;
   top: 0; right: 0; bottom: 0;
   width: 1px;
-  background: linear-gradient(180deg, 
-    transparent 0%, 
-    var(--border) 20%, 
-    var(--border) 80%, 
+  background: linear-gradient(180deg,
+    transparent 0%,
+    var(--border) 20%,
+    var(--border) 80%,
     transparent 100%
   );
   opacity: 0.5;
+  pointer-events: none;
 }
 
 .sidebar.collapsed {
@@ -1087,20 +1087,21 @@ textarea {
 }
 
 /* ── Glassmorphism "More" Popup ── */
+/* More button — always pinned to bottom */
 .sidebar-more-wrap {
   position: relative;
   flex-shrink: 0;
-  padding-top: 12px;
   margin-top: auto;
+  padding-top: 8px;
 }
 
 .sidebar-more-wrap::before {
   content: '';
   position: absolute;
-  top: 0; left: 16px; right: 16px;
+  top: 0; left: 12px; right: 12px;
   height: 1px;
   background: var(--border);
-  opacity: 0.3;
+  opacity: 0.25;
 }
 
 .ig-more-popup {
