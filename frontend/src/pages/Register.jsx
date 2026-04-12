@@ -6,13 +6,14 @@ import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
 import logo from '../assets/logo.png'
 import { GoogleLogin } from '@react-oauth/google'
-
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
 
 export default function Register() {
     const [form, setForm] = useState({ username: '', email: '', fullName: '', password: '' })
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
+    const [acceptedTerms, setAcceptedTerms] = useState(false)
+    
     const { register, loginGoogle, loginGuest } = useAuth()
     const navigate = useNavigate()
 
@@ -20,6 +21,7 @@ export default function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        if (!acceptedTerms) return toast.error('Please accept the Terms of Service')
         setLoading(true)
         try {
             await register(form)
@@ -54,9 +56,9 @@ export default function Register() {
 
     const fields = [
         { k: 'fullName', label: 'Full Name', placeholder: 'Your Name', type: 'text' },
-        { k: 'username', label: 'Username', placeholder: 'e.g. johnsmith', type: 'text' },
-        { k: 'email', label: 'Email', placeholder: 'you@example.com', type: 'email' },
-        { k: 'password', label: 'Password', placeholder: 'Min 8 chars', type: 'password' },
+        { k: 'username', label: 'Interstellar Username', placeholder: 'e.g. stargazer_01', type: 'text' },
+        { k: 'email', label: 'Email Address', placeholder: 'you@universe.com', type: 'email' },
+        { k: 'password', label: 'Quantum Password', placeholder: 'Min 8 characters', type: 'password' },
     ]
 
     return (
@@ -69,71 +71,72 @@ export default function Register() {
             </div>
 
             <motion.div className="auth-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}>
+                initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.4 }}>
+                
                 <div className="auth-logo-wrap">
                     <img src={logo} alt="PeerNet" className="auth-logo-img" />
                     <div className="auth-logo-text">PeerNet</div>
                 </div>
-                <p className="auth-sub">Create your account</p>
+                
+                <p className="auth-sub">Initialize your digital presence</p>
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     {fields.map(({ k, label, placeholder, type }) => (
                         <div key={k} className="input-group">
-                            <label>{label}</label>
-                            {k === 'password' ? (
-                                <div className="password-input-wrap" style={{ position: 'relative' }}>
-                                    <input 
-                                        className="input" 
-                                        type={showPassword ? 'text' : 'password'} 
-                                        placeholder={placeholder}
-                                        style={{ paddingRight: '45px' }}
-                                        value={form[k]} 
-                                        onChange={set(k)} 
-                                        required 
-                                    />
-                                    <button
-                                        type="button"
-                                        className="password-toggle"
+                            <label className="t-small">{label}</label>
+                            <div style={{ position: 'relative' }}>
+                                <input 
+                                    className="input" 
+                                    type={k === 'password' ? (showPassword ? 'text' : 'password') : type} 
+                                    placeholder={placeholder}
+                                    value={form[k]} 
+                                    onChange={set(k)} 
+                                    required 
+                                    style={k === 'password' ? { paddingRight: 44 } : {}}
+                                />
+                                {k === 'password' && (
+                                    <button 
+                                        type="button" 
+                                        className="password-toggle-btn"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '12px',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            color: 'var(--text-muted)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            padding: '5px'
-                                        }}
+                                        style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer' }}
                                     >
                                         {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
                                     </button>
-                                </div>
-                            ) : (
-                                <input className="input" type={type} placeholder={placeholder}
-                                    value={form[k]} onChange={set(k)} required />
-                            )}
+                                )}
+                            </div>
                         </div>
                     ))}
+
+                    <div 
+                        style={{ display: 'flex', alignItems: 'flex-start', gap: 10, margin: '12px 0 24px', cursor: 'pointer' }} 
+                        onClick={() => setAcceptedTerms(!acceptedTerms)}
+                    >
+                        <input 
+                            type="checkbox" 
+                            checked={acceptedTerms} 
+                            onChange={() => {}} 
+                            style={{ width: 17, height: 17, marginTop: 2, accentColor: 'var(--accent)' }}
+                        />
+                        <span style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
+                            I accept the <Link to="/legal/terms" target="_blank" onClick={e => e.stopPropagation()} className="t-accent hover:underline">Terms of Service</Link> and <Link to="/legal/privacy" target="_blank" onClick={e => e.stopPropagation()} className="t-accent hover:underline">Privacy Policy</Link>
+                        </span>
+                    </div>
+
                     <motion.button className="btn btn-primary w-full" type="submit"
                         disabled={loading}
-                        style={{ height: 46, marginTop: 4 }}
-                        whileHover={{ scale: 1.02 }}
+                        style={{ height: 48 }}
+                        whileHover={{ y: -1 }}
                         whileTap={{ scale: 0.98 }}>
-                        {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Create Account'}
+                        {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Establish Account'}
                     </motion.button>
                 </form>
 
-                <div className="auth-divider">
-                    <span>OR</span>
-                </div>
+                <div className="auth-divider"><span>SECURE AUTH</span></div>
 
-                <div className="auth-social-wrap">
+                <div className="auth-social-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
@@ -143,20 +146,13 @@ export default function Register() {
                             width="100%"
                         />
                     </div>
-
-                    <motion.button
-                        className="btn btn-secondary w-full"
-                        onClick={handleGuestLogin}
-                        disabled={loading}
-                        style={{ height: 40, marginTop: 12, fontSize: '13px' }}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}>
-                        Try as Guest
-                    </motion.button>
+                    <button className="btn btn-secondary w-full text-xs" onClick={handleGuestLogin} disabled={loading}>
+                        Continue as Guest
+                    </button>
                 </div>
 
                 <p className="auth-switch">
-                    Already have an account? <Link to="/login">Sign in</Link>
+                    Existing user? <Link to="/login" className="t-accent">Access Portal</Link>
                 </p>
             </motion.div>
         </div>

@@ -1,8 +1,10 @@
 import { useState, useCallback, Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import { useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 import SplashScreen from './components/SplashScreen'
+import CookieConsent from './components/CookieConsent'
 
 const Feed = lazy(() => import('./pages/Feed'))
 const Login = lazy(() => import('./pages/Login'))
@@ -14,6 +16,8 @@ const Notifications = lazy(() => import('./pages/Notifications'))
 const Search = lazy(() => import('./pages/Search'))
 const PostDetail = lazy(() => import('./pages/PostDetail'))
 const Settings = lazy(() => import('./pages/Settings'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Terms = lazy(() => import('./pages/Terms'))
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -46,7 +50,7 @@ export default function App() {
   }, [])
 
   return (
-    <>
+    <HelmetProvider>
       {!splashDone && <SplashScreen onDone={handleSplashDone} />}
       {splashDone && (
         <Suspense fallback={
@@ -69,17 +73,22 @@ export default function App() {
               <Route path="search" element={<Search />} />
               <Route path="profile/:id" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="privacy" element={<Privacy />} />
+              <Route path="terms" element={<Terms />} />
             </Route>
             
             {/* Public/Shared routes (can be viewed without login) */}
             <Route element={<Layout />}>
               <Route path="/posts/:id" element={<PostDetail />} />
+              <Route path="/legal/privacy" element={<Privacy />} />
+              <Route path="/legal/terms" element={<Terms />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       )}
-    </>
+      <CookieConsent />
+    </HelmetProvider>
   )
 }

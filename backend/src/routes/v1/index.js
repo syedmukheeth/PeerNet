@@ -16,6 +16,9 @@ const { authenticate } = require('../../middleware/auth.middleware');
 // 🚀 NUCLEAR BYPASS: Diagnostic and Heartbeat routes defined directly to ensure visibility
 router.get('/ping', (_req, res) => res.json({ status: 'pong', version: 'v2.bypass', timestamp: new Date() }));
 
+const feedbackRoutes = require('../../modules/feedback/feedback.routes');
+
+// ... other routes ...
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/posts', postRoutes);
@@ -26,5 +29,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/conversations', chatRoutes);
 router.use('/ai', aiRoutes);
+router.use('/feedback', feedbackRoutes);
 
 module.exports = router;
