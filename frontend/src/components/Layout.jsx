@@ -60,24 +60,42 @@ export default function Layout() {
     const syncAllCounts = useCallback(async () => {
         if (!user) return
         
-        // Isolate Notification Sync
-        api.get('/notifications/unread-count')
-            .then(res => {
-                const n = res.data.count ?? 0
-                setUnreadCount(n)
-                unreadRef.current = n
-            })
-            .catch(() => console.warn('[SYNC] Notification count fetch failed'))
+        console.group('🔄 [SYNC] Synchronization Started');
+        
+        // 1. Notifications Sync
+        try {
+            const res = await api.get('/notifications/unread-count');
+            setUnreadCount(res.data.count || 0);
+            unreadRef.current = res.data.count || 0;
+            console.log('✅ [SYNC] Notifications:', res.data.count);
+        } catch (err) {
+            console.warn('❌ [SYNC] Notification fetch failed');
+            console.table({
+                message: err.message,
+                url: `${api.defaults.baseURL}/notifications/unread-count`,
+                status: err.response?.status,
+                code: err.code
+            });
+        }
 
-        // Isolate Message Sync
-        chatApi.get('/conversations/unread-count')
-            .then(res => {
-                const m = res.data.count ?? 0
-                setMsgCount(m)
-                msgRef.current = m
-            })
-            .catch(() => console.warn('[SYNC] Message count fetch failed'))
-    }, [user])
+        // 2. Messages Sync
+        try {
+            const res = await chatApi.get('/conversations/unread-count');
+            setMsgCount(res.data.count || 0);
+            msgRef.current = res.data.count || 0;
+            console.log('✅ [SYNC] Messages:', res.data.count);
+        } catch (err) {
+            console.warn('❌ [SYNC] Message fetch failed');
+            console.table({
+                message: err.message,
+                url: `${chatApi.defaults.baseURL}/conversations/unread-count`,
+                status: err.response?.status,
+                code: err.code
+            });
+        }
+        
+        console.groupEnd();
+    }, [user, api, chatApi])
 
     // ── Global Badge Sync ────────────────────────────────────
     // Expose a way for sub-pages to trigger a re-sync of counts
