@@ -251,4 +251,4 @@ const markAllRead = async (userId) => {
 const getUnreadCount = async (userId) =>
     Notification.countDocuments({ recipient: userId, isRead: false });
 
-module.exports = { createNotification, getNotifications, markAllRead, getUnreadCount };
+module.exports = { createNotification, removeNotification, getNotifications, markAllRead, getUnreadCount };

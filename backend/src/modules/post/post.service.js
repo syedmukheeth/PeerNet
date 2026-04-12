@@ -160,7 +160,7 @@ const likePost = async (postId, userId) => {
 
 const unlikePost = async (postId, userId) => {
     const like = await Like.findOneAndDelete({ user: userId, targetId: postId, targetModel: 'Post' });
-    if (!like) throw new ApiError(404, 'Like not found');
+    if (!like) return { liked: false }; // Idempotent: if already unliked, just succeed
     await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
 
     // Notify via Event Bus
