@@ -222,8 +222,26 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
         return formatNotification(n, hydrated);
     });
 
+    // Stage 5: Self-Healing Garbage Collector
+    const validResults = [];
+    const ghosts = [];
+
+    formattedResults.forEach(n => {
+        // If thumbnail is NONE and it is not a follow notification, the target was permanently deleted.
+        if (n.type !== 'follow' && n.type !== 'mention' && n.thumbnail === 'NONE') {
+            ghosts.push(n._id);
+        } else {
+            validResults.push(n);
+        }
+    });
+
+    if (ghosts.length > 0) {
+        // Fire-and-forget background cleanup
+        Notification.deleteMany({ _id: { $in: ghosts } }).catch(() => {});
+    }
+
     const nextCursor = hasMore ? rawResults[rawResults.length - 1].createdAt.toISOString() : null;
-    return { data: formattedResults, nextCursor, hasMore };
+    return { data: validResults, nextCursor, hasMore };
 };
 
 const markAllRead = async (userId) => {
