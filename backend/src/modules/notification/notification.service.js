@@ -56,7 +56,8 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
             options: { strictPopulate: false },
             // Populate nested author and necessary fields for preview (body for comments, caption for posts)
             populate: [
-                { path: 'author', select: 'username avatarUrl', options: { strictPopulate: false } }
+                { path: 'author', select: 'username avatarUrl', options: { strictPopulate: false } },
+                { path: 'post', select: 'mediaUrl thumbnailUrl videoUrl', options: { strictPopulate: false } }
             ]
         })
         .sort({ createdAt: -1 })
