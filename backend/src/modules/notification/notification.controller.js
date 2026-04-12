@@ -14,11 +14,11 @@ const getNotifications = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-const markAllRead = async (req, res, next) => {
+const getUnreadCount = async (req, res, next) => {
     try {
-        await notificationService.markAllRead(req.user._id);
-        res.json({ success: true, message: 'All notifications marked as read' });
+        const count = await notificationService.getUnreadCount(req.user._id);
+        res.json({ success: true, count });
     } catch (err) { next(err); }
 };
 
-module.exports = { getNotifications, markAllRead };
+module.exports = { getNotifications, markAllRead, getUnreadCount };

@@ -185,7 +185,11 @@ function NotifRow({ n, index, onFollowBack }) {
                             display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}>
                             <img
-                                src={n.entityId.mediaUrl || n.entityId.videoUrl || n.entityId.thumbnailUrl}
+                                src={
+                                    n.entityModel === 'Dscroll' 
+                                        ? (n.entityId.thumbnailUrl || n.entityId.videoUrl) 
+                                        : (n.entityId.mediaUrl || n.entityId.thumbnailUrl || n.entityId.videoUrl)
+                                }
                                 alt=""
                                 onError={(e) => {
                                     e.target.style.display = 'none';
