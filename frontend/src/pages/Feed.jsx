@@ -47,12 +47,12 @@ function RightPanel() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             {/* ── Profile mini card ─────────────── */}
-            <div className="glass-card" style={{
+            <div style={{
                 display: 'flex', alignItems: 'center', gap: 14,
-                padding: '14px 18px', 
-                borderRadius: 12,
+                padding: '0 4px', 
                 transition: 'transform 0.2s',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                marginBottom: 4
             }} onClick={() => navigate(`/profile/${user?._id}`)}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                     <img src={myAvatar}
