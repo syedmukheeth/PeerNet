@@ -32,30 +32,44 @@ const formatNotification = (notif, hydratedEntity = null) => {
         };
         
         if (obj.entityModel === 'Post') {
-            thumbnail = getMedia(e);
-            targetId = e._id?.toString() || e.toString();
-            targetUrl = `/posts/${targetId}`;
+            if (!e) {
+                thumbnail = null;
+                targetId = obj.entityId?.toString();
+                targetUrl = `/posts/${targetId}`;
+            } else {
+                thumbnail = getMedia(e);
+                targetId = e._id?.toString() || e.toString();
+                targetUrl = `/posts/${targetId}`;
+            }
         } else if (obj.entityModel === 'Dscroll') {
-            thumbnail = e.thumbnailUrl || e.videoUrl || null;
-            targetId = e._id?.toString() || e.toString();
-            targetUrl = `/dscrolls`; 
+            if (!e) {
+                thumbnail = null;
+                targetId = obj.entityId?.toString();
+                targetUrl = `/dscrolls`;
+            } else {
+                thumbnail = e.thumbnailUrl || e.videoUrl || null;
+                targetId = e._id?.toString() || e.toString();
+                targetUrl = `/dscrolls`;
+            }
         } else if (obj.entityModel === 'Comment') {
             // Reach through: use the populated parent (post or dscroll object)
-            const parent = (e.post && typeof e.post === 'object') ? e.post
-                         : (e.dscroll && typeof e.dscroll === 'object') ? e.dscroll
+            const parent = (e && e.post && typeof e.post === 'object') ? e.post
+                         : (e && e.dscroll && typeof e.dscroll === 'object') ? e.dscroll
                          : null;
             if (parent) {
                 thumbnail = getMedia(parent);
                 targetId = parent._id?.toString();
             }
-            // Build navigation URL: always go to the parent post and pass the commentId
-            if (targetId) {
-                targetUrl = `/posts/${targetId}?commentId=${obj.entityId}`;
-            } else {
-                // Fallback: use raw ObjectId stored in e.post or e.dscroll
-                const rawParentId = e.post?.toString() || e.dscroll?.toString();
-                targetUrl = rawParentId ? `/posts/${rawParentId}?commentId=${obj.entityId}` : '/';
-            }
+            
+        // Build navigation URL: always go to the parent post and pass the commentId
+        if (targetId) {
+            const parentId = (e && e.parentComment) ? (e.parentComment._id || e.parentComment).toString() : null;
+            targetUrl = `/posts/${targetId}?commentId=${obj.entityId}${parentId ? `&parentId=${parentId}` : ''}`;
+        } else {
+            // Fallback: use raw ObjectId stored in e.post or e.dscroll if e exists but parent isn't hydrated
+            const rawParentId = e ? (e.post?.toString() || e.dscroll?.toString()) : null;
+            targetUrl = rawParentId ? `/posts/${rawParentId}?commentId=${obj.entityId}` : '/';
+        }
         }
     }
 
@@ -90,6 +104,7 @@ const formatNotification = (notif, hydratedEntity = null) => {
             _id: e._id?.toString(),
             body: e.body || null,
             post: e.post?._id?.toString() || e.post?.toString() || null,
+            parentComment: e.parentComment?._id?.toString() || e.parentComment?.toString() || null,
         } : obj.entityId,
         commentBody,
     };
@@ -227,8 +242,11 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const ghosts = [];
 
     formattedResults.forEach(n => {
-        // If thumbnail is NONE and it is not a follow notification, the target was permanently deleted.
-        if (n.type !== 'follow' && n.type !== 'mention' && n.thumbnail === 'NONE') {
+        // GHOST DETECTION: If thumbnail is missing and it is a media-reliant type, the target was deleted.
+        // Exempt 'follow' (no thumb) and 'mention' (might be user mention without post context in some cases)
+        const isGhost = (n.type === 'like' || n.type === 'comment' || n.type === 'reply') && !n.thumbnail;
+        
+        if (isGhost) {
             ghosts.push(n._id);
         } else {
             validResults.push(n);
