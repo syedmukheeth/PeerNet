@@ -1,28 +1,40 @@
 'use strict';
 
 const Notification = require('./Notification');
+const Post = require('../post/Post');
+const Comment = require('../comment/Comment');
+const Dscroll = require('../dscroll/Dscroll');
 const { getRedisOptional } = require('../../config/redis');
 
 const formatNotification = (notif) => {
+    // Standardize to a plain object
     const obj = notif.toObject ? notif.toObject() : notif;
     const e = obj.entityId;
     
-    // Normalization logic: Extract thumbnail and target link from any entity type
     let thumbnail = null;
     let targetId = null;
 
+    // ULTRA-DEFENSIVE MAPPING: 
+    // We search the entire object tree for anything that looks like a media URL.
     if (e && typeof e === 'object') {
-        const isComment = obj.entityModel === 'Comment' || obj.entityModel === 'Reply';
-        const targetEntity = isComment && e.post ? e.post : e;
+        const getMedia = (target) => target.mediaUrl || target.thumbnailUrl || target.videoUrl || null;
         
-        thumbnail = targetEntity.mediaUrl || targetEntity.thumbnailUrl || targetEntity.videoUrl;
-        targetId = (isComment && e.post) ? e.post._id : e._id;
+        // 1. Try the entity itself (for Post/Dscroll)
+        thumbnail = getMedia(e);
+        
+        // 2. Try nested post (for Comment/Reply)
+        if (!thumbnail && e.post) {
+            thumbnail = getMedia(e.post);
+            targetId = e.post._id || e.post;
+        } else {
+            targetId = e._id || e;
+        }
     }
 
     return {
         ...obj,
         thumbnail,
-        targetId,
+        targetId: targetId?.toString() || null,
         _id: obj._id.toString(),
         sender: obj.sender ? {
             _id: obj.sender._id?.toString() || obj.sender.toString(),
@@ -98,18 +110,19 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     if (cursor) query.createdAt = { $lt: new Date(cursor) };
 
     const notifications = await Notification.find(query)
+        .sort({ createdAt: -1 })
+        .limit(limit + 1)
         .populate('sender', 'username avatarUrl isVerified')
         .populate({
             path: 'entityId',
             options: { strictPopulate: false },
-            // Populate nested author and necessary fields for preview (body for comments, caption for posts)
-            populate: [
-                { path: 'author', select: 'username avatarUrl', options: { strictPopulate: false } },
-                { path: 'post', select: 'mediaUrl thumbnailUrl videoUrl', options: { strictPopulate: false } }
-            ]
+            populate: { 
+                path: 'post', 
+                select: 'mediaUrl thumbnailUrl videoUrl',
+                options: { strictPopulate: false }
+            }
         })
-        .sort({ createdAt: -1 })
-        .limit(limit + 1);
+        .lean();
 
     const hasMore = notifications.length > limit;
     const results = hasMore ? notifications.slice(0, limit) : notifications;
