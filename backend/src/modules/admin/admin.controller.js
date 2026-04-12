@@ -14,8 +14,18 @@ const getUsers = catchAsync(async (req, res) => {
 });
 
 const getPosts = catchAsync(async (req, res) => {
-    const { limit, skip } = req.query;
+    const { limit, skip, type } = req.query;
     const data = await adminService.getPosts({ 
+        limit: parseInt(limit) || 20, 
+        skip: parseInt(skip) || 0,
+        type: type || 'all'
+    });
+    res.json({ success: true, ...data });
+});
+
+const getFeedback = catchAsync(async (req, res) => {
+    const { limit, skip } = req.query;
+    const data = await adminService.getFeedback({ 
         limit: parseInt(limit) || 20, 
         skip: parseInt(skip) || 0 
     });
@@ -50,6 +60,7 @@ const verifyUser = catchAsync(async (req, res) => {
 module.exports = {
     getUsers,
     getPosts,
+    getFeedback,
     deleteUser,
     deletePost,
     deleteStory,

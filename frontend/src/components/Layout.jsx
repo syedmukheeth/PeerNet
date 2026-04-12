@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiUser, HiShieldCheck
+    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal
 } from 'react-icons/hi'
 import { useTheme } from '../context/ThemeContext'
 import api, { chatApi } from '../api/axios'
@@ -193,46 +193,47 @@ export default function Layout() {
                         </NavLink>
                     ))}
                     <button className="ig-link" onClick={() => setShowCreate(true)}>
-                        <span className="ig-icon-wrap"><HiPlusCircle className="ig-icon opacity-50" /></span>
+                        <div className="ig-icon-wrap">
+                            <HiPlusCircle className="ig-icon" style={{ opacity: 0.55 }} />
+                        </div>
                         <span className="ig-label">Create</span>
                     </button>
                     <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                        {({ isActive }) => (
-                            <>
-                                <span className="ig-icon-wrap">
-                                    <img src={avatarUrl} className="ig-avatar" alt="" style={{ outline: isActive ? '2px solid var(--text-1)' : 'none' }} />
-                                </span>
-                                <span className="ig-label">Profile</span>
-                            </>
-                        )}
+                        <div className="ig-icon-wrap">
+                            <img src={avatarUrl} className="ig-avatar" alt="" />
+                        </div>
+                        <span className="ig-label">Profile</span>
                     </NavLink>
 
                     {user?.role === 'admin' && (
                         <NavLink to="/admin" className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                            {({ isActive }) => (
-                                <>
-                                    <span className="ig-icon-wrap">
-                                        <HiShieldCheck className="ig-icon text-accent" style={{ opacity: isActive ? 1 : 0.6 }} />
-                                    </span>
-                                    <span className="ig-label">Admin Console</span>
-                                </>
-                            )}
+                            <div className="ig-icon-wrap">
+                                <HiShieldCheck className="ig-icon text-accent" />
+                            </div>
+                            <span className="ig-label">Admin Console</span>
                         </NavLink>
                     )}
                 </nav>
 
-                <div className="sidebar-more-wrap mt-auto py-3" ref={moreRef}>
+                <div className="sidebar-more-wrap" ref={moreRef}>
                     <AnimatePresence>
                         {showMore && (
-                            <motion.div className="ig-more-popup glass-card" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
+                            <motion.div 
+                                className="ig-more-popup" 
+                                initial={{ opacity: 0, y: 12, scale: 0.95 }} 
+                                animate={{ opacity: 1, y: 0, scale: 1 }} 
+                                exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                            >
                                 <button className="ig-more-item" onClick={() => { document.querySelector('.theme-toggle')?.click(); setShowMore(false) }}>
-                                    {isDark ? <HiSun size={20} /> : <HiMoon size={20} />} <span>Switch appearance</span>
+                                    {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
+                                    <span>Switch appearance</span>
                                 </button>
                                 <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
                                     <HiCog size={20} /> <span>Settings</span>
                                 </NavLink>
                                 <button className="ig-more-item" onClick={() => { setShowMore(false); navigate('/login') }}>
-                                    <span>Switch accounts</span>
+                                    <HiSwitchHorizontal size={20} /> <span>Switch accounts</span>
                                 </button>
                                 <div className="ig-more-divider" />
                                 <button className="ig-more-item text-error" onClick={handleLogout}>
@@ -241,8 +242,13 @@ export default function Layout() {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                    <button className="ig-link w-full" onClick={() => setShowMore(!showMore)}>
-                        <span className="ig-icon-wrap"><HiMenu className="ig-icon" /></span>
+                    <button 
+                        className={`ig-link ${showMore ? 'ig-link--active' : ''}`} 
+                        onClick={() => setShowMore(!showMore)}
+                    >
+                        <div className="ig-icon-wrap">
+                            <HiMenu className="ig-icon" />
+                        </div>
                         <span className="ig-label">More</span>
                     </button>
                 </div>
@@ -304,7 +310,9 @@ export default function Layout() {
                 {mobileBottomLinksRight.map(({ to, icon: Icon, exact }) => (
                     <NavLink key={to} to={to} end={exact} className={({ isActive }) => isActive ? 'active' : ''}><Icon /></NavLink>
                 ))}
-                <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => isActive ? 'active' : ''}><HiUser /></NavLink>
+                <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => isActive ? 'active' : ''}>
+                    <img src={avatarUrl} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
+                </NavLink>
             </nav>
 
             {showCreate && <CreatePostModal onClose={() => setShowCreate(false)} />}

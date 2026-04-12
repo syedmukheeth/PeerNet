@@ -17,7 +17,8 @@ router.get('/posts', ...guard, adminController.getPosts);
 router.delete('/posts/:postId', ...guard, adminController.deletePost);
 router.delete('/stories/:storyId', ...guard, adminController.deleteStory);
 
-// Analytics
+// Analytics & Issues
 router.get('/stats', ...guard, adminController.getStats);
+router.get('/feedback', ...guard, adminController.getFeedback);
 
 module.exports = router;
