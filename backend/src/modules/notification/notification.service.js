@@ -54,8 +54,10 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
         .populate({
             path: 'entityId',
             options: { strictPopulate: false },
-            // Populate nested author if the entity is a Comment
-            populate: { path: 'author', select: 'username avatarUrl', options: { strictPopulate: false } }
+            // Populate nested author and necessary fields for preview (body for comments, caption for posts)
+            populate: [
+                { path: 'author', select: 'username avatarUrl', options: { strictPopulate: false } }
+            ]
         })
         .sort({ createdAt: -1 })
         .limit(limit + 1);

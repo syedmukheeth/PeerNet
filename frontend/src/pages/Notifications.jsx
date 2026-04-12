@@ -6,8 +6,31 @@ import { timeago } from '../utils/timeago'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
 import {
-    HiBell, HiHeart, HiChatAlt2, HiUserAdd, HiCheck, HiBadgeCheck, HiAtSymbol
+    HiBell, HiHeart, HiChatAlt2, HiUserAdd, HiCheck, HiBadgeCheck, HiAtSymbol, HiOutlineSparkles
 } from 'react-icons/hi'
+
+// Global styles for notification animations
+const styleSheet = `
+@keyframes pulse-ring {
+  0% { transform: scale(.33); opacity: 0; }
+  80%, 100% { opacity: 0; }
+}
+@keyframes pulse-dot {
+  0% { transform: scale(.8); }
+  50% { transform: scale(1); }
+  100% { transform: scale(.8); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+`;
+if (typeof document !== 'undefined' && !document.getElementById('notif-styles')) {
+    const s = document.createElement('style');
+    s.id = 'notif-styles';
+    s.innerHTML = styleSheet;
+    document.head.appendChild(s);
+}
 const typeConfig = {
     like: {
         icon: HiHeart,
@@ -128,9 +151,9 @@ function NotifRow({ n, index, onFollowBack }) {
                 </div>
             </Link>
 
-            {/* Text */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: 'var(--text-1)' }}>
+            {/* Text Content */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <div style={{ fontSize: 13.5, lineHeight: 1.4, color: 'var(--text-1)' }}>
                     <Link
                         to={`/profile/${n.sender?._id}`}
                         style={{ fontWeight: 700, color: 'var(--text-1)', textDecoration: 'none' }}
@@ -138,14 +161,48 @@ function NotifRow({ n, index, onFollowBack }) {
                         {n.sender?.username}
                     </Link>
                     {n.sender?.isVerified && (
-                        <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13, marginLeft: 3, verticalAlign: 'middle' }} />
+                        <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13, marginLeft: 3, verticalAlign: 'middle', display: 'inline-block' }} />
                     )}
                     <span style={{ fontWeight: 400, color: 'var(--text-2)', marginLeft: 4 }}>{getActionText()}</span>
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--text-3)', margin: '3px 0 0', lineHeight: 1 }}>
-                    {timeago(n.createdAt)}
-                </p>
+                    <span style={{ fontSize: 12, color: 'var(--text-3)', marginLeft: 6 }}>{timeago(n.createdAt)}</span>
+                </div>
+
+                {/* Instagram Style: Comment content preview */}
+                {n.type === 'comment' && n.entityId?.body && (
+                    <p style={{ 
+                        margin: '2px 0 0', 
+                        fontSize: 13, 
+                        color: 'var(--text-2)', 
+                        background: 'rgba(255,255,255,0.03)', 
+                        padding: '4px 8px', 
+                        borderRadius: 6,
+                        borderLeft: '2px solid var(--border-md)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '90%'
+                    }}>
+                        "{n.entityId.body}"
+                    </p>
+                )}
             </div>
+
+            {/* Premium Unread Indicator (Pulsing blue dot) */}
+            {!n.isRead && (
+                <div style={{ position: 'relative', margin: '0 8px', flexShrink: 0 }}>
+                    <div style={{ 
+                        position: 'absolute', top: -10, left: -10, right: -10, bottom: -10,
+                        borderRadius: '50%', border: '2px solid var(--accent)',
+                        animation: 'pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite'
+                    }} />
+                    <div style={{ 
+                        width: 10, height: 10, borderRadius: '50%', 
+                        background: 'var(--accent)', 
+                        boxShadow: '0 0 10px var(--accent)',
+                        animation: 'pulse-dot 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite'
+                    }} />
+                </div>
+            )}
 
             {/* Right action — thumbnail for posts, follow-back for follows */}
             <div style={{ flexShrink: 0 }}>
@@ -225,13 +282,17 @@ function NotifRow({ n, index, onFollowBack }) {
 function SectionLabel({ label }) {
     return (
         <div style={{
-            padding: '16px 16px 6px',
-            fontSize: 13, fontWeight: 700,
+            padding: '24px 16px 8px',
+            fontSize: 12, fontWeight: 800,
             color: 'var(--text-3)',
-            letterSpacing: '0.03em',
+            letterSpacing: '0.1em',
             textTransform: 'uppercase',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12
         }}>
             {label}
+            <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, var(--border), transparent)' }} />
         </div>
     )
 }
@@ -239,11 +300,31 @@ function SectionLabel({ label }) {
 /* ── Skeleton row ─────────────────────────────────────────── */
 function NotifSkeleton() {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
-            <div style={{ width: 46, height: 46, borderRadius: '50%', background: 'var(--hover)', flexShrink: 0 }} />
+        <div style={{ 
+            display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
+            opacity: 0.6
+        }}>
+            <div style={{ 
+                width: 46, height: 46, borderRadius: '50%', 
+                background: 'linear-gradient(90deg, var(--hover) 25%, var(--border) 50%, var(--hover) 75%)',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 2s infinite linear',
+                flexShrink: 0 
+            }} />
             <div style={{ flex: 1 }}>
-                <div style={{ height: 12, width: '60%', borderRadius: 6, background: 'var(--hover)', marginBottom: 8 }} />
-                <div style={{ height: 10, width: '30%', borderRadius: 6, background: 'var(--hover)' }} />
+                <div style={{ 
+                    height: 12, width: '40%', borderRadius: 6, 
+                    background: 'linear-gradient(90deg, var(--hover) 25%, var(--border) 50%, var(--hover) 75%)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 2s infinite linear',
+                    marginBottom: 8 
+                }} />
+                <div style={{ 
+                    height: 10, width: '70%', borderRadius: 6, 
+                    background: 'linear-gradient(90deg, var(--hover) 25%, var(--border) 50%, var(--hover) 75%)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 2s infinite linear'
+                }} />
             </div>
         </div>
     )
@@ -267,6 +348,21 @@ export default function Notifications() {
         finally { setLoading(false) }
     }
 
+    const groupNotifs = () => {
+        const today = [];
+        const earlier = [];
+        const now = new Date();
+        
+        notifs.forEach(n => {
+            const date = new Date(n.createdAt);
+            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            if (diffDays === 0) today.push(n);
+            else earlier.push(n);
+        });
+        
+        return { today, earlier };
+    }
+
     useEffect(() => {
         load()
     }, [])
@@ -275,6 +371,9 @@ export default function Notifications() {
         if (!socket) return
         
         socket.on('new_notification', (notif) => {
+            // Check if it's from ourselves (mostly for testing/robustness)
+            if (notif.sender?._id === user?._id) return
+
             setNotifs(prev => [{ ...notif, isRead: false }, ...prev])
             setUnread(u => u + 1)
             setHasNew(true)
@@ -396,31 +495,56 @@ export default function Notifications() {
                 </div>
             ) : notifs.length === 0 ? (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                     style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        justifyContent: 'center', padding: '80px 32px', gap: 16, textAlign: 'center',
+                        justifyContent: 'center', padding: '100px 32px', gap: 24, textAlign: 'center',
                     }}
                 >
-                    <div style={{
-                        width: 80, height: 80, borderRadius: '50%',
-                        background: 'linear-gradient(135deg,rgba(99,102,241,0.15),rgba(167,139,250,0.15))',
-                        border: '2px solid rgba(99,102,241,0.2)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 36,
-                    }}>
-                        🔔
+                    <div style={{ position: 'relative' }}>
+                        <motion.div
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 4, repeat: Infinity }}
+                            style={{
+                                width: 100, height: 100, borderRadius: '50%',
+                                background: 'linear-gradient(135deg,rgba(99,102,241,0.1),rgba(167,139,250,0.1))',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 44, border: '1px solid rgba(99,102,241,0.2)'
+                            }}
+                        >
+                            <HiOutlineSparkles style={{ color: 'var(--accent)', opacity: 0.6 }} />
+                        </motion.div>
+                        <div style={{
+                            position: 'absolute', top: -5, right: -5,
+                            width: 32, height: 32, borderRadius: '50%',
+                            background: 'var(--bg)', border: '2px solid var(--accent)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 16, boxShadow: '0 4px 12px rgba(99,102,241,0.3)'
+                        }}>
+                            ✅
+                        </div>
                     </div>
                     <div>
-                        <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)', margin: '0 0 8px' }}>
-                            All caught up
-                        </p>
-                        <p style={{ fontSize: 14, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
-                            When someone likes, comments or follows you,&lt;br /&gt;you&apos;ll see it here.
+                        <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-1)', margin: '0 0 8px' }}>
+                            You&apos;re all caught up!
+                        </h3>
+                        <p style={{ fontSize: 14, color: 'var(--text-3)', margin: 0, maxWidth: 280, lineHeight: 1.6 }}>
+                            Follow more creators or post a new scroll to keep the conversation going.
                         </p>
                     </div>
+                    <Link 
+                        to="/home"
+                        style={{
+                            background: 'var(--accent)', color: '#fff',
+                            padding: '10px 24px', borderRadius: 20,
+                            fontWeight: 700, textDecoration: 'none',
+                            fontSize: 14, boxShadow: '0 4px 15px rgba(99,102,241,0.4)'
+                        }}
+                    >
+                        Explore PeerNet
+                    </Link>
                 </motion.div>
             ) : (
                 <div style={{ padding: '8px 0' }}>
