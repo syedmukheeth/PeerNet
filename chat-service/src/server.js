@@ -68,9 +68,11 @@ const bootstrap = async () => {
                     const data = JSON.parse(message);
                     if (channel === 'peernet:notifications') {
                         const { recipient, notification } = data;
+                        logger.info(`[REDIS] Incoming Notification for ${recipient} (Type: ${notification.type})`);
                         io.to(`user:${recipient}`).emit('new_notification', notification);
                     } else if (channel === 'peernet:messages') {
                         const { recipient, message: chatMsg, type, messageId, conversationId } = data;
+                        logger.info(`[REDIS] Incoming Message action for ${recipient} (Type: ${type})`);
                         if (type === 'MESSAGE_EDITED') {
                             io.to(`user:${recipient}`).emit('message_edited', chatMsg);
                         } else if (type === 'MESSAGE_DELETED') {

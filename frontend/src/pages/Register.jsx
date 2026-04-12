@@ -36,7 +36,7 @@ export default function Register() {
             await loginGoogle(credentialResponse.credential)
             toast.success('Joined PeerNet with Google!')
             navigate('/')
-        } catch (err) {
+        } catch (_err) {
             toast.error('Google registration failed')
         } finally { setLoading(false) }
     }
@@ -47,7 +47,7 @@ export default function Register() {
             await loginGuest()
             toast.success('Welcome, Guest!')
             navigate('/')
-        } catch (err) {
+        } catch (_err) {
             toast.error('Guest login failed')
         } finally { setLoading(false) }
     }

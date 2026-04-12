@@ -176,7 +176,7 @@ export default function PostDetail() {
             }
             setPost(p => ({ ...p, commentsCount: (p.commentsCount || 1) - 1 }))
             toast.success('Comment deleted')
-        } catch (err) {
+        } catch (_err) {
             toast.error('Failed to delete comment')
         }
     }
