@@ -17,13 +17,24 @@ const createNotification = async (data) => {
         const redis = getRedisOptional();
         if (redis) {
             try {
-                // We emit a robust object that the Chat Service expects
-                await redis.publish('peernet:notifications', JSON.stringify({
+                // BIG TECH: Explicitly construct the broadcast payload to ensure 
+                // it contains everything needed for the UI toast without extra DB hits.
+                const payload = {
                     recipient: notification.recipient.toString(),
-                    notification: notification.toJSON()
-                }));
+                    notification: {
+                        ...notification.toObject(),
+                        _id: notification._id.toString(),
+                        sender: {
+                            _id: notification.sender._id.toString(),
+                            username: notification.sender.username,
+                            avatarUrl: notification.sender.avatarUrl
+                        }
+                    }
+                };
+
+                await redis.publish('peernet:notifications', JSON.stringify(payload));
             } catch (redisErr) {
-                console.error(`NotificationService: Redis publish FAILED - ${redisErr.message}`);
+                console.error(`[NOTIF-REDIS] Publish FAILED: ${redisErr.message}`);
             }
         }
 
