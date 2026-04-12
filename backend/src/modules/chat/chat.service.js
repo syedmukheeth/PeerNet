@@ -3,6 +3,7 @@
 const Conversation = require('./Conversation');
 const Message = require('./Message');
 const ApiError = require('../../utils/ApiError');
+const { getRedisOptional } = require('../../config/redis');
 
 const getOrCreateConversation = async (userId, targetUserId) => {
     if (userId.toString() === targetUserId.toString()) {
@@ -77,6 +78,16 @@ const markAsSeen = async (conversationId, userId) => {
         { conversation: conversationId, sender: { $ne: userId }, status: { $ne: 'seen' } },
         { status: 'seen' }
     );
+
+    // Broadcast sync event so all client sessions refresh their unread counts
+    const redis = getRedisOptional();
+    if (redis) {
+        await redis.publish('peernet:messages', JSON.stringify({
+            recipient: userId.toString(),
+            type: 'UNREAD_COUNT_SYNC'
+        }));
+    }
+
     return result;
 };
 

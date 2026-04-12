@@ -1,26 +1,18 @@
 import axios from 'axios'
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
-const rawChatApiUrl = import.meta.env.VITE_CHAT_API_URL;
 
-// Main API server (posts, feed, auth, etc.)
+// Main API server (unified posts, messages, auth, etc.)
 const MAIN_API = 'https://peernet-5u5q.onrender.com/api/v1';
 
 const BASE_URL = rawApiUrl 
     ? (rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl.replace(/\/+$/, '')}/api/v1`)
     : (window.location.hostname.includes('vercel.app') ? MAIN_API : '/api/v1'); 
 
-// Chat / Socket server is peernet-5mtc — kept separate
-export const CHAT_BASE_URL = rawChatApiUrl 
-    ? (rawChatApiUrl.endsWith('/api/v1') ? rawChatApiUrl : `${rawChatApiUrl.replace(/\/+$/, '')}/api/v1`)
-    : (window.location.hostname.includes('vercel.app') ? 'https://peernet-5mtc.onrender.com/api/v1' : 'http://localhost:3001/api/v1');
+// Chat endpoints consolidated to Main API host
+export const CHAT_BASE_URL = BASE_URL;
 
-
-export const SOCKET_URL = import.meta.env.VITE_CHAT_API_URL
-    ? import.meta.env.VITE_CHAT_API_URL.replace(/\/api\/v1\/?$/, '')
-    : (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('peernet')
-        ? 'https://peernet-5mtc.onrender.com'
-        : 'http://localhost:3001')
+export const SOCKET_URL = BASE_URL.replace(/\/api\/v1\/?$/, '');
 
 // ── Shared Interceptor Logic ────────────────────────────────────
 

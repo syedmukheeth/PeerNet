@@ -243,6 +243,11 @@ export default function Layout() {
             showNotifToast(notif)
         })
 
+        socket.on('sync_counts', () => {
+             console.log('[Layout] Real-time sync signal received')
+             syncAllCounts()
+        })
+
         socket.on('new_message', (msg) => {
             const senderId = (msg.sender?._id || msg.sender || '').toString()
             if (senderId === user?._id?.toString()) return

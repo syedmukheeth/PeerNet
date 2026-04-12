@@ -84,14 +84,27 @@ const initSocket = async (server) => {
         try {
             const data = JSON.parse(message);
             if (channel === 'peernet:notifications') {
-                // Parse: { recipient, notification }
-                const { recipient, notification } = data;
+                const { recipient, notification, type } = data;
+                
+                // Real-time synchronization for unread counts
+                if (type === 'NOTIFICATION_COUNT_SYNC') {
+                    io.to(`user:${recipient}`).emit('sync_counts', { type: 'notifications' });
+                    logger.debug(`Relayed NOTIFICATION_COUNT_SYNC to user:${recipient}`);
+                    return;
+                }
+
                 io.to(`user:${recipient}`).emit('new_notification', notification);
                 logger.debug(`Relayed notification to user:${recipient}`);
             } else if (channel === 'peernet:messages') {
-                // Parse: { recipient, message, type?, messageId?, conversationId? }
                 const { recipient, message: chatMsg, type, messageId, conversationId } = data;
                 
+                // Real-time synchronization for unread counts
+                if (type === 'UNREAD_COUNT_SYNC') {
+                    io.to(`user:${recipient}`).emit('sync_counts', { type: 'messages' });
+                    logger.debug(`Relayed UNREAD_COUNT_SYNC to user:${recipient}`);
+                    return;
+                }
+
                 if (type === 'MESSAGE_EDITED') {
                     io.to(`user:${recipient}`).emit('message_edited', chatMsg);
                 } else if (type === 'MESSAGE_DELETED') {

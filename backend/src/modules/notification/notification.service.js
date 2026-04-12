@@ -112,8 +112,10 @@ const formatNotification = (notif, hydratedEntity = null) => {
 
 const createNotification = async (data) => {
     try {
-        // 1. DEDUPLICATION: Avoid spamming identical notifications within 60 seconds
-        const duplicateWindow = new Date(Date.now() - 60000);
+        // 1. DEDUPLICATION: Avoid spamming identical notifications within 5 seconds for likes (rapid testing)
+        // Others can keep 60s window.
+        const windowDuration = data.type === 'like' ? 5000 : 60000;
+        const duplicateWindow = new Date(Date.now() - windowDuration);
         const existing = await Notification.findOne({
             recipient: data.recipient,
             sender: data.sender,
@@ -286,6 +288,15 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
 
 const markAllRead = async (userId) => {
     await Notification.updateMany({ recipient: userId, isRead: false }, { isRead: true });
+
+    // Broadcast sync event so all client sessions refresh their unread counts
+    const redis = getRedisOptional();
+    if (redis) {
+        await redis.publish('peernet:notifications', JSON.stringify({
+            recipient: userId.toString(),
+            type: 'NOTIFICATION_COUNT_SYNC'
+        }));
+    }
 };
 
 const getUnreadCount = async (userId) =>

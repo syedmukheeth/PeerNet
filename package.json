@@ -195,9 +195,9 @@
     "concurrently": "^9.2.1"
   },
   "scripts": {
-    "start": "concurrently \"npm run start --prefix backend\" \"npm run start --prefix chat-service\" \"npm run build --prefix frontend && npm run preview --prefix frontend\"",
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix chat-service\" \"npm run dev --prefix frontend\"",
-    "install:all": "npm install && npm install --prefix backend && npm install --prefix chat-service && npm install --prefix frontend",
+    "start": "concurrently \"npm run start --prefix backend\" \"npm run build --prefix frontend && npm run preview --prefix frontend\"",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
