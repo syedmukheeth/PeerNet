@@ -8,6 +8,8 @@ const ApiError = require('../../utils/ApiError');
 const User = require('../user/User');
 const { getRedisOptional } = require('../../config/redis');
 const logger = require('../../config/logger');
+const { publishEvent } = require('../../config/kafka');
+const notificationService = require('../notification/notification.service');
 
 const createDscroll = async (userId, { caption, tags }, file) => {
     if (!file) throw new ApiError(400, 'Video file is required');
@@ -103,12 +105,16 @@ const likeDscroll = async (dscrollId, userId) => {
         await Like.create({ user: userId, targetId: dscrollId, targetModel: 'Dscroll' });
         await Dscroll.findByIdAndUpdate(dscrollId, { $inc: { likesCount: 1 } });
 
-        // Notify via Event Bus
-        publishEvent('dscroll_events', 'DSCROLL_LIKED', {
-            dscrollId,
-            userId,
-            authorId: dscroll.author
-        });
+        // Notify via Direct Notification Service (Reliable Real-Time)
+        if (dscroll.author.toString() !== userId.toString()) {
+            await notificationService.createNotification({
+                recipient: dscroll.author,
+                sender: userId,
+                type: 'like',
+                entityId: dscrollId,
+                entityModel: 'Dscroll'
+            });
+        }
 
         return { liked: true };
     } catch (err) {

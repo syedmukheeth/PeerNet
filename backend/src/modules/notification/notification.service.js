@@ -3,32 +3,35 @@
 const Notification = require('./Notification');
 const { getRedisOptional } = require('../../config/redis');
 
-const createNotification = async ({ recipient, sender, type, entityId, entityModel }) => {
-    // Don't notify yourself
-    if (recipient.toString() === sender.toString()) return;
+const createNotification = async (data) => {
+    try {
+        const notification = await Notification.create(data);
 
-    const notification = await Notification.create({ recipient, sender, type, entityId, entityModel });
+        // Populate for real-time delivery
+        await notification.populate([
+            { path: 'sender', select: 'username avatarUrl isVerified' },
+            { path: 'entityId', options: { strictPopulate: false } }
+        ]);
 
-    // Populate sender and entity details for real-time delivery
-    await notification.populate([
-        { path: 'sender', select: 'username avatarUrl isVerified' },
-        { path: 'entityId', options: { strictPopulate: false } }
-    ]);
-
-    // Push real-time notification cross-service via Redis
-    const redis = getRedisOptional();
-    if (redis) {
-        try {
-            await redis.publish('peernet:notifications', JSON.stringify({
-                recipient: recipient.toString(),
-                notification
-            }));
-        } catch (err) {
-            console.error('Failed to publish notification to Redis:', err);
+        // Broadcast to Redis for real-time delivery (to Chat Service)
+        const redis = getRedisOptional();
+        if (redis) {
+            try {
+                // We emit a robust object that the Chat Service expects
+                await redis.publish('peernet:notifications', JSON.stringify({
+                    recipient: notification.recipient.toString(),
+                    notification: notification.toJSON()
+                }));
+            } catch (redisErr) {
+                console.error(`NotificationService: Redis publish FAILED - ${redisErr.message}`);
+            }
         }
-    }
 
-    return notification;
+        return notification;
+    } catch (err) {
+        console.error(`NotificationService: Create FAILED - ${err.message}`);
+        throw err;
+    }
 };
 
 const getNotifications = async (userId, { limit = 20, cursor = null }) => {

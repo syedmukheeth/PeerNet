@@ -37,68 +37,11 @@ const initNotificationWorker = async () => {
                             logger.warn(`NotificationWorker: Missing data for POST_LIKED: ${JSON.stringify(payload)}`);
                             break;
                         }
-                        if (authorId.toString() === userId.toString()) {
-                            logger.debug(`NotificationWorker: Skipping self-like for post ${postId}`);
-                            break;
-                        }
-                        await notificationService.createNotification({
-                            recipient: authorId,
-                            sender: userId,
-                            type: 'like',
-                            entityId: postId,
-                            entityModel: 'Post',
-                        });
-                        break;
-                    }
+                    /* Core UI Notifications are now handled DIRECTLY in services for instant speed.
+                       Kafka is reserved for non-latency-sensitive background tasks. */
                     
-                    case 'COMMENT_ADDED':
-                        await notificationService.createNotification({
-                            recipient: payload.postAuthorId,
-                            sender: payload.authorId,
-                            type: 'comment',
-                            entityId: payload.postId,
-                            entityModel: payload.postModel || 'Post',
-                        });
-                        break;
-
-                    case 'REPLY_ADDED':
-                        await notificationService.createNotification({
-                            recipient: payload.parentCommentAuthorId,
-                            sender: payload.authorId,
-                            type: 'reply',
-                            entityId: payload.commentId,
-                            entityModel: 'Comment',
-                        });
-                        break;
-
-                    case 'COMMENT_LIKED':
-                        await notificationService.createNotification({
-                            recipient: payload.authorId,
-                            sender: payload.userId,
-                            type: 'like',
-                            entityId: payload.commentId,
-                            entityModel: 'Comment',
-                        });
-                        break;
-
-                    case 'DSCROLL_LIKED':
-                        await notificationService.createNotification({
-                            recipient: payload.authorId,
-                            sender: payload.userId,
-                            type: 'like',
-                            entityId: payload.dscrollId,
-                            entityModel: 'Dscroll',
-                        });
-                        break;
-
-                    case 'USER_FOLLOWED':
-                        await notificationService.createNotification({
-                            recipient: payload.followingId,
-                            sender: payload.followerId,
-                            type: 'follow',
-                            entityId: payload.followingId,
-                            entityModel: 'User',
-                        });
+                    case 'POST_CREATED':
+                        // Logic for AI post analysis could stay here if needed
                         break;
 
                     default:

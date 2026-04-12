@@ -6,6 +6,7 @@ const { getRedis } = require('../../config/redis');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 const { publishEvent } = require('../../config/kafka');
+const notificationService = require('../notification/notification.service');
 
 const USER_CACHE_TTL = 600; // 10 min
 
@@ -89,10 +90,11 @@ const follow = async (followerId, followingId) => {
     const redis = getRedis();
     await redis.del([`user:${followerId}`, `user:${followingId}`]);
 
-    // Notify via Event Bus
-    publishEvent('user_events', 'USER_FOLLOWED', {
-        followerId,
-        followingId
+    // Notify via Direct Notification Service (Reliable Real-Time)
+    await notificationService.createNotification({
+        recipient: followingId,
+        sender: followerId,
+        type: 'follow'
     });
 
     return { message: `Now following @${target.username}` };
