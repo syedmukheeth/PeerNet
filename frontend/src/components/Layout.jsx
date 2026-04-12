@@ -10,9 +10,11 @@ import {
 import { useTheme } from '../context/ThemeContext'
 import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
+import { useMultiAccount } from '../context/MultiAccountContext'
 import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
 import FeedbackModal from './FeedbackModal'
+import AccountSwitcherModal from './AccountSwitcherModal'
 import { FaLinkedin } from 'react-icons/fa'
 import logoImg from '../assets/logo.png'
 
@@ -36,12 +38,14 @@ const mobileBottomLinksRight = [
 export default function Layout() {
     const { user, logout } = useAuth()
     const { isDark } = useTheme()
+    const { saveCurrentAccount } = useMultiAccount()
     const navigate = useNavigate()
     const location = useLocation()
     const socket = useSocket(user)
 
     const [showCreate, setShowCreate] = useState(false)
     const [showFeedback, setShowFeedback] = useState(false)
+    const [showSwitcher, setShowSwitcher] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
     const [msgCount, setMsgCount] = useState(0)
     const unreadRef = useRef(0)
@@ -155,6 +159,10 @@ export default function Layout() {
         return () => socket.off('new_message', onMsg)
     }, [socket, user, location.pathname, showMsgToast])
 
+    useEffect(() => {
+        if (user) saveCurrentAccount(user)
+    }, [user, saveCurrentAccount])
+
     const handleLogout = async () => { await logout(); navigate('/login') }
     const avatarUrl = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
     const [showMore, setShowMore] = useState(false)
@@ -232,7 +240,7 @@ export default function Layout() {
                                 <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
                                     <HiCog size={20} /> <span>Settings</span>
                                 </NavLink>
-                                <button className="ig-more-item" onClick={() => { setShowMore(false); navigate('/login') }}>
+                                <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
                                     <HiSwitchHorizontal size={20} /> <span>Switch accounts</span>
                                 </button>
                                 <div className="ig-more-divider" />
@@ -290,7 +298,6 @@ export default function Layout() {
                                 <Link to="/legal/privacy" className="site-footer__link">Privacy</Link>
                                 <Link to="/legal/terms" className="site-footer__link">Terms</Link>
                                 <button onClick={() => setShowFeedback(true)} className="site-footer__link">Report Bug</button>
-                                <button onClick={() => navigate('/login')} className="site-footer__link site-footer__link--accent">Switch account</button>
                             </div>
                         </div>
 
@@ -335,8 +342,11 @@ export default function Layout() {
                 </NavLink>
             </nav>
 
-            {showCreate && <CreatePostModal onClose={() => setShowCreate(false)} />}
-            <AnimatePresence>{showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}</AnimatePresence>
+            <AnimatePresence>
+                {showCreate && <CreatePostModal onClose={() => setShowCreate(false)} />}
+                {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+                {showSwitcher && <AccountSwitcherModal onClose={() => setShowSwitcher(false)} />}
+            </AnimatePresence>
             <ThemeToggle className="sr-only" />
         </div>
     )

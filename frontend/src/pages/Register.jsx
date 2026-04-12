@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useMultiAccount } from '../context/MultiAccountContext'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
@@ -15,6 +16,7 @@ export default function Register() {
     const [acceptedTerms, setAcceptedTerms] = useState(false)
     
     const { register, loginGoogle, loginGuest } = useAuth()
+    const { saveCurrentAccount } = useMultiAccount()
     const navigate = useNavigate()
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -24,7 +26,8 @@ export default function Register() {
         if (!acceptedTerms) return toast.error('Please accept the Terms of Service')
         setLoading(true)
         try {
-            await register(form)
+            const user = await register(form)
+            saveCurrentAccount(user)
             toast.success('Welcome to PeerNet!')
             navigate('/')
         } catch (err) {
@@ -35,7 +38,8 @@ export default function Register() {
     const handleGoogleSuccess = async (credentialResponse) => {
         setLoading(true)
         try {
-            await loginGoogle(credentialResponse.credential)
+            const user = await loginGoogle(credentialResponse.credential)
+            saveCurrentAccount(user)
             toast.success('Joined PeerNet with Google!')
             navigate('/')
         } catch {
@@ -46,7 +50,8 @@ export default function Register() {
     const handleGuestLogin = async () => {
         setLoading(true)
         try {
-            await loginGuest()
+            const user = await loginGuest()
+            saveCurrentAccount(user)
             toast.success('Welcome, Guest!')
             navigate('/')
         } catch {

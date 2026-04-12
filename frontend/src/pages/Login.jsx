@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useMultiAccount } from '../context/MultiAccountContext'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
@@ -13,6 +14,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const { login, loginGoogle, loginGuest } = useAuth()
+    const { saveCurrentAccount } = useMultiAccount()
     const navigate = useNavigate()
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -21,7 +23,8 @@ export default function Login() {
         e.preventDefault()
         setLoading(true)
         try {
-            await login(form.identifier, form.password)
+            const user = await login(form.identifier, form.password)
+            saveCurrentAccount(user)
             toast.success('Welcome back!')
             navigate('/')
         } catch (err) {
@@ -32,7 +35,8 @@ export default function Login() {
     const handleGoogleSuccess = async (credentialResponse) => {
         setLoading(true)
         try {
-            await loginGoogle(credentialResponse.credential)
+            const user = await loginGoogle(credentialResponse.credential)
+            saveCurrentAccount(user)
             toast.success('Logged in with Google!')
             navigate('/')
         } catch {
@@ -43,7 +47,8 @@ export default function Login() {
     const handleGuestLogin = async () => {
         setLoading(true)
         try {
-            await loginGuest()
+            const user = await loginGuest()
+            saveCurrentAccount(user)
             toast.success('Welcome, Guest!')
             navigate('/')
         } catch {
