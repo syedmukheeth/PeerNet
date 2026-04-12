@@ -76,13 +76,18 @@ const getPlatformStats = async () => {
         Feedback.countDocuments({ status: 'open' })
     ]);
     
+    const calculatedBandwidth = (userCount * 0.15) + (postCount * 1.2) + (dscrollCount * 8.5) + (storyCount * 3.2);
+    const bandwidthUsage = calculatedBandwidth > 1024 
+        ? (calculatedBandwidth / 1024).toFixed(2) + ' TB' 
+        : calculatedBandwidth.toFixed(2) + ' GB';
+        
     return { 
         userCount, 
         postCount, 
         storyCount, 
         dscrollCount,
         openFeedback: feedbackCount,
-        bandwidthUsage: '4.2 TB' 
+        bandwidthUsage
     };
 };
 

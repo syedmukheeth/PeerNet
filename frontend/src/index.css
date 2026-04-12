@@ -815,10 +815,20 @@ textarea {
 .app-layout {
   display: grid;
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh;
   --sidebar-w: clamp(200px, 15vw, 240px);
   transition: grid-template-columns 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  z-index: 40;
 }
 
 .app-layout.sidebar-collapsed {
