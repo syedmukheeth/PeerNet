@@ -59,22 +59,24 @@ export default function Layout() {
     // ── Unified Sync (Big Tech Grade: Unified and Robust) ──────────────────
     const syncAllCounts = useCallback(async () => {
         if (!user) return
-        try {
-            const [notifRes, msgRes] = await Promise.all([
-                api.get('/notifications?limit=1'),
-                chatApi.get('/conversations/unread-count')
-            ])
+        
+        // Isolate Notification Sync
+        api.get('/notifications/unread-count')
+            .then(res => {
+                const n = res.data.count ?? 0
+                setUnreadCount(n)
+                unreadRef.current = n
+            })
+            .catch(() => console.warn('[SYNC] Notification count fetch failed'))
 
-            const n = notifRes.data.unreadCount || 0
-            const m = msgRes.data.count || 0
-
-            setUnreadCount(n)
-            unreadRef.current = n
-            setMsgCount(m)
-            msgRef.current = m
-        } catch (e) {
-            console.warn('[SYNC] Auto-sync failed (likely network-link delay)')
-        }
+        // Isolate Message Sync
+        chatApi.get('/conversations/unread-count')
+            .then(res => {
+                const m = res.data.count ?? 0
+                setMsgCount(m)
+                msgRef.current = m
+            })
+            .catch(() => console.warn('[SYNC] Message count fetch failed'))
     }, [user])
 
     // ── Global Badge Sync ────────────────────────────────────

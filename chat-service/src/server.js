@@ -69,16 +69,18 @@ const bootstrap = async () => {
                     if (channel === 'peernet:notifications') {
                         const { recipient, notification } = data;
                         logger.info(`[REDIS] Incoming Notification for ${recipient} (Type: ${notification.type})`);
-                        io.to(`user:${recipient}`).emit('new_notification', notification);
+                        // Use io.local to prevent duplicate broadcasts through the adapter
+                        io.local.to(`user:${recipient}`).emit('new_notification', notification);
                     } else if (channel === 'peernet:messages') {
                         const { recipient, message: chatMsg, type, messageId, conversationId } = data;
                         logger.info(`[REDIS] Incoming Message action for ${recipient} (Type: ${type})`);
+                        const room = `user:${recipient}`;
                         if (type === 'MESSAGE_EDITED') {
-                            io.to(`user:${recipient}`).emit('message_edited', chatMsg);
+                            io.local.to(room).emit('message_edited', chatMsg);
                         } else if (type === 'MESSAGE_DELETED') {
-                            io.to(`user:${recipient}`).emit('message_deleted', { messageId, conversationId });
+                            io.local.to(room).emit('message_deleted', { messageId, conversationId });
                         } else {
-                            io.to(`user:${recipient}`).emit('new_message', chatMsg);
+                            io.local.to(room).emit('new_message', chatMsg);
                         }
                     }
                 } catch (e) {
