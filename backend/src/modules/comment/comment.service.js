@@ -84,7 +84,11 @@ const addComment = async (postId, userId, { body, parentComment }) => {
 };
 
 const getComments = async (postId, { limit = 20, cursor = null }) => {
-    const query = { post: postId, parentComment: null }; // top-level only
+    // Search both post AND dscroll fields to handle both content types
+    const query = {
+        parentComment: null,
+        $or: [{ post: postId }, { dscroll: postId }]
+    };
     if (cursor) query.createdAt = { $lt: new Date(cursor) };
 
     const comments = await Comment.find(query)
@@ -100,12 +104,12 @@ const getComments = async (postId, { limit = 20, cursor = null }) => {
 };
 
 const getReplies = async (commentId, { limit = 20, cursor = null }) => {
-    const query = { parentComment: commentId }; // fetch child comments
+    const query = { parentComment: commentId };
     if (cursor) query.createdAt = { $lt: new Date(cursor) };
 
     const comments = await Comment.find(query)
         .populate('author', 'username avatarUrl isVerified')
-        .sort({ createdAt: 1 }) // chronologically, earliest replies first
+        .sort({ createdAt: 1 })
         .limit(limit + 1);
 
     const hasMore = comments.length > limit;

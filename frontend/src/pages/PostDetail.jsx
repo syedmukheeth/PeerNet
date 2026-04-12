@@ -367,7 +367,8 @@ export default function PostDetail() {
                                                 >
                                                     {replyingTo?._id === c._id ? 'Cancel reply' : 'Reply'}
                                                 </button>
-                                                {user?._id === (c.author?._id || c.author) && (
+                                                {/* Delete: shown to comment author OR post owner */}
+                                                {(String(user?._id) === String(c.author?._id || c.author) || String(user?._id) === String(post?.author?._id || post?.author)) && (
                                                     <button 
                                                         onClick={() => handleDeleteComment(c._id, false)}
                                                         style={{ background: 'none', border: 'none', color: 'var(--error)', opacity: 0.7, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
@@ -416,7 +417,8 @@ export default function PostDetail() {
                                                                     </div>
                                                                     <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, display: 'flex', gap: 10, alignItems: 'center' }}>
                                                                         <span>{timeago(reply.createdAt)}</span>
-                                                                        {user?._id === (reply.author?._id || reply.author) && (
+                                                                        {/* Delete reply: author or post owner */}
+                                                                        {(String(user?._id) === String(reply.author?._id || reply.author) || String(user?._id) === String(post?.author?._id || post?.author)) && (
                                                                             <button 
                                                                                 onClick={() => handleDeleteComment(reply._id, true, c._id)}
                                                                                 style={{ background: 'none', border: 'none', color: 'var(--error)', opacity: 0.7, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
