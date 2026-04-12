@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
+const cookieParser = require('cookie-parser');
 const logger = require('./config/logger');
 const { authenticate } = require('./middleware/auth.middleware');
 const notificationController = require('./modules/notification/notification.controller');
@@ -11,12 +12,17 @@ const routes = require('./routes/v1');
 
 const createApp = () => {
     const app = express();
+    
+    // ── 🔧 Production Proxy Setting ────────────────────────────────────────────
+    // Required for Render reverse proxy to correctly read client IPs for express-rate-limit
+    app.set('trust proxy', 1);
 
     // ── 🛡️ Middleware ──────────────────────────────────────────────────────────
     app.use(helmet());
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(compression());
+    app.use(cookieParser());
 
     // ── 🌐 CORS ───────────────────────────────────────────────────────────────
     const allowedOrigins = [
