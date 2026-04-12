@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const logger = require('./config/logger');
 const { authenticate } = require('./middleware/auth.middleware');
-const messageController = require('./modules/message/message.controller');
+const messageController = require('./controllers/message.controller');
 const routes = require('./routes/v1');
 
 const createApp = () => {
@@ -31,18 +31,12 @@ const createApp = () => {
         credentials: true,
     }));
 
-    // ── 🩺 Diagnostic Tracer & Health ─────────────────────────────────────────
-    app.get('/health', (req, res) => res.status(200).json({ status: 'ok', service: 'chat' }));
-
-    app.use((req, res, next) => {
-        if (req.path.includes('unread-count')) {
-            logger.info(`[CHAT-SYNC-TRACE] ${req.method} ${req.path}`);
-        }
-        next();
-    });
+    // ── 🩺 Diagnostics & Health ───────────────────────────────────────────────
+    app.get('/health', (req, res) => res.status(200).json({ status: 'ok', service: 'chat', environment: 'production' }));
 
     // ── 🔄 Global Sync Bypass ─────────────────────────────────────────────────
-    // Mount unread count at top level to avoid sub-router mounting issues
+    // Mount unread count at top level to avoid sub-router mounting issues.
+    // NOTE: This MUST point to controllers/message.controller.js.
     const chatSyncPaths = ['/conversations/unread-count', '/api/v1/conversations/unread-count'];
     app.get(chatSyncPaths, authenticate, messageController.getUnreadCount);
 
