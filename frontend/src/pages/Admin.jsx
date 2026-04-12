@@ -152,10 +152,13 @@ export default function Admin() {
                     { label: 'Node Payload', value: stats?.bandwidthUsage || '...', icon: <HiChartBar />, color: '#30D158', gradient: 'from-[#30D158]/20 to-transparent' },
                 ].map((s, i) => (
                     <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} 
-                        className={`glass-card p-6 md:p-8 rounded-[32px] border border-border/50 hover:border-[${s.color}]/40 relative overflow-hidden group`}>
+                        className="glass-card p-6 md:p-8 rounded-[32px] border relative overflow-hidden group"
+                        style={{ borderColor: 'var(--border)' }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = s.color + '66'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
                         <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-bl ${s.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                         <div className="flex justify-between items-start mb-6 relative z-10">
-                            <div className="p-3.5 rounded-2xl bg-surface border border-border/60 shadow-lg text-2xl" style={{ color: s.color, boxShadow: \`0 0 20px \${s.color}20\` }}>
+                            <div className="p-3.5 rounded-2xl bg-surface border border-border/60 shadow-lg text-2xl" style={{ color: s.color, boxShadow: `0 0 20px ${s.color}20` }}>
                                 {s.icon}
                             </div>
                             <span className="text-[10px] font-black opacity-30 tracking-[0.2em] uppercase">Metrics</span>
