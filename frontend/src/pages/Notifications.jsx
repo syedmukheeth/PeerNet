@@ -73,66 +73,105 @@ function NotifRow({ n, index, onFollowBack }) {
                      n.type === 'reply' ? 'replied to your comment.' :
                      n.type === 'follow' ? 'started following you.' : 'notified you.';
 
+    // Where to navigate when the row is clicked
+    const navTarget = n.targetUrl || (n.entityModel === 'Post' ? `/posts/${n.entityId}` : '/')
+
+    // Comment body preview text
+    const commentBody = (n.type === 'comment' || n.type === 'reply') && (n.commentBody || n.entityId?.body)
+
     return (
         <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: index * 0.02 }}
             style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px',
-                background: 'var(--bg-primary)', cursor: 'pointer', position: 'relative'
+                background: n.isRead ? 'transparent' : 'var(--accent-subtle)',
+                cursor: 'pointer', position: 'relative',
+                transition: 'background 200ms ease',
             }}
+            onClick={() => window.location.href = navTarget}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'}
+            onMouseLeave={e => e.currentTarget.style.background = n.isRead ? 'transparent' : 'var(--accent-subtle)'}
         >
-            <Link to={`/profile/${n.sender?._id}`} style={{ position: 'relative', flexShrink: 0 }}>
+            {/* ── Sender Avatar ─────────────────────────── */}
+            <div
+                onClick={e => { e.stopPropagation(); window.location.href = `/profile/${n.sender?._id}` }}
+                style={{ position: 'relative', flexShrink: 0, cursor: 'pointer' }}
+            >
                 <img src={avatar} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }} />
+                {/* Type badge */}
+                <div style={{
+                    position: 'absolute', bottom: -2, right: -2, width: 18, height: 18,
+                    borderRadius: '50%', background: cfg.gradient,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: '2px solid var(--bg-primary)', fontSize: 9
+                }}>
+                    <Icon style={{ color: '#fff', fontSize: 10 }} />
+                </div>
                 {!n.isRead && (
                     <div style={{
-                        position: 'absolute', top: -2, right: -2, width: 12, height: 12,
+                        position: 'absolute', top: -2, left: -2, width: 10, height: 10,
                         borderRadius: '50%', background: 'var(--accent)', border: '2px solid var(--bg-primary)'
                     }} />
                 )}
-            </Link>
+            </div>
 
+            {/* ── Text Content ──────────────────────────── */}
             <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.4, color: 'var(--text-primary)' }}>
-                <Link to={`/profile/${n.sender?._id}`} style={{ fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>
                     {n.sender?.username}
-                </Link>
-                {n.sender?.isVerified && <HiBadgeCheck style={{ color: '#0095f6', fontSize: 14, marginLeft: 3, verticalAlign: 'middle', display: 'inline' }} />}
-                <span style={{ marginLeft: 4 }}>{actionText}</span>
-                <span style={{ color: '#8e8e8e', marginLeft: 6 }}>{formatTime(n.createdAt)}</span>
-                
-                {n.type === 'comment' && n.entityId?.body && (
-                    <div style={{ color: '#8e8e8e', marginTop: 2, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {n.entityId.body}
+                </span>
+                {n.sender?.isVerified && <HiBadgeCheck style={{ color: '#0095f6', fontSize: 13, marginLeft: 3, verticalAlign: 'middle', display: 'inline' }} />}
+                <span style={{ marginLeft: 4, color: 'var(--text-2)' }}>{actionText}</span>
+                <span style={{ color: 'var(--text-3)', marginLeft: 6, fontSize: 12 }}>{formatTime(n.createdAt)}</span>
+
+                {/* Comment body preview pill */}
+                {commentBody && (
+                    <div style={{
+                        marginTop: 4, padding: '3px 8px',
+                        background: 'var(--hover)', borderRadius: 6,
+                        color: 'var(--text-2)', fontSize: 12.5,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        maxWidth: '100%', display: 'inline-block',
+                        borderLeft: '2px solid var(--accent)',
+                    }}>
+                        {commentBody}
                     </div>
                 )}
             </div>
 
-            <div style={{ flexShrink: 0 }}>
+            {/* ── Right Side: Thumbnail or Action ──────── */}
+            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
                 {n.type === 'follow' ? (
                     <button
                         onClick={handleFollowBack}
                         style={{
-                            background: followed ? 'transparent' : '#0095F6',
-                            color: followed ? '#fff' : '#fff',
-                            border: followed ? '1px solid #363636' : 'none',
+                            background: followed ? 'transparent' : 'var(--accent)',
+                            color: '#fff',
+                            border: followed ? '1px solid var(--border-md)' : 'none',
                             borderRadius: 8, padding: '6px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer'
                         }}
                     >
                         {followed ? 'Following' : 'Follow'}
                     </button>
                 ) : n.thumbnail ? (
-                    <Link to={n.targetUrl || '#'}>
-                        <img 
-                            src={n.thumbnail} 
-                            style={{ width: 44, height: 44, borderRadius: 4, objectFit: 'cover', border: '0.5px solid #262626' }}
-                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+                    <div style={{ position: 'relative', width: 48, height: 48, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border-md)' }}>
+                        <img
+                            src={n.thumbnail}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            onError={e => { e.target.style.display = 'none' }}
                         />
-                        <div style={{ display: 'none', width: 44, height: 44, background: 'var(--hover)', borderRadius: 4, alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-                            {cfg.emoji}
-                        </div>
-                    </Link>
+                    </div>
                 ) : (
-                    <HiChevronRight style={{ color: '#363636' }} />
+                    /* For comment/reply with NO post thumbnail (text-only post) show emoji icon */
+                    <div style={{
+                        width: 44, height: 44, borderRadius: 8,
+                        background: cfg.gradient,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 20, flexShrink: 0
+                    }}>
+                        {cfg.emoji}
+                    </div>
                 )}
             </div>
         </motion.div>

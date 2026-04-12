@@ -10,15 +10,23 @@ const { checkToxicity } = require('../../config/ai.config');
 const notificationService = require('../notification/notification.service');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
-    // Try Post first
+    // 1. Duplicate Prevention (Rate Limiting/Lag check)
+    // Check if user posted same comment in last 5 seconds
+    const existing = await Comment.findOne({
+        author: userId,
+        post: postId,
+        body: body.trim(),
+        createdAt: { $gt: new Date(Date.now() - 5000) }
+    });
+    if (existing) throw new ApiError(409, 'Duplicate comment detected. Please wait.');
+
+    // 2. Resolve Target
     let post = await Post.findById(postId);
     let targetModel = 'Post';
-
     if (!post) {
         post = await Dscroll.findById(postId);
         targetModel = 'Dscroll';
     }
-
     if (!post) throw new ApiError(404, 'Post or Video not found');
 
     // AI Toxicity Check
@@ -30,7 +38,7 @@ const addComment = async (postId, userId, { body, parentComment }) => {
     const comment = await Comment.create({ 
         post: postId, 
         author: userId, 
-        body, 
+        body: body.trim(), 
         parentComment: parentComment || null,
         isAiVerified: true,
         toxicityScore
@@ -106,7 +114,15 @@ const getReplies = async (commentId, { limit = 20, cursor = null }) => {
 const deleteComment = async (commentId, userId) => {
     const comment = await Comment.findById(commentId);
     if (!comment) throw new ApiError(404, 'Comment not found');
-    if (comment.author.toString() !== userId.toString()) {
+
+    // Fetch the post to check if the user is the owner
+    const post = await Post.findById(comment.post) || await Dscroll.findById(comment.post);
+    
+    // Auth: Either comment author OR post owner can delete
+    const isAuthor = comment.author.toString() === userId.toString();
+    const isPostOwner = post?.author?.toString() === userId.toString();
+
+    if (!isAuthor && !isPostOwner) {
         throw new ApiError(403, 'Not authorised to delete this comment');
     }
 

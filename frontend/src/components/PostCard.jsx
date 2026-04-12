@@ -138,14 +138,14 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     </Link>
                     <div style={{ flex: 1, marginLeft: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Link to={`/profile/${author._id}`} className="post-author-name" style={{ fontSize: 13.5, fontWeight: 700 }}>{author.username}</Link>
+                            <Link to={`/profile/${author._id}`} className="post-author-name" style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-1)' }}>{author.username}</Link>
                             {author.isVerified && <HiBadgeCheck className="verified" style={{ fontSize: 14 }} title="Verified" />}
                         </div>
-                        <div className="post-author-time" style={{ fontSize: 11, opacity: 0.7 }}>{timeago(post.createdAt)}</div>
+                        <div className="post-author-time" style={{ fontSize: 11, color: 'var(--text-3)' }}>{timeago(post.createdAt)}</div>
                     </div>
                     <div style={{ position: 'relative' }} ref={menuRef}>
                         <motion.button className="btn btn-ghost btn-icon-sm"
-                            whileHover={{ background: 'rgba(255,255,255,0.08)' }} whileTap={{ scale: 0.9 }}
+                            whileHover={{ background: 'var(--btn-glass-hover)' }} whileTap={{ scale: 0.9 }}
                             onClick={() => setMenuOpen(o => !o)}>
                             <HiDotsHorizontal style={{ fontSize: 18, color: 'var(--text-3)' }} />
                         </motion.button>
