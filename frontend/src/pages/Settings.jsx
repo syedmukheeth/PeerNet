@@ -138,8 +138,7 @@ export default function Settings() {
                         <span className="settings-row-label">Username</span>
                         {editMode === 'username' ? (
                             <input
-                                className="input input-sm"
-                                style={{ marginTop: 8 }}
+                                className="settings-input"
                                 value={profileDraft.username}
                                 onChange={(e) => setProfileDraft(d => ({ ...d, username: e.target.value }))}
                                 autoFocus
@@ -150,8 +149,10 @@ export default function Settings() {
                     </div>
                     {editMode === 'username' ? (
                         <div style={{ display: 'flex', gap: 8 }}>
-                            <button className="btn btn-ghost btn-xs" onClick={() => setEditMode(null)}>Cancel</button>
-                            <button className="btn btn-primary btn-xs" onClick={handleUpdateProfile} disabled={updateLoading}>Save</button>
+                            <button className="settings-edit-btn" style={{ color: 'var(--text-3)' }} onClick={() => setEditMode(null)}>Cancel</button>
+                            <button className="settings-edit-btn" onClick={handleUpdateProfile} disabled={updateLoading}>
+                                {updateLoading ? '...' : 'Save'}
+                            </button>
                         </div>
                     ) : (
                         <button className="settings-edit-btn" onClick={() => {
@@ -167,8 +168,7 @@ export default function Settings() {
                         <span className="settings-row-label">Email</span>
                         {editMode === 'email' ? (
                             <input
-                                className="input input-sm"
-                                style={{ marginTop: 8 }}
+                                className="settings-input"
                                 value={profileDraft.email}
                                 onChange={(e) => setProfileDraft(d => ({ ...d, email: e.target.value }))}
                                 autoFocus
@@ -179,8 +179,10 @@ export default function Settings() {
                     </div>
                     {editMode === 'email' ? (
                         <div style={{ display: 'flex', gap: 8 }}>
-                            <button className="btn btn-ghost btn-xs" onClick={() => setEditMode(null)}>Cancel</button>
-                            <button className="btn btn-primary btn-xs" onClick={handleUpdateProfile} disabled={updateLoading}>Save</button>
+                            <button className="settings-edit-btn" style={{ color: 'var(--text-3)' }} onClick={() => setEditMode(null)}>Cancel</button>
+                            <button className="settings-edit-btn" onClick={handleUpdateProfile} disabled={updateLoading}>
+                                {updateLoading ? '...' : 'Save'}
+                            </button>
                         </div>
                     ) : (
                         <button className="settings-edit-btn" onClick={() => {
