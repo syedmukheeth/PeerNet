@@ -112,6 +112,15 @@ function NotifRow({ n, index, onFollowBack }) {
         return cfg.text
     }
 
+    const getThumbnail = () => {
+        const e = n.entityId
+        if (!e || typeof e !== 'object') return null
+        
+        // If it's a comment or reply, the preview image should be the original post
+        const target = (n.entityModel === 'Comment' && e.post) ? e.post : e
+        return target.mediaUrl || target.thumbnailUrl || target.videoUrl
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -119,13 +128,19 @@ function NotifRow({ n, index, onFollowBack }) {
             transition={{ delay: index * 0.03, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             style={{
                 display: 'flex', alignItems: 'center', gap: 12,
-                padding: '12px 16px',
-                background: n.isRead ? 'transparent' : 'rgba(99,102,241,0.06)',
-                borderRadius: 12,
-                transition: 'background 0.2s',
+                padding: '14px 16px',
+                background: n.isRead ? 'transparent' : 'rgba(99,102,241,0.04)',
+                borderRadius: 16,
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 cursor: 'default',
+                border: n.isRead ? '1px solid transparent' : '1px solid rgba(99,102,241,0.15)',
+                marginBottom: 2
             }}
-            whileHover={{ background: 'var(--hover)' }}
+            whileHover={{ 
+                background: 'var(--hover)',
+                transform: 'translateX(4px)',
+                border: '1px solid var(--border-md)'
+            }}
         >
             {/* Avatar + icon badge */}
             <Link to={`/profile/${n.sender?._id}`} style={{ position: 'relative', flexShrink: 0 }}>
@@ -234,23 +249,20 @@ function NotifRow({ n, index, onFollowBack }) {
                         </span>
                     )
                 ) : (n.entityId && typeof n.entityId === 'object') ? (
-                    <Link to={(n.entityModel === 'Post' || n.entityModel === 'Dscroll') ? `/posts/${n.entityId._id}` : '#'}>
+                    <Link to={(n.entityModel === 'Post' || n.entityModel === 'Dscroll' || (n.entityModel === 'Comment' && n.entityId.post)) ? `/posts/${(n.entityModel === 'Comment' ? n.entityId.post?._id : n.entityId._id)}` : '#'}>
                         <div style={{
-                            width: 44, height: 44, borderRadius: 8,
+                            width: 48, height: 48, borderRadius: 10,
                             overflow: 'hidden', border: '1px solid var(--border)',
                             background: 'var(--hover)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                         }}>
                             <img
-                                src={
-                                    n.entityModel === 'Dscroll' 
-                                        ? (n.entityId.thumbnailUrl || n.entityId.videoUrl) 
-                                        : (n.entityId.mediaUrl || n.entityId.thumbnailUrl || n.entityId.videoUrl)
-                                }
+                                src={getThumbnail()}
                                 alt=""
                                 onError={(e) => {
                                     e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'block';
+                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';
                                 }}
                                 style={{
                                     width: '100%', height: '100%',
