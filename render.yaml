@@ -3,7 +3,7 @@ services:
     name: peernet-backend
     env: node
     rootDir: backend
-    buildCommand: npm install
+    buildCommand: npm run build
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -21,7 +21,7 @@ services:
       - key: JWT_REFRESH_SECRET
         sync: false
       - key: JWT_ACCESS_EXPIRES_IN
-        value: 15m
+        value: 1h
       - key: JWT_REFRESH_EXPIRES_IN
         value: 7d
       - key: CLOUDINARY_CLOUD_NAME
@@ -48,7 +48,7 @@ services:
     name: peernet-chat
     env: node
     rootDir: backend
-    buildCommand: npm install
+    buildCommand: npm run build
     startCommand: npm start
     healthCheckPath: /health
     envVars:

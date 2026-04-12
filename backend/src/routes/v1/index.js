@@ -25,7 +25,7 @@ router.use('/stories', storyRoutes);
 router.use('/dscrolls', dscrollRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
-router.use('/chats', chatRoutes);
+router.use('/conversations', chatRoutes);
 router.use('/ai', aiRoutes);
 
 module.exports = router;

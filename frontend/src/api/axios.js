@@ -10,7 +10,7 @@ const BASE_URL = rawApiUrl
     : (window.location.hostname.includes('vercel.app') ? MAIN_API : '/api/v1'); 
 
 // Chat endpoints consolidated to Main API host (unified)
-export const CHAT_BASE_URL = `${BASE_URL}/chats`;
+export const CHAT_BASE_URL = `${BASE_URL}/conversations`;
 
 export const SOCKET_URL = BASE_URL.replace(/\/api\/v1\/?$/, '');
 

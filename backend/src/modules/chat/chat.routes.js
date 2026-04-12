@@ -6,9 +6,9 @@ const { authenticate } = require('../../middleware/auth.middleware');
 
 router.use(authenticate);
 
-router.get('/conversations', chatController.getConversations);
-router.post('/conversations', chatController.getOrCreateConversation);
-router.get('/conversations/:conversationId/messages', chatController.getMessages);
-router.patch('/conversations/:conversationId/seen', chatController.markSeen);
+router.get('/', chatController.getConversations);
+router.post('/', chatController.getOrCreateConversation);
+router.get('/:conversationId/messages', chatController.getMessages);
+router.patch('/:conversationId/seen', chatController.markSeen);
 
 module.exports = router;
