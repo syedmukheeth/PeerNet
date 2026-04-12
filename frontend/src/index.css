@@ -115,7 +115,7 @@
   --text-secondary: var(--text-2);
   --text-muted: var(--text-3);
 
-  --glass-blur: blur(16px);
+  --glass-blur: none;
   --glass-border: var(--border-md);
 
   /* Profile-specific aliases */
@@ -151,16 +151,12 @@
 }
 
 .glass-header {
-  background: var(--glass-bg-alt);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
 .glass-footer {
-  background: var(--glass-bg-alt);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--surface);
   border-top: 1px solid var(--border);
 }
 
@@ -198,8 +194,8 @@ body {
   background: var(--bg);
   color: var(--text-1);
   line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: initial;
+  -moz-osx-font-smoothing: initial;
   min-height: 100dvh;
   max-width: 100vw;
   overflow-x: hidden;
@@ -485,7 +481,7 @@ textarea {
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 8px; /* Slightly smaller radius for cleaner look */
   box-shadow: var(--shadow-sm);
 }
 
@@ -1124,7 +1120,7 @@ textarea {
 .feed-col {
   flex: 1;
   min-width: 0;
-  max-width: 470px;
+  max-width: 480px; /* Standard IG-style width */
 }
 
 .feed-right-panel {
@@ -1144,29 +1140,27 @@ textarea {
 /* ── Post Card ───────────────────────────────────────────── */
 .post-card {
   background: var(--card);
-  border: 1px solid var(--border-md);
-  border-radius: 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px; /* IG-style sharp corners or very subtle radius */
   overflow: hidden;
-  box-shadow: var(--shadow-sm), 0 0 0 0px transparent;
-  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  box-shadow: none; /* Remove big shadow for cleaner look */
+  transition: border-color 200ms ease;
 }
 
 .post-card:hover {
-  border-color: var(--accent-ring);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  border-color: var(--border-md);
 }
 
 .post-header {
-  padding: 14px 16px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
 }
 
 .post-author-name {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700; /* Bolder for maximum sharpness */
   color: var(--text-1);
 }
 
@@ -1704,8 +1698,8 @@ textarea {
 }
 
 .profile-username-row h1 {
-  font-size: 22px;
-  font-weight: 400;
+  font-size: 24px;
+  font-weight: 700; /* Bolder for maximum sharpness */
   font-family: 'Inter', sans-serif;
   letter-spacing: 0;
   margin: 0;
@@ -2393,8 +2387,6 @@ textarea {
   position: fixed;
   inset: 0;
   background: var(--overlay);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   z-index: 300;
   display: flex;
   align-items: center;
@@ -2410,8 +2402,6 @@ textarea {
   width: 100%;
   max-width: 500px;
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 /* ── Upload Zone ─────────────────────────────────────────── */
@@ -2455,11 +2445,7 @@ textarea {
 }
 
 .auth-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  pointer-events: none;
-  animation: orbFloat 12s ease-in-out infinite;
+  display: none; /* Removed for "no filter" look */
 }
 
 .auth-orb-1 {
