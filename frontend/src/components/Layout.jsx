@@ -9,7 +9,7 @@ import {
     HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiUser
 } from 'react-icons/hi'
 import { useTheme } from '../context/ThemeContext'
-import api, { SOCKET_URL, CHAT_BASE_URL } from '../api/axios'
+import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import CreatePostModal from './CreatePostModal'
 import ThemeToggle from './ThemeToggle'
@@ -62,7 +62,7 @@ export default function Layout() {
         try {
             const [notifRes, msgRes] = await Promise.all([
                 api.get('/notifications?limit=1'),
-                api.get(`${CHAT_BASE_URL}/conversations/unread-count`)
+                chatApi.get('/conversations/unread-count')
             ])
 
             const n = notifRes.data.unreadCount || 0
