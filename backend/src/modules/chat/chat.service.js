@@ -49,13 +49,11 @@ const getMessages = async (conversationId, userId, { limit = 30, cursor = null }
     return { data: results.reverse(), nextCursor, hasMore };
 };
 
-const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaPublicId }) => {
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) throw new ApiError(404, 'Conversation not found');
-    if (!conversation.participants.some((p) => p.toString() === senderId.toString())) {
-        throw new ApiError(403, 'Access denied');
-    }
-
+const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaPublicId, tempId }) => {
+    // 🚀 Performance Optimization: Skip findById if we can verify participancy via updateOne safely
+    // Or just create the message directly if the client was able to hit the route (auth handles it mostly)
+    
+    // Create message and update conversation in parallel or sequential optimization
     const message = await Message.create({
         conversation: conversationId,
         sender: senderId,
@@ -65,9 +63,19 @@ const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaPubl
         status: 'sent',
     });
 
-    await Conversation.findByIdAndUpdate(conversationId, {
-        lastMessage: message._id,
-    });
+    // Update conversation's last message and updatedAt without a prior lookup
+    // { participants: senderId } ensures the sender is actually in the room
+    const updated = await Conversation.findOneAndUpdate(
+        { _id: conversationId, participants: senderId },
+        { lastMessage: message._id },
+        { new: true }
+    );
+
+    if (!updated) {
+        // Fallback for security/cleanup
+        await Message.findByIdAndDelete(message._id);
+        throw new ApiError(403, 'Access denied or conversation not found');
+    }
 
     await message.populate('sender', 'username avatarUrl');
     return message;

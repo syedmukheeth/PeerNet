@@ -147,38 +147,30 @@ export default function Messages() {
 
         socket.on('new_message', (msg) => {
             const senderId = msg.sender?._id || msg.sender
-            if (senderId === userRef.current?._id) return
+            
+            // Reconcile optimistic messages
+            setMessages(m => {
+                const existing = m.find(x => x._id === msg._id || x._id === `opt_${msg.tempId}`)
+                if (existing) {
+                    return m.map(x => (x._id === existing._id) ? msg : x)
+                }
+                return [...m, msg]
+            })
 
-            if (activeConvoRef.current?._id === msg.conversationId) {
-                // Mark as read immediately on the server
-                chatApi.patch(`conversations/${msg.conversationId}/messages/read`, {})
-                    .then(() => {
-                        window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
-                    })
-                    .catch(() => { })
-                
-                setMessages(m => {
-                    const exists = m.find(x => x._id === msg._id)
-                    if (exists) return m
-                    return [...m, { ...msg, isRead: true }]
-                })
-
-                // Trigger suggestion update on new incoming message context
-                fetchSuggestions(msg.conversationId)
-            } else {
-                // If not in this conversation, we still need to tell the sidebar to update
-                window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+            if (senderId !== userRef.current?._id) {
+                if (activeConvoRef.current?._id === msg.conversationId) {
+                    // Mark as read immediately on the server
+                    chatApi.patch(`conversations/${msg.conversationId}/messages/read`, {})
+                        .then(() => { window.dispatchEvent(new CustomEvent('peernet:sync-counts')) })
+                        .catch(() => { })
+                    
+                    fetchSuggestions(msg.conversationId)
+                } else {
+                    window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+                }
             }
 
-            setConversations(cs => {
-                const exists = cs.find(c => c._id === msg.conversationId)
-                if (exists) {
-                    return cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + 1 } : c)
-                } else {
-                    loadConvos()
-                    return cs
-                }
-            })
+            setConversations(cs => cs.map(c => c._id === msg.conversationId ? { ...c, lastMessage: msg } : c))
         })
         socket.on('messages_read', ({ conversationId, readBy }) => {
             if (activeConvoRef.current?._id === conversationId && readBy !== userRef.current?._id) {
@@ -333,33 +325,54 @@ export default function Messages() {
 
         const body = text.trim()
         const attachedFile = filePreview?.file
+        const tempId = Date.now().toString()
 
+        // 1. CLEAR INPUTS
         setText('')
         setFilePreview(null)
-        setIsUploading(true)
-
         clearTimeout(typingTimer.current)
         socket?.emit('stop_typing', { conversationId: activeConvo._id })
 
-        try {
-            const formData = new FormData()
-            if (body) formData.append('body', body)
-            if (attachedFile) formData.append('media', attachedFile)
+        // 2. OPTIMISTIC UPDATE
+        const optimisticMsg = {
+            _id: `opt_${tempId}`,
+            tempId,
+            conversationId: activeConvo._id,
+            sender: user,
+            body,
+            mediaUrl: filePreview?.url || null,
+            status: 'sending',
+            createdAt: new Date().toISOString()
+        }
+        setMessages(m => [...m, optimisticMsg])
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'auto' }), 10)
 
-            const { data } = await chatApi.post(`conversations/${activeConvo._id}/messages`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
-            setMessages(m => {
-                if (m.find(x => x._id === data.data._id)) return m
-                return [...m, data.data]
-            })
-            setConversations(cs => cs.map(c => c._id === activeConvo._id ? { ...c, lastMessage: data.data } : c))
-            setSuggestions([]) // Clear suggestions as context changed
-            fetchSuggestions(activeConvo._id) // Load new suggestions for next reply
-        } catch {
+        // 3. PROTOCOL SELECTION
+        try {
+            if (attachedFile) {
+                setIsUploading(true)
+                const formData = new FormData()
+                if (body) formData.append('body', body)
+                formData.append('media', attachedFile)
+                formData.append('tempId', tempId)
+
+                const { data } = await chatApi.post(`conversations/${activeConvo._id}/messages`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+                // Socket 'new_message' will handle state update
+            } else {
+                // Text-only: Fast path via Socket.io
+                socket.emit('send_message', { 
+                    conversationId: activeConvo._id, 
+                    body,
+                    tempId
+                })
+            }
+            setSuggestions([])
+        } catch (err) {
+            console.error("Send failed:", err)
             toast.error('Failed to send')
-            setText(body)
-            if (attachedFile) setFilePreview(filePreview)
+            setMessages(m => m.map(x => x._id === `opt_${tempId}` ? { ...x, status: 'failed' } : x))
         } finally {
             setIsUploading(false)
         }
@@ -700,10 +713,18 @@ export default function Messages() {
                                                     </div>
                                                 )}
                                                 {isLast && (
-                                                    <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                                                    <span style={{ fontSize: 11, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}>
                                                         {timeago(m.createdAt)}
-                                                        {isMine && m.isRead && (
-                                                            <span style={{ marginLeft: 6, color: 'var(--accent)', fontWeight: 600 }}>Seen</span>
+                                                        {isMine && m.status === 'sending' && (
+                                                            <span style={{ fontStyle: 'italic', opacity: 0.7 }}>Sending...</span>
+                                                        )}
+                                                        {isMine && m.status === 'failed' && (
+                                                            <span style={{ color: 'var(--error)', fontWeight: 600 }}>Failed</span>
+                                                        )}
+                                                        {isMine && (m.status === 'sent' || m.isRead) && (
+                                                            <span style={{ color: m.isRead ? 'var(--accent)' : 'var(--text-3)', fontWeight: m.isRead ? 600 : 400 }}>
+                                                                {m.isRead ? 'Seen' : 'Sent'}
+                                                            </span>
                                                         )}
                                                     </span>
                                                 )}

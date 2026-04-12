@@ -14,4 +14,7 @@ const messageSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
+// Speed up history retrieval: Find all messages for a convo, sorted by time
+messageSchema.index({ conversation: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Message', messageSchema);

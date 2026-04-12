@@ -45,9 +45,11 @@ module.exports = (io, socket) => {
 
             const message = await chatService.saveMessage(conversationId, userId, { body, mediaUrl });
             
-            // Emit to both patterns just in case
-            io.to(conversationId).emit('new_message', message);
-            io.to(`conversation:${conversationId}`).emit('new_message', message);
+            // Attach tempId for optimistic reconciliation on the sender's side
+            const messageWithTemp = { ...message.toObject(), tempId: data.tempId, conversationId };
+            
+            io.to(conversationId).emit('new_message', messageWithTemp);
+            io.to(`conversation:${conversationId}`).emit('new_message', messageWithTemp);
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
