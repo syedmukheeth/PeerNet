@@ -43,7 +43,7 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: GEMINI_API_KEY
-        value: [REDACTED_GEMINI_KEY]
+        sync: false
   - type: web
     name: peernet-chat
     env: node
@@ -66,4 +66,4 @@ services:
       - key: ALLOWED_ORIGINS
         sync: false   # e.g. https://peernet.vercel.app
       - key: GEMINI_API_KEY
-        value: [REDACTED_GEMINI_KEY]
+        sync: false
