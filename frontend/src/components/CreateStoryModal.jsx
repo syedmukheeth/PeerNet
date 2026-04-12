@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiX, HiPhotograph, HiVideoCamera, HiUpload, HiPencilAlt } from 'react-icons/hi'
+import { HiX, HiPhotograph, HiVideoCamera, HiUpload, HiPencilAlt, HiSparkles } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 
@@ -15,6 +15,10 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
     const [generatingAI, setGeneratingAI] = useState(false)
     const [dragOver, setDragOver] = useState(false)
     const inputRef = useRef()
+
+    const isVideo = file?.type?.startsWith('video/') ||
+        /\.(mp4|mov|webm|mkv|avi|3gp|hevc)$/i.test(file?.name || '') ||
+        (file?.type === 'application/octet-stream' && file?.size > 2000000)
 
     const optimizeAICaption = async () => {
         if (!content.trim()) return
@@ -78,10 +82,6 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
             toast.error(err.response?.data?.message || 'Failed to post story')
         } finally { setLoading(false) }
     }
-
-    const isVideo = file?.type?.startsWith('video/') ||
-        /\.(mp4|mov|webm|mkv|avi|3gp|hevc)$/i.test(file?.name || '') ||
-        (file?.type === 'application/octet-stream' && file?.size > 2000000)
 
     return (
         <AnimatePresence>

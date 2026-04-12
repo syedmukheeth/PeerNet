@@ -27,6 +27,12 @@ export default function CreatePostModal({ onClose }) {
         { name: 'Royal Velvet', value: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' },
     ]
 
+    const isVideo = file
+        ? file.type?.startsWith('video/') ||
+          /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(file.name || '') ||
+          (file.type === 'application/octet-stream' && file.size > 1_000_000)
+        : false
+
     const generateAICaption = async () => {
         if (!file || isVideo) return 
         setGeneratingAI(true)
@@ -115,12 +121,6 @@ export default function CreatePostModal({ onClose }) {
             setLoading(false)
         }
     }
-
-    const isVideo = file
-        ? file.type?.startsWith('video/') ||
-          /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(file.name || '') ||
-          (file.type === 'application/octet-stream' && file.size > 1_000_000)
-        : false
 
     return (
         <AnimatePresence>

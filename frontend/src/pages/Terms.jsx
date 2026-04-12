@@ -18,7 +18,7 @@ export default function Terms() {
 
                 <div className="legal-section">
                     <h2>2. Disclaimer</h2>
-                    <p>The materials on PeerNet are provided on an 'as is' basis. PeerNet makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties of merchantability.</p>
+                    <p>The materials on PeerNet are provided on an &apos;as is&apos; basis. PeerNet makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties of merchantability.</p>
                 </div>
 
                 <div className="legal-section">

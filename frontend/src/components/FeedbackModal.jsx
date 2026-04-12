@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { HiX, HiClipboardList, HiBugAnt, HiLightningBolt } from 'react-icons/hi'
+import { motion } from 'framer-motion'
+import { HiX, HiClipboardList, HiFire, HiLightningBolt } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 
@@ -54,7 +54,7 @@ export default function FeedbackModal({ onClose }) {
                 <form onSubmit={handleSubmit} className="flex-col gap-4">
                     <div className="flex gap-2">
                         {[
-                            { id: 'bug', label: 'Bug', icon: <HiBugAnt /> },
+                            { id: 'bug', label: 'Bug', icon: <HiFire /> },
                             { id: 'feature', label: 'Feature', icon: <HiLightningBolt /> },
                             { id: 'other', label: 'Other', icon: <HiClipboardList /> },
                         ].map(t => (

@@ -81,7 +81,6 @@ export default function Layout() {
             reply: 'replied to your comment',
             follow: 'started following you' 
         }
-        const color = '#6366F1'
         const targetUrl = notif.targetUrl || '/notifications';
 
         toast((t) => (
