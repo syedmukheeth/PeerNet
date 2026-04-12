@@ -36,21 +36,26 @@ const formatNotification = (notif, hydratedEntity = null) => {
             targetId = e._id?.toString() || e.toString();
             targetUrl = `/posts/${targetId}`;
         } else if (obj.entityModel === 'Dscroll') {
-            // For reels, prioritize the thumbnail
             thumbnail = e.thumbnailUrl || e.videoUrl || null;
             targetId = e._id?.toString() || e.toString();
             targetUrl = `/dscrolls`; 
         } else if (obj.entityModel === 'Comment') {
-            // REACH THROUGH logic for comments: look for Post OR Dscroll links
-            const parent = e.post || e.dscroll;
-            if (parent && typeof parent === 'object') {
+            // Reach through: use the populated parent (post or dscroll object)
+            const parent = (e.post && typeof e.post === 'object') ? e.post
+                         : (e.dscroll && typeof e.dscroll === 'object') ? e.dscroll
+                         : null;
+            if (parent) {
                 thumbnail = getMedia(parent);
-                targetId = parent._id?.toString() || parent.toString();
+                targetId = parent._id?.toString();
             }
-            
-            // Link to detail if resolved
-            if (targetId) targetUrl = `/posts/${targetId}`;
-            else targetUrl = `/posts/${e.post || e.dscroll || ''}`;
+            // Build navigation URL: always go to the parent post
+            if (targetId) {
+                targetUrl = `/posts/${targetId}`;
+            } else {
+                // Fallback: use raw ObjectId stored in e.post or e.dscroll
+                const rawParentId = e.post?.toString() || e.dscroll?.toString();
+                targetUrl = rawParentId ? `/posts/${rawParentId}` : '/';
+            }
         }
     }
 
@@ -167,11 +172,34 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     });
 
     // Stage 3: Bulk Manual Hydration
+    // For comments, also eagerly load the parent post so thumbnail can be extracted
     const [posts, dscrolls, comments] = await Promise.all([
         Post.find({ _id: { $in: grouped.Post } }).lean(),
         Dscroll.find({ _id: { $in: grouped.Dscroll } }).lean(),
-        Comment.find({ _id: { $in: grouped.Comment } }).populate({ path: 'post', strictPopulate: false }).populate({ path: 'dscroll', strictPopulate: false }).lean()
+        Comment.find({ _id: { $in: grouped.Comment } })
+            .populate({ path: 'post', select: 'mediaUrl thumbnailUrl mediaType videoUrl author', strictPopulate: false })
+            .populate({ path: 'dscroll', select: 'thumbnailUrl videoUrl author', strictPopulate: false })
+            .lean()
     ]);
+
+    // Build a map of all parent post IDs we still need for comments with unpopulated post
+    const commentParentIds = [];
+    comments.forEach(c => {
+        // If post is still an ObjectId (not populated), queue for manual lookup
+        if (c.post && typeof c.post !== 'object') commentParentIds.push(c.post);
+        if (c.dscroll && typeof c.dscroll !== 'object') commentParentIds.push(c.dscroll);
+    });
+    const extraPosts = commentParentIds.length > 0
+        ? await Post.find({ _id: { $in: commentParentIds } }).select('mediaUrl thumbnailUrl mediaType videoUrl author').lean()
+        : [];
+    const extraPostsMap = new Map(extraPosts.map(p => [p._id.toString(), p]));
+
+    // Patch comments: replace bare ObjectId with the fetched document
+    comments.forEach(c => {
+        if (c.post && typeof c.post !== 'object') {
+            c.post = extraPostsMap.get(c.post.toString()) || c.post;
+        }
+    });
 
     // Lookup table
     const entitiesMap = new Map();

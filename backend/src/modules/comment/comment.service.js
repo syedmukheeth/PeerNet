@@ -10,17 +10,9 @@ const { checkToxicity } = require('../../config/ai.config');
 const notificationService = require('../notification/notification.service');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
-    // 1. Duplicate Prevention (Rate Limiting/Lag check)
-    // Check if user posted same comment in last 5 seconds
-    const existing = await Comment.findOne({
-        author: userId,
-        post: postId,
-        body: body.trim(),
-        createdAt: { $gt: new Date(Date.now() - 5000) }
-    });
-    if (existing) throw new ApiError(409, 'Duplicate comment detected. Please wait.');
+    const trimmedBody = body.trim();
 
-    // 2. Resolve Target
+    // 1. Resolve Target (Post or Dscroll)
     let post = await Post.findById(postId);
     let targetModel = 'Post';
     if (!post) {
@@ -29,29 +21,41 @@ const addComment = async (postId, userId, { body, parentComment }) => {
     }
     if (!post) throw new ApiError(404, 'Post or Video not found');
 
-    // AI Toxicity Check
-    const toxicityScore = await checkToxicity(body);
+    // 2. Duplicate Prevention — check last 5 seconds with correct field
+    const dupQuery = {
+        author: userId,
+        body: trimmedBody,
+        createdAt: { $gt: new Date(Date.now() - 5000) },
+        ...(targetModel === 'Post' ? { post: postId } : { dscroll: postId })
+    };
+    const existing = await Comment.findOne(dupQuery);
+    if (existing) throw new ApiError(409, 'Duplicate comment detected. Please wait a moment.');
+
+    // 3. AI Toxicity Check
+    const toxicityScore = await checkToxicity(trimmedBody);
     if (toxicityScore > 0.7) {
         throw new ApiError(400, 'Comment rejected by AI Community Safety Filter');
     }
 
-    const comment = await Comment.create({ 
-        post: postId, 
-        author: userId, 
-        body: body.trim(), 
+    // 4. Create comment with CORRECT field (post vs dscroll)
+    const commentData = {
+        author: userId,
+        body: trimmedBody,
         parentComment: parentComment || null,
         isAiVerified: true,
-        toxicityScore
-    });
+        toxicityScore,
+        ...(targetModel === 'Post' ? { post: postId } : { dscroll: postId })
+    };
+    const comment = await Comment.create(commentData);
 
-    // Update count on the correct model
+    // 5. Update count on the correct model
     if (targetModel === 'Post') {
         await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
     } else {
         await Dscroll.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
     }
 
-    // Notify via Direct Notification Service (Reliable Real-Time)
+    // 6. Notify post/comment author
     if (parentComment) {
         const parent = await Comment.findById(parentComment);
         if (parent && parent.author.toString() !== userId.toString()) {
@@ -75,7 +79,7 @@ const addComment = async (postId, userId, { body, parentComment }) => {
         }
     }
 
-    await comment.populate('author', 'username avatarUrl');
+    await comment.populate('author', 'username avatarUrl isVerified');
     return comment;
 };
 
@@ -115,30 +119,32 @@ const deleteComment = async (commentId, userId) => {
     const comment = await Comment.findById(commentId);
     if (!comment) throw new ApiError(404, 'Comment not found');
 
-    // Fetch the post to check if the user is the owner
-    const post = await Post.findById(comment.post) || await Dscroll.findById(comment.post);
-    
-    // Auth: Either comment author OR post owner can delete
+    // Auth: Either comment author OR the post/dscroll owner can delete
     const isAuthor = comment.author.toString() === userId.toString();
-    const isPostOwner = post?.author?.toString() === userId.toString();
+    let isPostOwner = false;
+    if (!isAuthor) {
+        // Check against whichever parent field is set
+        const parentId = comment.post || comment.dscroll;
+        let parentDoc = await Post.findById(parentId).select('author').lean();
+        if (!parentDoc) parentDoc = await Dscroll.findById(parentId).select('author').lean();
+        isPostOwner = parentDoc?.author?.toString() === userId.toString();
+    }
 
     if (!isAuthor && !isPostOwner) {
         throw new ApiError(403, 'Not authorised to delete this comment');
     }
 
     await comment.deleteOne();
-    
-    // Update count on correct model (Post or Dscroll)
-    const postUpdated = await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
-    if (!postUpdated) {
-        await Dscroll.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
+
+    // Decrement count on the right model
+    if (comment.post) {
+        await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
+    } else if (comment.dscroll) {
+        await Dscroll.findByIdAndUpdate(comment.dscroll, { $inc: { commentsCount: -1 } });
     }
 
-    // Sync with Notifications: Remove the comment alert
-    await notificationService.removeNotification({
-        entityId: comment._id,
-        type: 'comment'
-    });
+    // Remove associated notification
+    await notificationService.removeNotification({ entityId: comment._id, type: 'comment' });
 };
 
 const likeComment = async (commentId, userId) => {
