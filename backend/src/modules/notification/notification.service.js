@@ -157,7 +157,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const [posts, dscrolls, comments] = await Promise.all([
         Post.find({ _id: { $in: grouped.Post } }).lean(),
         Dscroll.find({ _id: { $in: grouped.Dscroll } }).lean(),
-        Comment.find({ _id: { $in: grouped.Comment } }).populate(['post', 'dscroll']).lean()
+        Comment.find({ _id: { $in: grouped.Comment } }).populate({ path: 'post', strictPopulate: false }).populate({ path: 'dscroll', strictPopulate: false }).lean()
     ]);
 
     // Lookup table
