@@ -31,6 +31,43 @@ const getMessages = async (req, res, next) => {
     }
 };
 
+const postMessage = async (req, res, next) => {
+    try {
+        const { conversationId } = req.params;
+        const { body, tempId } = req.body;
+        const file = req.file;
+
+        let mediaUrl = '';
+        let mediaPublicId = '';
+
+        if (file) {
+            const { uploadToCloudinary } = require('../../utils/cloudinary.utils');
+            const result = await uploadToCloudinary(file.path, { folder: 'peernet/chats' });
+            mediaUrl = result.secure_url;
+            mediaPublicId = result.public_id;
+        }
+
+        const message = await chatService.saveMessage(conversationId, req.user.id, {
+            body,
+            mediaUrl,
+            mediaPublicId,
+            tempId
+        });
+
+        // Broadcast to relevant room
+        const { getIO } = require('../../config/socket');
+        const io = getIO();
+        
+        // Use consistent 'chat:{id}' room name
+        const messageWithTemp = { ...message.toObject(), tempId, conversationId };
+        io.to(`chat:${conversationId}`).emit('new_message', messageWithTemp);
+
+        res.json({ success: true, data: message });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const markSeen = async (req, res, next) => {
     try {
         const { conversationId } = req.params;
@@ -45,5 +82,6 @@ module.exports = {
     getConversations,
     getOrCreateConversation,
     getMessages,
+    postMessage,
     markSeen,
 };

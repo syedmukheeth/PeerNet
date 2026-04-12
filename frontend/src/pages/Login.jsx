@@ -35,7 +35,7 @@ export default function Login() {
             await loginGoogle(credentialResponse.credential)
             toast.success('Logged in with Google!')
             navigate('/')
-        } catch (err) {
+        } catch {
             toast.error('Google login failed')
         } finally { setLoading(false) }
     }
@@ -46,7 +46,7 @@ export default function Login() {
             await loginGuest()
             toast.success('Welcome, Guest!')
             navigate('/')
-        } catch (err) {
+        } catch {
             toast.error('Guest login failed')
         } finally { setLoading(false) }
     }

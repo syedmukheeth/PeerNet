@@ -14,15 +14,23 @@ const notificationService = require('../notification/notification.service');
 
 const POST_CACHE_TTL = 300; // 5 min
 
-const createPost = async (userId, { caption, location, tags }, file) => {
-    if (!file) throw new ApiError(400, 'Media file is required');
+const createPost = async (userId, { caption, location, tags, mediaType, backgroundColor }, file) => {
+    let secure_url = '';
+    let public_id = '';
+    let finalMediaType = mediaType || 'image';
 
-    const isVideo = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
-    const { secure_url, public_id } = await uploadToCloudinary(file.path, {
-        folder: 'peernet/posts',
-        resource_type: isVideo ? 'video' : 'image',
-        ...(isVideo ? {} : { transformation: [{ quality: 'auto', fetch_format: 'auto' }] }),
-    });
+    if (finalMediaType !== 'text') {
+        if (!file) throw new ApiError(400, 'Media file is required for image/video posts');
+        const isVideo = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
+        const uploadResult = await uploadToCloudinary(file.path, {
+            folder: 'peernet/posts',
+            resource_type: isVideo ? 'video' : 'image',
+            ...(isVideo ? {} : { transformation: [{ quality: 'auto', fetch_format: 'auto' }] }),
+        });
+        secure_url = uploadResult.secure_url;
+        public_id = uploadResult.public_id;
+        finalMediaType = isVideo ? 'video' : 'image';
+    }
 
     const parsedTags = Array.isArray(tags)
         ? tags
@@ -30,9 +38,9 @@ const createPost = async (userId, { caption, location, tags }, file) => {
             ? tags.split(',').map((t) => t.trim()).filter(Boolean)
             : [];
 
-    // AI Auto-Captioning
+    // AI Auto-Captioning (Only for images, if no caption provided)
     let finalCaption = caption;
-    if (!finalCaption && !isVideo) { // Gemini Vision works best with images
+    if (!finalCaption && finalMediaType === 'image' && file) { 
         finalCaption = await generateCaption(file.path, file.mimetype);
     }
 
@@ -40,7 +48,8 @@ const createPost = async (userId, { caption, location, tags }, file) => {
         author: userId,
         mediaUrl: secure_url,
         mediaPublicId: public_id,
-        mediaType: isVideo ? 'video' : 'image',
+        mediaType: finalMediaType,
+        backgroundColor: finalMediaType === 'text' ? backgroundColor : null,
         caption: finalCaption,
         location,
         tags: parsedTags,

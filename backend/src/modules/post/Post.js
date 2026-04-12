@@ -5,9 +5,10 @@ const mongoose = require('mongoose');
 const postSchema = new mongoose.Schema(
     {
         author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-        mediaUrl: { type: String, required: true },
-        mediaPublicId: { type: String, required: true },
-        mediaType: { type: String, enum: ['image', 'video'], default: 'image' },
+        mediaUrl: { type: String, required: function() { return this.mediaType !== 'text'; } },
+        mediaPublicId: { type: String, required: function() { return this.mediaType !== 'text'; } },
+        mediaType: { type: String, enum: ['image', 'video', 'text'], default: 'image' },
+        backgroundColor: { type: String, default: null },
         caption: { type: String, maxlength: 2200, default: '' },
         location: { type: String, maxlength: 100, default: '' },
         tags: [{ type: String, lowercase: true, trim: true }],

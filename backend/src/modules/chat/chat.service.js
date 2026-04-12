@@ -49,7 +49,7 @@ const getMessages = async (conversationId, userId, { limit = 30, cursor = null }
     return { data: results.reverse(), nextCursor, hasMore };
 };
 
-const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaPublicId, tempId }) => {
+const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaPublicId, _tempId }) => {
     // 🚀 Performance Optimization: Skip findById if we can verify participancy via updateOne safely
     // Or just create the message directly if the client was able to hit the route (auth handles it mostly)
     

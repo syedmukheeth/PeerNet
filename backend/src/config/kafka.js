@@ -29,8 +29,8 @@ const ghostKafka = {
     })
 };
 
-let kafka = null;
-let producer = null;
+let kafka;
+let producer;
 
 if (isKafkaEnabled) {
     try {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,8 +13,10 @@ import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'
 import { PostDetailSkeleton } from '../components/SkeletonLoader'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function PostDetail() {
+    const queryClient = useQueryClient()
     const { id } = useParams()
     const { user } = useAuth()
     const navigate = useNavigate()
@@ -86,7 +88,7 @@ export default function PostDetail() {
         } else {
             executeHighlight();
         }
-    }, [comments, urlCommentId, urlParentId, replyData])
+    }, [comments, urlCommentId, urlParentId, replyData, toggleReplies])
 
     // Close menu on outside click
     useEffect(() => {
@@ -208,7 +210,7 @@ export default function PostDetail() {
         }
     }
 
-    const toggleReplies = async (commentId) => {
+    const toggleReplies = useCallback(async (commentId) => {
         const current = replyData[commentId]
         
         // If we already have them and are showing them, hide them
@@ -235,7 +237,7 @@ export default function PostDetail() {
             setReplyData(prev => ({ ...prev, [commentId]: { loading: false, show: false, replies: [] } }))
             toast.error('Failed to load replies')
         }
-    }
+    }, [id, replyData])
 
     const handleDeleteComment = async (commentId, isReply, parentId) => {
         if (!confirm('Delete this comment?')) return
@@ -254,12 +256,12 @@ export default function PostDetail() {
             }
             setPost(p => ({ ...p, commentsCount: (p.commentsCount || 1) - 1 }))
             toast.success('Comment deleted')
-        } catch (_err) {
+        } catch {
             toast.error('Failed to delete comment')
         }
     }
 
-    const fetchAISuggestions = async (commentText = null) => {
+    const fetchAISuggestions = useCallback(async (commentText = null) => {
         if (!post) return
         setLoadingSuggestions(true)
         try {
@@ -273,7 +275,7 @@ export default function PostDetail() {
         } finally {
             setLoadingSuggestions(false)
         }
-    }
+    }, [post])
 
     useEffect(() => {
         if (replyingTo) {
@@ -281,7 +283,7 @@ export default function PostDetail() {
         } else {
             setSuggestions([])
         }
-    }, [replyingTo])
+    }, [replyingTo, fetchAISuggestions])
 
     if (loading) return <PostDetailSkeleton />
 

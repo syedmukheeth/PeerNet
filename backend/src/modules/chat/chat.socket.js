@@ -22,19 +22,18 @@ module.exports = (io, socket) => {
 
     // ── Room Management ──
     
-    // Support both 'join_room' (new) and 'join_conversation' (legacy)
-    socket.on('join_room', (conversationId) => {
-        socket.join(conversationId);
-        logger.info(`User ${userId} joined room: ${conversationId}`);
-    });
-
+    // Standardized conversation room
     socket.on('join_conversation', (conversationId) => {
-        socket.join(`conversation:${conversationId}`);
-        logger.info(`User ${userId} joined legacy conversation room: ${conversationId}`);
+        socket.join(`chat:${conversationId}`);
+        logger.info(`User ${userId} joined room: chat:${conversationId}`);
+    });
+    
+    socket.on('leave_conversation', (conversationId) => {
+        socket.leave(`chat:${conversationId}`);
     });
 
-    socket.on('leave_room', (conversationId) => socket.leave(conversationId));
-    socket.on('leave_conversation', (conversationId) => socket.leave(`conversation:${conversationId}`));
+    socket.on('join_room', (id) => socket.join(id));
+    socket.on('leave_room', (id) => socket.leave(id));
 
     // ── Messaging ──
     
@@ -48,8 +47,7 @@ module.exports = (io, socket) => {
             // Attach tempId for optimistic reconciliation on the sender's side
             const messageWithTemp = { ...message.toObject(), tempId: data.tempId, conversationId };
             
-            io.to(conversationId).emit('new_message', messageWithTemp);
-            io.to(`conversation:${conversationId}`).emit('new_message', messageWithTemp);
+            io.to(`chat:${conversationId}`).emit('new_message', messageWithTemp);
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
@@ -59,19 +57,19 @@ module.exports = (io, socket) => {
     
     // Support both 'typing_start'/'typing_stop' and 'typing'/'stop_typing' patterns
     socket.on('typing_start', (conversationId) => {
-        socket.to(conversationId).emit('user_typing_start', { userId, conversationId });
+        socket.to(`chat:${conversationId}`).emit('user_typing_start', { userId, conversationId });
     });
 
     socket.on('typing_stop', (conversationId) => {
-        socket.to(conversationId).emit('user_typing_stop', { userId, conversationId });
+        socket.to(`chat:${conversationId}`).emit('user_typing_stop', { userId, conversationId });
     });
 
     socket.on('typing', ({ conversationId }) => {
-        socket.to(`conversation:${conversationId}`).emit('user_typing', { userId });
+        socket.to(`chat:${conversationId}`).emit('user_typing', { userId });
     });
 
     socket.on('stop_typing', ({ conversationId }) => {
-        socket.to(`conversation:${conversationId}`).emit('user_stop_typing', { userId });
+        socket.to(`chat:${conversationId}`).emit('user_stop_typing', { userId });
     });
 
     // ── Maintenance ──

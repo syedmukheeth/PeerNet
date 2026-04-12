@@ -8,7 +8,6 @@ import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAl
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
-import logoImg from '../assets/logo.png'
 
 
 export default function Profile() {

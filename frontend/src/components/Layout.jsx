@@ -2,7 +2,6 @@ import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-do
 import { useAuth } from '../context/AuthContext'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { io } from 'socket.io-client'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
@@ -32,8 +31,6 @@ const mobileBottomLinksLeft = [
 const mobileBottomLinksRight = [
     { to: '/dscrolls', icon: HiFilm },
 ]
-
-let layoutSocket = null
 
 
 export default function Layout() {
@@ -95,7 +92,7 @@ export default function Layout() {
         }
         
         console.groupEnd();
-    }, [user, api, chatApi])
+    }, [user])
 
     // ── Global Badge Sync ────────────────────────────────────
     // Expose a way for sub-pages to trigger a re-sync of counts
@@ -109,31 +106,8 @@ export default function Layout() {
         return () => window.removeEventListener('peernet:sync-counts', handleSync)
     }, [syncAllCounts])
 
-    // ── Management: Polling + Visibility + Mount ───────────────────────────
-    useEffect(() => {
-        if (!user) return
-
-        syncAllCounts()
-
-        // Visibility Sync (Catch-up when user returns to tab)
-        const handleVisibility = () => {
-            if (document.visibilityState === 'visible') {
-                syncAllCounts()
-            }
-        }
-        document.addEventListener('visibilitychange', handleVisibility)
-
-        // Lower frequency background polling as ultimate fallback
-        const poll = setInterval(syncAllCounts, 60_000) 
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibility)
-            clearInterval(poll)
-        }
-    }, [user, syncAllCounts])
-
     // ── Toast Helpers ──────────────────────────────────────────────────────
-    const showNotifToast = (notif) => {
+    const showNotifToast = useCallback((notif) => {
         const typeEmoji = { like: '❤️', comment: '💬', follow: '👤', message: '💬', reply: '💬' }
         const typeText = { 
             like: notif.entityModel === 'Comment' ? 'liked your comment' : 'liked your post', 
@@ -195,9 +169,9 @@ export default function Layout() {
                 padding: '12px 16px', maxWidth: 340,
             },
         })
-    }
+    }, [navigate])
 
-    const showMsgToast = (msg) => {
+    const showMsgToast = useCallback((msg) => {
         const senderName = msg.sender?.username || 'Someone'
         const senderAvatar = msg.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${senderName}&background=6366F1&color=fff`
         const convoId = msg.conversationId
@@ -231,7 +205,7 @@ export default function Layout() {
                 padding: '12px 16px', maxWidth: 340,
             },
         })
-    }
+    }, [navigate])
 
     // ── Real-time socket events ──────────────────────────────────────────
     useEffect(() => {
@@ -242,6 +216,12 @@ export default function Layout() {
             setUnreadCount(unreadRef.current)
             showNotifToast(notif)
         })
+
+        socket.on('notification_removed', () => {
+            console.log('🛰️ [SOCKET] Notification removed');
+            unreadRef.current = Math.max(0, unreadRef.current - 1);
+            setUnreadCount(unreadRef.current);
+        });
 
         socket.on('sync_counts', () => {
              console.log('[Layout] Real-time sync signal received')
@@ -255,8 +235,12 @@ export default function Layout() {
             msgRef.current += 1
             setMsgCount(msgRef.current)
             
-            const isAtMessages = window.location.pathname.startsWith('/messages')
-            if (!isAtMessages) showMsgToast(msg)
+            const isInMessages = location.pathname.startsWith('/messages');
+            const isThisConvo = location.pathname === `/messages/${msg.conversationId}`;
+
+            if (!isInMessages || !isThisConvo) {
+                showMsgToast(msg)
+            }
         })
 
         socket.on('connect', () => {
@@ -273,11 +257,11 @@ export default function Layout() {
 
         return () => {
             socket.off('new_notification')
+            socket.off('notification_removed')
             socket.off('new_message')
-            socket.off('connect')
             clearInterval(pingInterval)
         }
-    }, [socket, user, syncAllCounts])
+    }, [socket, user, syncAllCounts, location.pathname, showNotifToast, showMsgToast])
 
     // ── Sidebar Highlighting Only ──
     useEffect(() => {

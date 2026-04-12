@@ -3,7 +3,15 @@
 const router = require('express').Router();
 const aiController = require('./ai.controller');
 const { authenticate } = require('../../middleware/auth.middleware');
+const { uploadMedia } = require('../../middleware/upload.middleware');
 
-router.post('/suggest-replies', authenticate, aiController.suggestReplies);
+router.use(authenticate);
+
+/**
+ * @route   POST /api/v1/ai/generate-caption
+ * @desc    Generate an AI caption for an image/video
+ * @access  Private
+ */
+router.post('/generate-caption', uploadMedia.single('media'), aiController.generateCaption);
 
 module.exports = router;

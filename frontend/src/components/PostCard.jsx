@@ -18,7 +18,6 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [liked, setLiked] = useState(post.isLiked || false)
     const [likesCount, setLikesCount] = useState(post.likesCount || 0)
     const [saved, setSaved] = useState(post.isSaved || false)
-    const [isLikePending, setIsLikePending] = useState(false)
     const pendingLike = useRef(false) // true while a like/unlike API call is in-flight
     const localLiked = useRef(null)     // user's intended liked state; null = defer to server
     const localCount = useRef(null)     // user's intended count; null = defer to server
@@ -85,7 +84,6 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
         localCount.current = newCount
         
         setLiked(newLiked)
-        setIsLikePending(true)
         setLikesCount(newCount)
         onLikeToggle?.(post._id, newLiked, newCount)
         try {
@@ -107,7 +105,6 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 onLikeToggle?.(post._id, !newLiked, likesCount)
             }
         } finally {
-            setIsLikePending(false)
             pendingLike.current = false
         }
     }
@@ -197,9 +194,30 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     </div>
                 </div>
 
-                {/* Media */}
+                {/* Media / Text Content */}
                 <div className="post-media-wrap">
-                    {post.mediaType === 'video' ? (
+                    {post.mediaType === 'text' ? (
+                        <div style={{
+                            background: post.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
+                            minHeight: 280,
+                            maxHeight: 400,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: 32,
+                            textAlign: 'center',
+                            color: '#fff',
+                            fontSize: 22,
+                            fontWeight: 800,
+                            fontFamily: 'Syne, Inter, sans-serif',
+                            boxShadow: 'inset 0 0 100px rgba(0,0,0,0.2)',
+                            cursor: 'pointer'
+                        }} onClick={handleImageTap}>
+                            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                {post.caption}
+                            </div>
+                        </div>
+                    ) : post.mediaType === 'video' ? (
                         <div style={{ position: 'relative', background: '#000' }}>
                             <video
                                 ref={videoRef}
@@ -281,7 +299,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 {likesCount > 0 && (
                     <div className="post-likes">{likesCount.toLocaleString()} likes</div>
                 )}
-                {caption && (
+                {caption && post.mediaType !== 'text' && (
                     <div className="post-caption">
                         <strong>{author.username}</strong>{' '}{caption}
                     </div>

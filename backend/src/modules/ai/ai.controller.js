@@ -1,24 +1,33 @@
 'use strict';
 
-const { generateSuggestions } = require('../../config/ai.config');
+const aiConfig = require('../../config/ai.config');
 const ApiError = require('../../utils/ApiError');
 
-const suggestReplies = async (req, res, next) => {
+/**
+ * Handles generating a caption for an uploaded media file.
+ */
+const generateCaption = async (req, res, next) => {
     try {
-        const { caption, commentText } = req.body;
-        
-        // We don't necessarily throw error if caption/commentText are missing, 
-        // the AI will just generate generic replies.
-        
-        const suggestions = await generateSuggestions({ caption, commentText });
-        
-        res.status(200).json({
-            status: 'success',
-            data: suggestions
+        const file = req.file;
+        if (!file) {
+            throw new ApiError(400, 'Media file is required for AI processing');
+        }
+
+        // Gemini 1.5 Flash supports images and videos
+        const caption = await aiConfig.generateCaption(file.path, file.mimetype);
+
+        res.json({
+            success: true,
+            data: {
+                caption,
+                model: 'gemini-1.5-flash'
+            }
         });
     } catch (err) {
         next(err);
     }
 };
 
-module.exports = { suggestReplies };
+module.exports = {
+    generateCaption
+};

@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import api from '../api/axios'
-import { Link } from 'react-router-dom'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
 import {
-    HiBell, HiHeart, HiChatAlt2, HiUserAdd, HiCheck, HiBadgeCheck, HiAtSymbol, HiOutlineSparkles, HiChevronRight
+    HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol
 } from 'react-icons/hi'
 
 // Premium Time Formatter (Instagram Style: 2m, 1h, 3w)
@@ -182,7 +181,7 @@ export default function Notifications() {
         try {
             const { data } = await api.get('/notifications')
             setNotifs(data.data || [])
-        } catch { /* silent */ }
+        } catch (err) { console.warn("Notif load fail", err) }
         finally { setLoading(false) }
     }
 
@@ -206,7 +205,7 @@ export default function Notifications() {
             try { 
                 await api.patch('/notifications/read')
                 window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
-            } catch {}
+            } catch (err) { console.warn("Mark read fail", err) }
         }
         if (notifs.some(n => !n.isRead)) mark()
     }, [notifs])

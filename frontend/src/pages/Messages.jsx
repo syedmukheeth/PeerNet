@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api, { chatApi } from '../api/axios'
@@ -128,7 +128,6 @@ export default function Messages() {
     const inputRef = useRef()
     const userRef = useRef(user)
     const [suggestions, setSuggestions] = useState([])
-    const [loadingSuggestions, setLoadingSuggestions] = useState(false)
     const activeConvoRef = useRef(activeConvo)
     
     useEffect(() => { userRef.current = user }, [user])
@@ -161,12 +160,10 @@ export default function Messages() {
                 if (activeConvoRef.current?._id === msg.conversationId) {
                     // Mark as read immediately on the server
                     chatApi.patch(`${msg.conversationId}/messages/read`, {})
-                        .then(() => { window.dispatchEvent(new CustomEvent('peernet:sync-counts')) })
-                        .catch(() => { })
                     
                     fetchSuggestions(msg.conversationId)
                 } else {
-                    window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+                    // Handled by Layout.jsx socket listener now!
                 }
             }
 
@@ -187,18 +184,30 @@ export default function Messages() {
         socket.on('message_deleted', ({ messageId }) => {
             setMessages(m => m.filter(x => x._id !== messageId))
         })
+        
+        // Support both old and new typing patterns
+        socket.on('user_typing_start', () => setPeerTyping(true))
+        socket.on('user_typing_stop', () => setPeerTyping(false))
         socket.on('user_typing', () => setPeerTyping(true))
         socket.on('user_stop_typing', () => setPeerTyping(false))
+
+        socket.on('notification_removed', () => {
+            // Optional: if messages had an associated notification, clear it
+            setConversations(cs => cs.map(c => ({ ...c, unreadCount: Math.max(0, (c.unreadCount || 0) - 1) })))
+        });
         
         return () => {
             socket.off('new_message')
             socket.off('messages_read')
             socket.off('message_edited')
             socket.off('message_deleted')
+            socket.off('user_typing_start')
+            socket.off('user_typing_stop')
             socket.off('user_typing')
             socket.off('user_stop_typing')
+            socket.off('notification_removed')
         }
-    }, [socket])
+    }, [socket, fetchSuggestions])
 
     useEffect(() => { activeConvoRef.current = activeConvo }, [activeConvo])
 
@@ -241,21 +250,29 @@ export default function Messages() {
         return () => clearInterval(poll)
     }, [])
 
-    const fetchSuggestions = async (convoId) => {
+    // Handle Room Joining
+    useEffect(() => {
+        if (!socket || !activeConvo) return
+        
+        socket.emit('join_conversation', activeConvo._id)
+        
+        return () => {
+            socket.emit('leave_conversation', activeConvo._id)
+        }
+    }, [socket, activeConvo?._id, activeConvo])
+
+    const fetchSuggestions = useCallback(async (convoId) => {
         if (!convoId) return setSuggestions([])
-        setLoadingSuggestions(true)
         try {
             const { data } = await chatApi.get(`${convoId}/suggestions`)
             setSuggestions(data.suggestions || [])
         } catch (err) {
             console.warn("AI: Suggestion fetch failed:", err)
             setSuggestions([])
-        } finally {
-            setLoadingSuggestions(false)
         }
-    }
+    }, [])
 
-    const loadMessages = async (convoId) => {
+    const loadMessages = useCallback(async (convoId) => {
         if (!convoId) return
         setLoadingMessages(true)
         try {
@@ -268,12 +285,10 @@ export default function Messages() {
 
             // Smart replies
             if (convoId) fetchSuggestions(convoId)
-        } catch (err) { 
-            console.error("Chat fetch err:", err) 
         } finally { 
             setLoadingMessages(false) 
         }
-    }
+    }, [fetchSuggestions])
 
     // Effect: Load messages when active convo changes
     useEffect(() => {
@@ -286,7 +301,7 @@ export default function Messages() {
                 socket?.emit('leave_conversation', activeConvo._id)
             }
         }
-    }, [activeConvo?._id])
+    }, [activeConvo?._id, activeConvo, loadMessages, socket])
 
     const selectConvo = async (convo) => {
         if (activeConvo?._id === convo._id) { setMobilePanel('chat'); return }
@@ -356,7 +371,7 @@ export default function Messages() {
                 formData.append('media', attachedFile)
                 formData.append('tempId', tempId)
 
-                const { data } = await chatApi.post(`conversations/${activeConvo._id}/messages`, formData, {
+                await chatApi.post(`${activeConvo._id}/messages`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
                 // Socket 'new_message' will handle state update
@@ -405,9 +420,9 @@ export default function Messages() {
     const handleType = (e) => {
         setText(e.target.value)
         if (activeConvo) {
-            socket?.emit('typing', { conversationId: activeConvo._id })
+            socket?.emit('typing_start', activeConvo._id)
             clearTimeout(typingTimer.current)
-            typingTimer.current = setTimeout(() => socket?.emit('stop_typing', { conversationId: activeConvo._id }), 2000)
+            typingTimer.current = setTimeout(() => socket?.emit('typing_stop', activeConvo._id), 2500)
         }
     }
 

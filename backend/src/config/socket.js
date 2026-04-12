@@ -93,6 +93,13 @@ const initSocket = async (server) => {
                     return;
                 }
 
+                if (type === 'notification_removed') {
+                    const { notificationId } = data;
+                    io.to(`user:${recipient}`).emit('notification_removed', { notificationId });
+                    logger.debug(`Relayed notification_removed to user:${recipient}`);
+                    return;
+                }
+
                 io.to(`user:${recipient}`).emit('new_notification', notification);
                 logger.debug(`Relayed notification to user:${recipient}`);
             } else if (channel === 'peernet:messages') {
