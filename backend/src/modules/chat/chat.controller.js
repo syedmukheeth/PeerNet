@@ -78,10 +78,20 @@ const markSeen = async (req, res, next) => {
     }
 };
 
+const getUnreadCount = async (req, res, next) => {
+    try {
+        const count = await chatService.getUnreadCount(req.user.id);
+        res.json({ success: true, count });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getConversations,
     getOrCreateConversation,
     getMessages,
     postMessage,
     markSeen,
+    getUnreadCount,
 };

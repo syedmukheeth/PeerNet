@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const feedbackController = require('./feedback.controller');
-const { protect } = require('../../middleware/auth');
+const { authenticate } = require('../../middleware/auth.middleware');
 
-router.post('/', protect, feedbackController.createFeedback);
+router.post('/', authenticate, feedbackController.createFeedback);
 
 module.exports = router;

@@ -278,7 +278,7 @@ export default function Layout() {
                     </div>
                 </header>
 
-                <div className="layout-container flex-1 min-h-0 overflow-y-auto">
+                <div className={`layout-container flex-1 min-h-0 overflow-y-auto ${(!['/messages', '/dscrolls'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}>
                     <AnimatePresence mode="wait"><Outlet /></AnimatePresence>
                 </div>
 

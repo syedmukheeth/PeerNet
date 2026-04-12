@@ -34,7 +34,23 @@ const createStory = async (userId, file, data = {}) => {
     });
 };
 
-// ... getStories and others ...
+const getStoriesFromFollowing = async (userId) => {
+    const follows = await Follower.find({ follower: userId }).select('following').lean();
+    const followingIds = follows.map(f => f.following);
+    // Include own stories
+    followingIds.push(userId);
+
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const stories = await Story.find({
+        author: { $in: followingIds },
+        createdAt: { $gte: cutoff },
+    })
+        .populate('author', 'username avatarUrl isVerified')
+        .sort({ createdAt: -1 })
+        .lean();
+
+    return stories;
+};
 
 const deleteStory = async (storyId, userId) => {
     const story = await Story.findById(storyId);
@@ -42,12 +58,12 @@ const deleteStory = async (storyId, userId) => {
     if (story.author.toString() !== userId.toString()) {
         throw new ApiError(403, 'Not authorised');
     }
-    
+
     // Only delete from Cloudinary if it's NOT a text story
     if (story.mediaType !== 'text') {
         await deleteFromCloudinary(story.mediaPublicId, story.mediaType === 'video' ? 'video' : 'image');
     }
-    
+
     await story.deleteOne();
 };
 

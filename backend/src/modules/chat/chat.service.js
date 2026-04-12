@@ -99,10 +99,22 @@ const markAsSeen = async (conversationId, userId) => {
     return result;
 };
 
+const getUnreadCount = async (userId) => {
+    const userConversations = await Conversation.find({ participants: userId }).select('_id').lean();
+    const convoIds = userConversations.map(c => c._id);
+    
+    return Message.countDocuments({
+        conversation: { $in: convoIds },
+        sender: { $ne: userId },
+        status: { $ne: 'seen' }
+    });
+};
+
 module.exports = {
     getOrCreateConversation,
     getUserConversations,
     getMessages,
     saveMessage,
     markAsSeen,
+    getUnreadCount,
 };
