@@ -72,10 +72,14 @@ const bootstrap = async () => {
                 try {
                     const data = JSON.parse(message);
                     if (channel === 'peernet:notifications') {
-                        const { recipient, notification } = data;
-                        logger.info(`[REDIS] Incoming Notification for ${recipient} (Type: ${notification.type})`);
-                        // Use io.local to prevent duplicate broadcasts through the adapter
-                        io.local.to(`user:${recipient}`).emit('new_notification', notification);
+                        const { recipient, type, notification, notificationId } = data;
+                        logger.info(`[REDIS] Incoming Notification ${type || 'NEW'} for ${recipient}`);
+                        
+                        if (type === 'notification_removed') {
+                            io.local.to(`user:${recipient}`).emit('notification_removed', { notificationId });
+                        } else {
+                            io.local.to(`user:${recipient}`).emit('new_notification', notification);
+                        }
                     } else if (channel === 'peernet:messages') {
                         const { recipient, message: chatMsg, type, messageId, conversationId } = data;
                         logger.info(`[REDIS] Incoming Message action for ${recipient} (Type: ${type})`);
