@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import api, { CHAT_BASE_URL } from '../api/axios'
+import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { HiBadgeCheck, HiSearch, HiX, HiPencilAlt, HiArrowLeft, HiPhotograph, HiEmojiHappy, HiDocument, HiDownload, HiPaperAirplane, HiTrash } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
@@ -151,7 +151,7 @@ export default function Messages() {
 
             if (activeConvoRef.current?._id === msg.conversationId) {
                 // Mark as read immediately on the server
-                api.patch(`conversations/${msg.conversationId}/messages/read`, {}, { baseURL: CHAT_BASE_URL })
+                chatApi.patch(`conversations/${msg.conversationId}/messages/read`, {})
                     .then(() => {
                         window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
                     })
@@ -212,7 +212,7 @@ export default function Messages() {
 
     const loadConvos = async () => {
         try {
-            const { data } = await api.get(`conversations`, { baseURL: CHAT_BASE_URL })
+            const { data } = await chatApi.get(`conversations`)
             const convos = data.data || []; setConversations(convos); return convos
         } finally {
             setInitialLoad(false)
@@ -253,7 +253,7 @@ export default function Messages() {
         if (!convoId) return setSuggestions([])
         setLoadingSuggestions(true)
         try {
-            const { data } = await api.get(`/conversations/${convoId}/suggestions`, { baseURL: CHAT_BASE_URL })
+            const { data } = await chatApi.get(`/conversations/${convoId}/suggestions`)
             setSuggestions(data.suggestions || [])
         } catch (err) {
             console.warn("AI: Suggestion fetch failed:", err)
@@ -267,9 +267,9 @@ export default function Messages() {
         if (!convoId) return
         setLoadingMessages(true)
         try {
-            const { data } = await api.get(`/conversations/${convoId}/messages`, { params: { limit: 50 }, baseURL: CHAT_BASE_URL })
+            const { data } = await chatApi.get(`/conversations/${convoId}/messages`, { params: { limit: 50 } })
             setMessages(data.data || [])
-            await api.patch(`/conversations/${convoId}/messages/read`, {}, { baseURL: CHAT_BASE_URL })
+            await chatApi.patch(`/conversations/${convoId}/messages/read`, {})
             
             // Tell the sidebar to refresh its message count instantly
             window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
@@ -316,7 +316,7 @@ export default function Messages() {
     const startConvoWith = async (u) => {
         setShowNewConvo(false); setStarting(true)
         try {
-            const { data } = await api.post(`conversations`, { targetUserId: u._id }, { baseURL: CHAT_BASE_URL })
+            const { data } = await chatApi.post(`conversations`, { targetUserId: u._id })
             const fresh = await loadConvos()
             const found = fresh.find(c => c._id === data.data._id) || { ...data.data, participants: [user, u] }
             await selectConvo(found)
@@ -346,8 +346,7 @@ export default function Messages() {
             if (body) formData.append('body', body)
             if (attachedFile) formData.append('media', attachedFile)
 
-            const { data } = await api.post(`conversations/${activeConvo._id}/messages`, formData, {
-                baseURL: CHAT_BASE_URL,
+            const { data } = await chatApi.post(`conversations/${activeConvo._id}/messages`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
             setMessages(m => {
@@ -412,7 +411,7 @@ export default function Messages() {
     const saveEdit = async (m) => {
         if (!editBody.trim()) return
         try {
-            const { data } = await api.put(`conversations/${activeConvo._id}/messages/${m._id}`, { body: editBody }, { baseURL: CHAT_BASE_URL })
+            const { data } = await chatApi.put(`conversations/${activeConvo._id}/messages/${m._id}`, { body: editBody })
             setMessages(ms => ms.map(x => x._id === m._id ? data.data : x))
             setConversations(cs => cs.map(c => c.lastMessage?._id === m._id ? { ...c, lastMessage: data.data } : c))
             setEditingMessageId(null)
@@ -425,7 +424,7 @@ export default function Messages() {
     const deleteMessage = async (m) => {
         if (!window.confirm("Delete this message for everyone?")) return
         try {
-            await api.delete(`conversations/${activeConvo._id}/messages/${m._id}`, { baseURL: CHAT_BASE_URL })
+            await chatApi.delete(`conversations/${activeConvo._id}/messages/${m._id}`)
             setMessages(ms => ms.filter(x => x._id !== m._id))
             toast.success('Message deleted')
         } catch {
