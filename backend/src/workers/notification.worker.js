@@ -16,48 +16,39 @@ const initNotificationWorker = async () => {
         await consumer.subscribe({ topic: 'user_events', fromBeginning: false });
 
         await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-            const event = JSON.parse(message.value.toString());
-            const { eventId, type, payload } = event;
+            eachMessage: async ({ topic, partition, message }) => {
+                try {
+                    const event = JSON.parse(message.value.toString());
+                    const { eventId, type, payload } = event;
 
-            // 1. Idempotency Check
-            const redis = getRedisOptional();
-            if (redis) {
-                const isProcessed = await redis.get(`processed_notif:${eventId}`);
-                if (isProcessed) return;
-            }
+                    // 1. Idempotency Check
+                    const redis = getRedisOptional();
+                    if (redis) {
+                        const isProcessed = await redis.get(`processed_notif:${eventId}`);
+                        if (isProcessed) return;
+                    }
 
-            logger.info(`NotificationWorker: Processing ${type}`);
+                    logger.info(`NotificationWorker: Processing ${type}`);
 
-            try {
-                switch (type) {
-                    case 'POST_LIKED': {
-                        const { authorId, userId, postId } = payload;
-                        if (!authorId || !userId || !postId) {
-                            logger.warn(`NotificationWorker: Missing data for POST_LIKED: ${JSON.stringify(payload)}`);
+                    switch (type) {
+                        case 'POST_CREATED':
+                            // Logic for AI post analysis or image moderation could go here
                             break;
-                        }
-                    /* Core UI Notifications are now handled DIRECTLY in services for instant speed.
-                       Kafka is reserved for non-latency-sensitive background tasks. */
-                    
-                    case 'POST_CREATED':
-                        // Logic for AI post analysis could stay here if needed
-                        break;
+                        
+                        default:
+                            // Core UI notifications (likes, comments) are now handled directly in services for speed.
+                            break;
+                    }
 
-                    default:
-                        // Some events (like POST_CREATED or UNLIKED) might not trigger notifications
-                        break;
+                    // 2. Mark as processed
+                    if (redis && eventId) {
+                        await redis.setEx(`processed_notif:${eventId}`, 86400, 'true');
+                    }
+                } catch (err) {
+                    logger.error(`NotificationWorker: Error processing message: ${err.message}`);
                 }
-
-                // 2. Mark as processed
-                if (redis) {
-                    await redis.setEx(`processed_notif:${eventId}`, 86400, 'true');
-                }
-            } catch (err) {
-                logger.error(`NotificationWorker: Error processing ${eventId}: ${err.message}`);
-            }
-        },
-    });
+            },
+        });
 
     logger.info('Kafka: Notification Worker started');
     } catch (err) {
