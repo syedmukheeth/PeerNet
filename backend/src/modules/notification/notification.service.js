@@ -183,21 +183,29 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     ]);
 
     // Build a map of all parent post IDs we still need for comments with unpopulated post
-    const commentParentIds = [];
+    const commentPostIds = [];
+    const commentDscrollIds = [];
     comments.forEach(c => {
-        // If post is still an ObjectId (not populated), queue for manual lookup
-        if (c.post && typeof c.post !== 'object') commentParentIds.push(c.post);
-        if (c.dscroll && typeof c.dscroll !== 'object') commentParentIds.push(c.dscroll);
+        // If post/dscroll is still an ObjectId (not populated), queue for manual lookup
+        if (c.post && typeof c.post !== 'object') commentPostIds.push(c.post);
+        if (c.dscroll && typeof c.dscroll !== 'object') commentDscrollIds.push(c.dscroll);
     });
-    const extraPosts = commentParentIds.length > 0
-        ? await Post.find({ _id: { $in: commentParentIds } }).select('mediaUrl thumbnailUrl mediaType videoUrl author').lean()
-        : [];
+
+    const [extraPosts, extraDscrolls] = await Promise.all([
+        commentPostIds.length > 0 ? Post.find({ _id: { $in: commentPostIds } }).select('mediaUrl thumbnailUrl mediaType videoUrl author').lean() : [],
+        commentDscrollIds.length > 0 ? Dscroll.find({ _id: { $in: commentDscrollIds } }).select('thumbnailUrl videoUrl author').lean() : []
+    ]);
+
     const extraPostsMap = new Map(extraPosts.map(p => [p._id.toString(), p]));
+    const extraDscrollsMap = new Map(extraDscrolls.map(d => [d._id.toString(), d]));
 
     // Patch comments: replace bare ObjectId with the fetched document
     comments.forEach(c => {
         if (c.post && typeof c.post !== 'object') {
             c.post = extraPostsMap.get(c.post.toString()) || c.post;
+        }
+        if (c.dscroll && typeof c.dscroll !== 'object') {
+            c.dscroll = extraDscrollsMap.get(c.dscroll.toString()) || c.dscroll;
         }
     });
 
