@@ -100,13 +100,19 @@ export default function PostDetail() {
     const handleComment = async (e) => {
         e.preventDefault()
         if (!user) { toast.error('Please sign in to comment'); return navigate('/login'); }
-        if (!body.trim()) return
+        const text = body.trim()
+        if (!text || isScanning) return
+        
         setIsScanning(true)
         try {
-            const payload = { body }
+            const payload = { body: text }
             if (replyingTo) payload.parentComment = replyingTo._id
 
             const { data } = await api.post(`/posts/${id}/comments`, payload)
+
+            // Clear early to prevent double submission
+            setBody('')
+            setReplyingTo(null)
 
             if (replyingTo) {
                 // Add to replies of the parent comment
@@ -123,11 +129,11 @@ export default function PostDetail() {
                 setComments(c => [...c, data.data])
                 setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
             }
-            
-            setBody('')
-            setReplyingTo(null)
-        } catch (err) { toast.error(err.response?.data?.message || 'Failed') }
-        finally { setIsScanning(false) }
+        } catch (err) { 
+            toast.error(err.response?.data?.message || 'Failed to post comment') 
+        } finally { 
+            setIsScanning(false) 
+        }
     }
 
     const toggleReplies = async (commentId) => {

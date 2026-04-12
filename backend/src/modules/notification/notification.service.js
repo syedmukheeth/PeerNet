@@ -67,13 +67,26 @@ const formatNotification = (notif, hydratedEntity = null) => {
         console.log(`[NOTIF-THUMB] ID: ${obj._id} - Type: ${obj.type} - Thumb: ${thumbnail || 'NONE'}`);
     }
 
+    // For comment/reply, surface the comment body for frontend preview
+    let commentBody = null;
+    if ((type === 'comment' || type === 'reply') && e) {
+        commentBody = e.body || null;
+    }
+
     return {
         ...obj,
         _id: obj._id.toString(),
         thumbnail,
         targetUrl,
         targetId: targetId || (e?._id?.toString() || e?.toString()),
-        sender
+        sender,
+        // Attach entity details needed by frontend
+        entityId: e ? {
+            _id: e._id?.toString(),
+            body: e.body || null,
+            post: e.post?._id?.toString() || e.post?.toString() || null,
+        } : obj.entityId,
+        commentBody,
     };
 };
 

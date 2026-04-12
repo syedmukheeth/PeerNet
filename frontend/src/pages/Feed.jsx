@@ -44,14 +44,13 @@ function RightPanel() {
         `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`)
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             {/* ── Profile mini card ─────────────── */}
             <div className="glass-card" style={{
                 display: 'flex', alignItems: 'center', gap: 14,
-                padding: '16px 18px', 
+                padding: '14px 18px', 
                 borderRadius: 12,
-                marginBottom: 24,
                 transition: 'transform 0.2s',
                 cursor: 'pointer'
             }} onClick={() => navigate(`/profile/${user?._id}`)}>
@@ -83,14 +82,14 @@ function RightPanel() {
                     onClick={(e) => { e.stopPropagation(); navigate(`/profile/${user?._id}`) }}
                     className="btn btn-xs"
                     style={{ 
-                        background: 'rgba(255,255,255,0.08)', 
-                        color: 'var(--text-2)', 
+                        background: 'var(--btn-glass-hover)', 
+                        color: 'var(--text-1)', 
                         fontWeight: 700,
                         borderRadius: 18,
-                        padding: '5px 12px',
+                        padding: '6px 14px',
                         border: '1px solid var(--border-md)',
                         fontSize: 11,
-                        flexShrink: 0  // Added to prevent overlap
+                        flexShrink: 0
                     }}>
                     Switch
                 </button>
@@ -151,24 +150,31 @@ function RightPanel() {
             )}
 
             {/* ── Footer ───────────────────────── */}
-            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <a
-                    href="https://www.linkedin.com/in/syedmukheeth"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        fontSize: 12, color: '#0A66C2', fontWeight: 600,
-                        textDecoration: 'none', transition: 'opacity 150ms',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
-                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-                    <FaLinkedin style={{ fontSize: 15 }} />
-                    Syed Mukheeth
-                </a>
-                <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>
-                    Built by Syed Mukheeth · © 2026 PeerNet
-                </p>
+            <div style={{ paddingLeft: 18, paddingRight: 18, marginTop: 4 }}>
+                <div style={{ 
+                    borderTop: '1px solid var(--border)', 
+                    paddingTop: 14,
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: 5,
+                    opacity: 0.6
+                }}>
+                    <a
+                        href="https://www.linkedin.com/in/syedmukheeth"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            fontSize: 12, color: 'var(--accent)', fontWeight: 600,
+                            textDecoration: 'none',
+                        }}>
+                        <FaLinkedin style={{ fontSize: 13 }} />
+                        Syed Mukheeth
+                    </a>
+                    <p style={{ fontSize: 10.5, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
+                        Built with Passion in India · © 2026 PeerNet
+                    </p>
+                </div>
             </div>
 
         </div>

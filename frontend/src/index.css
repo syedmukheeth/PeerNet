@@ -48,6 +48,9 @@
   --story-ring: linear-gradient(135deg, #7C3AED, #4F7AFF, #06B6D4, #7C3AED);
   /* DM */
   --dm-theirs: #1C1C2E;
+  --glass-bg: rgba(10, 10, 10, 0.65);
+  --glass-bg-alt: rgba(0, 0, 0, 0.35);
+  --btn-glass-hover: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Light Mode — Clean White + Purple/Blue ─────────────── */
@@ -93,6 +96,9 @@
   --story-ring: linear-gradient(135deg, #7C3AED, #4F7AFF, #06B6D4, #7C3AED);
   /* DM */
   --dm-theirs: #E8E8F0;
+  --glass-bg: #ffffff;
+  --glass-bg-alt: #ffffff;
+  --btn-glass-hover: rgba(0, 0, 0, 0.05);
 }
 
 /* ── Variable Aliases — all naming conventions work ─────── */
@@ -109,7 +115,6 @@
   --text-secondary: var(--text-2);
   --text-muted: var(--text-3);
 
-  --glass-bg: var(--card);
   --glass-blur: blur(16px);
   --glass-border: var(--border-md);
 
@@ -135,30 +140,49 @@
     box-shadow 220ms ease;
 }
 
-/* Don't animate transforms/opacity via this catch-all */
-.no-transition-bg {
-  transition: none !important;
-}
+/* Glass components — dark mode: frosted; light mode: solid white */
 
 .glass-card {
-  background: rgba(10, 10, 10, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-md);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .glass-header {
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--glass-bg-alt);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
 
 .glass-footer {
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--glass-bg-alt);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--border);
+}
+
+/* Light mode: disable blur (no frosted glass needed on white) */
+[data-theme="light"] .glass-card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.05);
+}
+
+[data-theme="light"] .glass-header {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+
+[data-theme="light"] .glass-footer {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: 1px solid rgba(0,0,0,0.07);
 }
 
 /* ── Base ────────────────────────────────────────────────── */
