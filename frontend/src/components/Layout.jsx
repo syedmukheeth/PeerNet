@@ -134,19 +134,27 @@ export default function Layout() {
 
     // ── Toast Helpers ──────────────────────────────────────────────────────
     const showNotifToast = (notif) => {
-        const typeEmoji = { like: '❤️', comment: '💬', follow: '👤', message: '💬' }
-        const typeText = { like: 'liked your post', comment: 'commented on your post', follow: 'started following you' }
-        const typeColor = { like: '#FF375F', comment: '#6366F1', follow: '#10B981' }
+        const typeEmoji = { like: '❤️', comment: '💬', follow: '👤', message: '💬', reply: '💬' }
+        const typeText = { 
+            like: notif.entityModel === 'Comment' ? 'liked your comment' : 'liked your post', 
+            comment: 'commented on your post', 
+            reply: 'replied to your comment',
+            follow: 'started following you' 
+        }
+        const typeColor = { like: '#FF375F', comment: '#6366F1', follow: '#10B981', reply: '#6366F1' }
         const color = typeColor[notif.type] || '#6366F1'
+
+        // Action destination
+        const targetUrl = notif.targetUrl || '/notifications';
 
         toast((t) => (
             <div
-                onClick={() => { navigate('/notifications'); toast.dismiss(t.id) }}
+                onClick={() => { navigate(targetUrl); toast.dismiss(t.id) }}
                 style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '2px 4px' }}
             >
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                     <img
-                        src={notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.username}&background=6366F1&color=fff`}
+                        src={notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.username || 'User'}&background=6366F1&color=fff`}
                         style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
                         alt=""
                     />
@@ -158,23 +166,22 @@ export default function Layout() {
                         fontSize: 10, border: '2px solid var(--surface)',
                     }}>{typeEmoji[notif.type]}</div>
                 </div>
-                {notif.entityId && typeof notif.entityId === 'object' && (
-                    <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border)', background: 'var(--hover)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+                {/* Standardized Thumbnail View */}
+                {notif.thumbnail && (
+                    <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border)', background: 'var(--hover)' }}>
                          <img 
-                            src={notif.entityId.mediaUrl || notif.entityId.videoUrl || notif.entityId.thumbnailUrl} 
+                            src={notif.thumbnail} 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
                             alt="" 
                         />
-                        <div style={{ display: 'none', color: 'var(--text-3)', fontSize: 16 }}>
-                            {notif.type === 'like' ? '❤️' : '💬'}
-                        </div>
                     </div>
                 )}
+
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-1)', lineHeight: 1.3 }}>
-                        {notif.sender?.username}
-                        <span style={{ fontWeight: 400, color: 'var(--text-2)', marginLeft: 4 }}>{typeText[notif.type]}</span>
+                        {notif.sender?.username || 'Someone'}
+                        <span style={{ fontWeight: 400, color: 'var(--text-2)', marginLeft: 4 }}>{typeText[notif.type] || 'notified you'}</span>
                     </p>
                     <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--text-3)' }}>Tap to view</p>
                 </div>

@@ -112,18 +112,40 @@ const formatNotification = (notif, hydratedEntity = null) => {
 
 const createNotification = async (data) => {
     try {
+        // 1. DEDUPLICATION: Avoid spamming identical notifications within 60 seconds
+        const duplicateWindow = new Date(Date.now() - 60000);
+        const existing = await Notification.findOne({
+            recipient: data.recipient,
+            sender: data.sender,
+            type: data.type,
+            entityId: data.entityId,
+            createdAt: { $gt: duplicateWindow }
+        }).sort({ createdAt: -1 });
+
+        if (existing) {
+            // Already sent recently, just ignore or bump the timestamp if desired.
+            // For now, we return null to signal "no new broadcast needed".
+            return null;
+        }
+
         const notification = await Notification.create(data);
 
-        // Manual Hydration for single creation (Double-checking reliability)
-        let hydrated = null;
-        if (data.entityModel === 'Post') hydrated = await Post.findById(data.entityId).lean();
-        else if (data.entityModel === 'Dscroll') hydrated = await Dscroll.findById(data.entityId).lean();
-        else if (data.entityModel === 'Comment') hydrated = await Comment.findById(data.entityId).populate({ path: 'post', strictPopulate: false }).populate({ path: 'dscroll', strictPopulate: false }).lean();
+        // Manual Hydration for single creation
+        let hydratedEntity = null;
+        if (data.entityModel === 'Post') hydratedEntity = await Post.findById(data.entityId).lean();
+        else if (data.entityModel === 'Dscroll') hydratedEntity = await Dscroll.findById(data.entityId).lean();
+        else if (data.entityModel === 'Comment') hydratedEntity = await Comment.findById(data.entityId)
+            .populate({ path: 'post', strictPopulate: false })
+            .populate({ path: 'dscroll', strictPopulate: false })
+            .lean();
 
         const sender = await User.findById(data.sender).select('username avatarUrl isVerified').lean();
-        notification.sender = sender;
+        
+        // Convert to plain object to ensure we can attach the populated sender safely for broadcasting
+        const notificationObj = notification.toObject();
+        notificationObj.sender = sender;
 
-        const formatted = formatNotification(notification, hydrated);
+        const formatted = formatNotification(notificationObj, hydratedEntity);
 
         // Broadcast to Redis for real-time delivery
         const redis = getRedisOptional();
@@ -137,8 +159,8 @@ const createNotification = async (data) => {
 
         return formatted;
     } catch (err) {
-        console.error(`[NOTIF-SERVICE] Create FAILED: ${err.message}`);
-        throw err;
+        console.error('Failed to create/broadcast notification:', err);
+        return null;
     }
 };
 
