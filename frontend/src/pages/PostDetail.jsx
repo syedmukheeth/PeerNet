@@ -20,6 +20,7 @@ export default function PostDetail() {
     const navigate = useNavigate()
     const location = useLocation()
     const urlCommentId = new URLSearchParams(location.search).get('commentId')
+    const urlParentId = new URLSearchParams(location.search).get('parentId')
     const [post, setPost] = useState(null)
     const [comments, setComments] = useState([])
     const [body, setBody] = useState('')
@@ -59,19 +60,33 @@ export default function PostDetail() {
 
     // Auto-scroll and flash target comment if provided via URL
     useEffect(() => {
-        if (urlCommentId && comments.length > 0) {
-            setTimeout(() => {
-                const el = document.getElementById(`comment-${urlCommentId}`)
-                if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                    const originalBg = el.style.backgroundColor || 'transparent'
-                    el.style.backgroundColor = 'rgba(99, 102, 241, 0.15)'
-                    el.style.transition = 'background-color 0.8s ease'
-                    setTimeout(() => el.style.backgroundColor = originalBg, 2000)
-                }
-            }, 300)
+        if (!urlCommentId || comments.length === 0) return;
+
+        const executeHighlight = () => {
+            const el = document.getElementById(`comment-${urlCommentId}`)
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                const originalBg = el.style.backgroundColor || 'transparent'
+                el.style.backgroundColor = 'rgba(99, 102, 241, 0.25)'
+                el.style.transition = 'background-color 0.8s ease'
+                setTimeout(() => el.style.backgroundColor = originalBg, 2000)
+            }
+        };
+
+        if (urlParentId) {
+            // Need to expand the parent first
+            if (!replyData[urlParentId]?.show) {
+                toggleReplies(urlParentId).then(() => {
+                    // Small delay to allow DOM to render replies
+                    setTimeout(executeHighlight, 400); 
+                });
+            } else {
+                executeHighlight();
+            }
+        } else {
+            executeHighlight();
         }
-    }, [comments, urlCommentId])
+    }, [comments, urlCommentId, urlParentId, replyData])
 
     // Close menu on outside click
     useEffect(() => {
