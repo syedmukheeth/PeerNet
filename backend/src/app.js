@@ -29,27 +29,37 @@ const createApp = () => {
     app.use(cookieParser());
 
     // ── 🌐 CORS ───────────────────────────────────────────────────────────────
-    // Explicit whitelisting to support process.env.ALLOWED_ORIGINS + Standard Production Slugs
+    // Robust whitelisting for local, production, and Vercel preview branches
     const allowedOrigins = [
         'http://localhost:5173',
         'http://localhost:3000',
         'https://peer-net-indol.vercel.app',
         'https://peernet.vercel.app',
-        ...(process.env.ALLOWED_ORIGINS || '').split(/[\s,]+/).map((o) => o.trim()).filter(Boolean)
+        /\.vercel\.app$/ // Matches any Vercel deployment/preview subdomain
     ];
 
     app.use(cors({
         origin: (origin, callback) => {
-            // Allow requests with no origin (like mobile apps or curl) or explicitly allowed domains
-            if (!origin || allowedOrigins.includes(origin)) {
+            // 1. Allow non-browser requests (mobile, etc.)
+            if (!origin) return callback(null, true);
+            
+            // 2. Check against explicit list or Regex
+            const isAllowed = allowedOrigins.some(pattern => {
+                if (pattern instanceof RegExp) return pattern.test(origin);
+                return pattern === origin;
+            });
+
+            if (isAllowed) {
                 callback(null, true);
             } else {
                 logger.warn(`[CORS-REJECTED] Origin: ${origin}`);
-                callback(new Error('CORS Policy violation'));
+                // Instead of throwing an Error (which strips headers), we pass false
+                callback(null, false);
             }
         },
-        methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+        methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
         credentials: true,
+        optionsSuccessStatus: 200 // Some legacy browsers crash on 204
     }));
 
     // ── 🩺 Health Check ───────────────────────────────────────────────────────
