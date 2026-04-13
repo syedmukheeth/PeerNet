@@ -12,6 +12,6 @@ router.get('/unread-count', chatController.getUnreadCount);
 router.post('/', chatController.getOrCreateConversation);
 router.get('/:conversationId/messages', chatController.getMessages);
 router.post('/:conversationId/messages', uploadMedia.single('media'), chatController.postMessage);
-router.patch('/:conversationId/seen', chatController.markSeen);
+router.patch('/:conversationId/messages/read', chatController.markSeen);
 
 module.exports = router;
