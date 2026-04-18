@@ -44,13 +44,16 @@ export const AuthProvider = ({ children }) => {
     }, [fetchMe])
 
     const login = async (identifier, password) => {
-        // withCredentials ensures the browser stores the httpOnly refreshToken cookie
+        console.log(`[AUTH CONTEXT] Login attempt for: ${identifier}`);
         const { data } = await api.post('/auth/login', { email: identifier, password }, { withCredentials: true })
+        
+        console.log('[AUTH CONTEXT] Login request successful, storing tokens...');
         localStorage.setItem('accessToken', data.data.accessToken)
         localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)
         return data.data.user
     }
+
 
     const register = async (payload) => {
         const { data } = await api.post('/auth/register', payload, { withCredentials: true })

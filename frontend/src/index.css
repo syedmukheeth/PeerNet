@@ -183,24 +183,26 @@
 }
 
 /* ── Base ────────────────────────────────────────────────── */
-html {
-  scroll-behavior: smooth;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100dvh;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 15px;
   background: var(--bg);
   color: var(--text-1);
   line-height: 1.6;
-  -webkit-font-smoothing: initial;
-  -moz-osx-font-smoothing: initial;
-  min-height: 100dvh;
-  max-width: 100vw;
-  overflow-x: hidden;
 }
+
+/* ── Specific Lock for Dashboard Layout ── */
+.layout-locked, 
+.layout-locked body {
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 
 a {
   color: inherit;
@@ -228,15 +230,14 @@ textarea {
 
 /* ── Immersive Auth System v6 ── */
 .auth-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #000;
   background-image: var(--prismatic-mesh);
   position: relative;
-  overflow: hidden;
-  padding: 24px;
+  padding: 60px 24px; /* Generous padding for mobile/short screens */
 }
 
 .auth-orb {
@@ -874,13 +875,14 @@ textarea {
 
 /* ── Layout ──────────────────────────────────────────────── */
 .app-layout {
-  display: grid;
-  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  display: flex; /* Changed from grid to flex */
   height: 100dvh;
+  width: 100vw;
   overflow: hidden;
-  --sidebar-w: clamp(200px, 15vw, 240px);
-  transition: grid-template-columns 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-w: 240px;
+  --sidebar-collapsed-w: 80px;
 }
+
 
 /* Sidebar: full viewport height, never scrolls away */
 .sidebar {
@@ -897,9 +899,9 @@ textarea {
 .sidebar::-webkit-scrollbar { display: none; }
 
 .app-layout.sidebar-collapsed {
-  grid-template-columns: 80px minmax(0, 1fr);
-  --sidebar-w: 80px;
+  --sidebar-w: var(--sidebar-collapsed-w);
 }
+
 
 /* ── Fade-in utility ──────────────────────────────────────── */
 @keyframes fadeIn {
@@ -1023,20 +1025,28 @@ textarea {
 
 /* ── High-Fidelity Professional Sidebar ─────────────────── */
 .sidebar {
-  position: sticky;
+  position: fixed; /* True Instagram behavior: Sidebar is fixed */
+  left: 0;
   top: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
   height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 12px 14px 24px;
-  gap: 0;
-  overflow-y: auto;
-  overflow-x: clip;
   background: var(--surface);
   border-right: 1px solid var(--border);
-  transition: width 400ms var(--ease-out);
-  z-index: 10;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Hide scrollbar */
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+
 
 .sidebar::after {
   content: '';
@@ -1187,28 +1197,26 @@ textarea {
   bottom: calc(100% + 12px);
   left: 0;
   right: 0;
-  background: rgba(13, 13, 13, 0.85); /* Deep Obsidian */
+  background: var(--surface); /* Use design system surface */
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-md); /* Stronger border for visibility */
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
   padding: 8px;
   z-index: 200;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .ig-more-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  color: var(--text-2);
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--text-1); /* High contrast text */
   font-size: 14px;
   font-weight: 600;
   transition: all 200ms ease;
@@ -1219,9 +1227,18 @@ textarea {
 }
 
 .ig-more-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-1);
-  transform: scale(1.02);
+  background: var(--hover);
+  transform: translateX(4px);
+}
+
+.ig-more-item svg {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+.ig-more-item:hover svg {
+  opacity: 1;
+  color: var(--accent);
 }
 
 .ig-more-divider {
@@ -1324,9 +1341,17 @@ textarea {
 
 /* ── Main Content ────────────────────────────────────────── */
 .main-col {
-  min-height: 100dvh;
+  flex: 1;
+  height: 100dvh;
+  margin-left: var(--sidebar-w); /* Equal to sidebar width */
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg);
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
 }
+
 
 .content-wrap {
   width: 100%;
@@ -2360,32 +2385,131 @@ textarea {
 
 /* ── Responsive Breakpoints ──────────────────────────────── */
 
-/* Tablet (≤900px) — sidebar collapses to icons only, hide feed right panel */
-@media (max-width: 1024px) {
-  .feed-right-panel {
-    display: none;
-  }
-}
-
-@media (max-width: 900px) {
+/* ── Tablet (≤1264px) — Collapsed Sidebar ────────────────── */
+@media (max-width: 1264px) {
   .app-layout {
-    grid-template-columns: 68px minmax(0, 1fr);
-    --sidebar-w: 68px;
+    --sidebar-w: var(--sidebar-collapsed-w); /* 80px */
   }
-
+  
   .sidebar {
-    padding: 16px 6px;
+    width: var(--sidebar-w);
+    padding: 12px 0;
     align-items: center;
   }
 
-  .peernetLogo {
-    padding: 6px 4px 16px;
+  .sidebar-brand .peernetLogo,
+  .ig-label,
+  .sidebar-more-wrap .ig-label,
+  .sidebar-brand-img {
+    display: none; /* Hide labels/logo text */
+  }
+
+  .sidebar-logo-row {
+    padding: 16px 0;
     justify-content: center;
   }
 
-  .sidebar-logo-text {
-    display: none;
+  .sidebar-brand {
+    gap: 0;
   }
+
+  .ig-link {
+    justify-content: center;
+    padding: 12px;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+  }
+
+  .ig-icon-wrap {
+    width: 32px;
+    height: 32px;
+  }
+
+  .ig-icon {
+    font-size: 28px !important;
+  }
+
+  .sidebar-more-wrap {
+    padding: 12px 0;
+  }
+}
+
+/* ── Mobile (≤768px) — Bottom Nav + Top Header ──────────── */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    display: none; /* Hide sidebar entirely on mobile */
+  }
+
+  .main-col {
+    margin-left: 0; /* No sidebar margin */
+    height: 100dvh;
+    padding-bottom: 60px; /* Room for bottom nav */
+  }
+
+  .mobile-top-header {
+    display: flex; /* Show top header */
+    height: 60px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .mobile-nav {
+    display: flex; /* Show bottom nav */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+    z-index: 100;
+  }
+
+  .mobile-nav a, .mobile-nav button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    font-size: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    transition: all 200ms ease;
+  }
+
+  .mobile-nav a.active {
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
+
+  .content-wrap {
+    padding: 16px 12px 40px;
+  }
+
+  .feed-layout {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .feed-right-panel {
+    display: none; /* Hide right panel on small screens */
+  }
+}
+
 
   .sidebar-link {
     justify-content: center;
@@ -3376,17 +3500,43 @@ textarea::placeholder {
 }
 
 @media (max-width: 640px) {
-  .dm-wrapper {
-    top: 52px !important;
-    bottom: 52px !important;
-    left: 0 !important;
+  .dm-layout-root {
+    flex-direction: column !important;
+  }
+  
+  .dm-mobile-hidden {
+    display: none !important;
   }
 
-  .dm-list-panel {
+  .dm-list-panel, .dm-chat-view {
     width: 100% !important;
-    border-right: none !important;
+    flex: 1 !important;
   }
 }
+
+.dm-main-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.message-row:hover .message-actions {
+  opacity: 1 !important;
+}
+
+.skeleton-item.animate-shimmer {
+  background: linear-gradient(90deg, var(--hover) 25%, var(--border-md) 50%, var(--hover) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 
 .verified {
   color: var(--accent);

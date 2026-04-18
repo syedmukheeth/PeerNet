@@ -53,8 +53,17 @@ export default function Layout() {
     const mainRef = useRef(null)
 
     useEffect(() => {
-        if (mainRef.current) mainRef.current.scrollTo({ top: 0, behavior: 'instant' })
+        if (mainRef.current) {
+            mainRef.current.scrollTo({ top: 0, behavior: 'instant' })
+        }
     }, [location.pathname])
+
+    useEffect(() => {
+        // Apply locked state for dashboard layout
+        document.documentElement.classList.add('layout-locked');
+        return () => document.documentElement.classList.remove('layout-locked');
+    }, []);
+
 
     const syncAllCounts = useCallback(async () => {
         if (!user) return
@@ -262,7 +271,8 @@ export default function Layout() {
                 </div>
             </aside>
 
-            <main className="main-col flex flex-col h-[100dvh] overflow-hidden">
+            <main className="main-col" ref={mainRef}>
+
                 <header className="mobile-top-header">
                     <Link to="/" className="flex items-center gap-2 no-underline">
                         <img src={logoImg} alt="PN" className="w-7 h-7 rounded-lg" />
@@ -279,8 +289,7 @@ export default function Layout() {
                 </header>
 
                 <div 
-                    className={`layout-container flex-1 min-h-0 overflow-y-auto ${(!['/messages', '/dscrolls'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
-                    ref={mainRef}
+                    className={`layout-container ${(!['/messages', '/dscrolls'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
                     <AnimatePresence mode="wait">
                         <Outlet />

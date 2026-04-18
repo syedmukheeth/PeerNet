@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useMultiAccount } from '../context/MultiAccountContext'
@@ -13,24 +13,45 @@ export default function Login() {
     const [form, setForm] = useState({ identifier: '', password: '' })
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
-    const { login, loginGoogle, loginGuest } = useAuth()
+    const { login, loginGoogle, loginGuest, user: authUser } = useAuth()
     const { saveCurrentAccount } = useMultiAccount()
     const navigate = useNavigate()
+
+    // ── Redirect if already logged in ────────────────────────────────
+    useEffect(() => {
+        if (authUser) {
+            console.log('[LOGIN] User already authenticated, redirecting to home...');
+            navigate('/');
+        }
+    }, [authUser, navigate]);
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        if (e) e.preventDefault()
+        if (loading) return
+
+        console.group('[LOGIN FLOW]');
+        console.log('Identifier:', form.identifier);
+        
         setLoading(true)
         try {
             const user = await login(form.identifier, form.password)
+            console.log('Login Result: SUCCESS', user._id);
             saveCurrentAccount(user)
             toast.success('Welcome back!')
             navigate('/')
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Login failed')
-        } finally { setLoading(false) }
+            const msg = err.response?.data?.message || 'Login failed';
+            console.error('Login Result: FAILED', msg);
+            // Deduplicate toasts using a unique ID
+            toast.error(msg, { id: 'login-error' })
+        } finally { 
+            setLoading(false)
+            console.groupEnd()
+        }
     }
+
 
     const handleGoogleSuccess = async (credentialResponse) => {
         setLoading(true)
@@ -79,7 +100,7 @@ export default function Login() {
                     <div className="input-group">
                         <label>Username or Email</label>
                         <input className="input" type="text" placeholder="johndoe or you@example.com"
-                            value={form.identifier} onChange={set('identifier')} required />
+                            value={form.identifier} onChange={set('identifier')} required disabled={loading} />
                     </div>
                     <div className="input-group">
                         <label>Password</label>
@@ -92,7 +113,9 @@ export default function Login() {
                                 value={form.password} 
                                 onChange={set('password')} 
                                 required 
+                                disabled={loading}
                             />
+
                             <button
                                 type="button"
                                 className="password-toggle"
@@ -146,7 +169,7 @@ export default function Login() {
                         style={{ height: 40, marginTop: 12, fontSize: '13px' }}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}>
-                        Try as Guest
+                        {loading ? <span className="spinner" style={{ width: 14, height: 14 }} /> : 'Try as Guest'}
                     </motion.button>
                 </div>
 

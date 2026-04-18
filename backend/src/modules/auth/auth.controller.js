@@ -21,8 +21,12 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
+        const { email } = req.body;
+        console.log(`[AUTH CONTROLLER] Login request received for: ${email}`);
         const { user, accessToken, refreshToken } = await authService.login(req.body);
+        console.log(`[AUTH CONTROLLER] Login successful for: ${email}`);
         res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+
         res.json({ success: true, data: { user, accessToken, refreshToken } });
     } catch (err) {
         next(err);
@@ -69,7 +73,14 @@ const guestLogin = async (req, res, next) => {
         res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
         res.json({ success: true, data: { user, accessToken, refreshToken } });
     } catch (err) {
-        next(err);
+        // TEMP DEBUG: Expose error to frontend
+        console.error('GUEST LOGIN CRASH:', err);
+        res.status(500).json({ 
+            success: false, 
+            message: err.message, 
+            stack: err.stack,
+            context: 'guestLogin controller'
+        });
     }
 };
 

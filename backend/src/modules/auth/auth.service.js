@@ -77,13 +77,24 @@ const register = async ({ username, email, password, fullName }) => {
 
 const login = async ({ email: identifier, password }) => {
     // The identifier could be an actual email or a username
+    console.log(`[AUTH SERVICE] Attempting login for identifier: ${identifier}`);
     const user = await User.findOne({
         $or: [{ email: identifier }, { username: identifier }]
     }).select('+passwordHash');
-    if (!user) throw new ApiError(401, 'Invalid credentials');
+    
+    if (!user) {
+        console.warn(`[AUTH SERVICE] User not found: ${identifier}`);
+        throw new ApiError(401, 'Invalid credentials');
+    }
 
     const match = await user.matchPassword(password);
-    if (!match) throw new ApiError(401, 'Invalid credentials');
+    if (!match) {
+        console.warn(`[AUTH SERVICE] Password mismatch for: ${identifier}`);
+        throw new ApiError(401, 'Invalid credentials');
+    }
+
+    console.log(`[AUTH SERVICE] Successful login for: ${identifier} (${user._id})`);
+
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
@@ -177,7 +188,11 @@ const googleLogin = async (token) => {
 };
 
 const guestLogin = async () => {
-    let user = await User.findOne({ username: 'guest' }).select('+passwordHash');
+    // Search by both to prevent duplicate key errors if email/username already taken distinctly
+    let user = await User.findOne({ 
+        $or: [{ username: 'guest' }, { email: 'guest@peernet.app' }] 
+    }).select('+passwordHash');
+
     if (!user) {
         const randomPassword = require('crypto').randomBytes(16).toString('hex');
         const passwordHash = await User.hashPassword(randomPassword);
@@ -188,7 +203,6 @@ const guestLogin = async () => {
             passwordHash,
             bio: 'This is a temporary guest account.'
         });
-
     }
 
     // AUTO-FOLLOW ADMINS: Ensure interviewer sees content immediately on every login
