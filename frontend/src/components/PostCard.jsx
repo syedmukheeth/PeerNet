@@ -141,29 +141,28 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
 
     return (
         <>
-            <motion.div className="post-card"
+            <motion.div className="post-card overflow-hidden relative"
                 initial={{ opacity: 0, scale: 0.98, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                style={{ overflow: 'hidden', position: 'relative' }}>
+                transition={{ duration: 0.3, ease: 'easeOut' }}>
                 
                 {/* Header with glass effect */}
-                <div className="post-header glass-header" style={{ padding: '12px 14px' }}>
-                    <Link to={`/profile/${author._id}`} style={{ position: 'relative' }}>
-                        <img src={avatarUrl} className="avatar" style={{ width: 38, height: 38, border: '1.5px solid var(--border-md)' }} alt={author.username} />
+                <div className="post-header glass-header px-[14px] py-[12px]">
+                    <Link to={`/profile/${author._id}`} className="relative shrink-0">
+                        <img src={avatarUrl} className="avatar w-[38px] h-[38px] border-[1.5px] border-border-md" alt={author.username} />
                     </Link>
-                    <div style={{ flex: 1, marginLeft: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Link to={`/profile/${author._id}`} className="post-author-name" style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-1)' }}>{author.username}</Link>
-                            {author.isVerified && <HiBadgeCheck className="verified" style={{ fontSize: 14 }} title="Verified" />}
+                    <div className="flex-1 ml-3 truncate">
+                        <div className="flex items-center gap-1.5">
+                            <Link to={`/profile/${author._id}`} className="post-author-name text-[13.5px] font-bold text-primary truncate">{author.username}</Link>
+                            {author.isVerified && <HiBadgeCheck className="text-accent text-[14px] shrink-0" title="Verified" />}
                         </div>
-                        <div className="post-author-time" style={{ fontSize: 11, color: 'var(--text-3)' }}>{timeago(post.createdAt)}</div>
+                        <div className="post-author-time text-[11px] text-muted">{timeago(post.createdAt)}</div>
                     </div>
-                    <div style={{ position: 'relative' }} ref={menuRef}>
+                    <div className="relative" ref={menuRef}>
                         <motion.button className="btn btn-ghost btn-icon-sm"
                             whileHover={{ background: 'var(--btn-glass-hover)' }} whileTap={{ scale: 0.9 }}
                             onClick={() => setMenuOpen(o => !o)}>
-                            <HiDotsHorizontal style={{ fontSize: 18, color: 'var(--text-3)' }} />
+                            <HiDotsHorizontal className="text-[18px] text-muted" />
                         </motion.button>
                         <AnimatePresence>
                             {menuOpen && (
@@ -197,28 +196,15 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 {/* Media / Text Content */}
                 <div className="post-media-wrap">
                     {post.mediaType === 'text' ? (
-                        <div style={{
-                            background: post.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
-                            minHeight: 280,
-                            maxHeight: 400,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: 32,
-                            textAlign: 'center',
-                            color: '#fff',
-                            fontSize: 22,
-                            fontWeight: 800,
-                            fontFamily: 'Syne, Inter, sans-serif',
-                            boxShadow: 'inset 0 0 100px rgba(0,0,0,0.2)',
-                            cursor: 'pointer'
-                        }} onClick={handleImageTap}>
-                            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                        <div className="cursor-pointer min-h-[280px] max-h-[400px] flex items-center justify-center p-8 text-center text-white text-[22px] font-extrabold font-syne shadow-[inset_0_0_100px_rgba(0,0,0,0.2)]"
+                            style={{ background: post.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #334155 100%)' }}
+                            onClick={handleImageTap}>
+                            <div className="whitespace-pre-wrap break-words">
                                 {post.caption}
                             </div>
                         </div>
                     ) : post.mediaType === 'video' ? (
-                        <div style={{ position: 'relative', background: '#000' }}>
+                        <div className="relative bg-black">
                             <video
                                 ref={videoRef}
                                 src={post.mediaUrl}
@@ -233,13 +219,13 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                             {/* Mute toggle */}
                             <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMuted(!isMuted) }}
-                                style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
+                                className="absolute bottom-3 right-3 bg-black/60 text-white border-none rounded-full p-2 cursor-pointer flex items-center justify-center z-10"
                             >
                                 {isMuted ? <HiVolumeOff size={18} /> : <HiVolumeUp size={18} />}
                             </button>
                             {!isPlaying && (
-                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: 14, pointerEvents: 'none', color: '#fff', display: 'flex', zIndex: 2 }}>
-                                    <HiPlay size={28} style={{ marginLeft: 3 }} />
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/50 rounded-full p-3.5 pointer-events-none text-white flex z-10">
+                                    <HiPlay size={28} className="ml-[3px]" />
                                 </div>
                             )}
                         </div>
@@ -251,21 +237,21 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 </div>
 
                 {/* Actions with glass effect */}
-                <div className="post-actions glass-footer" style={{ padding: '8px 12px', marginTop: 0 }}>
+                <div className="post-actions glass-footer px-3 py-2 mt-0">
                     <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`}
                         onClick={handleLike}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.9 }}>
                         {liked
-                            ? <HiHeart style={{ fontSize: 24, color: 'var(--error)' }} />
-                            : <HiOutlineHeart style={{ fontSize: 24 }} />
+                            ? <HiHeart className="text-[24px] text-error" />
+                            : <HiOutlineHeart className="text-[24px]" />
                         }
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>{likesCount.toLocaleString()}</span>
+                        <span className="text-[13px] font-bold">{likesCount.toLocaleString()}</span>
                     </motion.button>
 
-                    <Link to={`/posts/${post._id}`} className="post-action-btn" style={{ padding: '6px 10px' }}>
-                        <HiChatAlt2 style={{ fontSize: 22 }} />
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>{post.commentsCount || 0}</span>
+                    <Link to={`/posts/${post._id}`} className="post-action-btn px-2.5 py-1.5">
+                        <HiChatAlt2 className="text-[22px]" />
+                        <span className="text-[13px] font-bold">{post.commentsCount || 0}</span>
                     </Link>
 
                     <motion.button className="post-action-btn"

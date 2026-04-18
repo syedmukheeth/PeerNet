@@ -100,19 +100,20 @@ export default function Layout() {
         toast((t) => (
             <div onClick={() => { navigate(targetUrl); toast.dismiss(t.id) }} className="flex items-center gap-3 cursor-pointer">
                 <div className="relative flex-shrink-0">
-                    <img src={notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.username || 'User'}&background=6366F1&color=fff`} className="w-10 h-10 rounded-full object-cover" alt="" />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-accent flex items-center justify-center text-[10px] border-2 border-surface">
+                    <img src={notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.username || 'User'}&background=6366F1&color=fff`} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
+                    <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-accent flex items-center justify-center text-[10px] border-2 border-surface shadow-sm">
                         {typeEmoji[notif.type]}
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="m-0 text-[13px] font-bold text-text-1">
-                        {notif.sender?.username} <span className="font-normal text-text-2">{typeText[notif.type]}</span>
+                    <p className="m-0 text-[13.5px] font-bold text-primary">
+                        {notif.sender?.username} <span className="font-medium text-secondary">{typeText[notif.type]}</span>
                     </p>
                 </div>
             </div>
         ), {
-            style: { background: 'var(--surface)', color: 'var(--text-1)', border: '1px solid var(--border-md)', borderRadius: 16 }
+            className: 'glass-toast',
+            style: { background: 'var(--card)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', boxShadow: 'var(--shadow-lg)' }
         })
     }, [navigate])
 
@@ -124,16 +125,17 @@ export default function Layout() {
         toast((t) => (
             <div onClick={() => { navigate(`/messages/${convoId || ''}`); toast.dismiss(t.id) }} className="flex items-center gap-3 cursor-pointer">
                 <div className="relative flex-shrink-0">
-                    <img src={msg.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${senderName}&background=6366F1&color=fff`} className="w-10 h-10 rounded-full object-cover" alt="" />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center text-[9px] border-2 border-surface">💬</div>
+                    <img src={msg.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${senderName}&background=6366F1&color=fff`} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
+                    <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-primary flex items-center justify-center text-[9px] border-2 border-surface shadow-sm">💬</div>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="m-0 text-[13px] font-bold text-text-1">{senderName}</p>
-                    <p className="m-0 text-[12px] text-text-3 truncate">{preview}</p>
+                    <p className="m-0 text-[13.5px] font-bold text-primary">{senderName}</p>
+                    <p className="m-0 text-[12px] text-muted truncate">{preview}</p>
                 </div>
             </div>
         ), {
-            style: { background: 'var(--surface)', color: 'var(--text-1)', border: '1px solid var(--border-md)', borderRadius: 16 }
+            className: 'glass-toast',
+            style: { background: 'var(--card)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', boxShadow: 'var(--shadow-lg)' }
         })
     }, [navigate])
 
@@ -200,7 +202,7 @@ export default function Layout() {
                             {({ isActive }) => (
                                 <>
                                     <span className="ig-icon-wrap relative">
-                                        <Icon className="ig-icon" style={{ opacity: isActive ? 1 : 0.55 }} />
+                                        <Icon className={`ig-icon ${isActive ? 'opacity-100' : 'opacity-60'}`} />
                                         {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
                                         {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
                                     </span>
@@ -211,7 +213,7 @@ export default function Layout() {
                     ))}
                     <button className="ig-link" onClick={() => setShowCreate(true)}>
                         <div className="ig-icon-wrap">
-                            <HiPlusCircle className="ig-icon" style={{ opacity: 0.55 }} />
+                            <HiPlusCircle className="ig-icon opacity-60" />
                         </div>
                         <span className="ig-label">Create</span>
                     </button>
@@ -276,14 +278,14 @@ export default function Layout() {
                 <header className="mobile-top-header">
                     <Link to="/" className="flex items-center gap-2 no-underline">
                         <img src={logoImg} alt="PN" className="w-7 h-7 rounded-lg" />
-                        <span className="text-[18px] font-extrabold" style={{ background: 'var(--logo-gradient)', WebkitBackgroundClip: 'text', color: 'transparent' }}>PeerNet</span>
+                        <span className="text-[18px] font-extrabold logo-gradient-text">PeerNet</span>
                     </Link>
                     <div className="mobile-top-actions">
                         <NavLink to="/notifications" className="relative">
-                            <HiBell size={24} /> {unreadCount > 0 && <span className="mobile-badge bg-error">{unreadCount}</span>}
+                            <HiBell size={24} /> {unreadCount > 0 && <span className="mobile-badge bg-error border-2 border-surface">{unreadCount}</span>}
                         </NavLink>
                         <NavLink to="/messages" className="relative">
-                            <HiChatAlt2 size={24} /> {msgCount > 0 && <span className="mobile-badge bg-accent">{msgCount}</span>}
+                            <HiChatAlt2 size={24} /> {msgCount > 0 && <span className="mobile-badge bg-accent border-2 border-surface">{msgCount}</span>}
                         </NavLink>
                     </div>
                 </header>
@@ -303,7 +305,7 @@ export default function Layout() {
                                 <div className="site-footer__left">
                                     <Link to="/" className="site-footer__brand">
                                         <img src={logoImg} alt="PeerNet" className="site-footer__logo" />
-                                        <span className="peernetLogo" style={{ fontSize: 16 }}>PeerNet</span>
+                                        <span className="peernetLogo text-base">PeerNet</span>
                                     </Link>
                                     <p className="site-footer__tagline">
                                         A professional network built for the next generation.
@@ -353,7 +355,7 @@ export default function Layout() {
                     <NavLink key={to} to={to} end={exact} className={({ isActive }) => isActive ? 'active' : ''}><Icon /></NavLink>
                 ))}
                 <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => isActive ? 'active' : ''}>
-                    <img src={avatarUrl} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
+                    <img src={avatarUrl} alt="" className="w-[26px] h-[26px] rounded-full object-cover" />
                 </NavLink>
             </nav>
 

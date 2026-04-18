@@ -44,53 +44,33 @@ function RightPanel() {
         `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`)
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="flex-col gap-4">
 
             {/* ── Profile mini card ─────────────── */}
-            <div style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                padding: '0 4px', 
-                transition: 'transform 0.2s',
-                cursor: 'pointer',
-                marginBottom: 4
-            }} onClick={() => navigate(`/profile/${user?._id}`)}>
-                <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div 
+                className="flex items-center gap-3 px-1 hover:scale-[1.02] cursor-pointer mb-1 transition-transform"
+                onClick={() => navigate(`/profile/${user?._id}`)}
+            >
+                <div className="relative shrink-0">
                     <img src={myAvatar}
-                        style={{
-                            width: 52, height: 52, borderRadius: '50%',
-                            objectFit: 'cover', display: 'block',
-                            border: '2px solid var(--accent)',
-                            padding: 2
-                        }}
+                        className="w-[52px] h-[52px] rounded-full object-cover border-2 border-accent p-[2px]"
                         alt="" />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: '100%' }}>
-                        <span style={{ 
-                            fontWeight: 800, fontSize: 13.5, color: 'var(--text-1)',
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
-                        }}>
+                <div className="flex-1 truncate">
+                    <div className="flex items-center gap-1 w-full">
+                        <span className="font-extrabold text-[13.5px] text-primary truncate">
                             {user?.username}
                         </span>
-                        {user?.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14, flexShrink: 0 }} />}
+                        {user?.isVerified && <HiBadgeCheck className="text-accent text-[14px] shrink-0" />}
                     </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 500, marginTop: 1, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div className="text-[13px] text-secondary font-medium mt-1 truncate opacity-80">
                         {user?.fullName || 'PeerNet user'}
                     </div>
                 </div>
                 <button
                     onClick={(e) => { e.stopPropagation(); navigate(`/profile/${user?._id}`) }}
-                    className="btn btn-xs"
-                    style={{ 
-                        background: 'var(--btn-glass-hover)', 
-                        color: 'var(--text-1)', 
-                        fontWeight: 700,
-                        borderRadius: 18,
-                        padding: '6px 14px',
-                        border: '1px solid var(--border-md)',
-                        fontSize: 11,
-                        flexShrink: 0
-                    }}>
+                    className="btn btn-xs rounded-full py-1.5 px-3.5 border border-border-md bg-hover font-bold shrink-0"
+                >
                     Switch
                 </button>
             </div>
@@ -98,48 +78,40 @@ function RightPanel() {
             {/* ── Suggested for you ─────────────── */}
             {suggestions.length > 0 && (
                 <div>
-                    <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        marginBottom: 16,
-                    }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-3)' }}>
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-[13px] font-bold text-muted uppercase tracking-wider">
                             Suggested for you
                         </span>
-                        <Link to="/search"
-                            style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textDecoration: 'none' }}>
+                        <Link to="/search" className="text-[12px] font-bold text-primary hover:text-accent transition-colors">
                             See all
                         </Link>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+                    <div className="flex-col gap-4">
                         {suggestions.map(u => {
                             const rawAv = u.avatarUrl ||
                                 `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
                             const av = optimizeAvatarUrl(rawAv)
                             const isFollowed = followed[u._id]
                             return (
-                                <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <Link to={`/profile/${u._id}`} style={{ flexShrink: 0 }}>
-                                        <img src={av}
-                                            style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
-                                            alt="" />
+                                <div key={u._id} className="flex items-center gap-3">
+                                    <Link to={`/profile/${u._id}`} className="shrink-0">
+                                        <img src={av} className="w-10 h-10 rounded-full object-cover" alt="" />
                                     </Link>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <Link to={`/profile/${u._id}`} style={{ textDecoration: 'none', color: 'var(--text-1)' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, fontSize: 13 }}>
+                                    <div className="flex-1 truncate">
+                                        <Link to={`/profile/${u._id}`} className="block text-primary">
+                                            <div className="flex items-center gap-1 font-semibold text-[13px]">
                                                 {u.username}
-                                                {u.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 12 }} />}
+                                                {u.isVerified && <HiBadgeCheck className="text-accent text-[12px]" />}
                                             </div>
-                                            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 1 }}>
+                                            <div className="text-[12px] text-muted mt-0.5">
                                                 Suggested for you
                                             </div>
                                         </Link>
                                     </div>
-                                    <button onClick={() => handleFollow(u)} style={{
-                                        background: 'none', border: 'none', cursor: 'pointer',
-                                        color: isFollowed ? 'var(--text-3)' : 'var(--accent)',
-                                        fontWeight: 700, fontSize: 12, flexShrink: 0,
-                                        transition: 'color 150ms',
-                                    }}>
+                                    <button 
+                                        onClick={() => handleFollow(u)} 
+                                        className={`font-bold text-[12px] shrink-0 transition-colors ${isFollowed ? 'text-muted' : 'text-accent hover:text-accent-hover'}`}
+                                    >
                                         {isFollowed ? 'Following' : 'Follow'}
                                     </button>
                                 </div>
@@ -150,29 +122,17 @@ function RightPanel() {
             )}
 
             {/* ── Footer ───────────────────────── */}
-            <div style={{ paddingLeft: 18, paddingRight: 18, marginTop: 4 }}>
-                <div style={{ 
-                    borderTop: '1px solid var(--border)', 
-                    paddingTop: 16,
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: 6,
-                }}>
+            <div className="px-4 mt-1">
+                <div className="border-t border-border pt-4 flex-col gap-1.5">
                     <a
                         href="https://www.linkedin.com/in/syedmukheeth"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 6,
-                            fontSize: 12.5, color: 'var(--accent)', fontWeight: 800,
-                            textDecoration: 'none', transition: 'filter 0.2s',
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.2)'}
-                        onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
-                        <FaLinkedin style={{ fontSize: 13, color: '#0A66C2' }} />
+                        className="inline-flex items-center gap-1.5 text-[12.5px] text-accent font-extrabold hover:brightness-110 transition-all">
+                        <FaLinkedin className="text-[13px] text-[#0A66C2]" />
                         Syed Mukheeth
                     </a>
-                    <p style={{ fontSize: 10.5, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
+                    <p className="text-[10.5px] text-muted m-0 leading-relaxed">
                         Built with Passion in India · © 2026 PeerNet
                     </p>
                 </div>
@@ -256,7 +216,7 @@ export default function Feed() {
                 {/* ── Feed column ───────────── */}
                 <div className="feed-col">
                     <StoryRail />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20 }}>
+                    <div className="flex-col gap-5 mt-5">
                         {posts.filter(Boolean).map(post => (
                             <PostCard key={post?._id || post?.id} post={post}
                                 onLikeToggle={onLikeToggle}
@@ -265,24 +225,25 @@ export default function Feed() {
                         ))}
                     </div>
                     {loading && posts.length === 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                        <div className="flex-col gap-4">
                             <PostSkeleton />
                             <PostSkeleton />
                             <PostSkeleton />
                         </div>
                     )}
                     {loading && posts.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 10 }}>
+                        <div className="flex-col gap-4 pt-4">
                             <PostSkeleton />
                         </div>
                     )}
                     {!loading && posts.length === 0 && (
-                        <div className="empty-state" style={{ marginTop: 40 }}>
+                        <div className="empty-state">
                             <div className="empty-state-icon">👥</div>
                             <p className="empty-state-title">Your feed is empty</p>
                             <p className="empty-state-desc">Follow people to see their posts here</p>
                         </div>
                     )}
+
                     {hasNextPage && !loading && posts.length > 0 && (
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16, paddingBottom: 32 }}>
                             <motion.button className="btn btn-secondary"

@@ -111,12 +111,14 @@ export default function Profile() {
 
 
     if (loading) return (
-        <div className="flex justify-center items-center" style={{ padding: '80px 0' }}>
-            <div className="spinner" style={{ width: 36, height: 36 }} />
+        <div className="flex justify-center items-center py-20">
+            <div className="spinner w-9 h-9" />
         </div>
     )
     if (!profile) return (
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 60 }}>User not found</p>
+        <div className="empty-state py-20">
+            <p className="empty-state-title">User not found</p>
+        </div>
     )
 
     const avatar = profile.avatarUrl || `https://ui-avatars.com/api/?name=${profile.username}&size=200&background=6366F1&color=fff`
@@ -130,42 +132,17 @@ export default function Profile() {
                 <div className="profile-avatar-col">
                     <div
                         onClick={() => hasStory && setViewerOpen(true)}
-                        style={{
-                            position: 'relative',
-                            cursor: hasStory ? 'pointer' : 'default',
-                            display: 'inline-block',
-                        }}
+                        className={`relative ${hasStory ? 'cursor-pointer' : 'cursor-default'} inline-block`}
                     >
                         {/* Gradient story ring — only shown when user has stories */}
                         {hasStory && (
-                            <div style={{
-                                position: 'absolute',
-                                inset: -3,
-                                borderRadius: '50%',
-                                background: 'linear-gradient(215deg, #6559CA 0%, #C13584 25%, #E1306C 50%, #F77737 75%, #FCAF45 100%)',
-                                animation: 'rotateBorder 3s linear infinite',
-                                padding: 2,
-                                zIndex: 0,
-                            }} />
+                            <div className="absolute -inset-[3px] rounded-full bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45] animate-[rotateBorder_3s_linear_infinite] p-[2px] z-0" />
                         )}
-                        <div className={hasStory ? '' : 'profile-avatar-ring'} style={{
-                            position: 'relative',
-                            zIndex: 1,
-                            borderRadius: '50%',
-                            background: 'var(--bg)',
-                            padding: hasStory ? 3 : 0,
-                            display: 'inline-block',
-                        }}>
+                        <div className={`${hasStory ? '' : 'profile-avatar-ring'} relative z-10 rounded-full bg-bg ${hasStory ? 'p-[3px]' : ''} inline-block`}>
                             <img
                                 src={avatar}
                                 alt={profile.username}
-                                style={{
-                                    width: hasStory ? 100 : undefined,
-                                    height: hasStory ? 100 : undefined,
-                                    borderRadius: '50%',
-                                    objectFit: 'cover',
-                                    display: 'block',
-                                }}
+                                className={`${hasStory ? 'w-[100px] h-[100px]' : ''} rounded-full object-cover block`}
                             />
                         </div>
                     </div>
@@ -177,9 +154,9 @@ export default function Profile() {
                     {/* Row 1: username + buttons */}
                     <div className="profile-username-row">
                         <h1>{profile.username}</h1>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div className="flex items-center gap-1.5">
                             {profile.isVerified && (
-                                <HiBadgeCheck style={{ fontSize: 18, color: 'var(--accent)', flexShrink: 0 }} title="Verified" />
+                                <HiBadgeCheck className="text-[18px] text-accent shrink-0" title="Verified" />
                             )}
                         </div>
                         {isMe ? (
@@ -187,22 +164,20 @@ export default function Profile() {
                         ) : (
                             <>
                                 <motion.button
-                                    className={`btn btn-sm ${following ? 'btn-secondary' : 'btn-primary'}`}
+                                    className={`btn btn-sm min-w-[100px] ${following ? 'btn-secondary' : 'btn-primary'}`}
                                     onClick={handleFollow}
-                                    style={{ minWidth: 100 }}
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}>
                                     {following ? 'Following' : 'Follow'}
                                 </motion.button>
                                 <motion.button
-                                    className="btn btn-secondary btn-sm"
+                                    className="btn btn-secondary btn-sm flex items-center gap-1.5"
                                     onClick={handleMessage}
                                     disabled={messaging}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}>
                                     {messaging
-                                        ? <span className="spinner" style={{ width: 14, height: 14 }} />
+                                        ? <span className="spinner w-3.5 h-3.5" />
                                         : <><HiChatAlt2 /> Message</>
                                     }
                                 </motion.button>
@@ -229,11 +204,11 @@ export default function Profile() {
                             <span className="profile-stat-num">{posts.length}</span>
                             <span className="profile-stat-label">posts</span>
                         </div>
-                        <div className="profile-stat" onClick={() => setShowFollowers(true)} style={{ cursor: 'pointer' }}>
+                        <div className="profile-stat cursor-pointer" onClick={() => setShowFollowers(true)}>
                             <span className="profile-stat-num">{profile.followersCount || 0}</span>
                             <span className="profile-stat-label">followers</span>
                         </div>
-                        <div className="profile-stat" onClick={() => setShowFollowing(true)} style={{ cursor: 'pointer' }}>
+                        <div className="profile-stat cursor-pointer" onClick={() => setShowFollowing(true)}>
                             <span className="profile-stat-num">{profile.followingCount || 0}</span>
                             <span className="profile-stat-label">following</span>
                         </div>
@@ -292,8 +267,8 @@ export default function Profile() {
                 }
 
                 if (isLoading) return (
-                    <div className="flex justify-center" style={{ padding: 60 }}>
-                        <div className="spinner" style={{ width: 36, height: 36 }} />
+                    <div className="flex justify-center p-14">
+                        <div className="spinner w-9 h-9" />
                     </div>
                 )
 
@@ -319,7 +294,7 @@ export default function Profile() {
                             ))}
                         </div>
                         {displayPosts.length === 0 && (
-                            <div className="empty-state" style={{ paddingTop: 60 }}>
+                            <div className="empty-state pt-14">
                                 <div className="empty-state-icon">{emptyIcon}</div>
                                 <p className="empty-state-title">{emptyTitle}</p>
                                 {emptyDesc && <p className="empty-state-desc">{emptyDesc}</p>}
