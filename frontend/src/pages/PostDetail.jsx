@@ -289,11 +289,11 @@ export default function PostDetail() {
 
     if (notFound || !post) {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center', gap: 16 }}>
-                <div style={{ fontSize: 64 }}>🕵️‍♂️</div>
-                <h2 style={{ color: 'var(--text-1)' }}>Content Not Found</h2>
-                <p style={{ color: 'var(--text-3)', maxWidth: 300 }}>This content might have been deleted or the link is incorrect.</p>
-                <Link to="/" className="btn btn-primary" style={{ padding: '10px 24px', borderRadius: 24, fontWeight: 700 }}>
+            <div className="empty-state-wrap">
+                <div className="empty-state-icon">🕵️‍♂️</div>
+                <h2 className="t-h2">Content Not Found</h2>
+                <p className="t-body text-muted max-w-[300px]">This content might have been deleted or the link is incorrect.</p>
+                <Link to="/" className="btn btn-primary btn-premium px-6 py-2.5">
                     Go Home
                 </Link>
             </div>
@@ -307,9 +307,9 @@ export default function PostDetail() {
     return (
         <>
             {/* Back header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div className="l-cluster gap-3 mb-4">
                 <button onClick={() => navigate(-1)} className="btn btn-ghost btn-icon"><HiArrowLeft /></button>
-                <span style={{ fontWeight: 700, fontSize: 17 }}>Post</span>
+                <span className="t-h3 font-bold">Post</span>
             </div>
 
             {/* Instagram split-view card */}
@@ -318,8 +318,8 @@ export default function PostDetail() {
                 {/* ── LEFT: media ──────────────────────────── */}
                 <div className="post-detail-media">
                     {post.mediaType === 'video'
-                        ? <video src={post.mediaUrl} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        : <img src={post.mediaUrl} alt={post.caption} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                        ? <video src={post.mediaUrl} controls className="post-detail-video" />
+                        : <img src={post.mediaUrl} alt={post.caption} className="post-detail-img" />
                     }
                 </div>
 
@@ -327,25 +327,22 @@ export default function PostDetail() {
                 <div className="post-detail-info">
 
                     {/* Header */}
-                    <div style={{
-                        display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
-                        borderBottom: '1px solid var(--border)', flexShrink: 0,
-                    }}>
+                    <div className="post-detail-header">
                         <Link to={`/profile/${author._id}`}>
-                            <img src={avatar} style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', display: 'block' }} alt="" />
+                            <img src={avatar} className="post-detail-avatar" alt="" />
                         </Link>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 700, fontSize: 14 }}>
-                                <Link to={`/profile/${author._id}`} style={{ color: 'var(--text-1)', textDecoration: 'none' }}>
+                        <div className="flex-1">
+                            <div className="l-cluster gap-1 font-bold text-[14px]">
+                                <Link to={`/profile/${author._id}`} className="text-primary no-underline">
                                     {author.username}
                                 </Link>
-                                {author.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 13 }} />}
+                                {author.isVerified && <HiBadgeCheck className="text-accent text-[13px]" />}
                             </div>
-                            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{timeago(post.createdAt)}</div>
+                            <div className="text-[12px] text-muted">{timeago(post.createdAt)}</div>
                         </div>
 
                         {/* ··· menu */}
-                        <div style={{ position: 'relative' }} ref={menuRef}>
+                        <div className="relative" ref={menuRef}>
                             <button className="btn btn-ghost btn-icon" onClick={() => setMenuOpen(o => !o)}>
                                 <HiDotsHorizontal />
                             </button>
@@ -389,17 +386,17 @@ export default function PostDetail() {
 
                     {/* Caption */}
                     {post.caption && (
-                        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                            <img src={avatar} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} alt="" />
-                            <div style={{ fontSize: 14, lineHeight: 1.5 }}>
-                                <strong style={{ marginRight: 6 }}>{author.username}</strong>
+                        <div className="post-detail-caption">
+                            <img src={avatar} className="post-detail-caption-avatar" alt="" />
+                            <div className="text-[14px] leading-6">
+                                <strong className="mr-1.5">{author.username}</strong>
                                 {post.caption}
                             </div>
                         </div>
                     )}
 
                     {/* Comments list */}
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '10px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div className="post-detail-comments">
                         {comments.length === 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-3)', textAlign: 'center', gap: 8 }}>
                                 <span style={{ fontSize: 32 }}>💬</span>
@@ -517,17 +514,17 @@ export default function PostDetail() {
                     </div>
 
                     {/* Action bar */}
-                    <div style={{ borderTop: '1px solid var(--border)', padding: '10px 16px', flexShrink: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
+                    <div className="post-detail-actions-wrap">
+                        <div className="l-cluster gap-3.5 mb-2">
                             <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={handleLike} whileTap={{ scale: 0.85 }}>
-                                {liked ? <HiHeart style={{ fontSize: 24 }} /> : <HiOutlineHeart style={{ fontSize: 24 }} />}
+                                {liked ? <HiHeart className="text-[24px]" /> : <HiOutlineHeart className="text-[24px]" />}
                             </motion.button>
-                            <div style={{ position: 'relative' }} ref={emojiRef}>
+                            <div className="relative" ref={emojiRef}>
                                 <button className="post-action-btn" onClick={() => setShowEmojiPicker(p => !p)}>
-                                    <HiEmojiHappy style={{ fontSize: 22 }} />
+                                    <HiEmojiHappy className="text-[22px]" />
                                 </button>
                                 {showEmojiPicker && (
-                                    <div style={{ position: 'absolute', bottom: '100%', left: 0, zIndex: 100, marginBottom: 8 }}>
+                                    <div className="emoji-picker-popover">
                                         <EmojiPicker 
                                             theme="dark"
                                             onEmojiClick={(e) => setBody(prev => prev + e.emoji)}
@@ -536,25 +533,25 @@ export default function PostDetail() {
                                 )}
                             </div>
                             <button className="post-action-btn" onClick={handleShare}>
-                                <HiShare style={{ fontSize: 22 }} />
+                                <HiShare className="text-[22px]" />
                             </button>
-                            <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`} onClick={handleSave} whileTap={{ scale: 0.85 }} style={{ marginLeft: 'auto' }}>
-                                {saved ? <HiBookmark style={{ fontSize: 22 }} /> : <HiOutlineBookmark style={{ fontSize: 22 }} />}
+                            <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`} onClick={handleSave} whileTap={{ scale: 0.85 }} className="ml-auto">
+                                {saved ? <HiBookmark className="text-[22px]" /> : <HiOutlineBookmark className="text-[22px]" />}
                             </motion.button>
                         </div>
-                        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{likesCount.toLocaleString()} likes</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 10 }}>{timeago(post.createdAt)}</div>
+                        <div className="font-bold text-[13px] mb-1">{likesCount.toLocaleString()} likes</div>
+                        <div className="text-[11px] text-muted mb-2.5">{timeago(post.createdAt)}</div>
 
                         {/* Comment input */}
-                        <form onSubmit={handleComment} style={{ display: 'flex', alignItems: 'center', gap: 10, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+                        <form onSubmit={handleComment} className="post-detail-comment-form">
                             <img src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`}
-                                style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt="" />
-                            <div style={{ flex: 1, position: 'relative' }}>
+                                className="post-detail-form-avatar" alt="" />
+                            <div className="flex-1 relative">
                                 {replyingTo && (
-                                    <div style={{ position: 'absolute', bottom: '100%', left: 0, width: '100%', paddingBottom: 6 }}>
+                                    <div className="post-detail-reply-badge">
                                         {/* AI Suggestions Chips */}
                                         {suggestions.length > 0 && (
-                                            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'none' }} className="no-scrollbar">
+                                            <div className="ai-suggestion-row no-scrollbar">
                                                 {suggestions.map((s, idx) => (
                                                     <motion.button
                                                         key={idx}
@@ -563,18 +560,7 @@ export default function PostDetail() {
                                                         transition={{ delay: idx * 0.1 }}
                                                         onClick={() => setBody(s)}
                                                         type="button"
-                                                        style={{
-                                                            whiteSpace: 'nowrap',
-                                                            padding: '6px 14px',
-                                                            borderRadius: 20,
-                                                            background: 'var(--surface)',
-                                                            border: '1px solid var(--border-md)',
-                                                            color: 'var(--text-2)',
-                                                            fontSize: 12,
-                                                            fontWeight: 600,
-                                                            cursor: 'pointer',
-                                                            boxShadow: 'var(--shadow-sm)',
-                                                        }}
+                                                        className="ai-suggestion-chip"
                                                         whileHover={{ background: 'var(--hover)', color: 'var(--text-1)', scale: 1.02 }}
                                                         whileTap={{ scale: 0.98 }}
                                                     >
@@ -584,11 +570,11 @@ export default function PostDetail() {
                                             </div>
                                         )}
                                         {loadingSuggestions && (
-                                            <div style={{ fontSize: 10, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                                                <div className="spinner" style={{ width: 10, height: 10 }} /> Thinking of replies...
+                                            <div className="ai-thinking-label">
+                                                <div className="spinner w-[10px] h-[10px]" /> Thinking of replies...
                                             </div>
                                         )}
-                                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                                        <div className="text-[11px] text-muted">
                                             Replying to <strong>{replyingTo.author?.username}</strong>
                                         </div>
                                     </div>
@@ -597,13 +583,10 @@ export default function PostDetail() {
                                     ref={inputRef}
                                     value={body} onChange={e => setBody(e.target.value)}
                                     placeholder={replyingTo ? 'Write a reply...' : 'Add a comment…'}
-                                    style={{
-                                        width: '100%', background: 'none', border: 'none', outline: 'none',
-                                        color: 'var(--text-1)', fontSize: 14,
-                                    }} />
+                                    className="post-detail-input" />
                             </div>
                             {body.trim() && (
-                                <button type="submit" disabled={isScanning} style={{ background: 'none', border: 'none', cursor: isScanning ? 'default' : 'pointer', color: isScanning ? 'var(--text-3)' : 'var(--accent)', fontWeight: 700, fontSize: 13 }}>
+                                <button type="submit" disabled={isScanning} className={`post-detail-submit ${isScanning ? 'is-scanning' : ''}`}>
                                     {isScanning ? 'AI Scanning...' : 'Post'}
                                 </button>
                             )}

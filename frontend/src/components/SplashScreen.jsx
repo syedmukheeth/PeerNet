@@ -50,12 +50,13 @@ export default function SplashScreen({ onDone }) {
 
                     {/* Tagline */}
                     <motion.p
-                        className="splash-tagline"
+                        className="splash-tagline t-h3"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.7, duration: 0.4 }}
+                        style={{ letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7 }}
                     >
-                        Connect with your peers
+                        Professional Network for Creators
                     </motion.p>
 
                     {/* Bottom Meta logo (Instagram-style) */}

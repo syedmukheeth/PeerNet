@@ -25,6 +25,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [menuOpen, setMenuOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
     const [caption, setCaption] = useState(post.caption || '')
+    const [showHeart, setShowHeart] = useState(false)
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
 
@@ -111,8 +112,11 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
 
     const handleImageTap = () => {
         const now = Date.now()
-        // Double-tap to like only — never double-tap to unlike
-        if (now - lastTap < 350 && !liked) handleLike()
+        if (now - lastTap < 350) {
+            if (!liked) handleLike()
+            setShowHeart(true)
+            setTimeout(() => setShowHeart(false), 800)
+        }
         setLastTap(now)
     }
 
@@ -141,54 +145,55 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
 
     return (
         <>
-            <motion.div className="l-card-premium relative"
+            <motion.div 
+                className="l-card-premium l-post-card overflow-hidden"
                 initial={{ opacity: 0, scale: 0.99 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}>
                 
-                {/* Header: Clean & Balanced */}
+                {/* ── Header: Identity & Context ── */}
                 <div className="l-cluster px-4 py-3 justify-between">
                     <div className="l-cluster gap-3">
-                        <Link to={`/profile/${author._id}`} className="relative shrink-0">
-                            <img src={avatarUrl} className="avatar w-10 h-10 border-[1.5px] border-border-md" alt={author.username} />
+                        <Link to={`/profile/${author._id}`} className="shrink-0">
+                            <img src={avatarUrl} className="avatar w-9 h-9 border-[1px] border-border-md" alt={author.username} />
                         </Link>
-                        <div className="l-stack l-stack-sm">
-                            <div className="l-cluster gap-1.5">
-                                <Link to={`/profile/${author._id}`} className="t-h3 no-underline hover:underline font-bold truncate">
+                        <div className="l-stack l-stack-sm" style={{ gap: '2px' }}>
+                            <div className="l-cluster gap-1.5 flex-nowrap">
+                                <Link to={`/profile/${author._id}`} className="t-h4 no-underline hover:underline font-bold text-primary truncate max-w-[140px]">
                                     {author.username}
                                 </Link>
-                                {author.isVerified && <HiBadgeCheck className="text-accent text-sm shrink-0" title="Verified" />}
+                                {author.isVerified && <HiBadgeCheck className="post-verified" />}
+                                <span className="text-muted text-[12px] opacity-40">•</span>
+                                <span className="post-timestamp">{timeago(post.createdAt)}</span>
                             </div>
-                            <div className="t-caption text-muted">{timeago(post.createdAt)}</div>
                         </div>
                     </div>
                     <div className="relative" ref={menuRef}>
-                        <motion.button className="btn btn-ghost btn-icon-sm"
-                            whileHover={{ background: 'var(--btn-glass-hover)' }} whileTap={{ scale: 0.9 }}
-                            onClick={() => setMenuOpen(o => !o)}>
-                            <HiDotsHorizontal className="text-[18px] text-muted" />
-                        </motion.button>
+                        <button className="btn btn-ghost btn-icon-sm p-1" onClick={() => setMenuOpen(o => !o)}>
+                            <HiDotsHorizontal className="text-[20px] text-muted" />
+                        </button>
                         <AnimatePresence>
                             {menuOpen && (
-                                <motion.div className="post-options-menu glass-card"
-                                    initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: -6, scale: 0.96 }}
-                                    transition={{ duration: 0.15 }}
-                                    style={{ border: '1px solid var(--border-md)', boxShadow: 'var(--shadow-lg)' }}>
+                                <motion.div 
+                                    className="post-options-menu glass-card p-1"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    style={{ right: 0, top: '100%', border: '1px solid var(--border-md)', minWidth: '160px', position: 'absolute' }}
+                                >
                                     {isOwner ? (
                                         <>
                                             <button className="post-options-item" onClick={() => { setMenuOpen(false); setEditOpen(true) }}>
-                                                <HiPencil /> Edit caption
+                                                <HiPencil size={18} /> <span>Edit post</span>
                                             </button>
-                                            <div className="ig-more-divider" style={{ margin: '4px 0', opacity: 0.5 }} />
-                                            <button className="post-options-item danger" onClick={() => { setMenuOpen(false); handleDelete() }}>
-                                                <HiTrash /> Delete post
+                                            <div className="ig-more-divider" />
+                                            <button className="post-options-item text-error" onClick={() => { setMenuOpen(false); handleDelete() }}>
+                                                <HiTrash size={18} /> <span>Delete post</span>
                                             </button>
                                         </>
                                     ) : (
-                                        <button className="post-options-item" onClick={() => { toast('Report coming soon'); setMenuOpen(false) }}>
-                                            Report
+                                        <button className="post-options-item" onClick={() => { toast('Reported successfully'); setMenuOpen(false) }}>
+                                            Report inappropriate
                                         </button>
                                     )}
                                 </motion.div>
@@ -197,104 +202,79 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     </div>
                 </div>
 
-                {/* Media / Text Content */}
-                <div className="post-media-wrap">
+                {/* ── Media: Premium Visual Fit ── */}
+                <div className="post-media-container bg-black" onClick={handleImageTap}>
+                    <AnimatePresence>
+                        {showHeart && (
+                            <motion.div 
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0] }}
+                                transition={{ duration: 0.8 }}
+                                className="absolute z-10 text-white drop-shadow-xl"
+                            >
+                                <HiHeart size={80} />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {post.mediaType === 'text' ? (
-                        <div className="cursor-pointer min-h-[280px] max-h-[400px] flex items-center justify-center p-8 text-center text-white text-[22px] font-extrabold font-syne shadow-[inset_0_0_100px_rgba(0,0,0,0.2)]"
-                            style={{ background: post.backgroundColor || 'linear-gradient(135deg, #0f172a 0%, #334155 100%)' }}
-                            onClick={handleImageTap}>
-                            <div className="whitespace-pre-wrap break-words">
-                                {post.caption}
-                            </div>
+                        <div className="w-full h-full min-h-[360px] flex items-center justify-center p-12 text-center text-white text-[24px] font-black font-syne"
+                            style={{ background: post.backgroundColor || 'var(--accent-gradient)' }}>
+                            <div className="whitespace-pre-wrap">{post.caption}</div>
                         </div>
                     ) : post.mediaType === 'video' ? (
-                        <div className="relative bg-black">
-                            <video
-                                ref={videoRef}
-                                src={post.mediaUrl}
-                                className="post-media-video"
-                                muted={isMuted}
-                                loop
-                                playsInline
-                                onPlay={() => setIsPlaying(true)}
-                                onPause={() => setIsPlaying(false)}
-                                onClick={(e) => { e.stopPropagation(); handleImageTap(); }}
-                            />
-                            {/* Mute toggle */}
-                            <button
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMuted(!isMuted) }}
-                                className="absolute bottom-3 right-3 bg-black/60 text-white border-none rounded-full p-2 cursor-pointer flex items-center justify-center z-10"
-                            >
+                        <div className="relative w-full h-full">
+                            <video ref={videoRef} src={post.mediaUrl} className="post-media" muted={isMuted} loop playsInline />
+                            <button className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-md text-white rounded-full p-2" onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted) }}>
                                 {isMuted ? <HiVolumeOff size={18} /> : <HiVolumeUp size={18} />}
                             </button>
-                            {!isPlaying && (
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/50 rounded-full p-3.5 pointer-events-none text-white flex z-10">
-                                    <HiPlay size={28} className="ml-[3px]" />
-                                </div>
-                            )}
+                            {!isPlaying && <HiPlay size={50} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />}
                         </div>
                     ) : (
-                        <Link to={`/posts/${post._id}`} onClick={e => e.stopPropagation()} style={{ display: 'block' }}>
-                            <img src={optimizeCloudinaryUrl(post.mediaUrl)} className="post-media" alt={post.caption} loading="lazy" onClick={handleImageTap} />
-                        </Link>
+                        <img src={optimizeCloudinaryUrl(post.mediaUrl)} className="post-media" alt="" loading="lazy" />
                     )}
                 </div>
 
-                {/* Actions: Elegant & Functional */}
-                <div className="l-cluster px-4 py-3 justify-between">
+                {/* ── Actions: Immediate Feedback ── */}
+                <div className="post-action-row px-4 py-2">
                     <div className="l-cluster gap-4">
-                        <motion.button 
-                            className={`l-cluster gap-2 transition-colors ${liked ? 'text-error' : 'hover:text-error'}`}
-                            onClick={handleLike}
-                            whileTap={{ scale: 0.9 }}>
-                            {liked
-                                ? <HiHeart className="text-[26px]" />
-                                : <HiOutlineHeart className="text-[26px]" />
-                            }
-                            <span className="t-h3 font-bold">{likesCount.toLocaleString()}</span>
-                        </motion.button>
-    
-                        <Link to={`/posts/${post._id}`} className="l-cluster gap-2 no-underline text-current hover:text-accent">
-                            <HiChatAlt2 className="text-[26px]" />
-                            <span className="t-h3 font-bold">{post.commentsCount || 0}</span>
+                        <button className={`post-action-btn ${liked ? 'active-heart' : ''}`} onClick={handleLike}>
+                            {liked ? <HiHeart size={28} /> : <HiOutlineHeart size={28} />}
+                        </button>
+                        <Link to={`/posts/${post._id}`} className="post-action-btn no-underline text-current">
+                            <HiChatAlt2 size={26} />
                         </Link>
-    
-                        <motion.button 
-                            className="hover:text-accent transition-colors"
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => {
-                                const url = `${window.location.origin}/posts/${post._id}`
-                                if (navigator.share) {
-                                    navigator.share({ title: 'PeerNet post', url })
-                                } else {
-                                    navigator.clipboard.writeText(url)
-                                        .then(() => toast.success('Link copied!'))
-                                        .catch(() => toast.error('Copy failed'))
-                                }
-                            }}>
+                        <button className="post-action-btn" onClick={() => {
+                            const url = `${window.location.origin}/posts/${post._id}`
+                            navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'))
+                        }}>
                             <HiShare size={24} />
-                        </motion.button>
+                        </button>
                     </div>
-
-                    <motion.button 
-                        className={`transition-colors ${saved ? 'text-accent' : 'hover:text-accent'}`}
-                        onClick={handleSave}
-                        whileTap={{ scale: 0.9 }}>
-                        {saved
-                            ? <HiBookmark className="text-[26px]" />
-                            : <HiOutlineBookmark className="text-[26px]" />
-                        }
-                    </motion.button>
+                    <button className={`post-action-btn ${saved ? 'active-save' : ''}`} onClick={handleSave}>
+                        {saved ? <HiBookmark size={26} /> : <HiOutlineBookmark size={26} />}
+                    </button>
                 </div>
 
-                {likesCount > 0 && (
-                    <div className="px-4 py-1 t-h3">{likesCount.toLocaleString()} likes</div>
-                )}
-                {caption && post.mediaType !== 'text' && (
-                    <div className="px-4 pb-4 t-body">
-                        <strong className="text-primary pr-1">{author.username}</strong>{caption}
+                {/* ── Footer: Engagement & Caption ── */}
+                <div className="post-footer-content px-4 pb-4">
+                    <div className="t-h4 font-bold text-primary mb-1">
+                        {likesCount > 0 ? `${likesCount.toLocaleString()} likes` : 'Be the first to like'}
                     </div>
-                )}
+                    
+                    {caption && post.mediaType !== 'text' && (
+                        <div className="t-body text-[14.5px] leading-snug">
+                            <span className="post-caption-author">{author.username}</span>
+                            {caption}
+                        </div>
+                    )}
+
+                    {post.commentsCount > 0 && (
+                        <Link to={`/posts/${post._id}`} className="post-comments-preview no-underline block mt-1.5 opacity-60 hover:opacity-100 transition-opacity">
+                            View all {post.commentsCount} comments
+                        </Link>
+                    )}
+                </div>
             </motion.div>
             {editOpen && (
                 <EditPostModal

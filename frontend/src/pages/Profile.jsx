@@ -116,8 +116,9 @@ export default function Profile() {
         </div>
     )
     if (!profile) return (
-        <div className="empty-state py-20">
-            <p className="empty-state-title">User not found</p>
+        <div className="empty-state-wrap">
+            <div className="empty-state-icon">🕵️‍♂️</div>
+            <h2 className="t-h2">User not found</h2>
         </div>
     )
 
@@ -188,9 +189,9 @@ export default function Profile() {
                     {/* Admin Dashboard Sidebar — Only for admins viewing others */}
                     {me?.role === 'admin' && !isMe && (
                         <div className="admin-profile-dashboard">
-                            <p className="admin-dashboard-title">Admin Controls</p>
-                            <div className="admin-dashboard-actions">
-                                <button className={`btn btn-sm ${profile.isVerified ? 'btn-secondary' : 'btn-primary'}`} 
+                            <p className="font-bold text-[11px] uppercase tracking-wider text-accent mb-3">Admin Governance</p>
+                            <div className="l-cluster gap-2">
+                                <button className={`btn btn-sm btn-premium ${profile.isVerified ? 'btn-secondary' : 'btn-primary'}`} 
                                     onClick={handleToggleVerify}>
                                     {profile.isVerified ? 'Unverify User' : 'Verify User'}
                                 </button>
@@ -294,10 +295,10 @@ export default function Profile() {
                             ))}
                         </div>
                         {displayPosts.length === 0 && (
-                            <div className="empty-state pt-14">
+                            <div className="empty-state-wrap pb-20">
                                 <div className="empty-state-icon">{emptyIcon}</div>
-                                <p className="empty-state-title">{emptyTitle}</p>
-                                {emptyDesc && <p className="empty-state-desc">{emptyDesc}</p>}
+                                <h2 className="t-h2">{emptyTitle}</h2>
+                                {emptyDesc && <p className="t-body text-muted max-w-[280px] mx-auto">{emptyDesc}</p>}
                             </div>
                         )}
                     </>

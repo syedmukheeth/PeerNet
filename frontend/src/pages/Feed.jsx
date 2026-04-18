@@ -240,11 +240,24 @@ export default function Feed() {
                     )}
 
                     {!loading && posts.length === 0 && (
-                        <div className="empty-state l-card-premium p-12 text-center">
-                            <div className="empty-state-icon mb-4">👥</div>
-                            <p className="t-h2 mb-2">Your feed is empty</p>
-                            <p className="t-body text-muted">Follow people to see their posts here</p>
-                        </div>
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="empty-state-premium l-card-premium p-16 text-center"
+                        >
+                            <div className="empty-state-visual mb-6">
+                                <div className="visual-circle">
+                                    <span className="text-4xl text-accent">✨</span>
+                                </div>
+                            </div>
+                            <h2 className="t-h2 mb-2 font-bold">Your feed is just beginning</h2>
+                            <p className="t-body text-muted mb-8 max-w-sm mx-auto">
+                                Follow creators and join communities to see the best of PeerNet right here.
+                            </p>
+                            <Link to="/search" className="btn btn-primary px-8 py-3 no-underline inline-flex items-center gap-2">
+                                Discover People ↗
+                            </Link>
+                        </motion.div>
                     )}
 
                     {hasNextPage && !loading && posts.length > 0 && (

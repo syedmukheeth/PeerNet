@@ -189,6 +189,7 @@ export default function Layout() {
     return (
         <div className="app-layout">
             <aside className="sidebar">
+                {/* Top: Branding */}
                 <div className="sidebar-logo-row">
                     <Link to="/" className="sidebar-brand">
                         <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
@@ -196,80 +197,91 @@ export default function Layout() {
                     </Link>
                 </div>
 
+                {/* Middle: Main Navigation */}
                 <nav className="sidebar-nav">
                     {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
                         <NavLink key={to} to={to} end={exact} className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
                             {({ isActive }) => (
                                 <>
-                                    <span className="ig-icon-wrap relative">
-                                        <Icon className={`ig-icon ${isActive ? 'opacity-100' : 'opacity-60'}`} />
+                                    <div className="ig-icon-wrap">
+                                        <Icon className="ig-icon" />
                                         {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
                                         {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
-                                    </span>
-                                    <span className="t-h3">{label}</span>
+                                    </div>
+                                    <span className="ig-label">{label}</span>
                                 </>
                             )}
                         </NavLink>
                     ))}
+                    
                     <button className="ig-link" onClick={() => setShowCreate(true)}>
                         <div className="ig-icon-wrap">
-                            <HiPlusCircle className="ig-icon opacity-60" />
+                            <HiPlusCircle className="ig-icon" />
                         </div>
-                        <span className="t-h3">Create</span>
+                        <span className="ig-label">Create</span>
                     </button>
-                    <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                        <div className="ig-icon-wrap">
-                            <img src={avatarUrl} className="ig-avatar" alt="" />
-                        </div>
-                        <span className="t-h3">Profile</span>
-                    </NavLink>
 
                     {user?.role === 'admin' && (
                         <NavLink to="/admin" className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
                             <div className="ig-icon-wrap">
                                 <HiShieldCheck className="ig-icon text-accent" />
                             </div>
-                            <span className="t-h3">Admin Console</span>
+                            <span className="ig-label">Admin Console</span>
                         </NavLink>
                     )}
                 </nav>
 
-                <div className="sidebar-more-wrap" ref={moreRef}>
-                    <AnimatePresence>
-                        {showMore && (
-                            <motion.div 
-                                className="ig-more-popup" 
-                                initial={{ opacity: 0, y: 12, scale: 0.95 }} 
-                                animate={{ opacity: 1, y: 0, scale: 1 }} 
-                                exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                            >
-                                <button className="ig-more-item" onClick={() => { document.querySelector('.theme-toggle')?.click(); setShowMore(false) }}>
-                                    {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
-                                    <span>Switch appearance</span>
-                                </button>
-                                <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
-                                    <HiCog size={20} /> <span>Settings</span>
-                                </NavLink>
-                                <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
-                                    <HiSwitchHorizontal size={20} /> <span>Switch accounts</span>
-                                </button>
-                                <div className="ig-more-divider" />
-                                <button className="ig-more-item text-error" onClick={handleLogout}>
-                                    <HiLogout size={20} /> <span>Log out</span>
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                    <button 
-                        className={`ig-link ${showMore ? 'ig-link--active' : ''}`} 
-                        onClick={() => setShowMore(!showMore)}
+                {/* Bottom: Profile & Settings */}
+                <div className="sidebar-footer">
+                    {/* Profile Mini Card */}
+                    <div 
+                        className="sidebar-profile-card"
+                        onClick={() => navigate(`/profile/${user?._id}`)}
                     >
-                        <div className="ig-icon-wrap">
-                            <HiMenu className="ig-icon" />
+                        <img src={avatarUrl} className="profile-card-avatar" alt="" />
+                        <div className="profile-card-info">
+                            <span className="profile-card-name">{user?.username}</span>
+                            <span className="profile-card-role">{user?.role === 'admin' ? 'Super Admin' : 'Creator'}</span>
                         </div>
-                        <span className="ig-label">More</span>
-                    </button>
+                    </div>
+
+                    <div className="sidebar-more-wrap" ref={moreRef}>
+                        <AnimatePresence>
+                            {showMore && (
+                                <motion.div 
+                                    className="ig-more-popup" 
+                                    initial={{ opacity: 0, y: 12, scale: 0.95 }} 
+                                    animate={{ opacity: 1, y: 0, scale: 1 }} 
+                                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <button className="ig-more-item" onClick={() => { document.querySelector('.theme-toggle')?.click(); setShowMore(false) }}>
+                                        {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
+                                        <span>Appearance</span>
+                                    </button>
+                                    <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                        <HiCog size={20} /> <span>Settings</span>
+                                    </NavLink>
+                                    <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
+                                        <HiSwitchHorizontal size={20} /> <span>Accounts</span>
+                                    </button>
+                                    <div className="ig-more-divider" />
+                                    <button className="ig-more-item text-error" onClick={handleLogout}>
+                                        <HiLogout size={20} /> <span>Log out</span>
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        <button 
+                            className={`ig-link ${showMore ? 'ig-link--active' : ''}`} 
+                            onClick={() => setShowMore(!showMore)}
+                        >
+                            <div className="ig-icon-wrap">
+                                <HiMenu className="ig-icon" />
+                            </div>
+                            <span className="ig-label">More</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
 
@@ -294,7 +306,16 @@ export default function Layout() {
                     className={`layout-container ${(!['/messages', '/dscrolls'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
                     <AnimatePresence mode="wait">
-                        <Outlet />
+                        <motion.div
+                            key={location.pathname}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            className="page-transition-wrapper"
+                        >
+                            <Outlet />
+                        </motion.div>
                     </AnimatePresence>
 
                     {/* Hide Footer on Messages and Dscrolls pages for app-screen style */}
