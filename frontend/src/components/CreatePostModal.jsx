@@ -177,23 +177,21 @@ export default function CreatePostModal({ onClose }) {
                 >
                     {/* Header */}
                     <header className="create-post-header">
-                        <div className="creative-tabs" style={{ margin: 0, padding: 4 }}>
+                        <div className="creative-tabs m-0 p-1">
                             <div 
-                                className={`creative-tab ${!isTextMode ? 'active' : ''}`}
+                                className={`creative-tab ${!isTextMode ? 'active' : ''} t-h3 px-4 py-2`}
                                 onClick={() => setIsTextMode(false)}
-                                style={{ padding: '8px 16px', fontSize: 13 }}
                             >
                                 <HiPhotograph /> Media
                             </div>
                             <div 
-                                className={`creative-tab ${isTextMode ? 'active' : ''}`}
+                                className={`creative-tab ${isTextMode ? 'active' : ''} t-h3 px-4 py-2`}
                                 onClick={() => setIsTextMode(true)}
-                                style={{ padding: '8px 16px', fontSize: 13 }}
                             >
                                 <HiPencilAlt /> Status
                             </div>
                         </div>
-                        <h2 className="create-post-title dm-mobile-hidden">
+                        <h2 className="t-h2 dm-mobile-hidden m-0">
                             {isTextMode ? 'Create Status' : 'Create New Post'}
                         </h2>
                         <button className="btn btn-ghost btn-icon-sm" onClick={onClose}>
@@ -318,17 +316,10 @@ export default function CreatePostModal({ onClose }) {
                             Cancel
                         </button>
                         <motion.button 
-                            className="btn btn-primary"
-                            style={{ 
-                                paddingLeft: 30, 
-                                paddingRight: 30,
-                                background: 'var(--logo-gradient)',
-                                border: 'none',
-                                boxShadow: '0 8px 20px var(--accent-ring)'
-                            }}
+                            className="btn btn-primary px-8"
                             onClick={handleSubmit}
                             disabled={loading || (!isTextMode && !file) || (isTextMode && !caption.trim())}
-                            whileHover={{ scale: 1.02, boxShadow: '0 12px 28px var(--accent-ring)' }}
+                            whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
                             {loading ? (

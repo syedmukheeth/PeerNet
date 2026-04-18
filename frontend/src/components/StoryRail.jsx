@@ -8,22 +8,19 @@ import CreateStoryModal from './CreateStoryModal'
 import { StorySkeleton } from './SkeletonLoader'
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
-// Instagram-style 4-stop gradient (purple → magenta → orange → yellow)
 const IG_GRADIENT = 'linear-gradient(215deg, #6559CA 0%, #C13584 25%, #E1306C 50%, #F77737 75%, #FCAF45 100%)'
 
-// ── Animated Progress Bar (pause-aware) ──────────────────────
+// ── Animated Progress Bar ────────────────────────────────────
 function ViewerProgressBar({ total, current, duration, paused, onNext }) {
     return (
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div className="story-progress-row">
             {Array.from({ length: total }, (_, i) => (
-                <div key={i} style={{
-                    flex: 1, height: 3,
+                <div key={i} className="story-progress-item" style={{
                     background: i < current ? '#fff' : 'rgba(255,255,255,0.3)',
-                    borderRadius: 2, position: 'relative', overflow: 'hidden',
                 }}>
                     {i === current && (
                         <motion.div
-                            style={{ position: 'absolute', inset: 0, background: '#fff', borderRadius: 2, transformOrigin: 'left' }}
+                            className="story-progress-fill"
                             initial={{ scaleX: 0 }}
                             animate={{ scaleX: paused ? undefined : 1 }}
                             transition={{ duration: duration / 1000, ease: 'linear' }}
@@ -86,7 +83,6 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
         setMenuOpen(false)
     }
 
-    // Reset pause when story changes
     useEffect(() => { setPaused(false); setMenuOpen(false) }, [groupIdx, storyIdx])
 
     if (!story) return null
@@ -95,23 +91,13 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
     return (
         <motion.div
-            style={{
-                position: 'fixed', inset: 0, zIndex: 400,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'rgba(0,0,0,0.95)',
-            }}
+            className="story-viewer-overlay"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => { if (menuOpen) { setMenuOpen(false); return } onClose() }}>
 
             <motion.div
-                style={{
-                    position: 'relative', width: '100%', maxWidth: 420,
-                    height: '100dvh', maxHeight: 820,
-                    borderRadius: 20, overflow: 'hidden',
-                    background: '#000',
-                    boxShadow: '0 40px 80px rgba(0,0,0,0.7)',
-                }}
+                className="story-viewer-container"
                 initial={{ scale: 0.9, y: 30 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 30 }}
@@ -121,7 +107,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                 {/* Media / Content */}
                 <AnimatePresence mode="wait">
                     <motion.div key={`${groupIdx}-${storyIdx}`}
-                        style={{ position: 'absolute', inset: 0 }}
+                        className="story-media-container"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}>
                         {story.mediaType === 'text' ? (() => {
@@ -137,12 +123,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                             }
 
                             return (
-                                <div style={{
-                                    width: '100%', height: '100%',
-                                    background: story.backgroundColor || '#000',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    padding: 40, boxSizing: 'border-box'
-                                }}>
+                                <div className="story-text-container" style={{ background: story.backgroundColor || '#000' }}>
                                     <h1 className={fontClass} style={{
                                         fontSize: calcFontSize(story.content),
                                         textAlign: story.textAlign || 'center',
@@ -159,20 +140,20 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                         })()
                         : story.mediaType === 'video' ? (
                             <video src={optimizeCloudinaryVideo(story.mediaUrl)} 
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                className="story-media"
                                 autoPlay muted loop playsInline />
                         ) : (
                             <img src={optimizeCloudinaryUrl(story.mediaUrl, 1000)} alt=""
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                className="story-media" />
                         )}
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Gradient overlays */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)', pointerEvents: 'none' }} />
+                {/* Overlays */}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%)', pointerEvents: 'none' }} />
 
                 {/* Top bar */}
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '14px 14px 8px', zIndex: 10 }}>
+                <div className="story-top-bar">
                     <ViewerProgressBar
                         total={group.stories.length}
                         current={storyIdx}
@@ -180,86 +161,54 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                         paused={paused}
                         onNext={nextStory} />
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-                        {/* Author */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <img src={authorAvatar} style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.7)' }} alt="" />
-                            <div>
-                                <p style={{ color: '#fff', fontWeight: 700, fontSize: 14, lineHeight: 1.2 }}>{group.author.username}</p>
-                                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11 }}>
+                    <div className="story-header">
+                        <div className="story-author">
+                            <img src={authorAvatar} className="story-author-avatar" alt="" />
+                            <div className="story-author-info">
+                                <p className="t-h3 m-0" style={{ color: '#fff' }}>{group.author.username}</p>
+                                <p className="t-caption m-0" style={{ color: 'rgba(255,255,255,0.7)' }}>
                                     {story.expiresAt ? `${Math.max(0, Math.ceil((new Date(story.expiresAt) - Date.now()) / 3600000))}h left` : 'Story'}
                                 </p>
                             </div>
                         </div>
 
-                        {/* Controls */}
-                        <div style={{ display: 'flex', gap: 8 }}>
-                            {/* Pause / Play */}
-                            <button onClick={togglePause}
-                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {paused
-                                    ? <HiPlay style={{ color: '#fff', fontSize: 16 }} />
-                                    : <HiPause style={{ color: '#fff', fontSize: 16 }} />
-                                }
+                        <div className="story-controls">
+                            <button onClick={togglePause} className="story-control-btn">
+                                {paused ? <HiPlay size={18} color="#fff" /> : <HiPause size={18} color="#fff" />}
                             </button>
-
-                            {/* Three-dots menu */}
-                            <button onClick={() => setMenuOpen(o => !o)}
-                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <HiDotsVertical style={{ color: '#fff', fontSize: 18 }} />
+                            <button onClick={() => setMenuOpen(o => !o)} className="story-control-btn">
+                                <HiDotsVertical size={18} color="#fff" />
                             </button>
-
-                            {/* Close */}
-                            <button onClick={onClose}
-                                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <HiX style={{ color: '#fff', fontSize: 18 }} />
+                            <button onClick={onClose} className="story-control-btn">
+                                <HiX size={18} color="#fff" />
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* ── Slide-up action menu ── */}
+                {/* Action menu */}
                 <AnimatePresence>
                     {menuOpen && (
                         <motion.div
-                            style={{
-                                position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20,
-                                background: 'rgba(10,10,12,0.98)',
-                                borderTop: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '20px 20px 0 0', padding: '8px 0 28px',
-                            }}
-                            initial={{ y: '100%' }}
-                            animate={{ y: 0 }}
-                            exit={{ y: '100%' }}
+                            className="story-action-sheet"
+                            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                             transition={{ type: 'spring', stiffness: 380, damping: 36 }}>
-
-                            {/* Handle */}
-                            <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)', margin: '8px auto 18px' }} />
-
-                            {/* Pause / Resume */}
-                            <button onClick={togglePause}
-                                style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%', padding: '14px 24px', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 15, fontWeight: 500 }}>
-                                {paused
-                                    ? <><HiPlay style={{ fontSize: 22, opacity: 0.8 }} /> Resume story</>
-                                    : <><HiPause style={{ fontSize: 22, opacity: 0.8 }} /> Pause story</>
-                                }
+                            <div className="story-sheet-handle" />
+                            <button onClick={togglePause} className="story-sheet-item">
+                                {paused ? <><HiPlay size={20} /> Resume</> : <><HiPause size={20} /> Pause</>}
                             </button>
-
-                            {/* Delete — only for own stories */}
                             {isMyStory && (
-                                <button onClick={handleDelete}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%', padding: '14px 24px', background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', fontSize: 15, fontWeight: 500 }}>
-                                    <HiTrash style={{ fontSize: 22 }} />
-                                    Delete story
+                                <button onClick={handleDelete} className="story-sheet-item" style={{ color: 'var(--error)' }}>
+                                    <HiTrash size={20} /> Delete story
                                 </button>
                             )}
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* Tap zones — behind the top bar */}
-                <button onClick={prevStory} style={{ position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '30%', background: 'none', border: 'none', cursor: 'pointer', zIndex: 1 }} />
-                <button onClick={nextStory} style={{ position: 'absolute', right: 0, top: '10%', bottom: '10%', width: '30%', background: 'none', border: 'none', cursor: 'pointer', zIndex: 1 }} />
+                {/* Tap zones */}
+                <button onClick={prevStory} className="story-tap-zone story-tap-left" />
+                <button onClick={nextStory} className="story-tap-zone story-tap-right" />
             </motion.div>
         </motion.div>
     )
@@ -268,58 +217,35 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
 // ── Story Item Circle ─────────────────────────────────────────
 function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
-
     return (
         <motion.div
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', flexShrink: 0 }}
+            className="flex-col items-center gap-2 cursor-pointer shrink-0"
             onClick={onClick}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.22 }}
             whileHover={{ y: -3 }}
             whileTap={{ scale: 0.93 }}>
-            <div style={{ position: 'relative' }}>
-                {/* Gradient ring */}
+            <div className="relative">
                 {!isAdd && (
                     <div style={{
                         position: 'absolute', inset: -3,
                         borderRadius: '50%',
-                        background: seen
-                            ? `conic-gradient(from 0deg, var(--border-md) 0%, var(--border-md) 100%)`
-                            : IG_GRADIENT,
+                        background: seen ? 'var(--border-md)' : IG_GRADIENT,
                         animation: seen ? 'none' : 'rotateBorder 3s linear infinite',
                         padding: 2,
                     }} />
                 )}
-                <div style={{
-                    position: 'relative',
-                    width: 64, height: 64,
-                    borderRadius: '50%',
-                    background: 'var(--bg)',
-                    padding: 2.5,
-                    zIndex: 1,
-                }}>
-                    <img src={avatar} alt={label}
-                        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                <div className="relative w-16 h-16 rounded-full bg-bg p-[2px] z-10">
+                    <img src={avatar} alt={label} className="w-full h-full rounded-full object-cover" />
                     {isAdd && (
-                        <div style={{
-                            position: 'absolute', bottom: 0, right: 0,
-                            width: 22, height: 22, borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #6366F1, #A78BFA)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            border: '2.5px solid var(--bg)',
-                            boxShadow: '0 2px 8px rgba(99,102,241,0.5)',
-                        }}>
-                            <HiPlus style={{ color: '#fff', fontSize: 12 }} />
+                        <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center border-2 border-bg shadow-sm">
+                            <HiPlus className="text-white text-[10px]" />
                         </div>
                     )}
                 </div>
             </div>
-            <span style={{
-                fontSize: 11, color: seen ? 'var(--text-3)' : 'var(--text-2)',
-                fontWeight: 500, maxWidth: 64, textAlign: 'center',
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>{label}</span>
+            <span className={`t-caption truncate w-16 text-center ${seen ? 'opacity-60' : 'font-bold'}`}>{label}</span>
         </motion.div>
     )
 }
@@ -330,7 +256,6 @@ export default function StoryRail() {
     const [stories, setStories] = useState([])
     const [viewerGroup, setViewerGroup] = useState(null)
     const [showCreate, setShowCreate] = useState(false)
-
     const [loading, setLoading] = useState(true)
 
     const loadStories = async () => {
@@ -344,7 +269,6 @@ export default function StoryRail() {
 
     useEffect(() => { loadStories() }, [])
 
-    // Group stories by author, excluding your own
     const groups = Object.values(
         stories.reduce((acc, s) => {
             const id = s.author._id
@@ -357,23 +281,15 @@ export default function StoryRail() {
     const userAvatar = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
 
     return (
-        <>
-            {/* ── Scrollable Rail ── */}
-            <div style={{
-                display: 'flex', gap: 14,
-                overflowX: 'auto', padding: '4px 4px 16px',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-            }}>
+        <div className="mb-6">
+            <div className="flex gap-4 overflow-x-auto py-1 no-scrollbar">
                 {loading && stories.length === 0 ? (
                     <StorySkeleton />
                 ) : (
                     <>
-                        {/* "Your story" / add button */}
                         <StoryCircle
                             label="Your story"
                             avatar={userAvatar}
-                            ringColors={null}
                             isAdd={true}
                             seen={false}
                             index={0}
@@ -397,10 +313,8 @@ export default function StoryRail() {
                 )}
             </div>
 
-            {/* Divider */}
-            <div className="divider" style={{ marginBottom: 20 }} />
+            <div className="divider mt-4 opacity-10" />
 
-            {/* ── Story Viewer overlay ── */}
             <AnimatePresence>
                 {viewerGroup && (
                     <StoryViewer
@@ -412,13 +326,12 @@ export default function StoryRail() {
                 )}
             </AnimatePresence>
 
-            {/* ── Create Story Modal ── */}
             {showCreate && (
                 <CreateStoryModal
                     onClose={() => setShowCreate(false)}
                     onSuccess={loadStories}
                 />
             )}
-        </>
+        </div>
     )
 }

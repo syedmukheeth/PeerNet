@@ -141,22 +141,26 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
 
     return (
         <>
-            <motion.div className="post-card overflow-hidden relative"
-                initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
+            <motion.div className="l-card-premium relative"
+                initial={{ opacity: 0, scale: 0.99 }}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}>
                 
-                {/* Header with glass effect */}
-                <div className="post-header glass-header px-[14px] py-[12px]">
-                    <Link to={`/profile/${author._id}`} className="relative shrink-0">
-                        <img src={avatarUrl} className="avatar w-[38px] h-[38px] border-[1.5px] border-border-md" alt={author.username} />
-                    </Link>
-                    <div className="flex-1 ml-3 truncate">
-                        <div className="flex items-center gap-1.5">
-                            <Link to={`/profile/${author._id}`} className="post-author-name text-[13.5px] font-bold text-primary truncate">{author.username}</Link>
-                            {author.isVerified && <HiBadgeCheck className="text-accent text-[14px] shrink-0" title="Verified" />}
+                {/* Header: Clean & Balanced */}
+                <div className="l-cluster px-4 py-3 justify-between">
+                    <div className="l-cluster gap-3">
+                        <Link to={`/profile/${author._id}`} className="relative shrink-0">
+                            <img src={avatarUrl} className="avatar w-10 h-10 border-[1.5px] border-border-md" alt={author.username} />
+                        </Link>
+                        <div className="l-stack l-stack-sm">
+                            <div className="l-cluster gap-1.5">
+                                <Link to={`/profile/${author._id}`} className="t-h3 no-underline hover:underline font-bold truncate">
+                                    {author.username}
+                                </Link>
+                                {author.isVerified && <HiBadgeCheck className="text-accent text-sm shrink-0" title="Verified" />}
+                            </div>
+                            <div className="t-caption text-muted">{timeago(post.createdAt)}</div>
                         </div>
-                        <div className="post-author-time text-[11px] text-muted">{timeago(post.createdAt)}</div>
                     </div>
                     <div className="relative" ref={menuRef}>
                         <motion.button className="btn btn-ghost btn-icon-sm"
@@ -236,58 +240,59 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     )}
                 </div>
 
-                {/* Actions with glass effect */}
-                <div className="post-actions glass-footer px-3 py-2 mt-0">
-                    <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`}
-                        onClick={handleLike}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.9 }}>
-                        {liked
-                            ? <HiHeart className="text-[24px] text-error" />
-                            : <HiOutlineHeart className="text-[24px]" />
-                        }
-                        <span className="text-[13px] font-bold">{likesCount.toLocaleString()}</span>
-                    </motion.button>
-
-                    <Link to={`/posts/${post._id}`} className="post-action-btn px-2.5 py-1.5">
-                        <HiChatAlt2 className="text-[22px]" />
-                        <span className="text-[13px] font-bold">{post.commentsCount || 0}</span>
-                    </Link>
-
-                    <motion.button className="post-action-btn"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => {
-                            const url = `${window.location.origin}/posts/${post._id}`
-                            if (navigator.share) {
-                                navigator.share({ title: 'PeerNet post', url })
-                            } else {
-                                navigator.clipboard.writeText(url)
-                                    .then(() => toast.success('Link copied!'))
-                                    .catch(() => toast.error('Copy failed'))
+                {/* Actions: Elegant & Functional */}
+                <div className="l-cluster px-4 py-3 justify-between">
+                    <div className="l-cluster gap-4">
+                        <motion.button 
+                            className={`l-cluster gap-2 transition-colors ${liked ? 'text-error' : 'hover:text-error'}`}
+                            onClick={handleLike}
+                            whileTap={{ scale: 0.9 }}>
+                            {liked
+                                ? <HiHeart className="text-[26px]" />
+                                : <HiOutlineHeart className="text-[26px]" />
                             }
-                        }}>
-                        <HiShare style={{ fontSize: 22 }} />
-                    </motion.button>
+                            <span className="t-h3 font-bold">{likesCount.toLocaleString()}</span>
+                        </motion.button>
+    
+                        <Link to={`/posts/${post._id}`} className="l-cluster gap-2 no-underline text-current hover:text-accent">
+                            <HiChatAlt2 className="text-[26px]" />
+                            <span className="t-h3 font-bold">{post.commentsCount || 0}</span>
+                        </Link>
+    
+                        <motion.button 
+                            className="hover:text-accent transition-colors"
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => {
+                                const url = `${window.location.origin}/posts/${post._id}`
+                                if (navigator.share) {
+                                    navigator.share({ title: 'PeerNet post', url })
+                                } else {
+                                    navigator.clipboard.writeText(url)
+                                        .then(() => toast.success('Link copied!'))
+                                        .catch(() => toast.error('Copy failed'))
+                                }
+                            }}>
+                            <HiShare size={24} />
+                        </motion.button>
+                    </div>
 
-                    <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`}
+                    <motion.button 
+                        className={`transition-colors ${saved ? 'text-accent' : 'hover:text-accent'}`}
                         onClick={handleSave}
-                        style={{ marginLeft: 'auto' }}
-                        whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.9 }}>
                         {saved
-                            ? <HiBookmark style={{ fontSize: 22, color: 'var(--accent)' }} />
-                            : <HiOutlineBookmark style={{ fontSize: 22 }} />
+                            ? <HiBookmark className="text-[26px]" />
+                            : <HiOutlineBookmark className="text-[26px]" />
                         }
                     </motion.button>
                 </div>
 
                 {likesCount > 0 && (
-                    <div className="post-likes">{likesCount.toLocaleString()} likes</div>
+                    <div className="px-4 py-1 t-h3">{likesCount.toLocaleString()} likes</div>
                 )}
                 {caption && post.mediaType !== 'text' && (
-                    <div className="post-caption">
-                        <strong>{author.username}</strong>{' '}{caption}
+                    <div className="px-4 pb-4 t-body">
+                        <strong className="text-primary pr-1">{author.username}</strong>{caption}
                     </div>
                 )}
             </motion.div>

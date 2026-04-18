@@ -206,7 +206,7 @@ export default function Layout() {
                                         {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
                                         {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
                                     </span>
-                                    <span className="ig-label">{label}</span>
+                                    <span className="t-h3">{label}</span>
                                 </>
                             )}
                         </NavLink>
@@ -215,13 +215,13 @@ export default function Layout() {
                         <div className="ig-icon-wrap">
                             <HiPlusCircle className="ig-icon opacity-60" />
                         </div>
-                        <span className="ig-label">Create</span>
+                        <span className="t-h3">Create</span>
                     </button>
                     <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
                         <div className="ig-icon-wrap">
                             <img src={avatarUrl} className="ig-avatar" alt="" />
                         </div>
-                        <span className="ig-label">Profile</span>
+                        <span className="t-h3">Profile</span>
                     </NavLink>
 
                     {user?.role === 'admin' && (
@@ -229,7 +229,7 @@ export default function Layout() {
                             <div className="ig-icon-wrap">
                                 <HiShieldCheck className="ig-icon text-accent" />
                             </div>
-                            <span className="ig-label">Admin Console</span>
+                            <span className="t-h3">Admin Console</span>
                         </NavLink>
                     )}
                 </nav>
@@ -275,10 +275,10 @@ export default function Layout() {
 
             <main className="main-col" ref={mainRef}>
 
-                <header className="mobile-top-header">
+                <header className="mobile-top-header px-4">
                     <Link to="/" className="flex items-center gap-2 no-underline">
-                        <img src={logoImg} alt="PN" className="w-7 h-7 rounded-lg" />
-                        <span className="text-[18px] font-extrabold logo-gradient-text">PeerNet</span>
+                        <img src={logoImg} alt="PN" className="w-8 h-8 rounded-lg shadow-sm" />
+                        <span className="t-h2 logo-gradient-text">PeerNet</span>
                     </Link>
                     <div className="mobile-top-actions">
                         <NavLink to="/notifications" className="relative">
@@ -350,7 +350,7 @@ export default function Layout() {
                 {mobileBottomLinksLeft.map(({ to, icon: Icon, exact }) => (
                     <NavLink key={to} to={to} end={exact} className={({ isActive }) => isActive ? 'active' : ''}><Icon /></NavLink>
                 ))}
-                <button onClick={() => setShowCreate(true)} className="w-9 h-9 flex items-center justify-center border border-border-md rounded-xl text-2xl"><HiPlusCircle size={28} /></button>
+                <button onClick={() => setShowCreate(true)} className="w-10 h-10 flex items-center justify-center border border-border-md rounded-xl bg-surface-1 shadow-sm"><HiPlusCircle size={28} /></button>
                 {mobileBottomLinksRight.map(({ to, icon: Icon, exact }) => (
                     <NavLink key={to} to={to} end={exact} className={({ isActive }) => isActive ? 'active' : ''}><Icon /></NavLink>
                 ))}

@@ -140,17 +140,17 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
                         <div>
                             <div className="creative-tabs">
                                 <div 
-                                    className={`creative-tab ${!isTextMode ? 'active' : ''}`}
+                                    className={`creative-tab ${!isTextMode ? 'active' : ''} t-h3 px-4 py-2`}
                                     onClick={() => setIsTextMode(false)}>
                                     <HiPhotograph /> MEDIA
                                 </div>
                                 <div 
-                                    className={`creative-tab ${isTextMode ? 'active' : ''}`}
+                                    className={`creative-tab ${isTextMode ? 'active' : ''} t-h3 px-4 py-2`}
                                     onClick={() => setIsTextMode(true)}>
                                     <HiPencilAlt /> TEXT
                                 </div>
                             </div>
-                            <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: -12 }}>
+                            <p className="t-caption mt-1 mb-0">
                                 Disappears after 24 hours
                             </p>
                         </div>
@@ -276,15 +276,15 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
                     )}
 
                     <motion.button
-                        className="btn btn-primary w-full"
-                        style={{ marginTop: 20, height: 50, fontSize: 15 }}
+                        className="btn btn-primary w-full mt-4"
+                        style={{ height: 48 }}
                         onClick={handleSubmit}
                         disabled={loading || (isTextMode ? !content.trim() : !file)}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}>
                         {loading
-                            ? <span className="spinner" style={{ width: 18, height: 18 }} />
-                            : <><HiUpload style={{ fontSize: 17 }} /> Post Story</>
+                            ? <span className="spinner-sm" />
+                            : <><HiUpload /> Post Story</>
                         }
                     </motion.button>
                 </motion.div>
