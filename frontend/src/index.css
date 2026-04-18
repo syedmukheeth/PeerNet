@@ -2317,20 +2317,6 @@ textarea {
 }
 
 /* Typing dots */
-@keyframes pulseDot {
-
-  0%,
-  80%,
-  100% {
-    transform: scale(0.5);
-    opacity: 0.35;
-  }
-
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 
 .typing-indicator {
   display: flex;
@@ -2507,7 +2493,7 @@ textarea {
   }
 }
 
-
+@media (max-width: 768px) {
   .sidebar-link {
     justify-content: center;
     padding: 10px;
@@ -3486,7 +3472,6 @@ textarea::placeholder {
   width: 350px;
 }
 
-@media (max-width: 640px) {
 /* ═══════════════════════════════════════════════════════════
    MESSAGES MODULE - Digital Obsidian Premium UI (Refined)
    ═══════════════════════════════════════════════════════════ */
