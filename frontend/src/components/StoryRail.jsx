@@ -124,32 +124,40 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                         style={{ position: 'absolute', inset: 0 }}
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}>
-                        {story.mediaType === 'text' ? (
-                            <div style={{
-                                width: '100%',
-                                height: '100%',
-                                background: story.backgroundColor || '#000',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: 40,
-                                textAlign: 'center',
-                                color: '#fff',
-                                boxSizing: 'border-box'
-                            }}>
-                                <h1 style={{
-                                    fontFamily: "'Syne', sans-serif",
-                                    fontSize: 'calc(1.8rem + 1.5vw)',
-                                    fontWeight: 800,
-                                    lineHeight: 1.2,
-                                    margin: 0,
-                                    wordBreak: 'break-word',
-                                    textShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                        {story.mediaType === 'text' ? (() => {
+                            const fontClasses = { Modern: 'font-modern', Classic: 'font-classic', Neon: 'font-neon', Strong: 'font-strong' }
+                            const fontClass = fontClasses[story.fontFamily] || 'font-modern'
+                            
+                            const calcFontSize = (content) => {
+                                const len = content?.length || 0
+                                if (len < 20) return '42px'
+                                if (len < 50) return '32px'
+                                if (len < 100) return '24px'
+                                return '18px'
+                            }
+
+                            return (
+                                <div style={{
+                                    width: '100%', height: '100%',
+                                    background: story.backgroundColor || '#000',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    padding: 40, boxSizing: 'border-box'
                                 }}>
-                                    {story.content}
-                                </h1>
-                            </div>
-                        ) : story.mediaType === 'video' ? (
+                                    <h1 className={fontClass} style={{
+                                        fontSize: calcFontSize(story.content),
+                                        textAlign: story.textAlign || 'center',
+                                        fontWeight: story.isBold ? 900 : 400,
+                                        color: story.textColor || '#fff',
+                                        lineHeight: 1.25,
+                                        margin: 0,
+                                        wordBreak: 'break-word'
+                                    }}>
+                                        {story.content}
+                                    </h1>
+                                </div>
+                            )
+                        })()
+                        : story.mediaType === 'video' ? (
                             <video src={optimizeCloudinaryVideo(story.mediaUrl)} 
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 autoPlay muted loop playsInline />

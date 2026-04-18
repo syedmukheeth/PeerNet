@@ -1,14 +1,31 @@
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiX, HiPhotograph, HiVideoCamera, HiUpload, HiPencilAlt, HiSparkles } from 'react-icons/hi'
+import { HiX, HiPhotograph, HiVideoCamera, HiUpload, HiPencilAlt, HiSparkles, HiMenu, HiMenuAlt2, HiMenuAlt3, HiLightningBolt, HiColorSwatch } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
+
+const FONT_FAMILIES = [
+    { name: 'Modern', class: 'font-modern' },
+    { name: 'Classic', class: 'font-classic' },
+    { name: 'Neon', class: 'font-neon' },
+    { name: 'Strong', class: 'font-strong' }
+]
+
+const COLOR_PALETTE = [
+    '#ffffff', '#000000', '#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#a29bfe', '#fd79a8'
+]
 
 export default function CreateStoryModal({ onClose, onSuccess }) {
     const [isTextMode, setIsTextMode] = useState(false)
     const [content, setContent] = useState('')
     const [backgroundColor, setBackgroundColor] = useState('linear-gradient(135deg, #6366F1, #A78BFA)')
     
+    // Premium style metadata
+    const [fontIdx, setFontIdx] = useState(0)
+    const [textColor, setTextColor] = useState('#ffffff')
+    const [textAlign, setTextAlign] = useState('center')
+    const [isBold, setIsBold] = useState(true)
+
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState(null)
     const [loading, setLoading] = useState(false)
@@ -19,6 +36,20 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
     const isVideo = file?.type?.startsWith('video/') ||
         /\.(mp4|mov|webm|mkv|avi|3gp|hevc)$/i.test(file?.name || '') ||
         (file?.type === 'application/octet-stream' && file?.size > 2000000)
+
+    const calcFontSize = () => {
+        const length = content.length
+        if (length < 20) return 42
+        if (length < 50) return 32
+        if (length < 100) return 24
+        return 18
+    }
+
+    const cycleFont = () => setFontIdx(prev => (prev + 1) % FONT_FAMILIES.length)
+    const cycleAlign = () => {
+        const flow = { center: 'left', left: 'right', right: 'center' }
+        setTextAlign(flow[textAlign])
+    }
 
     const optimizeAICaption = async () => {
         if (!content.trim()) return
@@ -41,6 +72,7 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
         { name: 'Sunset Bloom', value: 'linear-gradient(135deg, #F59E0B, #EC4899)' },
         { name: 'Emerald Night', value: 'linear-gradient(135deg, #059669, #000000)' },
         { name: 'Royal Velvet', value: 'linear-gradient(135deg, #4338ca, #1e1b4b)' },
+        { name: 'Crimson Sky', value: 'linear-gradient(135deg, #ff4b1f, #1fddff)' },
         { name: 'Dark Obsidian', value: '#0d0d0d' },
     ]
 
@@ -67,7 +99,11 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
                 await api.post('/stories', {
                     mediaType: 'text',
                     content: content.trim(),
-                    backgroundColor
+                    backgroundColor,
+                    fontFamily: FONT_FAMILIES[fontIdx].name,
+                    textAlign,
+                    isBold,
+                    textColor
                 })
             } else {
                 const fd = new FormData()
@@ -126,14 +162,68 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
 
                     {/* Content Area */}
                     {isTextMode ? (
-                        <div className="story-text-preview" style={{ background: backgroundColor, minHeight: 280 }}>
-                            <textarea 
-                                placeholder="Start typing..."
-                                value={content}
-                                onChange={e => setContent(e.target.value)}
-                                autoFocus
-                                style={{ padding: '40px 30px', fontSize: 24 }}
-                            />
+                        <div className="story-creator-canvas" style={{ background: backgroundColor }}>
+                            <div className="story-stage-overlay">
+                                {/* Top Controls */}
+                                <div className="story-toolbar-top">
+                                    <button className={`story-toolbar-btn active`} onClick={cycleFont}>
+                                        <span style={{ fontSize: 13, fontWeight: 700 }}>
+                                            {FONT_FAMILIES[fontIdx].name}
+                                        </span>
+                                    </button>
+                                    <button className="story-toolbar-btn" onClick={cycleAlign}>
+                                        {textAlign === 'center' ? <HiMenu /> : textAlign === 'left' ? <HiMenuAlt2 /> : <HiMenuAlt3 />}
+                                    </button>
+                                    <button className={`story-toolbar-btn ${isBold ? 'active' : ''}`} onClick={() => setIsBold(!isBold)}>
+                                        <span style={{ fontSize: 16, fontWeight: 800 }}>B</span>
+                                    </button>
+                                </div>
+
+                                {/* Main Input Area */}
+                                <div className="story-live-input-area">
+                                    <textarea 
+                                        className={`story-live-textarea ${FONT_FAMILIES[fontIdx].class}`}
+                                        placeholder="Start typing..."
+                                        value={content}
+                                        onChange={e => setContent(e.target.value)}
+                                        autoFocus
+                                        style={{ 
+                                            fontSize: calcFontSize(),
+                                            textAlign: textAlign,
+                                            fontWeight: isBold ? 900 : 400,
+                                            color: textColor
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Bottom Controls */}
+                                <div className="story-toolbar-bottom">
+                                    {/* Color Swatches */}
+                                    <div className="story-swatch-list">
+                                        {COLOR_PALETTE.map(c => (
+                                            <div 
+                                                key={c}
+                                                className={`story-swatch ${textColor === c ? 'active' : ''}`}
+                                                style={{ background: c }}
+                                                onClick={() => setTextColor(c)}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Background Presets */}
+                                    <div className="story-swatch-list">
+                                        {bgPresets.map(preset => (
+                                            <div
+                                                key={preset.name}
+                                                className={`story-swatch ${backgroundColor === preset.value ? 'active' : ''}`}
+                                                style={{ background: preset.value }}
+                                                onClick={() => setBackgroundColor(preset.value)}
+                                                title={preset.name}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
 
                             {content.length > 3 && (
                                 <motion.button
@@ -142,32 +232,12 @@ export default function CreateStoryModal({ onClose, onSuccess }) {
                                     disabled={generatingAI}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
-                                    style={{ bottom: 20, right: 20 }}
+                                    style={{ position: 'absolute', top: 80, right: 20, zIndex: 100 }}
                                     title="Optimize with AI"
                                 >
                                     {generatingAI ? <span className="spinner-sm" /> : <HiSparkles />}
                                 </motion.button>
                             )}
-
-                            {/* Preset Picker */}
-                            <div style={{ position: 'absolute', bottom: 20, left: 20, display: 'flex', gap: 10 }}>
-                                {bgPresets.map(preset => (
-                                    <motion.button
-                                        key={preset.name}
-                                        onClick={() => setBackgroundColor(preset.value)}
-                                        whileHover={{ scale: 1.25 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        style={{
-                                            width: 26, height: 26, borderRadius: '50%',
-                                            background: preset.value,
-                                            border: backgroundColor === preset.value ? '2px solid white' : '2px solid transparent',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-                                        }}
-                                        title={preset.name}
-                                    />
-                                ))}
-                            </div>
                         </div>
                     ) : !preview ? (
                         <motion.div

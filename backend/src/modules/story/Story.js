@@ -16,6 +16,13 @@ const storySchema = new mongoose.Schema(
         mediaType: { type: String, enum: ['image', 'video', 'text'], default: 'image' },
         content: { type: String, trim: true },
         backgroundColor: { type: String, default: '#000000' },
+        
+        // Premium Text Story metadata
+        fontFamily: { type: String, default: 'Modern' },
+        textAlign: { type: String, default: 'center' },
+        isBold: { type: Boolean, default: true },
+        textColor: { type: String, default: '#ffffff' },
+
         viewers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         expiresAt: {
             type: Date,
