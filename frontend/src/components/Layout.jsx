@@ -295,50 +295,52 @@ export default function Layout() {
                         <Outlet />
                     </AnimatePresence>
 
-                    {/* Move Footer Inside Scrollable Container for Natural Content Flow */}
-                    <footer className="site-footer">
-                        <div className="site-footer__inner">
-                            {/* Left: Brand + Links */}
-                            <div className="site-footer__left">
-                                <Link to="/" className="site-footer__brand">
-                                    <img src={logoImg} alt="PeerNet" className="site-footer__logo" />
-                                    <span className="peernetLogo" style={{ fontSize: 16 }}>PeerNet</span>
-                                </Link>
-                                <p className="site-footer__tagline">
-                                    A professional network built for the next generation.
-                                </p>
-                                <div className="site-footer__links">
-                                    <Link to="/legal/privacy" className="site-footer__link">Privacy</Link>
-                                    <Link to="/legal/terms" className="site-footer__link">Terms</Link>
-                                    <button onClick={() => setShowFeedback(true)} className="site-footer__link">Report Bug</button>
+                    {/* Hide Footer on Messages and Dscrolls pages for app-screen style */}
+                    {!['/messages', '/dscrolls'].some(p => location.pathname.startsWith(p)) && (
+                        <footer className="site-footer">
+                            <div className="site-footer__inner">
+                                {/* Left: Brand + Links */}
+                                <div className="site-footer__left">
+                                    <Link to="/" className="site-footer__brand">
+                                        <img src={logoImg} alt="PeerNet" className="site-footer__logo" />
+                                        <span className="peernetLogo" style={{ fontSize: 16 }}>PeerNet</span>
+                                    </Link>
+                                    <p className="site-footer__tagline">
+                                        A professional network built for the next generation.
+                                    </p>
+                                    <div className="site-footer__links">
+                                        <Link to="/legal/privacy" className="site-footer__link">Privacy</Link>
+                                        <Link to="/legal/terms" className="site-footer__link">Terms</Link>
+                                        <button onClick={() => setShowFeedback(true)} className="site-footer__link">Report Bug</button>
+                                    </div>
+                                </div>
+
+                                {/* Right: Creator card */}
+                                <div className="site-footer__right">
+                                    <a
+                                        href="https://www.linkedin.com/in/syedmukheeth"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="site-footer__creator-card"
+                                    >
+                                        <div className="site-footer__creator-inner">
+                                            <FaLinkedin size={20} className="site-footer__li-icon" />
+                                            <div>
+                                                <p className="site-footer__creator-name">Syed Mukheeth</p>
+                                                <p className="site-footer__creator-sub">Creator & Developer</p>
+                                            </div>
+                                        </div>
+                                        <span className="site-footer__creator-cta">Connect ↗</span>
+                                    </a>
                                 </div>
                             </div>
-
-                            {/* Right: Creator card */}
-                            <div className="site-footer__right">
-                                <a
-                                    href="https://www.linkedin.com/in/syedmukheeth"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="site-footer__creator-card"
-                                >
-                                    <div className="site-footer__creator-inner">
-                                        <FaLinkedin size={20} className="site-footer__li-icon" />
-                                        <div>
-                                            <p className="site-footer__creator-name">Syed Mukheeth</p>
-                                            <p className="site-footer__creator-sub">Creator & Developer</p>
-                                        </div>
-                                    </div>
-                                    <span className="site-footer__creator-cta">Connect ↗</span>
-                                </a>
+                            <div className="site-footer__bottom">
+                                <span>© 2026 PeerNet</span>
+                                <span className="site-footer__dot">·</span>
+                                <span>Built with Passion in India 🇮🇳</span>
                             </div>
-                        </div>
-                        <div className="site-footer__bottom">
-                            <span>© 2026 PeerNet</span>
-                            <span className="site-footer__dot">·</span>
-                            <span>Built with Passion in India 🇮🇳</span>
-                        </div>
-                    </footer>
+                        </footer>
+                    )}
                 </div>
             </main>
 

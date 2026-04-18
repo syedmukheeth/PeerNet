@@ -6,8 +6,13 @@ import { useSocket } from '../hooks/useSocket'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
 
-import ChatList from './messages/ChatList'
-import ChatArea from './messages/ChatArea'
+// New Modular Components
+import MessagesLayout from './messages/MessagesLayout'
+import ConversationList from './messages/ConversationList'
+import ChatHeader from './messages/ChatHeader'
+import MessageBubble from './messages/MessageBubble'
+import MessageComposer from './messages/MessageComposer'
+import EmptyState from './messages/EmptyState'
 import NewConvoModal from './messages/NewConvoModal'
 
 export default function Messages() {
@@ -31,12 +36,10 @@ export default function Messages() {
     const [isUploading, setIsUploading] = useState(false)
     const [editingMessageId, setEditingMessageId] = useState(null)
     const [editBody, setEditBody] = useState('')
-    const [suggestions, setSuggestions] = useState([])
     const [mobilePanel, setMobilePanel] = useState('list') // 'list' | 'chat'
 
     const bottomRef = useRef()
     const fileRef = useRef()
-    const docRef = useRef()
     const inputRef = useRef()
     const typingTimer = useRef()
     
@@ -62,34 +65,22 @@ export default function Messages() {
         }
     }
 
-    const fetchSuggestions = useCallback(async (convoId) => {
-        if (!convoId) return setSuggestions([])
-        try {
-            const { data } = await chatApi.get(`${convoId}/suggestions`)
-            setSuggestions(data.suggestions || [])
-        } catch (err) {
-            setSuggestions([])
-        }
-    }, [])
-
     const loadMessages = useCallback(async (convoId) => {
         if (!convoId) return
         setLoadingMessages(true)
         try {
+            // FIX: chatApi already has /conversations base
             const { data } = await chatApi.get(`${convoId}/messages`, { params: { limit: 50 } })
             setMessages(data.data || [])
             await chatApi.patch(`${convoId}/messages/read`, {})
             window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
-            fetchSuggestions(convoId)
             scrollToBottom('instant')
         } catch (err) {
-            toast.error("Failed to load messages")
+            console.error("Failed to load messages:", err)
         } finally {
             setLoadingMessages(false)
         }
-    }, [fetchSuggestions])
-
-    // ─── Effects ────────────────────────────────────────────────
+    }, [])
 
     useEffect(() => {
         loadConvos(true)
@@ -124,16 +115,14 @@ export default function Messages() {
 
         const onNewMsg = (msg) => {
             if (msg.conversationId !== activeConvoRef.current?._id) {
-                // Not in current chat, just update sidebar
                 setConversations(prev => prev.map(c => 
                     c._id === msg.conversationId 
                     ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + 1 } 
                     : c
-                ))
+                ).sort((a,b) => (a._id === msg.conversationId ? -1 : 1)))
                 return
             }
 
-            // In current chat
             setMessages(prev => {
                 const exists = prev.find(m => m._id === msg._id || m._id === `opt_${msg.tempId}`)
                 if (exists) return prev.map(m => m._id === exists._id ? msg : m)
@@ -141,7 +130,6 @@ export default function Messages() {
             })
             
             chatApi.patch(`${msg.conversationId}/messages/read`, {})
-            fetchSuggestions(msg.conversationId)
             scrollToBottom()
             
             setConversations(prev => prev.map(c => 
@@ -159,8 +147,6 @@ export default function Messages() {
         socket.on('new_message', onNewMsg)
         socket.on('user_typing_start', onTyping)
         socket.on('user_typing_stop', onStopTyping)
-        socket.on('user_typing', onTyping) // legacy
-        socket.on('user_stop_typing', onStopTyping) // legacy
 
         socket.on('message_edited', (msg) => {
             if (msg.conversationId === activeConvoRef.current?._id) {
@@ -176,12 +162,10 @@ export default function Messages() {
             socket.off('new_message', onNewMsg)
             socket.off('user_typing_start')
             socket.off('user_typing_stop')
-            socket.off('user_typing')
-            socket.off('user_stop_typing')
             socket.off('message_edited')
             socket.off('message_deleted')
         }
-    }, [socket, user?._id, fetchSuggestions])
+    }, [socket, user?._id])
 
     // ─── Action Handlers ────────────────────────────────────────
 
@@ -205,6 +189,9 @@ export default function Messages() {
     const handleSend = async (e) => {
         e?.preventDefault()
         if ((!text.trim() && !filePreview) || isUploading) return
+
+        const currentConvoId = activeConvo?._id;
+        if (!currentConvoId) return;
 
         const tempId = Date.now()
         const optimisticMsg = {
@@ -230,13 +217,12 @@ export default function Messages() {
                 mediaUrl = uploadRes.data.url
             }
 
-            const { data } = await chatApi.post(`conversations/${activeConvo._id}/messages`, {
+            // FIX: chatApi already has /conversations base
+            await chatApi.post(`${currentConvoId}/messages`, {
                 body: text,
                 mediaUrl,
                 tempId
             })
-
-            // new_message socket will handle the replacement of optimistic message
         } catch (err) {
             setMessages(prev => prev.map(m => m._id === optimisticMsg._id ? { ...m, status: 'failed' } : m))
             toast.error("Failed to send message")
@@ -248,7 +234,6 @@ export default function Messages() {
     const handleFileSelect = (e) => {
         const file = e.target.files[0]
         if (!file) return
-
         const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'doc'
         const url = URL.createObjectURL(file)
         setFilePreview({ file, url, type, name: file.name })
@@ -258,7 +243,9 @@ export default function Messages() {
         setShowNewConvo(false)
         setStarting(true)
         try {
-            const { data } = await chatApi.post('conversations', { recipientId: otherUser._id })
+            // FIX: chatApi already has /conversations base
+            // Use api.post('/conversations') or chatApi.post('')
+            const { data } = await chatApi.post('', { recipientId: otherUser._id })
             const newC = data.data
             setConversations(prev => {
                 if (prev.find(c => c._id === newC._id)) return prev
@@ -275,7 +262,7 @@ export default function Messages() {
     const deleteMessage = async (m) => {
         if (!window.confirm("Delete this message?")) return
         try {
-            await chatApi.delete(`conversations/${activeConvo._id}/messages/${m._id}`)
+            await chatApi.delete(`${activeConvo._id}/messages/${m._id}`)
             setMessages(prev => prev.filter(x => x._id !== m._id))
         } catch {
             toast.error("Delete failed")
@@ -285,7 +272,7 @@ export default function Messages() {
     const saveEdit = async (m) => {
         if (!editBody.trim()) return
         try {
-            const { data } = await chatApi.patch(`conversations/${activeConvo._id}/messages/${m._id}`, { body: editBody })
+            const { data } = await chatApi.patch(`${activeConvo._id}/messages/${m._id}`, { body: editBody })
             setMessages(prev => prev.map(x => x._id === m._id ? data.data : x))
             setEditingMessageId(null)
         } catch {
@@ -293,14 +280,11 @@ export default function Messages() {
         }
     }
 
+    const peer = activeConvo?.participants?.find(p => p._id !== user?._id) || activeConvo?.participant;
+
     return (
-        <div className="dm-layout-root" style={{
-            height: '100%',
-            display: 'flex',
-            overflow: 'hidden',
-            background: 'var(--bg)'
-        }}>
-            <ChatList 
+        <MessagesLayout>
+            <ConversationList 
                 user={user}
                 conversations={conversations}
                 activeConvo={activeConvo}
@@ -314,41 +298,70 @@ export default function Messages() {
                 className={mobilePanel === 'chat' ? 'dm-mobile-hidden' : ''}
             />
 
-            <ChatArea 
-                user={user}
-                activeConvo={activeConvo}
-                messages={messages}
-                loadingMessages={loadingMessages}
-                text={text}
-                setText={setText}
-                peerTyping={peerTyping}
-                handleType={handleType}
-                handleSend={handleSend}
-                handleFileSelect={handleFileSelect}
-                onBack={() => setMobilePanel('list')}
-                onNavigateProfile={(uid) => navigate(`/profile/${uid}`)}
-                timeago={timeago}
-                filePreview={filePreview}
-                setFilePreview={setFilePreview}
-                showEmoji={showEmoji}
-                setShowEmoji={setShowEmoji}
-                insertEmoji={(e) => setText(prev => prev + e.emoji)}
-                isUploading={isUploading}
-                editingMessageId={editingMessageId}
-                setEditingMessageId={setEditingMessageId}
-                editBody={editBody}
-                setEditBody={setEditBody}
-                startEditing={(m) => { setEditingMessageId(m._id); setEditBody(m.body); }}
-                saveEdit={saveEdit}
-                cancelEditing={() => setEditingMessageId(null)}
-                deleteMessage={deleteMessage}
-                suggestions={suggestions}
-                bottomRef={bottomRef}
-                inputRef={inputRef}
-                fileRef={fileRef}
-                docRef={docRef}
-                className={mobilePanel === 'list' ? 'dm-mobile-hidden' : ''}
-            />
+            <main className={`dm-chat-area-root ${mobilePanel === 'list' ? 'dm-mobile-hidden' : ''}`}>
+                {activeConvo ? (
+                    <>
+                        <ChatHeader 
+                            participant={peer}
+                            isOnline={activeConvo.isOnline}
+                            onBack={() => setMobilePanel('list')}
+                            onNavigateProfile={(uid) => navigate(`/profile/${uid}`)}
+                        />
+                        
+                        <div className="dm-messages-scroll dark-scrollbar">
+                            {loadingMessages ? (
+                                <div className="dm-loading-center">
+                                    <div className="dm-loading-spinner" />
+                                </div>
+                            ) : (
+                                <div className="dm-messages-inner">
+                                    <div className="dm-messages-header-info">
+                                        <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`} className="dm-info-avatar" alt="" />
+                                        <h2>{peer?.fullName || peer?.username}</h2>
+                                        <p>{peer?.username} · PeerNet Member</p>
+                                        <button className="dm-info-view-btn" onClick={() => navigate(`/profile/${peer?._id}`)}>View Profile</button>
+                                    </div>
+
+                                    {messages.map((m, idx) => (
+                                        <MessageBubble 
+                                            key={m._id}
+                                            message={m}
+                                            isSelf={m.sender === user?._id}
+                                            onDelete={deleteMessage}
+                                            onEdit={(msg) => { setEditingMessageId(msg._id); setEditBody(msg.body); }}
+                                            timeago={timeago}
+                                        />
+                                    ))}
+                                    {peerTyping && (
+                                        <div className="dm-typing-indicator">
+                                            <span>{peer?.username} is typing...</span>
+                                        </div>
+                                    )}
+                                    <div ref={bottomRef} style={{ height: 20 }} />
+                                </div>
+                            )}
+                        </div>
+
+                        <MessageComposer 
+                            text={text}
+                            setText={setText}
+                            handleType={handleType}
+                            handleSend={handleSend}
+                            handleFileSelect={handleFileSelect}
+                            filePreview={filePreview}
+                            setFilePreview={setFilePreview}
+                            showEmoji={showEmoji}
+                            setShowEmoji={setShowEmoji}
+                            insertEmoji={(e) => setText(prev => prev + e.emoji)}
+                            isUploading={isUploading}
+                            inputRef={inputRef}
+                            fileRef={fileRef}
+                        />
+                    </>
+                ) : (
+                    <EmptyState onNewMessage={() => setShowNewConvo(true)} />
+                )}
+            </main>
 
             {showNewConvo && (
                 <NewConvoModal 
@@ -356,6 +369,6 @@ export default function Messages() {
                     onStart={startNewConvo}
                 />
             )}
-        </div>
+        </MessagesLayout>
     )
 }
