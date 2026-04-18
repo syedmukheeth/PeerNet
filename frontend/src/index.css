@@ -26,6 +26,7 @@
   --accent: #4F7AFF;
   --accent-hover: #3D65E8;
   --accent-subtle: rgba(79, 122, 255, 0.12);
+  --accent-low: rgba(79, 122, 255, 0.08); /* Added missing variable */
   --accent-ring: rgba(79, 122, 255, 0.25);
 
   /* Logo gradient */
@@ -73,6 +74,7 @@
   --accent: #4F7AFF;
   --accent-hover: #3D65E8;
   --accent-subtle: rgba(79, 122, 255, 0.06);
+  --accent-low: rgba(79, 122, 255, 0.04); /* Added missing variable */
   --accent-ring: rgba(79, 122, 255, 0.15);
 
   /* States */
@@ -482,6 +484,16 @@ textarea {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dm-mobile-hidden {
+  display: block;
+}
+
+@media (max-width: 800px) {
+  .dm-mobile-hidden {
+    display: none !important;
+  }
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
@@ -5201,10 +5213,7 @@ textarea::placeholder {
 }
 
 /* 🎭 Interactions */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* fadeIn animation already defined globally */
 
 @media (max-width: 640px) {
   .create-post-card {
