@@ -219,14 +219,14 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
     return (
         <motion.div
-            className="flex-col items-center gap-2 cursor-pointer shrink-0"
+            className="flex flex-col items-center gap-2 cursor-pointer shrink-0"
             onClick={onClick}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.22 }}
             whileHover={{ y: -3 }}
             whileTap={{ scale: 0.93 }}>
-            <div className="relative">
+            <div className="relative w-16 h-16 shrink-0">
                 {!isAdd && (
                     <div style={{
                         position: 'absolute', inset: -3,
@@ -236,16 +236,16 @@ function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
                         padding: 2,
                     }} />
                 )}
-                <div className="relative w-16 h-16 rounded-full bg-bg p-[2px] z-10">
+                <div className="relative w-full h-full rounded-full bg-surface p-[2.5px] z-10 border border-border-md">
                     <img src={avatar} alt={label} className="w-full h-full rounded-full object-cover" />
                     {isAdd && (
-                        <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center border-2 border-bg shadow-sm">
+                        <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center border-2 border-surface shadow-sm">
                             <HiPlus className="text-white text-[10px]" />
                         </div>
                     )}
                 </div>
             </div>
-            <span className={`t-caption truncate w-16 text-center ${seen ? 'opacity-60' : 'font-bold'}`}>{label}</span>
+            <span className={`text-[11px] truncate w-16 text-center tracking-tight ${seen ? 'opacity-40' : 'font-bold opacity-80'}`}>{label}</span>
         </motion.div>
     )
 }

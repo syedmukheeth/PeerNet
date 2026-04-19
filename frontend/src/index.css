@@ -7,15 +7,15 @@
 /* ── Dark Mode — Deep Space + Electric Blue/Cyan ─────────── */
 :root,
 [data-theme="dark"] {
-  /* Backgrounds — Pure Neutral Deep Space */
-  --bg: #000000;
-  --surface: #0a0a0a;
-  --card: #0d0d0d;
-  --hover: #161616;
+  /* Backgrounds — Professional Charcoal Deep Space */
+  --bg: #0d0d0e;
+  --surface: #121214;
+  --card: #161618;
+  --hover: #1c1c1e;
 
-  /* Borders — Minimalist & High Contrast */
-  --border: rgba(255, 255, 255, 0.04);
-  --border-md: rgba(255, 255, 255, 0.08);
+  /* Borders — Minimalist & Precise */
+  --border: rgba(255, 255, 255, 0.05);
+  --border-md: rgba(255, 255, 255, 0.1);
 
   /* Typography */
   --text-1: #ffffff;
@@ -40,25 +40,25 @@
   --error: #EF4444;
   --warning: #F59E0B;
 
-  /* Shadows — Softer, more depth */
-  --input-bg: #080808;
+  /* Shadows — Refined with depth on charcoal */
+  --input-bg: #111112;
   --overlay: rgba(0, 0, 0, 0.8);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.8);
-  --shadow-accent: 0 0 30px rgba(124, 58, 237, 0.15);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --shadow-accent: 0 0 30px rgba(124, 58, 237, 0.1);
 
   /* UI Elements */
   --story-ring: linear-gradient(135deg, #7C3AED, #6366F1, #06B6D4, #7C3AED);
-  --dm-theirs: #161618;
-  --glass-bg: rgba(10, 10, 10, 0.7);
-  --glass-bg-alt: rgba(0, 0, 0, 0.7);
+  --dm-theirs: #1a1a1c;
+  --glass-bg: rgba(18, 18, 20, 0.7);
+  --glass-bg-alt: rgba(13, 13, 14, 0.7);
   --btn-glass-hover: rgba(255, 255, 255, 0.08);
 
   /* Surface Extensions */
-  --surface-1: #121212;
-  --surface-2: #1a1a1a;
-  --surface-rgb: 10, 10, 10;
+  --surface-1: #1a1a1c;
+  --surface-2: #222224;
+  --surface-rgb: 18, 18, 20;
   --text-1-rgb: 255, 255, 255;
 }
 
@@ -165,8 +165,8 @@
   --trans-smooth: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Premium Shadows & Borders */
-  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.7), 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
   --border-subtle: 1px solid var(--border-md);
 
   /* ── Z-Index Scale ── */
@@ -239,12 +239,50 @@
   overflow: hidden;
 }
 
+/* ── Utilities: Hardening Layout Primitives ──────────────── */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.w-9  { width: 36px; }  .h-9  { height: 36px; }
+.w-10 { width: 40px; }  .h-10 { height: 40px; }
+.w-12 { width: 48px; }  .h-12 { height: 48px; }
+.w-16 { width: 64px; }  .h-16 { height: 64px; }
+.avatar { border-radius: 50%; object-fit: cover; }
+.shrink-0 { flex-shrink: 0; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 12px;
+  transition: all var(--trans-fast);
+}
+
+.sidebar-brand:hover {
+  background: var(--accent-subtle);
+}
+
 .l-card-premium {
   background: var(--card);
-  border: var(--border-subtle);
+  border: 1px solid var(--border-md);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-premium);
-  transition: border-color var(--trans-fast);
+  transition: all var(--trans-fast);
+}
+
+.l-card-premium:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124, 58, 237, 0.2);
 }
 /* ── Status Modal Primitives ──────────────────────────────── */
 
@@ -351,14 +389,23 @@
 .post-media-container {
   position: relative;
   width: 100%;
-  aspect-ratio: auto;
-  min-height: 200px;
-  max-height: 80vh;
+  aspect-ratio: 4 / 5; /* Professional portrait aspect ratio */
+  min-height: 300px;
+  max-height: 720px;
   background: var(--surface-1);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 1024px) {
+  .post-media-container {
+    aspect-ratio: auto;
+    min-height: 400px;
+  }
 }
 
 .post-media {
@@ -1358,6 +1405,33 @@ textarea:focus-visible {
 .sidebar-logo-row {
   margin-bottom: 32px;
   padding: 0 12px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.sidebar-brand-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+.peernetLogo {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: var(--logo-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Nav Grouping */
@@ -1373,42 +1447,55 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  color: var(--text-secondary);
+  padding: 14px 16px;
+  border-radius: 14px;
+  color: var(--text-2);
   font-size: 15.5px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
   text-decoration: none;
   border: none;
   background: transparent;
   width: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .ig-link:hover {
-  background: var(--accent-subtle);
-  color: var(--text-primary);
-  box-shadow: inset 0 0 0 1px var(--accent-low);
+  background: var(--accent-low);
+  color: var(--text-1);
 }
 
 .ig-link:hover .ig-icon {
-  transform: scale(1.1);
+  transform: translateY(-2px);
   color: var(--accent);
 }
 
-/* Active State: Glowing Purple Matte */
+/* Active State: Minimalist & Elegant */
 .ig-link--active {
-  background: rgba(124, 58, 237, 0.1) !important;
   color: var(--accent) !important;
   font-weight: 700;
+  background: var(--accent-subtle) !important;
   box-shadow: inset 0 0 0 1px var(--accent-low);
+}
+
+.ig-link--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 4px 0 12px var(--accent-ring);
 }
 
 .ig-link--active .ig-icon {
   color: var(--accent);
-  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.4));
+  filter: drop-shadow(0 0 8px var(--accent-ring));
 }
 
 .ig-icon-wrap {

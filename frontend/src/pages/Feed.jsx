@@ -45,33 +45,35 @@ function RightPanel() {
     return (
         <div className="l-stack l-stack-lg">
 
-            {/* ── Profile mini card ─────────────── */}
+            {/* ── Profile Premium Card ─────────────── */}
             <div 
-                className="l-cluster gap-3 px-1 cursor-pointer transition-opacity hover:opacity-80"
+                className="l-card-premium p-4 cursor-pointer group"
                 onClick={() => navigate(`/profile/${user?._id}`)}
             >
-                <div className="relative shrink-0">
-                    <img src={myAvatar}
-                        className="w-[56px] h-[56px] rounded-full object-cover border-2 border-accent p-[2px]"
-                        alt="" />
-                </div>
-                <div className="flex-1 truncate">
-                    <div className="l-cluster gap-1 w-full">
-                        <span className="t-h3 font-bold truncate">
-                            {user?.username}
-                        </span>
-                        {user?.isVerified && <HiBadgeCheck className="text-accent text-sm shrink-0" />}
+                <div className="l-cluster gap-4">
+                    <div className="relative shrink-0">
+                        <img src={myAvatar}
+                            className="w-12 h-12 avatar ring-2 ring-accent/20 p-[0.5px] transition-transform group-hover:scale-105"
+                            alt="" />
                     </div>
-                    <div className="t-body truncate opacity-60">
-                        {user?.fullName || 'PeerNet user'}
+                    <div className="flex-1 min-w-0">
+                        <div className="l-cluster gap-1.5 w-full">
+                            <span className="t-h3 font-bold truncate text-primary group-hover:text-accent transition-colors">
+                                {user?.username}
+                            </span>
+                            {user?.isVerified && <HiBadgeCheck className="text-accent text-sm shrink-0" />}
+                        </div>
+                        <div className="t-caption truncate opacity-50">
+                            {user?.fullName || 'PeerNet Creator'}
+                        </div>
                     </div>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/profile/${user?._id}`) }}
+                        className="btn btn-ghost btn-sm text-accent hover:bg-accent-subtle transition-all font-bold px-3 py-1.5"
+                    >
+                        Switch
+                    </button>
                 </div>
-                <button
-                    onClick={(e) => { e.stopPropagation(); navigate(`/profile/${user?._id}`) }}
-                    className="text-accent font-bold text-xs hover:text-accent-hover transition-colors"
-                >
-                    Switch
-                </button>
             </div>
 
             {/* ── Suggested for you ─────────────── */}
@@ -121,18 +123,22 @@ function RightPanel() {
                 </div>
             )}
 
-            {/* ── Footer ───────────────────────── */}
-            <div className="pt-4 border-t border-border opacity-40">
-                <div className="l-stack l-stack-sm">
-                    <a
-                        href="https://www.linkedin.com/in/syedmukheeth"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="l-cluster gap-1.5 text-[11px] text-primary no-underline font-bold hover:underline">
-                        <FaLinkedin className="text-[#0A66C2]" />
-                        Syed Mukheeth
-                    </a>
-                    <p className="text-[10px] m-0">
+            {/* ── Professional Footer ───────────────────────── */}
+            <div className="pt-6 border-t border-border-md">
+                <div className="l-stack gap-3">
+                    <div className="l-cluster gap-4 opacity-40 hover:opacity-100 transition-opacity">
+                        <a
+                            href="https://www.linkedin.com/in/syedmukheeth"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="l-cluster gap-1.5 text-[11px] text-primary no-underline font-bold hover:text-accent transition-colors">
+                            <FaLinkedin className="text-[#0A66C2]" size={14} />
+                            Syed Mukheeth
+                        </a>
+                        <Link to="/legal" className="text-[11px] text-primary no-underline font-medium hover:underline">Privacy</Link>
+                        <Link to="/legal" className="text-[11px] text-primary no-underline font-medium hover:underline">Terms</Link>
+                    </div>
+                    <p className="text-[10px] m-0 opacity-30 font-medium tracking-wider uppercase">
                         Built with Passion in India · © 2026 PeerNet
                     </p>
                 </div>

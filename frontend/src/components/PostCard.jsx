@@ -155,9 +155,9 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 <div className="l-cluster px-4 py-3 justify-between">
                     <div className="l-cluster gap-3">
                         <Link to={`/profile/${author._id}`} className="shrink-0">
-                            <img src={avatarUrl} className="avatar w-9 h-9 border-[1px] border-border-md" alt={author.username} />
+                            <img src={avatarUrl} className="avatar w-10 h-10 border border-border-md" alt={author.username} />
                         </Link>
-                        <div className="l-stack l-stack-sm" style={{ gap: '2px' }}>
+                        <div className="l-stack" style={{ gap: '1px' }}>
                             <div className="l-cluster gap-1.5 flex-nowrap">
                                 <Link to={`/profile/${author._id}`} className="t-h4 no-underline hover:underline font-bold text-primary truncate max-w-[140px]">
                                     {author.username}
