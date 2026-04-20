@@ -25,7 +25,7 @@ function RightPanel() {
 
     useEffect(() => {
         if (!user) return
-        api.get('/users/search', { params: { q: 'an', limit: 8 } })
+        api.get('/users/search', { params: { q: 'a', limit: 6 } })
             .then(({ data }) => {
                 const others = (data.data || []).filter(u => u._id !== user._id)
                 setSuggestions(others.slice(0, 5))
@@ -43,87 +43,73 @@ function RightPanel() {
         `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`)
 
     return (
-        <div className="l-stack l-stack-lg">
+        <div className="sp-container">
 
-            {/* ── Profile Premium Card ─────────────── */}
-            <div 
-                className="l-card-premium p-4 cursor-pointer group"
-                onClick={() => navigate(`/profile/${user?._id}`)}
-            >
-                <div className="l-cluster gap-4">
-                    <div className="relative shrink-0">
-                        <img src={myAvatar}
-                            className="w-12 h-12 avatar ring-2 ring-accent/20 p-[0.5px] transition-transform group-hover:scale-105"
-                            alt="" />
+            {/* ── Current User Card ───────────── */}
+            <div className="sp-user-card">
+                <img 
+                    src={myAvatar}
+                    className="sp-user-avatar"
+                    alt="" 
+                    onClick={() => navigate(`/profile/${user?._id}`)}
+                />
+                <div className="sp-user-info">
+                    <div className="sp-username" onClick={() => navigate(`/profile/${user?._id}`)}>
+                        {user?.username}
+                        {user?.isVerified && <HiBadgeCheck className="text-accent" />}
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="l-cluster gap-1.5 w-full">
-                            <span className="t-h3 font-bold truncate text-primary group-hover:text-accent transition-colors">
-                                {user?.username}
-                            </span>
-                            {user?.isVerified && <HiBadgeCheck className="text-accent text-sm shrink-0" />}
-                        </div>
-                        <div className="t-caption truncate opacity-50">
-                            {user?.fullName || 'PeerNet Creator'}
-                        </div>
-                    </div>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/profile/${user?._id}`) }}
-                        className="btn btn-ghost btn-sm text-accent hover:bg-accent-subtle transition-all font-bold px-3 py-1.5"
-                    >
-                        Switch
-                    </button>
+                    <div className="sp-fullname">{user?.fullName || 'PeerNet Creator'}</div>
                 </div>
+                <button 
+                    onClick={() => navigate(`/profile/${user?._id}`)}
+                    className="sp-action-link"
+                >
+                    Switch
+                </button>
             </div>
 
-            {/* ── Suggested for you ─────────────── */}
+            {/* ── Suggestions Section ─────────── */}
             {suggestions.length > 0 && (
-                <div className="l-stack">
-                    <div className="l-cluster justify-between mb-4 px-1">
-                        <span className="t-label opacity-60 font-black tracking-[0.15em]">
-                            Global_Registry
-                        </span>
-                        <Link to="/search" className="t-caption font-black text-accent no-underline hover:brightness-125 transition-all">
-                            EXPLORE_ALL
-                        </Link>
+                <div className="mt-2">
+                    <div className="sp-section-header">
+                        <span className="sp-section-title">Suggested for you</span>
+                        <Link to="/search" className="sp-action-link sp-action-link--muted">See All</Link>
                     </div>
 
-                    <div className="l-stack l-stack-sm">
+                    <div className="flex flex-col">
                         {suggestions.map((u, idx) => {
-                            const rawAv = u.avatarUrl ||
-                                `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
-                            const av = optimizeAvatarUrl(rawAv)
+                            const av = optimizeAvatarUrl(u.avatarUrl ||
+                                `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`)
                             const isFollowed = followed[u._id]
                             return (
                                 <motion.div 
                                     key={u._id} 
-                                    initial={{ opacity: 0, x: 20 }}
+                                    initial={{ opacity: 0, x: 10 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.1 * idx, type: 'spring', damping: 20 }}
-                                    className="l-cluster gap-4 p-3 rounded-2xl hover:bg-surface/50 border border-transparent hover:border-border/30 transition-all group"
+                                    transition={{ delay: 0.05 * idx }}
+                                    className="sp-suggestion-row"
                                 >
-                                    <Link to={`/profile/${u._id}`} className="shrink-0 relative">
-                                        <img src={av} className="w-11 h-11 rounded-xl object-cover shadow-lg border border-border/20 group-hover:scale-105 transition-transform" alt="" />
-                                        {isFollowed && (
-                                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-surface animate-pulse" />
-                                        )}
-                                    </Link>
-                                    <div className="flex-1 truncate">
-                                        <Link to={`/profile/${u._id}`} className="block text-primary no-underline">
-                                            <div className="l-cluster gap-1.5 mb-0.5">
-                                                <span className="t-h3 font-black tracking-tight">{u.username.toUpperCase()}</span>
-                                                {u.isVerified && <HiBadgeCheck className="text-accent text-sm" />}
-                                            </div>
-                                            <div className="t-caption opacity-40 font-bold uppercase text-[9px] tracking-widest">
-                                                Active_Node
-                                            </div>
-                                        </Link>
+                                    <img 
+                                        src={av} 
+                                        className="sp-suggestion-avatar" 
+                                        alt="" 
+                                        onClick={() => navigate(`/profile/${u._id}`)}
+                                    />
+                                    <div className="sp-suggestion-info">
+                                        <div 
+                                            className="sp-suggestion-username"
+                                            onClick={() => navigate(`/profile/${u._id}`)}
+                                        >
+                                            {u.username}
+                                            {u.isVerified && <HiBadgeCheck className="text-accent" />}
+                                        </div>
+                                        <div className="sp-suggestion-subtext">Followed by PeerNet</div>
                                     </div>
                                     <button 
                                         onClick={() => handleFollow(u)} 
-                                        className={`h-8 px-4 rounded-lg font-black text-[10px] tracking-widest uppercase transition-all ${isFollowed ? 'bg-surface text-text-3 border border-border/40' : 'bg-accent/10 text-accent border border-accent/20 hover:bg-accent hover:text-white'}`}
+                                        className={`sp-btn-follow ${isFollowed ? 'active' : ''}`}
                                     >
-                                        {isFollowed ? 'Following' : 'Connect'}
+                                        {isFollowed ? 'Following' : 'Follow'}
                                     </button>
                                 </motion.div>
                             )
@@ -132,24 +118,35 @@ function RightPanel() {
                 </div>
             )}
 
-            {/* ── Professional Footer ───────────────────────── */}
-            <div className="pt-6 border-t border-border-md">
-                <div className="l-stack gap-3">
-                    <div className="l-cluster gap-4 opacity-40 hover:opacity-100 transition-opacity">
-                        <a
-                            href="https://www.linkedin.com/in/syedmukheeth"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="l-cluster gap-1.5 text-[11px] text-primary no-underline font-bold hover:text-accent transition-colors">
-                            <FaLinkedin className="text-[#0A66C2]" size={14} />
-                            Syed Mukheeth
-                        </a>
-                        <Link to="/legal" className="text-[11px] text-primary no-underline font-medium hover:underline">Privacy</Link>
-                        <Link to="/legal" className="text-[11px] text-primary no-underline font-medium hover:underline">Terms</Link>
-                    </div>
-                    <p className="text-[10px] m-0 opacity-30 font-medium tracking-wider uppercase">
-                        Built with Passion in India · © 2026 PeerNet
-                    </p>
+            {/* ── Refined Footer ──────────────── */}
+            <div className="sp-footer">
+                <nav className="sp-footer-links">
+                    <Link to="/legal" className="sp-footer-link">About</Link>
+                    <Link to="/legal" className="sp-footer-link">Help</Link>
+                    <Link to="/legal" className="sp-footer-link">Press</Link>
+                    <Link to="/legal" className="sp-footer-link">API</Link>
+                    <Link to="/legal" className="sp-footer-link">Jobs</Link>
+                    <Link to="/legal" className="sp-footer-link">Privacy</Link>
+                    <Link to="/legal" className="sp-footer-link">Terms</Link>
+                    <Link to="/legal" className="sp-footer-link">Locations</Link>
+                    <Link to="/legal" className="sp-footer-link">Language</Link>
+                    <Link to="/legal" className="sp-footer-link">Verified</Link>
+                </nav>
+                
+                <div className="flex flex-col gap-2 opacity-50">
+                    <a 
+                        href="https://www.linkedin.com/in/syedmukheeth" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="sp-footer-link flex items-center gap-1.5"
+                        style={{ opacity: 1 }}
+                    >
+                        <FaLinkedin size={12} className="text-[#0A66C2]" />
+                        Syed Mukheeth
+                    </a>
+                    <span className="sp-footer-copyright">
+                        © 2026 PEERNET FROM INDIA
+                    </span>
                 </div>
             </div>
 

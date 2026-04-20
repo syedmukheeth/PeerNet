@@ -746,7 +746,171 @@ textarea:focus-visible {
 
 /* Legacy aliases */
 .l-main-col     { width: 100%; max-width: 620px; margin: 0 auto; }
-.l-side-panel   { width: 292px; flex-shrink: 0; position: sticky; top: 24px; }
+/* ── SIDE PANEL (Right Column) ────────────────────────── */
+.l-side-panel {
+  width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px;
+}
+
+.sp-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 8px 12px;
+}
+
+/* User Profile Card (Top) */
+.sp-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sp-user-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+}
+
+.sp-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sp-username {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sp-fullname {
+  font-size: 13px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-action-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.sp-action-link:hover { opacity: 0.8; }
+
+.sp-action-link--muted {
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+/* Suggestions Section */
+.sp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sp-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-3);
+}
+
+.sp-suggestion-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.sp-suggestion-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+}
+
+.sp-suggestion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sp-suggestion-username {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sp-suggestion-subtext {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.sp-btn-follow {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.sp-btn-follow:hover { color: var(--text-1); }
+.sp-btn-follow.active { color: var(--text-2); }
+
+/* Footer Links */
+.sp-footer {
+  margin-top: 8px;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sp-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sp-footer-link {
+  font-size: 11px;
+  color: var(--text-3);
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.sp-footer-link:hover { opacity: 1; text-decoration: underline; }
+
+.sp-footer-copyright {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.4;
+}
+
 .l-feed-grid {
   display: flex;
   gap: 32px;
