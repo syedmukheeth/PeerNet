@@ -3967,7 +3967,7 @@ textarea:focus-visible {
   align-items: flex-start;
   justify-content: center;
   padding: 0 0 64px;
-  max-width: 980px;
+  max-width: 1024px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -3975,15 +3975,15 @@ textarea:focus-visible {
 
 /* Center feed column */
 .l-main-col {
-  flex: 0 0 470px;
-  max-width: 470px;
+  flex: 0 0 620px;
+  max-width: 620px;
   min-width: 0;
   width: 100%;
 }
 
 /* Right panel */
 .l-side-panel {
-  width: 292px;
+  width: 320px;
   flex-shrink: 0;
   position: sticky;
   top: 24px;
