@@ -146,74 +146,72 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     return (
         <>
             <motion.div 
-                className="l-card-premium l-post-card glass-card relative"
-                style={{ 
-                    boxShadow: 'var(--shadow-premium), var(--shadow-specular)',
-                }}
+                className="l-post-card glass-card"
                 initial={{ opacity: 0, scale: 0.99 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}>
                 
-                {/* ── Header: Identity & Context ── */}
-                <div className="l-cluster px-4 py-3 justify-between">
-                    <div className="l-cluster gap-3">
-                        <Link to={`/profile/${author._id}`} className="shrink-0">
-                            <img src={avatarUrl} className="avatar w-10 h-10 border border-border-md" alt={author.username} />
+                {/* ── Post Header ────────────────── */}
+                <header className="post-card-header">
+                    <div className="post-card-user">
+                        <Link to={`/profile/${author._id}`} className="post-card-avatar-link">
+                            <img src={avatarUrl} className="post-card-avatar" alt={author.username} />
                         </Link>
-                        <div className="l-stack" style={{ gap: '1px' }}>
-                            <div className="l-cluster gap-1.5 flex-nowrap">
-                                <Link to={`/profile/${author._id}`} className="t-h4 no-underline hover:underline font-bold text-primary truncate max-w-[140px]">
+                        <div className="post-card-user-meta">
+                            <div className="post-card-user-row">
+                                <Link to={`/profile/${author._id}`} className="post-card-username">
                                     {author.username}
                                 </Link>
-                                {author.isVerified && <HiBadgeCheck className="post-verified" />}
-                                <span className="text-muted text-[12px] opacity-40">•</span>
-                                <span className="post-timestamp">{timeago(post.createdAt)}</span>
+                                {author.isVerified && <HiBadgeCheck className="post-card-verified" />}
+                                <span className="post-card-dot">•</span>
+                                <time className="post-card-time">{timeago(post.createdAt)}</time>
                             </div>
+                            {post.location && (
+                                <span className="post-card-location">{post.location}</span>
+                            )}
                         </div>
                     </div>
-                    <div className="relative" ref={menuRef}>
-                        <button className="btn btn-ghost btn-icon-sm p-1" onClick={() => setMenuOpen(o => !o)}>
-                            <HiDotsHorizontal className="text-[20px] text-muted" />
+                    <div className="post-card-menu-wrap" ref={menuRef}>
+                        <button className="post-card-menu-btn" onClick={() => setMenuOpen(o => !o)}>
+                            <HiDotsHorizontal />
                         </button>
                         <AnimatePresence>
                             {menuOpen && (
                                 <motion.div 
-                                    className="post-options-menu glass-card p-1"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    style={{ right: 0, top: '100%', border: '1px solid var(--border-md)', minWidth: '160px', position: 'absolute' }}
+                                    className="post-card-menu-dropdown"
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 5 }}
                                 >
                                     {isOwner ? (
                                         <>
-                                            <button className="post-options-item" onClick={() => { setMenuOpen(false); setEditOpen(true) }}>
-                                                <HiPencil size={18} /> <span>Edit post</span>
+                                            <button className="post-card-menu-item" onClick={() => { setMenuOpen(false); setEditOpen(true) }}>
+                                                <HiPencil size={16} /> <span>Edit</span>
                                             </button>
-                                            <div className="ig-more-divider" />
-                                            <button className="post-options-item text-error" onClick={() => { setMenuOpen(false); handleDelete() }}>
-                                                <HiTrash size={18} /> <span>Delete post</span>
+                                            <button className="post-card-menu-item text-error" onClick={() => { setMenuOpen(false); handleDelete() }}>
+                                                <HiTrash size={16} /> <span>Delete</span>
                                             </button>
                                         </>
                                     ) : (
-                                        <button className="post-options-item" onClick={() => { toast('Reported successfully'); setMenuOpen(false) }}>
-                                            Report inappropriate
+                                        <button className="post-card-menu-item" onClick={() => { toast.success('Reported'); setMenuOpen(false) }}>
+                                            Report
                                         </button>
                                     )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
-                </div>
+                </header>
 
-                {/* ── Media: Premium Visual Fit ── */}
-                <div className="post-media-container bg-black" onClick={handleImageTap}>
+                {/* ── Post Media ─────────────────── */}
+                <div className="post-card-media-wrap" onClick={handleImageTap}>
                     <AnimatePresence>
                         {showHeart && (
                             <motion.div 
                                 initial={{ scale: 0, opacity: 0 }}
                                 animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0] }}
-                                transition={{ duration: 0.8 }}
-                                className="absolute z-10 text-white drop-shadow-xl"
+                                transition={{ duration: 0.7 }}
+                                className="post-card-heart-overlay"
                             >
                                 <HiHeart size={80} />
                             </motion.div>
@@ -221,63 +219,68 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     </AnimatePresence>
 
                     {post.mediaType === 'text' ? (
-                        <div className="w-full h-full min-h-[360px] flex items-center justify-center p-12 text-center text-white text-[24px] font-black font-syne"
-                            style={{ background: post.backgroundColor || 'var(--accent-gradient)' }}>
-                            <div className="whitespace-pre-wrap">{post.caption}</div>
+                        <div className="post-card-text-content" style={{ background: post.backgroundColor || 'var(--accent-gradient)' }}>
+                            <div className="post-card-text-inner">{post.caption}</div>
                         </div>
                     ) : post.mediaType === 'video' ? (
-                        <div className="relative w-full h-full">
-                            <video ref={videoRef} src={post.mediaUrl} className="post-media" muted={isMuted} loop playsInline />
-                            <button className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-md text-white rounded-full p-2" onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted) }}>
-                                {isMuted ? <HiVolumeOff size={18} /> : <HiVolumeUp size={18} />}
+                        <div className="post-card-video-wrap">
+                            <video ref={videoRef} src={post.mediaUrl} className="post-card-media" muted={isMuted} loop playsInline />
+                            <button className="post-card-video-toggle" onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted) }}>
+                                {isMuted ? <HiVolumeOff size={16} /> : <HiVolumeUp size={16} />}
                             </button>
-                            {!isPlaying && <HiPlay size={50} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />}
+                            {!isPlaying && <HiPlay size={40} className="post-card-video-play-hint" />}
                         </div>
                     ) : (
-                        <img src={optimizeCloudinaryUrl(post.mediaUrl)} className="post-media" alt="" loading="lazy" />
+                        <img src={optimizeCloudinaryUrl(post.mediaUrl)} className="post-card-media" alt="" loading="lazy" />
                     )}
                 </div>
 
-                {/* ── Actions: Immediate Feedback ── */}
-                <div className="post-action-row px-4 py-2">
-                    <div className="l-cluster gap-4">
-                        <button className={`post-action-btn ${liked ? 'active-heart' : ''}`} onClick={handleLike}>
-                            {liked ? <HiHeart size={28} /> : <HiOutlineHeart size={28} />}
+                {/* ── Post Actions ───────────────── */}
+                <div className="post-card-actions">
+                    <div className="post-card-actions-left">
+                        <button className={`post-card-action-btn ${liked ? 'is-liked' : ''}`} onClick={handleLike}>
+                            {liked ? <HiHeart size={26} /> : <HiOutlineHeart size={26} />}
                         </button>
-                        <Link to={`/posts/${post._id}`} className="post-action-btn no-underline text-current">
-                            <HiChatAlt2 size={26} />
+                        <Link to={`/posts/${post._id}`} className="post-card-action-btn">
+                            <HiChatAlt2 size={24} />
                         </Link>
-                        <button className="post-action-btn" onClick={() => {
+                        <button className="post-card-action-btn" onClick={() => {
                             const url = `${window.location.origin}/posts/${post._id}`
                             navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'))
                         }}>
-                            <HiShare size={24} />
+                            <HiShare size={22} />
                         </button>
                     </div>
-                    <button className={`post-action-btn ${saved ? 'active-save' : ''}`} onClick={handleSave}>
-                        {saved ? <HiBookmark size={26} /> : <HiOutlineBookmark size={26} />}
+                    <button className={`post-card-action-btn ${saved ? 'is-saved' : ''}`} onClick={handleSave}>
+                        {saved ? <HiBookmark size={24} /> : <HiOutlineBookmark size={24} />}
                     </button>
                 </div>
 
-                {/* ── Footer: Engagement & Caption ── */}
-                <div className="post-footer-content px-4 pb-4">
-                    <div className="t-h4 font-bold text-primary mb-1">
-                        {likesCount > 0 ? `${likesCount.toLocaleString()} likes` : 'Be the first to like'}
+                {/* ── Post Footer ────────────────── */}
+                <footer className="post-card-footer">
+                    <div className="post-card-engagement">
+                        {likesCount > 0 && (
+                            <span className="post-card-likes">
+                                {likesCount.toLocaleString()} {likesCount === 1 ? 'like' : 'likes'}
+                            </span>
+                        )}
                     </div>
                     
                     {caption && post.mediaType !== 'text' && (
-                        <div className="t-body text-[14.5px] leading-snug">
-                            <span className="post-caption-author">{author.username}</span>
-                            {caption}
+                        <div className="post-card-caption">
+                            <Link to={`/profile/${author._id}`} className="post-card-caption-author">
+                                {author.username}
+                            </Link>
+                            <span className="post-card-caption-text">{caption}</span>
                         </div>
                     )}
 
                     {post.commentsCount > 0 && (
-                        <Link to={`/posts/${post._id}`} className="post-comments-preview no-underline block mt-1.5 opacity-60 hover:opacity-100 transition-opacity">
+                        <Link to={`/posts/${post._id}`} className="post-card-comments-link">
                             View all {post.commentsCount} comments
                         </Link>
                     )}
-                </div>
+                </footer>
             </motion.div>
             {editOpen && (
                 <EditPostModal
