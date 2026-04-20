@@ -96,6 +96,61 @@ const getUnreadCount = async (req, res, next) => {
     }
 };
 
+const editMessage = async (req, res, next) => {
+    try {
+        const { messageId } = req.params;
+        const { body } = req.body;
+        const message = await chatService.updateMessage(messageId, req.user.id, body);
+        
+        // Broadcast
+        const { getIO } = require('../../config/socket');
+        const io = getIO();
+        
+        // Find conversation to get participants
+        const Conversation = require('./Conversation');
+        const convo = await Conversation.findById(message.conversation);
+        if (convo) {
+            convo.participants.forEach(pId => {
+                io.to(`user:${pId.toString()}`).emit('message_edited', { 
+                    messageId: message._id, 
+                    body: message.body,
+                    conversationId: message.conversation 
+                });
+            });
+        }
+
+        res.json({ success: true, data: message });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const deleteMessage = async (req, res, next) => {
+    try {
+        const { messageId } = req.params;
+        const message = await chatService.deleteMessage(messageId, req.user.id);
+        
+        // Broadcast
+        const { getIO } = require('../../config/socket');
+        const io = getIO();
+        
+        const Conversation = require('./Conversation');
+        const convo = await Conversation.findById(message.conversation);
+        if (convo) {
+            convo.participants.forEach(pId => {
+                io.to(`user:${pId.toString()}`).emit('message_deleted', { 
+                    messageId: message._id,
+                    conversationId: message.conversation
+                });
+            });
+        }
+
+        res.json({ success: true, message: 'Message deleted' });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getConversations,
     getOrCreateConversation,
@@ -103,4 +158,6 @@ module.exports = {
     postMessage,
     markSeen,
     getUnreadCount,
+    editMessage,
+    deleteMessage,
 };

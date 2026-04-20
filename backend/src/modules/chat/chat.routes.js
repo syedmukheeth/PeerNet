@@ -13,5 +13,7 @@ router.post('/', chatController.getOrCreateConversation);
 router.get('/:conversationId/messages', chatController.getMessages);
 router.post('/:conversationId/messages', uploadMedia.single('media'), chatController.postMessage);
 router.patch('/:conversationId/messages/read', chatController.markSeen);
+router.patch('/:conversationId/messages/:messageId', chatController.editMessage);
+router.delete('/:conversationId/messages/:messageId', chatController.deleteMessage);
 
 module.exports = router;

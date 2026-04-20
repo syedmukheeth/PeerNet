@@ -29,9 +29,7 @@ export default function ChatHeader({ participant, isOnline, onBack, onNavigatePr
             </div>
 
             <div className="dm-header-actions">
-                <button className="dm-action-icon"><HiPhone /></button>
-                <button className="dm-action-icon"><HiVideoCamera /></button>
-                <button className="dm-action-icon"><HiInformationCircle /></button>
+                {/* Actions removed as requested */}
             </div>
         </header>
     )

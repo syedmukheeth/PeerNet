@@ -3035,6 +3035,24 @@ textarea:focus-visible {
   100% { transform: scale(1); opacity: 1; }
 }
 
+.dm-edit-banner {
+  background: var(--accent-subtle) !important;
+  border-left: 3px solid var(--accent) !important;
+  border-radius: var(--r-md) var(--r-md) 0 0;
+}
+.dm-edit-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+.dm-edit-body {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
 .dm-typing-indicator {
   padding: 12px;
   font-size: 12px;

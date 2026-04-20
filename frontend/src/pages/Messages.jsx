@@ -29,6 +29,7 @@ export default function Messages() {
     const [starting, setStarting] = useState(false)
     const [convoSearch, setConvoSearch] = useState('')
     const [text, setText] = useState('')
+    const [editingMessage, setEditingMessage] = useState(null)
     const [peerTyping, setPeerTyping] = useState(false)
     const [showNewConvo, setShowNewConvo] = useState(false)
     const [showEmoji, setShowEmoji] = useState(false)
@@ -191,6 +192,22 @@ export default function Messages() {
         const currentConvoId = activeConvo?._id;
         if (!currentConvoId) return;
 
+        if (editingMessage) {
+            const originalId = editingMessage._id
+            const newBody = text
+            setMessages(prev => prev.map(m => m._id === originalId ? { ...m, body: newBody } : m))
+            setEditingMessage(null)
+            setText('')
+            
+            try {
+                await chatApi.patch(`${currentConvoId}/messages/${originalId}`, { body: newBody })
+            } catch {
+                toast.error("Failed to update message")
+                // Rollback not strictly necessary here as socket will eventually sync, but good for UX
+            }
+            return
+        }
+
         const tempId = Date.now()
         const optimisticMsg = {
             _id: `opt_${tempId}`,
@@ -227,6 +244,12 @@ export default function Messages() {
         } finally {
             setIsUploading(false)
         }
+    }
+
+    const startEditing = (m) => {
+        setEditingMessage(m)
+        setText(m.body)
+        inputRef.current?.focus()
     }
 
     const handleFileSelect = (e) => {
@@ -317,6 +340,7 @@ export default function Messages() {
                                             isSelf={(m.sender?._id || m.sender) === user?._id}
                                             peer={peer}
                                             onDelete={deleteMessage}
+                                            onEdit={startEditing}
                                             timeago={timeago}
                                         />
                                     ))}
@@ -344,6 +368,11 @@ export default function Messages() {
                             isUploading={isUploading}
                             inputRef={inputRef}
                             fileRef={fileRef}
+                            editingMessage={editingMessage}
+                            onCancelEdit={() => {
+                                setEditingMessage(null)
+                                setText('')
+                            }}
                         />
                     </>
                 ) : (

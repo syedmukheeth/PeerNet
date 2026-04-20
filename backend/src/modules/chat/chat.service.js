@@ -127,6 +127,23 @@ const getUnreadCount = async (userId) => {
     });
 };
 
+const updateMessage = async (messageId, userId, body) => {
+    const message = await Message.findOne({ _id: messageId, sender: userId });
+    if (!message) throw new ApiError(403, 'Message not found or access denied');
+
+    message.body = body;
+    await message.save();
+    return message.populate('sender', '_id username avatarUrl');
+};
+
+const deleteMessage = async (messageId, userId) => {
+    const message = await Message.findOne({ _id: messageId, sender: userId });
+    if (!message) throw new ApiError(403, 'Message not found or access denied');
+    
+    await Message.deleteOne({ _id: messageId });
+    return message;
+};
+
 module.exports = {
     getOrCreateConversation,
     getUserConversations,
@@ -134,4 +151,6 @@ module.exports = {
     saveMessage,
     markAsSeen,
     getUnreadCount,
+    updateMessage,
+    deleteMessage
 };

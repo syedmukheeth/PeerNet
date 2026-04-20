@@ -13,7 +13,9 @@ export default function MessageComposer({
     insertEmoji,
     isUploading,
     inputRef,
-    fileRef
+    fileRef,
+    editingMessage,
+    onCancelEdit
 }) {
     return (
         <footer className="dm-composer-root">
@@ -29,6 +31,20 @@ export default function MessageComposer({
                             </div>
                         )}
                         <button className="dm-preview-remove" onClick={() => setFilePreview(null)}>
+                            <HiX />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {editingMessage && (
+                <div className="dm-composer-preview">
+                    <div className="dm-preview-card dm-edit-banner">
+                        <div className="dm-preview-doc">
+                            <span className="dm-edit-label">Editing Message</span>
+                            <span className="dm-edit-body truncate">{editingMessage.body}</span>
+                        </div>
+                        <button className="dm-preview-remove" onClick={onCancelEdit}>
                             <HiX />
                         </button>
                     </div>
