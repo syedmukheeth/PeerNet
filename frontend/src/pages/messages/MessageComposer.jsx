@@ -35,10 +35,14 @@ export default function MessageComposer({
                 </div>
             )}
 
-            <div className="dm-composer-main">
-                <div className="dm-composer-actions-left">
-                    <button className="dm-composer-icon-btn" onClick={() => fileRef.current?.click()}>
-                        <HiPhotograph />
+            <div className="dm-composer-container">
+                <div className="dm-composer-main-pill">
+                    <button 
+                        className="dm-composer-pill-action" 
+                        onClick={() => fileRef.current?.click()}
+                        title="Attach file"
+                    >
+                        <HiPhotograph size={22} />
                     </button>
                     <input 
                         type="file" 
@@ -47,16 +51,14 @@ export default function MessageComposer({
                         style={{ display: 'none' }} 
                         accept="image/*,video/*"
                     />
-                </div>
 
-                <div className="dm-input-area">
-                    <div className="dm-input-wrapper">
+                    <div className="dm-input-flex-wrapper">
                         <textarea
                             ref={inputRef}
                             value={text}
                             onChange={handleType}
                             placeholder="Message..."
-                            className="dm-textarea dark-scrollbar"
+                            className="dm-textarea-pill dark-scrollbar"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault()
@@ -64,36 +66,37 @@ export default function MessageComposer({
                                 }
                             }}
                         />
-                        <button 
-                            className="dm-emoji-btn" 
-                            onClick={() => setShowEmoji(!showEmoji)}
-                        >
-                            <HiEmojiHappy />
-                        </button>
                         
-                        {showEmoji && (
-                            <div className="dm-emoji-popover">
-                                <EmojiPicker 
-                                    onEmojiClick={insertEmoji}
-                                    theme="dark"
-                                    width={300}
-                                    height={400}
-                                />
-                            </div>
-                        )}
+                        <div className="dm-pill-emoji-wrap">
+                            <button 
+                                className="dm-emoji-btn-pill" 
+                                onClick={() => setShowEmoji(!showEmoji)}
+                            >
+                                <HiEmojiHappy size={22} />
+                            </button>
+                            
+                            {showEmoji && (
+                                <div className="dm-emoji-popover-pill">
+                                    <EmojiPicker 
+                                        onEmojiClick={insertEmoji}
+                                        theme="dark"
+                                        width={300}
+                                        height={400}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                <div className="dm-composer-actions-right">
                     <button 
-                        className={`dm-send-btn ${(!text.trim() && !filePreview) || isUploading ? 'disabled' : ''}`}
+                        className={`dm-send-btn-pill ${(!text.trim() && !filePreview) || isUploading ? 'disabled' : ''}`}
                         onClick={handleSend}
                         disabled={(!text.trim() && !filePreview) || isUploading}
                     >
                         {isUploading ? (
-                            <div className="dm-loading-spinner-sm" />
+                            <div className="dm-loading-spinner-pill" />
                         ) : (
-                            <HiPaperAirplane />
+                            <HiPaperAirplane size={20} className="rotate-90" />
                         )}
                     </button>
                 </div>

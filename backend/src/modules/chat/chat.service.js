@@ -21,11 +21,28 @@ const getOrCreateConversation = async (userId, targetUserId) => {
     return conversation;
 };
 
-const getUserConversations = async (userId) =>
-    Conversation.find({ participants: userId })
+const getUserConversations = async (userId) => {
+    const conversations = await Conversation.find({ participants: userId })
         .populate('participants', 'username avatarUrl fullName isVerified')
         .populate('lastMessage')
         .sort({ updatedAt: -1 });
+
+    // Inject unread counts for each conversation
+    const mapped = await Promise.all(
+        conversations.map(async (conv) => {
+            const count = await Message.countDocuments({
+                conversation: conv._id,
+                sender: { $ne: userId },
+                status: { $ne: 'seen' },
+            });
+            const obj = conv.toObject();
+            obj.unreadCount = count;
+            return obj;
+        })
+    );
+
+    return mapped;
+};
 
 const getMessages = async (conversationId, userId, { limit = 30, cursor = null }) => {
     const conversation = await Conversation.findById(conversationId);
