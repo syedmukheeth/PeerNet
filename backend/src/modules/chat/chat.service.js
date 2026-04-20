@@ -77,8 +77,8 @@ const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaPubl
         throw new ApiError(403, 'Access denied or conversation not found');
     }
 
-    await message.populate('sender', 'username avatarUrl');
-    return message;
+    await message.populate('sender', '_id username avatarUrl');
+    return { message, conversation: updated };
 };
 
 const markAsSeen = async (conversationId, userId) => {

@@ -42,12 +42,20 @@ module.exports = (io, socket) => {
             const { conversationId, body, mediaUrl } = data;
             if (!conversationId || !body) return;
 
-            const message = await chatService.saveMessage(conversationId, userId, { body, mediaUrl });
+            const { message, conversation } = await chatService.saveMessage(conversationId, userId, { body, mediaUrl });
             
             // Attach tempId for optimistic reconciliation on the sender's side
             const messageWithTemp = { ...message.toObject(), tempId: data.tempId, conversationId };
             
+            // 1. Emit to active chat room
             io.to(`chat:${conversationId}`).emit('new_message', messageWithTemp);
+
+            // 2. Emit to each participant's private user room
+            if (conversation && conversation.participants) {
+                conversation.participants.forEach(pId => {
+                    io.to(`user:${pId.toString()}`).emit('new_message', messageWithTemp);
+                });
+            }
         } catch (err) {
             socket.emit('error', { message: err.message });
         }

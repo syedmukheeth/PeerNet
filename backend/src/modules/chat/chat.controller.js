@@ -47,20 +47,29 @@ const postMessage = async (req, res, next) => {
             mediaPublicId = result.public_id;
         }
 
-        const message = await chatService.saveMessage(conversationId, req.user.id, {
+        const { message, conversation } = await chatService.saveMessage(conversationId, req.user.id, {
             body,
             mediaUrl,
             mediaPublicId,
             tempId
         });
-
+        
         // Broadcast to relevant room
         const { getIO } = require('../../config/socket');
         const io = getIO();
         
         // Use consistent 'chat:{id}' room name
         const messageWithTemp = { ...message.toObject(), tempId, conversationId };
+        
+        // 1. Emit to active chat room (for users currently viewing the chat)
         io.to(`chat:${conversationId}`).emit('new_message', messageWithTemp);
+
+        // 2. Emit to each participant's private user room (for global notifications/badges)
+        if (conversation && conversation.participants) {
+            conversation.participants.forEach(pId => {
+                io.to(`user:${pId.toString()}`).emit('new_message', messageWithTemp);
+            });
+        }
 
         res.json({ success: true, data: message });
     } catch (err) {
