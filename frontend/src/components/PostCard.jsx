@@ -147,15 +147,27 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
         <>
             <motion.div 
                 className="l-post-card glass-card"
-                initial={{ opacity: 0, scale: 0.99 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}>
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                    type: "spring", 
+                    stiffness: 260, 
+                    damping: 20,
+                    delay: 0.05
+                }}
+            >
                 
                 {/* ── Post Header ────────────────── */}
                 <header className="post-card-header">
                     <div className="post-card-user">
                         <Link to={`/profile/${author._id}`} className="post-card-avatar-link">
-                            <img src={avatarUrl} className="post-card-avatar" alt={author.username} />
+                            <img 
+                                src={avatarUrl} 
+                                className="post-card-avatar" 
+                                alt={author.username} 
+                                loading="lazy"
+                            />
                         </Link>
                         <div className="post-card-user-meta">
                             <div className="post-card-user-row">

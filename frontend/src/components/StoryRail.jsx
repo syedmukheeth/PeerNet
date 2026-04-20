@@ -229,11 +229,16 @@ function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
         <motion.div
             className="story-item"
             onClick={onClick}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05, duration: 0.22 }}
-            whileHover={{ y: -3 }}
-            whileTap={{ scale: 0.93 }}
+            initial={{ opacity: 0, scale: 0.8, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
+                delay: index * 0.04 
+            }}
+            whileHover={{ y: -4, scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
         >
             <div className="story-avatar-wrap">
                 <div className={`story-ring${seen ? ' story-ring--seen' : ''}`}>

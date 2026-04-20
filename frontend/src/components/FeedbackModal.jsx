@@ -26,29 +26,23 @@ export default function FeedbackModal({ onClose }) {
     }
 
     return (
-        <motion.div 
-            className="modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-        >
+        <div className="modal-overlay" onClick={onClose}>
             <motion.div 
-                className="glass-card"
-                style={{ width: '100%', maxWidth: 460, padding: 24, borderRadius: 20, position: 'relative' }}
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="modal-card w-full max-w-[460px] p-6"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ type: "spring", stiffness: 350, damping: 25 }}
                 onClick={e => e.stopPropagation()}
             >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div className="icon-wrap-accent" style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', padding: 8, borderRadius: 10 }}>
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-accent-subtle text-accent rounded-xl flex items-center justify-center">
                             <HiClipboardList size={22} />
                         </div>
-                        <h3 className="t-heading">Send Feedback</h3>
+                        <h3 className="t-h2 m-0">Send Feedback</h3>
                     </div>
-                    <button className="btn-icon" onClick={onClose}><HiX size={20} /></button>
+                    <button className="btn btn-icon-sm" onClick={onClose}><HiX size={20} /></button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex-col gap-4">
@@ -80,14 +74,18 @@ export default function FeedbackModal({ onClose }) {
                         autoFocus
                     />
 
-                    <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                        <button type="button" className="btn btn-ghost w-full" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="btn btn-primary w-full" disabled={loading || !text.trim()}>
-                            {loading ? <span className="spinner" style={{ width: 16, height: 16 }} /> : 'Submit'}
+                    <div className="flex gap-3 mt-4">
+                        <button type="button" className="btn btn-secondary flex-1" onClick={onClose}>Cancel</button>
+                        <button 
+                            type="submit" 
+                            className={`btn btn-primary flex-1 ${loading ? 'btn-loading' : ''}`} 
+                            disabled={loading || !text.trim()}
+                        >
+                            {loading ? 'Submitting...' : 'Submit'}
                         </button>
                     </div>
                 </form>
             </motion.div>
-        </motion.div>
+        </div>
     )
 }

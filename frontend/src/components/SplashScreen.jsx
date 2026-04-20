@@ -18,9 +18,12 @@ export default function SplashScreen({ onDone }) {
                     key="splash"
                     className="splash-screen"
                     initial={{ opacity: 1 }}
-                    animate={{ opacity: phase === 'out' ? 0 : 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.55, ease: 'easeInOut' }}
+                    animate={{ 
+                        opacity: phase === 'out' ? 0 : 1, 
+                        scale: phase === 'out' ? 1.05 : 1 
+                    }}
+                    exit={{ opacity: 0, scale: 1.1 }}
+                    transition={{ duration: 0.65, ease: [0.4, 0, 0.2, 1] }}
                     onAnimationComplete={() => { if (phase === 'out') setPhase('done') }}
                 >
                     {/* Background orbs */}

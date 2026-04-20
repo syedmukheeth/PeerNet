@@ -21,17 +21,14 @@ export default function AccountSwitcherModal({ onClose }) {
     }
 
     return (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+        <div className="modal-overlay" onClick={onClose}>
             <motion.div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={onClose}
-            />
-            <motion.div
-                className="relative w-full max-w-sm glass-card overflow-hidden"
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="modal-card w-full max-w-sm"
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                onClick={e => e.stopPropagation()}
             >
                 <div className="glass-header p-4 flex items-center justify-between">
                     <h3 className="font-bold text-lg m-0">Switch accounts</h3>

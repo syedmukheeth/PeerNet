@@ -114,15 +114,18 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-                    <button className="btn btn-secondary" style={{ flex: 1 }} onClick={onClose}>Cancel</button>
+                <div className="flex gap-3 mt-8">
+                    <button className="btn btn-secondary flex-1" onClick={onClose} disabled={loading}>
+                        Cancel
+                    </button>
                     <motion.button
-                        className="btn btn-primary"
-                        style={{ flex: 1 }}
+                        className={`btn btn-primary flex-1 ${loading ? 'btn-loading' : ''}`}
                         onClick={handleSave}
                         disabled={loading}
-                        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        {loading ? <span className="spinner" style={{ width: 16, height: 16 }} /> : 'Save Changes'}
+                        whileHover={{ scale: 1.02 }} 
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        {loading ? 'Saving...' : 'Save Changes'}
                     </motion.button>
                 </div>
             </motion.div>

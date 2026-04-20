@@ -310,21 +310,18 @@ export default function CreatePostModal({ onClose }) {
 
                     {/* Footer */}
                     <footer className="create-post-footer">
-                        <button className="btn btn-ghost" onClick={onClose} disabled={loading}>
+                        <button className="btn btn-secondary px-6" onClick={onClose} disabled={loading}>
                             Cancel
                         </button>
                         <motion.button 
-                            className="btn btn-primary px-8"
+                            className={`btn btn-primary px-8 ${loading ? 'btn-loading' : ''}`}
                             onClick={handleSubmit}
                             disabled={loading || (!isTextMode && !file) || (isTextMode && !caption.trim())}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            {loading ? (
-                                <><span className="spinner-sm" /> Sharing...</>
-                            ) : (
-                                <><HiCheckCircle /> {isTextMode ? 'Share Status' : 'Share Post'}</>
-                            )}
+                            {!loading && <HiCheckCircle />}
+                            {loading ? 'Sharing...' : (isTextMode ? 'Share Status' : 'Share Post')}
                         </motion.button>
                     </footer>
                 </motion.div>

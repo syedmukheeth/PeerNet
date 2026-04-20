@@ -8,10 +8,11 @@
 /* ── Dark Mode ────────────────────────────────────────────── */
 :root,
 [data-theme="dark"] {
-  --bg:       #09090b;
-  --surface:  #111113;
-  --card:     #18181b;
-  --hover:    #1f1f23;
+  --bg:       #000000; /* True black for pure Digital Obsidian */
+  --surface:  #09090b;
+  --card:     #121214;
+  --surface-el: #09090b; /* High-fidelity matte surface */
+  --hover:    #1a1a1c;
 
   --border:    rgba(255,255,255,0.06);
   --border-md: rgba(255,255,255,0.10);
@@ -43,7 +44,9 @@
   --shadow-sm: 0 1px 4px rgba(0,0,0,0.4);
   --shadow-md: 0 8px 32px rgba(0,0,0,0.55);
   --shadow-lg: 0 24px 64px rgba(0,0,0,0.75);
+  --shadow-xl: 0 32px 80px rgba(0,0,0,0.85);
   --shadow-accent: 0 0 32px rgba(124,58,237,0.18);
+  --text-glow: #ffffff;
 
   --glass-bg:     rgba(17,17,19,0.75);
   --glass-border: rgba(255,255,255,0.07);
@@ -62,6 +65,7 @@
   --bg:       #f4f4f5;
   --surface:  #ffffff;
   --card:     #ffffff;
+  --surface-el: #fbfbfc; /* Very light matte surface */
   --hover:    #f1f1f4;
 
   --border:    rgba(0,0,0,0.05);
@@ -94,7 +98,9 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04);
   --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
   --shadow-lg: 0 20px 48px rgba(0,0,0,0.12);
+  --shadow-xl: 0 32px 80px rgba(0,0,0,0.22);
   --shadow-accent: 0 0 24px rgba(124,58,237,0.12);
+  --text-glow: var(--accent);
 
   --glass-bg:     rgba(255,255,255,0.85);
   --glass-border: rgba(0,0,0,0.06);
@@ -153,6 +159,7 @@
   --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
   --trans-fast:    150ms cubic-bezier(0.4, 0, 0.2, 1);
   --trans-smooth:  300ms cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-spring:  500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /* Z-index */
   --z-below:   -1;
@@ -168,8 +175,8 @@
   /* Layout */
   --sidebar-w: 244px;
   --sidebar-collapsed-w: 72px;
-  --feed-max:  468px;
-  --right-panel-w: 292px;
+  --feed-max:  580px; /* Wider feed for better image focus */
+  --right-panel-w: 320px; /* Standardized to premium width */
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -212,7 +219,10 @@ button {
   color: inherit;
 }
 
-button:active:not(:disabled) { transform: scale(0.96); }
+button:active:not(:disabled) { 
+  transform: scale(0.98); 
+  filter: brightness(0.95);
+}
 
 button:focus-visible {
   outline: none;
@@ -220,9 +230,44 @@ button:focus-visible {
   border-radius: var(--r-sm);
 }
 
+/* Premium Button States */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  border-radius: var(--r-md);
+  transition: all 0.2s var(--ease-out);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.btn-loading::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 input, textarea {
   font-family: inherit;
   color: inherit;
+  transition: all 0.2s var(--ease-out);
 }
 
 input::placeholder,
@@ -248,33 +293,47 @@ textarea:focus-visible {
 }
 
 /* ══════════════════════════════════════════════════════════
-   SCROLLBARS
+   SCROLLBARS — Ghostly & Professional
    ══════════════════════════════════════════════════════════ */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-md) transparent;
+  scrollbar-color: var(--border-lg) transparent;
 }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
+
+::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+
 ::-webkit-scrollbar-thumb {
-  background: var(--border-md);
-  border-radius: 10px;
+  background: var(--border-lg);
+  border-radius: var(--r-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background 0.3s ease;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); }
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
+::-webkit-scrollbar-thumb:hover { 
+  background: var(--text-3);
+  background-clip: content-box;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb { 
+  background: rgba(255,255,255,0.08); 
+  background-clip: content-box;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { 
+  background: rgba(255,255,255,0.15); 
+  background-clip: content-box;
+}
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-.dark-scrollbar::-webkit-scrollbar { width: 5px; }
-.dark-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.dark-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(var(--text-1-rgb), 0.10);
-  border-radius: 10px;
-}
 
 /* ══════════════════════════════════════════════════════════
    TYPOGRAPHY SYSTEM
@@ -293,28 +352,29 @@ textarea:focus-visible {
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--text-1);
 }
 
 .t-h2 {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--text-1);
 }
 
 .t-h3 {
   font-size: 15px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--text-1);
 }
 
 .t-body {
   font-size: 15px;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text-2);
 }
 
@@ -415,13 +475,37 @@ textarea:focus-visible {
   box-shadow: var(--shadow-sm);
 }
 
-.l-glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--s-4);
+}
+
+.modal-content {
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 400px) {
+  .profile-username-row {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+  .profile-stats {
+    gap: var(--s-4);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1302,10 +1386,7 @@ textarea:focus-visible {
   text-decoration: none;
   margin-top: 2px;
 }
-.post-card-comments-link:hover { opacity: 0.8; });
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  z-index: 20;
-}
+.post-card-comments-link:hover { opacity: 0.8; }
 
 .story-name {
   font-size: 11px;

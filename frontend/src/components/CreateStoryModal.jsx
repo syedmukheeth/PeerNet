@@ -254,24 +254,18 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
 
                         {/* Modal Footer Actions */}
                         <div className="status-footer-actions">
-                            <button className="status-btn-cancel" onClick={onClose}>
+                            <button className="btn btn-secondary px-6" onClick={onClose} disabled={loading}>
                                 Cancel
                             </button>
                             <button 
-                                className="status-btn-share" 
+                                className={`btn btn-primary px-8 ${loading ? 'btn-loading' : ''}`} 
                                 onClick={handleSubmit}
                                 disabled={loading || !content.trim()}
                             >
-                                {loading ? <span className="spinner-sm" /> : (
-                                    <>
-                                        <span>Share Status</span>
-                                        <span className="dot-blink" />
-                                    </>
-                                )}
+                                {loading ? 'Sharing...' : 'Share Status'}
                             </button>
                         </div>
                     </div>
-                </motion.div>
                 </motion.div>
             </motion.div>
         </AnimatePresence>

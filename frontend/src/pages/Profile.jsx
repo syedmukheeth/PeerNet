@@ -277,21 +277,43 @@ export default function Profile() {
                     <>
                         <div className="profile-grid">
                             {displayPosts.map((p, i) => (
-                                <Link key={p._id} to={`/posts/${p._id}`} className="profile-grid-item"
-                                    style={{ animationDelay: `${i * 40}ms` }}>
-                                    {p.mediaType === 'video'
-                                        ? <video src={p.mediaUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
-                                        : <img src={p.mediaUrl} alt="" loading="lazy" />
-                                    }
-                                    <div className="profile-grid-overlay">
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <HiHeart /> {p.likesCount || 0}
-                                        </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <HiChat /> {p.commentsCount || 0}
-                                        </span>
-                                    </div>
-                                </Link>
+                                <motion.div
+                                    key={p._id}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ 
+                                        type: "spring", 
+                                        stiffness: 300, 
+                                        damping: 25,
+                                        delay: Math.min(i * 0.03, 0.3) 
+                                    }}
+                                >
+                                    <Link to={`/posts/${p._id}`} className="profile-grid-item m-0 h-full">
+                                        {p.mediaType === 'video'
+                                            ? <video 
+                                                src={p.mediaUrl} 
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                muted 
+                                                playsInline
+                                            />
+                                            : <img 
+                                                src={p.mediaUrl} 
+                                                alt="" 
+                                                loading="lazy" 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        }
+                                        <div className="profile-grid-overlay">
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <HiHeart /> {p.likesCount || 0}
+                                            </span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <HiChat /> {p.commentsCount || 0}
+                                            </span>
+                                        </div>
+                                    </Link>
+                                </motion.div>
                             ))}
                         </div>
                         {displayPosts.length === 0 && (
