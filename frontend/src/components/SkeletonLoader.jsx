@@ -19,6 +19,8 @@ export function PostSkeleton() {
     );
 }
 
+export const PostDetailSkeleton = PostSkeleton;
+
 export function StorySkeleton() {
     return (
         <div className="sk-story-rail">

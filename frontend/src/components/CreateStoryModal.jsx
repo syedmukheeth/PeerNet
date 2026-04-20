@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-    HiX, HiEmojiHappy, HiTextAlignmentLeft, 
-    HiTextAlignmentCenter, HiTextAlignmentRight, HiSparkles 
-} from 'react-icons/hi'
+import { HiX, HiEmojiHappy, HiSparkles } from 'react-icons/hi'
+import { FiAlignLeft, FiAlignCenter, FiAlignRight } from 'react-icons/fi'
 import EmojiPicker from 'emoji-picker-react'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -188,13 +186,13 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                                 <div className="tool-divider" />
                                 <div className="align-controls">
                                     <button className={`tool-icon-btn ${textAlign === 'left' ? 'active' : ''}`} onClick={() => setTextAlign('left')}>
-                                        <HiTextAlignmentLeft size={20} />
+                                        <FiAlignLeft size={20} />
                                     </button>
                                     <button className={`tool-icon-btn ${textAlign === 'center' ? 'active' : ''}`} onClick={() => setTextAlign('center')}>
-                                        <HiTextAlignmentCenter size={20} />
+                                        <FiAlignCenter size={20} />
                                     </button>
                                     <button className={`tool-icon-btn ${textAlign === 'right' ? 'active' : ''}`} onClick={() => setTextAlign('right')}>
-                                        <HiTextAlignmentRight size={20} />
+                                        <FiAlignRight size={20} />
                                     </button>
                                 </div>
                             </div>
