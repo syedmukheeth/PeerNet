@@ -37,7 +37,7 @@ const mobileBottomLinksRight = [
 
 export default function Layout() {
     const { user, logout } = useAuth()
-    const { isDark } = useTheme()
+    const { isDark, toggle } = useTheme()
     const { saveCurrentAccount } = useMultiAccount()
     const navigate = useNavigate()
     const location = useLocation()
@@ -255,15 +255,19 @@ export default function Layout() {
                     
                     <motion.button 
                         variants={navItemVariants} 
-                        className="ig-link" 
+                        className="ig-link w-full border-none bg-transparent text-left" 
                         onClick={() => setShowCreate(true)}
-                        whileHover={{ x: 4 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                     >
-                        <div className="ig-icon-wrap">
-                            <HiPlusCircle className="ig-icon" />
-                        </div>
-                        <span className="ig-label">Create</span>
+                        <motion.div 
+                            className="flex items-center gap-4 w-full"
+                            whileHover={{ x: 4 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                        >
+                            <div className="ig-icon-wrap">
+                                <HiPlusCircle className="ig-icon" />
+                            </div>
+                            <span className="ig-label">Create</span>
+                        </motion.div>
                     </motion.button>
 
                     {user?.role === 'admin' && (
@@ -313,7 +317,7 @@ export default function Layout() {
                                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
                                     transition={{ duration: 0.2 }}
                                 >
-                                    <button className="ig-more-item" onClick={() => { document.querySelector('.theme-toggle')?.click(); setShowMore(false) }}>
+                                    <button className="ig-more-item" onClick={() => { toggle(); setShowMore(false) }}>
                                         {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
                                         <span>Appearance</span>
                                     </button>
@@ -331,15 +335,19 @@ export default function Layout() {
                             )}
                         </AnimatePresence>
                         <motion.button 
-                            className={`ig-link ${showMore ? 'ig-link--active' : ''}`} 
+                            className={`ig-link w-full border-none bg-transparent text-left ${showMore ? 'ig-link--active' : ''}`} 
                             onClick={() => setShowMore(!showMore)}
-                            whileHover={{ x: 4 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                         >
-                            <div className="ig-icon-wrap">
-                                <HiMenu className="ig-icon" />
-                            </div>
-                            <span className="ig-label">More</span>
+                            <motion.div 
+                                className="flex items-center gap-4 w-full"
+                                whileHover={{ x: 4 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                            >
+                                <div className="ig-icon-wrap">
+                                    <HiMenu className="ig-icon" />
+                                </div>
+                                <span className="ig-label">More</span>
+                            </motion.div>
                         </motion.button>
                     </div>
                 </div>
@@ -451,7 +459,6 @@ export default function Layout() {
                 {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
                 {showSwitcher && <AccountSwitcherModal onClose={() => setShowSwitcher(false)} />}
             </AnimatePresence>
-            <ThemeToggle className="sr-only" />
         </div>
     )
 }
