@@ -212,7 +212,13 @@ export default function Layout() {
                 {/* Top: Branding */}
                 <div className="sidebar-logo-row">
                     <Link to="/" className="sidebar-brand">
-                        <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
+                        <motion.img 
+                            src={logoImg} 
+                            alt="PeerNet" 
+                            className="sidebar-brand-img"
+                            whileHover={{ rotate: -5, scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                        />
                         <span className="peernetLogo">PeerNet</span>
                     </Link>
                 </div>
@@ -226,22 +232,34 @@ export default function Layout() {
                 >
                     {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
                         <motion.div key={to} variants={navItemVariants}>
-                            <NavLink to={to} end={exact} className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                                {() => (
-                                    <>
-                                        <div className="ig-icon-wrap">
-                                            <Icon className="ig-icon" />
-                                            {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
-                                            {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
-                                        </div>
-                                        <span className="ig-label">{label}</span>
-                                    </>
-                                )}
+                            <NavLink 
+                                to={to} 
+                                end={exact} 
+                                className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
+                            >
+                                <motion.div 
+                                    className="flex items-center gap-4 w-full"
+                                    whileHover={{ x: 4 }}
+                                    transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                                >
+                                    <div className="ig-icon-wrap">
+                                        <Icon className="ig-icon" />
+                                        {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                        {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
+                                    </div>
+                                    <span className="ig-label">{label}</span>
+                                </motion.div>
                             </NavLink>
                         </motion.div>
                     ))}
                     
-                    <motion.button variants={navItemVariants} className="ig-link" onClick={() => setShowCreate(true)}>
+                    <motion.button 
+                        variants={navItemVariants} 
+                        className="ig-link" 
+                        onClick={() => setShowCreate(true)}
+                        whileHover={{ x: 4 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                    >
                         <div className="ig-icon-wrap">
                             <HiPlusCircle className="ig-icon" />
                         </div>
@@ -250,11 +268,20 @@ export default function Layout() {
 
                     {user?.role === 'admin' && (
                         <motion.div variants={navItemVariants}>
-                            <NavLink to="/admin" className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                                <div className="ig-icon-wrap">
-                                    <HiShieldCheck className="ig-icon text-accent" />
-                                </div>
-                                <span className="ig-label">Admin Console</span>
+                            <NavLink 
+                                to="/admin" 
+                                className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
+                            >
+                                <motion.div 
+                                    className="flex items-center gap-4 w-full"
+                                    whileHover={{ x: 4 }}
+                                    transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                                >
+                                    <div className="ig-icon-wrap">
+                                        <HiShieldCheck className="ig-icon text-accent" />
+                                    </div>
+                                    <span className="ig-label">Admin Console</span>
+                                </motion.div>
                             </NavLink>
                         </motion.div>
                     )}
@@ -263,16 +290,18 @@ export default function Layout() {
                 {/* Bottom: Profile & Settings */}
                 <div className="sidebar-footer">
                     {/* Profile Mini Card */}
-                    <div 
+                    <motion.div 
                         className="sidebar-profile-card"
                         onClick={() => navigate(`/profile/${user?._id}`)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                     >
                         <img src={avatarUrl} className="profile-card-avatar" alt="" />
                         <div className="profile-card-info">
                             <span className="profile-card-name">{user?.username}</span>
                             <span className="profile-card-role">{user?.role === 'admin' ? 'Super Admin' : 'Creator'}</span>
                         </div>
-                    </div>
+                    </motion.div>
 
                     <div className="sidebar-more-wrap" ref={moreRef}>
                         <AnimatePresence>
@@ -301,17 +330,20 @@ export default function Layout() {
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                        <button 
+                        <motion.button 
                             className={`ig-link ${showMore ? 'ig-link--active' : ''}`} 
                             onClick={() => setShowMore(!showMore)}
+                            whileHover={{ x: 4 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                         >
                             <div className="ig-icon-wrap">
                                 <HiMenu className="ig-icon" />
                             </div>
                             <span className="ig-label">More</span>
-                        </button>
+                        </motion.button>
                     </div>
                 </div>
+
             </aside>
 
             <main className="main-col" ref={mainRef}>
