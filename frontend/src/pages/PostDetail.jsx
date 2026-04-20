@@ -333,14 +333,15 @@ export default function PostDetail() {
                         <Link to={`/profile/${author._id}`}>
                             <img src={avatar} className="post-detail-avatar" alt="" />
                         </Link>
-                        <div className="flex-1">
+                        <div className="flex-1 flex items-center">
                             <div className="l-cluster gap-1 font-bold text-[14px]">
-                                <Link to={`/profile/${author._id}`} className="text-primary no-underline">
+                                <Link to={`/profile/${author._id}`} className="text-primary no-underline hover:underline">
                                     {author.username}
                                 </Link>
                                 {author.isVerified && <HiBadgeCheck className="text-accent text-[13px]" />}
+                                <span style={{ color: 'var(--text-3)', fontWeight: 400, margin: '0 4px', fontSize: 12 }}>•</span>
+                                <span style={{ color: 'var(--text-3)', fontWeight: 400, fontSize: 13 }}>{timeago(post.createdAt)}</span>
                             </div>
-                            <div className="text-[12px] text-muted">{timeago(post.createdAt)}</div>
                         </div>
 
                         {/* ··· menu */}
@@ -388,11 +389,17 @@ export default function PostDetail() {
 
                     {/* Caption */}
                     {post.caption && (
-                        <div className="post-detail-caption">
-                            <img src={avatar} className="post-detail-caption-avatar" alt="" />
-                            <div className="text-[14px] leading-6">
-                                <strong className="mr-1.5">{author.username}</strong>
-                                {post.caption}
+                        <div className="post-detail-caption" style={{ padding: '14px 16px 4px', borderBottom: 'none', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                            <Link to={`/profile/${author._id}`}>
+                                <img src={avatar} className="post-detail-caption-avatar" style={{ width: 32, height: 32, marginTop: 2, flexShrink: 0 }} alt="" />
+                            </Link>
+                            <div style={{ fontSize: 14, lineHeight: 1.5, wordWrap: 'break-word', flex: 1 }}>
+                                <strong style={{ marginRight: 6 }}>
+                                    <Link to={`/profile/${author._id}`} style={{ color: 'var(--text-1)', textDecoration: 'none' }} className="hover:underline">
+                                        {author.username}
+                                    </Link>
+                                </strong>
+                                <span style={{ color: 'var(--text-1)' }}>{post.caption}</span>
                             </div>
                         </div>
                     )}
@@ -409,21 +416,21 @@ export default function PostDetail() {
                             comments.map(c => {
                                 const cav = c.author?.avatarUrl || `https://ui-avatars.com/api/?name=${c.author?.username}&background=6366F1&color=fff`
                                 return (
-                                    <div id={`comment-${c._id}`} key={c._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '4px 6px', borderRadius: 8 }}>
+                                    <div id={`comment-${c._id}`} key={c._id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '6px 0', borderRadius: 8 }}>
                                         <Link to={`/profile/${c.author?._id}`}>
-                                            <img src={cav} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} alt="" />
+                                            <img src={cav} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block', marginTop: 2 }} alt="" />
                                         </Link>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: 14, lineHeight: 1.5 }}>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ fontSize: 14, lineHeight: 1.5, wordWrap: 'break-word' }}>
                                                 <strong style={{ marginRight: 6 }}>
-                                                    <Link to={`/profile/${c.author?._id}`} style={{ color: 'var(--text-1)', textDecoration: 'none' }}>
+                                                    <Link to={`/profile/${c.author?._id}`} style={{ color: 'var(--text-1)', textDecoration: 'none' }} className="hover:underline">
                                                         {c.author?.username}
                                                     </Link>
                                                 </strong>
-                                                {c.body}
+                                                <span style={{ color: 'var(--text-1)' }}>{c.body}</span>
                                                 {c.isAiVerified && (
                                                     <HiShieldCheck 
-                                                        style={{ color: '#10B981', fontSize: 13, marginLeft: 4, verticalAlign: 'middle', cursor: 'help' }} 
+                                                        style={{ color: '#10B981', fontSize: 14, marginLeft: 6, verticalAlign: 'middle', cursor: 'help' }} 
                                                         title="AI Verified Safe" 
                                                     />
                                                 )}
@@ -453,12 +460,13 @@ export default function PostDetail() {
                                             </div>
 
                                             {/* Replies Toggle */}
-                                            <div style={{ marginTop: 8 }}>
+                                            <div style={{ marginTop: 12, marginBottom: 4 }}>
                                                 <button 
                                                     onClick={() => toggleReplies(c._id)}
-                                                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', color: 'var(--text-3)', fontSize: 11, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                                                    style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', color: 'var(--text-3)', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                                                    className="hover:opacity-80"
                                                 >
-                                                    <div style={{ width: 20, height: 1, background: 'var(--border)' }} />
+                                                    <div style={{ width: 24, height: 1, background: 'var(--border-md)' }} />
                                                     {replyData[c._id]?.loading ? 'Loading...' : replyData[c._id]?.show ? 'Hide replies' : 'View replies'}
                                                 </button>
                                             </div>
@@ -469,18 +477,18 @@ export default function PostDetail() {
                                                     {replyData[c._id]?.replies?.map(reply => {
                                                         const rav = reply.author?.avatarUrl || `https://ui-avatars.com/api/?name=${reply.author?.username}&background=6366F1&color=fff`
                                                         return (
-                                                            <div id={`comment-${reply._id}`} key={reply._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '4px 6px', borderRadius: 8 }}>
+                                                            <div id={`comment-${reply._id}`} key={reply._id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '4px 0', borderRadius: 8 }}>
                                                                 <Link to={`/profile/${reply.author?._id}`}>
-                                                                    <img src={rav} style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} alt="" />
+                                                                    <img src={rav} style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block', marginTop: 2 }} alt="" />
                                                                 </Link>
-                                                                <div style={{ flex: 1 }}>
-                                                                    <div style={{ fontSize: 13, lineHeight: 1.5 }}>
+                                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                                    <div style={{ fontSize: 14, lineHeight: 1.5, wordWrap: 'break-word' }}>
                                                                         <strong style={{ marginRight: 6 }}>
-                                                                            <Link to={`/profile/${reply.author?._id}`} style={{ color: 'var(--text-1)', textDecoration: 'none' }}>
+                                                                            <Link to={`/profile/${reply.author?._id}`} style={{ color: 'var(--text-1)', textDecoration: 'none' }} className="hover:underline">
                                                                                 {reply.author?.username}
                                                                             </Link>
                                                                         </strong>
-                                                                        {reply.body}
+                                                                        <span style={{ color: 'var(--text-1)' }}>{reply.body}</span>
                                                                         {reply.isAiVerified && (
                                                                             <HiShieldCheck 
                                                                                 style={{ color: '#10B981', fontSize: 12, marginLeft: 4, verticalAlign: 'middle', cursor: 'help' }} 
