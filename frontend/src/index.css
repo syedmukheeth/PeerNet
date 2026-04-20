@@ -54,8 +54,10 @@
 
   --surface-1: #1a1a1e;
   --surface-2: #222226;
-  --surface-rgb: 17, 17, 19;
+  --surface-rgb: 9, 9, 11;
   --text-1-rgb: 250, 250, 250;
+  --accent-rgb: 124, 58, 237;
+  --border-rgb: 255, 255, 255;
 
   --dm-theirs: #1e1e22;
 }
@@ -110,6 +112,8 @@
   --surface-2: #f1f1f4;
   --surface-rgb: 255, 255, 255;
   --text-1-rgb: 24, 24, 27;
+  --accent-rgb: 124, 58, 237;
+  --border-rgb: 0, 0, 0;
 
   --dm-theirs: #f1f1f4;
 }
@@ -5008,9 +5012,9 @@ textarea:focus-visible {
 .flex-1  { flex: 1; }
 .flex-wrap { flex-wrap: wrap; }
 .flex-nowrap { flex-wrap: nowrap; }
-.group   {} /* framer passthrough */
-.ring-2  {} /* passthrough — rings handled inline */
-.ring-accent\/20 {} /* passthrough */
+.group   { position: relative; } /* for group-hover targeting */
+.ring-2  { box-shadow: 0 0 0 2px var(--accent); }
+.ring-accent\/20 { box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.2); }
 .transition-colors { transition: color var(--trans-fast); }
 .transition-all    { transition: all var(--trans-fast); }
 .transition-transform { transition: transform var(--trans-fast); }
@@ -5172,11 +5176,11 @@ textarea:focus-visible {
 .group:hover .hover\:scale-105 { transform: scale(1.05); }
 
 /* Transition shortcuts */
-.hover\:bg-accent         { } /* handled by inline classes or JS */
-.hover\:bg-surface\/50    { }
-.hover\:border-border\/30 { }
-.hover\:text-accent       { }
-.hover\:brightness-125    { }
+.hover\:bg-accent:hover         { background-color: var(--accent); }
+.hover\:bg-surface\/50:hover    { background-color: rgba(var(--surface-rgb), 0.5); }
+.hover\:border-border\/30:hover { border-color: rgba(var(--border-rgb), 0.3); }
+.hover\:text-accent:hover       { color: var(--accent); }
+.hover\:brightness-125:hover    { filter: brightness(1.25); }
 .hover\:underline:hover { text-decoration: underline; }
 
 /* ══════════ FEED RESPONSIVE ADJUSTMENTS ══════════ */
