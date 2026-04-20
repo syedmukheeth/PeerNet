@@ -3568,9 +3568,11 @@ textarea:focus-visible {
 .l-status-modal {
   width: 100%;
   max-width: 540px;
+  max-height: 90vh; /* Don't exceed screen bounds */
   background: var(--surface-el);
   border-radius: var(--r-xl);
-  overflow: hidden;
+  overflow-y: auto; /* Fallback scroll for micro-screens */
+  overflow-x: hidden;
   box-shadow: var(--shadow-xl), 0 0 0 1px var(--border-md);
   display: flex;
   flex-direction: column;
@@ -3610,6 +3612,8 @@ textarea:focus-visible {
 .status-preview-canvas {
   position: relative;
   width: 100%;
+  max-width: min(100%, 45vh); /* Dynamically shrinks canvas width based on available viewport height! */
+  margin: 0 auto; /* Keep it centered when it shrinks */
   aspect-ratio: 4 / 5;
   border-radius: var(--r-lg);
   display: flex;
