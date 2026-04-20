@@ -227,78 +227,29 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
     return (
         <motion.div
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', flexShrink: 0 }}
+            className="story-item"
             onClick={onClick}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.22 }}
             whileHover={{ y: -3 }}
-            whileTap={{ scale: 0.93 }}>
-            <div style={{ position: 'relative', width: '64px', height: '64px', flexShrink: 0 }}>
-                <div style={{
-                    position: 'absolute',
-                    inset: '-3px',
-                    borderRadius: '50%',
-                    background: seen ? 'var(--border-md)' : IG_GRADIENT,
-                    padding: '2px',
-                    transition: 'all 0.3s ease'
-                }} />
-                <div style={{ 
-                    position: 'relative',
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '50%',
-                    background: 'var(--surface)',
-                    padding: '2px',
-                    zIndex: 10,
-                    border: '1px solid var(--border-md)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    <img src={avatar} alt={label} 
-                        style={{ 
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            border: '2px solid var(--surface)'
-                        }} 
-                    />
+            whileTap={{ scale: 0.93 }}
+        >
+            <div className="story-avatar-wrap">
+                <div className={`story-ring${seen ? ' story-ring--seen' : ''}`}>
+                    <div className="story-inner">
+                        <img src={avatar} alt={label} loading="lazy" />
+                    </div>
                 </div>
                 {isAdd && (
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '0',
-                        right: '0',
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '50%',
-                        background: 'var(--accent)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '2px solid var(--surface)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                        zIndex: 20
-                    }}>
-                        <HiPlus style={{ color: '#fff', fontSize: '10px' }} />
+                    <div className="story-add-badge">
+                        <HiPlus size={12} color="#fff" />
                     </div>
                 )}
             </div>
-            <span style={{
-                fontSize: '11px',
-                width: '64px',
-                textAlign: 'center',
-                letterSpacing: '-0.02em',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: 'block',
-                opacity: seen ? 0.4 : 0.8,
-                fontWeight: seen ? 400 : 700
-            }}>{label}</span>
+            <span className={`story-name${seen ? ' story-name--seen' : ''}`}>
+                {label}
+            </span>
         </motion.div>
     )
 }
@@ -334,8 +285,8 @@ export default function StoryRail() {
     const userAvatar = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
 
     return (
-        <div className="mb-6">
-            <div className="flex gap-4 overflow-x-auto py-1 no-scrollbar">
+        <div className="story-rail-wrap">
+            <div className="story-rail">
                 {loading && stories.length === 0 ? (
                     <StorySkeleton />
                 ) : (

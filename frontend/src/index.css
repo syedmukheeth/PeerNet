@@ -660,13 +660,18 @@ textarea:focus-visible {
 /* ══════════════════════════════════════════════════════════
    STORY RAIL
    ══════════════════════════════════════════════════════════ */
+.story-rail-wrap {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
 .story-rail {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 8px 0 12px;
+  padding: 8px 4px 12px;
   scrollbar-width: none;
-  margin-bottom: 8px;
+  width: 100%;
 }
 .story-rail::-webkit-scrollbar { display: none; }
 
@@ -674,44 +679,84 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   flex-shrink: 0;
   transition: transform var(--trans-fast);
+  width: 82px;
 }
 
-.story-item:hover { transform: translateY(-2px); }
+.story-avatar-wrap {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+}
 
-/* Story gradient ring — 2.5px ring + 2.5px gap */
+/* Story gradient ring */
 .story-ring {
-  padding: 2.5px;
+  padding: 3px;
   background: var(--story-ring);
   border-radius: 50%;
+  transition: all 0.3s ease;
+  width: 100%;
+  height: 100%;
+}
+
+.story-ring--seen {
+  background: var(--border-lg);
 }
 
 .story-inner {
   background: var(--bg);
   border-radius: 50%;
   padding: 2.5px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .story-inner img {
-  width: 56px;
-  height: 56px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
   display: block;
 }
 
+.story-add-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--bg);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 20;
+}
+
 .story-name {
   font-size: 11px;
-  font-weight: 500;
-  color: var(--text-2);
-  max-width: 64px;
+  font-weight: 600;
+  color: var(--text-1);
+  width: 100%;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.story-name--seen {
+  color: var(--text-3);
+  font-weight: 400;
 }
 
 /* ══════════════════════════════════════════════════════════
