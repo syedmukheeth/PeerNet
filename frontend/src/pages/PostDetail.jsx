@@ -8,6 +8,7 @@ import {
     HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
     HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
     HiBadgeCheck, HiEmojiHappy, HiShieldCheck,
+    HiOutlineChat, HiOutlinePaperAirplane
 } from 'react-icons/hi'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
@@ -528,31 +529,21 @@ export default function PostDetail() {
                         <div className="flex items-center justify-between w-full mb-3">
                             <div className="flex items-center gap-4">
                                 <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={handleLike} whileTap={{ scale: 0.85 }}>
-                                    {liked ? <HiHeart className="text-[26px]" /> : <HiOutlineHeart className="text-[26px]" />}
+                                    {liked ? <HiHeart size={28} /> : <HiOutlineHeart size={28} />}
                                 </motion.button>
-                                <div className="relative" ref={emojiRef}>
-                                    <button className="post-action-btn" onClick={() => setShowEmojiPicker(p => !p)}>
-                                        <HiEmojiHappy className="text-[26px]" />
-                                    </button>
-                                    {showEmojiPicker && (
-                                        <div className="emoji-picker-popover">
-                                            <EmojiPicker 
-                                                theme="dark"
-                                                onEmojiClick={(e) => setBody(prev => prev + e.emoji)}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                <button className="post-action-btn" onClick={() => inputRef.current?.focus()}>
+                                    <HiOutlineChat size={28} />
+                                </button>
                                 <button className="post-action-btn" onClick={handleShare}>
-                                    <HiShare className="text-[26px]" />
+                                    <HiOutlinePaperAirplane className="rotate-45 relative right-[2px] top-[-2px]" size={28} />
                                 </button>
                             </div>
                             
                             <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`} onClick={handleSave} whileTap={{ scale: 0.85 }}>
-                                {saved ? <HiBookmark className="text-[26px]" /> : <HiOutlineBookmark className="text-[26px]" />}
+                                {saved ? <HiBookmark size={28} /> : <HiOutlineBookmark size={28} />}
                             </motion.button>
                         </div>
-                        <div className="font-bold text-[13px] mb-1">{likesCount.toLocaleString()} likes</div>
+                        <div className="font-bold text-[14px] mb-1">{likesCount.toLocaleString()} likes</div>
                         <div className="text-[11px] text-muted mb-2.5">{timeago(post.createdAt)}</div>
 
                         {/* Comment input */}

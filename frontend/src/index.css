@@ -3273,7 +3273,7 @@ textarea:focus-visible {
 .post-detail-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
 
 .post-detail-info {
-  flex: 0 0 340px;
+  flex: 0 0 450px;
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-md);
