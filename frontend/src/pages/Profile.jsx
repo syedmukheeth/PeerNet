@@ -233,7 +233,7 @@ export default function Profile() {
             <div className="profile-tabs">
                 {[
                     { key: 'posts', icon: <HiViewGrid />, label: 'Posts' },
-                    { key: 'dscrolls', icon: <HiFilm />, label: 'Dscrolls' },
+                    { key: 'shorts', icon: <HiFilm />, label: 'Shorts' },
                     ...(isMe ? [{ key: 'saved', icon: <HiBookmark />, label: 'Saved' }] : []),
                 ].map(({ key, icon, label }) => (
                     <button key={key} onClick={() => setTab(key)}
@@ -254,10 +254,10 @@ export default function Profile() {
 
                 if (tab === 'posts') {
                     displayPosts = posts // Show all posts including videos in main grid
-                } else if (tab === 'dscrolls') {
+                } else if (tab === 'shorts') {
                     displayPosts = posts.filter(p => p.mediaType === 'video')
                     emptyIcon = '🎬'
-                    emptyTitle = 'No Dscrolls yet'
+                    emptyTitle = 'No Shorts yet'
                     emptyDesc = isMe ? 'Share your first video' : ''
                 } else if (tab === 'saved') {
                     displayPosts = savedPosts

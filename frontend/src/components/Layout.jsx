@@ -21,7 +21,7 @@ import logoImg from '../assets/logo.png'
 const links = [
     { to: '/', icon: HiHome, label: 'Home', exact: true },
     { to: '/search', icon: HiSearch, label: 'Search' },
-    { to: '/dscrolls', icon: HiFilm, label: 'Dscrolls' },
+    { to: '/shorts', icon: HiFilm, label: 'Shorts' },
     { to: '/messages', icon: HiChatAlt2, label: 'Messages', msgBadge: true },
     { to: '/notifications', icon: HiBell, label: 'Notifications', badge: true },
 ]
@@ -32,7 +32,7 @@ const mobileBottomLinksLeft = [
 ]
 
 const mobileBottomLinksRight = [
-    { to: '/dscrolls', icon: HiFilm },
+    { to: '/shorts', icon: HiFilm },
 ]
 
 export default function Layout() {
@@ -94,10 +94,17 @@ export default function Layout() {
                 api.get('/notifications/unread-count'),
                 chatApi.get('unread-count')
             ])
+            
             setUnreadCount(notifRes.data.count || 0)
             unreadRef.current = notifRes.data.count || 0
-            setMsgCount(msgRes.data.count || 0)
-            msgRef.current = msgRes.data.count || 0
+            
+            // If user is already on messages, don't show the global badge
+            const isAtMessages = window.location.pathname.startsWith('/messages')
+            const count = msgRes.data.count || 0
+            const displayCount = isAtMessages ? 0 : count
+            
+            setMsgCount(displayCount)
+            msgRef.current = count 
         } catch (err) {
             console.warn('[Layout] Sync failed', err)
         }
@@ -108,6 +115,15 @@ export default function Layout() {
         window.addEventListener('peernet:sync-counts', handleSync)
         return () => window.removeEventListener('peernet:sync-counts', handleSync)
     }, [syncAllCounts])
+
+    // Update display count when path changes (to clear badge if entering messages)
+    useEffect(() => {
+        if (location.pathname.startsWith('/messages')) {
+            setMsgCount(0)
+        } else {
+            setMsgCount(msgRef.current)
+        }
+    }, [location.pathname])
 
     const showNotifToast = useCallback((notif) => {
         const typeEmoji = { like: '❤️', comment: '💬', follow: '👤', message: '💬', reply: '💬' }
@@ -376,7 +392,7 @@ export default function Layout() {
                 </header>
 
                 <div 
-                    className={`layout-container ${(!['/messages', '/dscrolls'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
+                    className={`layout-container ${(!['/messages', '/shorts'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -396,8 +412,8 @@ export default function Layout() {
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* Hide Footer on Messages and Dscrolls pages for app-screen style */}
-                    {!['/messages', '/dscrolls'].some(p => location.pathname.startsWith(p)) && (
+                    {/* Hide Footer on Messages and Shorts pages for app-screen style */}
+                    {!['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) && (
                         <footer className="site-footer">
                             <div className="site-footer__inner">
                                 {/* Left: Brand + Links */}

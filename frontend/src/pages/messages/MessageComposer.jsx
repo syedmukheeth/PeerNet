@@ -105,14 +105,15 @@ export default function MessageComposer({
                     </div>
 
                     <button 
-                        className={`dm-send-btn-pill ${(!text.trim() && !filePreview) || isUploading ? 'disabled' : ''}`}
+                        className="dm-send-btn-pill"
                         onClick={handleSend}
                         disabled={(!text.trim() && !filePreview) || isUploading}
+                        title="Send message"
                     >
                         {isUploading ? (
-                            <div className="dm-loading-spinner-pill" />
+                            <div className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
                         ) : (
-                            <HiPaperAirplane size={20} className="rotate-90" />
+                            <HiPaperAirplane size={20} style={{ transform: 'rotate(45deg)', marginLeft: -2 }} />
                         )}
                     </button>
                 </div>

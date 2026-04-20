@@ -139,10 +139,10 @@ export default function CreatePostModal({ onClose }) {
                 if (isVideoUpload) {
                     await api.post('/dscrolls', fd, config)
                     toast.success('🎬 Video shared!')
-                    await queryClient.invalidateQueries({ queryKey: ['dscrolls'] })
+                    await queryClient.invalidateQueries({ queryKey: ['shorts'] })
                     await queryClient.invalidateQueries({ queryKey: ['feed'] })
                     onClose()
-                    navigate('/dscrolls')
+                    navigate('/shorts')
                 } else {
                     await api.post('/posts', fd, config)
                     toast.success('✅ Post shared!')

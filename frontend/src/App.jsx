@@ -10,7 +10,7 @@ const Feed = lazy(() => import('./pages/Feed'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const Profile = lazy(() => import('./pages/Profile'))
-const Dscrolls = lazy(() => import('./pages/Dscrolls'))
+const Shorts = lazy(() => import('./pages/Shorts'))
 const Messages = lazy(() => import('./pages/Messages'))
 const Notifications = lazy(() => import('./pages/Notifications'))
 const Search = lazy(() => import('./pages/Search'))
@@ -78,7 +78,7 @@ export default function App() {
             {/* Protected app */}
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Feed />} />
-              <Route path="dscrolls" element={<Dscrolls />} />
+              <Route path="shorts" element={<Shorts />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="messages" element={<Messages />} />
               <Route path="messages/:id" element={<Messages />} />
