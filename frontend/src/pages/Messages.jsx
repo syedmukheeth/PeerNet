@@ -314,7 +314,8 @@ export default function Messages() {
                                         <MessageBubble 
                                             key={m._id}
                                             message={m}
-                                            isSelf={m.sender === user?._id}
+                                            isSelf={(m.sender?._id || m.sender) === user?._id}
+                                            peer={peer}
                                             onDelete={deleteMessage}
                                             timeago={timeago}
                                         />

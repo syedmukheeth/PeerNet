@@ -3,6 +3,7 @@ import { HiDotsVertical } from 'react-icons/hi'
 export default function MessageBubble({ 
     message, 
     isSelf, 
+    peer,
     onDelete, 
     onEdit, 
     timeago,
@@ -14,7 +15,11 @@ export default function MessageBubble({
     return (
         <div className={`dm-message-row ${isSelf ? 'self' : 'peer'}`}>
             {!isSelf && (
-                <div className="dm-message-avatar-spacer" />
+                <img 
+                    src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`} 
+                    alt={peer?.username || 'Peer'} 
+                    className="dm-bubble-avatar" 
+                />
             )}
             
             <div className="dm-message-container">
