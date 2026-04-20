@@ -3626,6 +3626,7 @@ textarea:focus-visible {
   background: transparent !important;
   border: none !important;
   outline: none !important;
+  box-shadow: none !important;
   resize: none !important;
   padding: 0;
   margin: 0;
@@ -3634,6 +3635,12 @@ textarea:focus-visible {
   caret-color: var(--accent);
   text-align: center;
   z-index: 5;
+}
+.status-main-textarea:focus,
+.status-main-textarea:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 .status-main-textarea::placeholder { color: rgba(255,255,255,0.3); }
 
