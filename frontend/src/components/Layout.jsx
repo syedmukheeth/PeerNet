@@ -253,22 +253,24 @@ export default function Layout() {
                         </motion.div>
                     ))}
                     
-                    <motion.button 
-                        variants={navItemVariants} 
-                        className="ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer" 
-                        onClick={() => setShowCreate(true)}
-                    >
-                        <motion.div 
-                            className="flex items-center gap-4 w-full"
-                            whileHover={{ x: 4 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                    <motion.div variants={navItemVariants}>
+                        <div 
+                            className="ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer" 
+                            onClick={() => setShowCreate(true)}
+                            role="button"
                         >
-                            <div className="ig-icon-wrap">
-                                <HiPlusCircle className="ig-icon" />
-                            </div>
-                            <span className="ig-label">Create</span>
-                        </motion.div>
-                    </motion.button>
+                            <motion.div 
+                                className="flex items-center gap-4 w-full"
+                                whileHover={{ x: 4 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                            >
+                                <div className="ig-icon-wrap">
+                                    <HiPlusCircle className="ig-icon" />
+                                </div>
+                                <span className="ig-label">Create</span>
+                            </motion.div>
+                        </div>
+                    </motion.div>
 
                     {user?.role === 'admin' && (
                         <motion.div variants={navItemVariants}>
@@ -334,9 +336,11 @@ export default function Layout() {
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                        <motion.button 
+                        <div 
                             className={`ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer ${showMore ? 'ig-link--active' : ''}`} 
                             onClick={() => setShowMore(!showMore)}
+                            role="button"
+                            tabIndex={0}
                         >
                             <motion.div 
                                 className="flex items-center gap-4 w-full"
@@ -348,7 +352,7 @@ export default function Layout() {
                                 </div>
                                 <span className="ig-label">More</span>
                             </motion.div>
-                        </motion.button>
+                        </div>
                     </div>
                 </div>
 
