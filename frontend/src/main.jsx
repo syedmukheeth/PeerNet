@@ -32,21 +32,21 @@ createRoot(document.getElementById('root')).render(
             <MultiAccountProvider>
               <AuthProvider>
                 <App />
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  style: {
-                    background: 'var(--surface)',
-                    color: 'var(--text-1)',
-                    border: '1px solid var(--border-md)',
-                    borderRadius: '12px',
-                    fontSize: '14px',
-                    boxShadow: 'var(--shadow-md)',
-                  },
-                  success: { iconTheme: { primary: 'var(--success)', secondary: 'var(--surface)' } },
-                  error: { iconTheme: { primary: 'var(--error)', secondary: 'var(--surface)' } },
-                }}
-              />
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    style: {
+                      background: 'var(--surface)',
+                      color: 'var(--text-1)',
+                      border: '1px solid var(--border-md)',
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      boxShadow: 'var(--shadow-md)',
+                    },
+                    success: { iconTheme: { primary: 'var(--success)', secondary: 'var(--surface)' } },
+                    error: { iconTheme: { primary: 'var(--error)', secondary: 'var(--surface)' } },
+                  }}
+                />
               </AuthProvider>
             </MultiAccountProvider>
           </ThemeProvider>

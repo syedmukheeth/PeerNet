@@ -1,4 +1,3 @@
-import React from 'react'
 import { HiOutlineChatAlt2 } from 'react-icons/hi'
 
 export default function EmptyState({ onNewMessage }) {

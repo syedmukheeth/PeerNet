@@ -51,6 +51,28 @@ export default function Layout() {
     const unreadRef = useRef(0)
     const msgRef = useRef(0)
     const mainRef = useRef(null)
+    const [showMore, setShowMore] = useState(false)
+    const moreRef = useRef(null)
+
+    const navContainerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    }
+
+    const navItemVariants = {
+        hidden: { opacity: 0, x: -20 },
+        visible: { 
+            opacity: 1, 
+            x: 0,
+            transition: { type: 'spring', damping: 25, stiffness: 300 }
+        }
+    }
 
     useEffect(() => {
         if (mainRef.current) {
@@ -176,8 +198,6 @@ export default function Layout() {
 
     const handleLogout = async () => { await logout(); navigate('/login') }
     const avatarUrl = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
-    const [showMore, setShowMore] = useState(false)
-    const moreRef = useRef(null)
 
     useEffect(() => {
         if (!showMore) return
@@ -198,38 +218,47 @@ export default function Layout() {
                 </div>
 
                 {/* Middle: Main Navigation */}
-                <nav className="sidebar-nav">
+                <motion.nav 
+                    className="sidebar-nav"
+                    variants={navContainerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
                     {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
-                        <NavLink key={to} to={to} end={exact} className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                            {({ isActive }) => (
-                                <>
-                                    <div className="ig-icon-wrap">
-                                        <Icon className="ig-icon" />
-                                        {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
-                                        {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
-                                    </div>
-                                    <span className="ig-label">{label}</span>
-                                </>
-                            )}
-                        </NavLink>
+                        <motion.div key={to} variants={navItemVariants}>
+                            <NavLink to={to} end={exact} className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
+                                {() => (
+                                    <>
+                                        <div className="ig-icon-wrap">
+                                            <Icon className="ig-icon" />
+                                            {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                            {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
+                                        </div>
+                                        <span className="ig-label">{label}</span>
+                                    </>
+                                )}
+                            </NavLink>
+                        </motion.div>
                     ))}
                     
-                    <button className="ig-link" onClick={() => setShowCreate(true)}>
+                    <motion.button variants={navItemVariants} className="ig-link" onClick={() => setShowCreate(true)}>
                         <div className="ig-icon-wrap">
                             <HiPlusCircle className="ig-icon" />
                         </div>
                         <span className="ig-label">Create</span>
-                    </button>
+                    </motion.button>
 
                     {user?.role === 'admin' && (
-                        <NavLink to="/admin" className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
-                            <div className="ig-icon-wrap">
-                                <HiShieldCheck className="ig-icon text-accent" />
-                            </div>
-                            <span className="ig-label">Admin Console</span>
-                        </NavLink>
+                        <motion.div variants={navItemVariants}>
+                            <NavLink to="/admin" className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}>
+                                <div className="ig-icon-wrap">
+                                    <HiShieldCheck className="ig-icon text-accent" />
+                                </div>
+                                <span className="ig-label">Admin Console</span>
+                            </NavLink>
+                        </motion.div>
                     )}
-                </nav>
+                </motion.nav>
 
                 {/* Bottom: Profile & Settings */}
                 <div className="sidebar-footer">

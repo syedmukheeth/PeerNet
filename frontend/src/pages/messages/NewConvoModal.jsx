@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { HiX, HiSearch, HiBadgeCheck } from 'react-icons/hi'
 import api from '../../api/axios'
 
@@ -14,7 +14,9 @@ export default function NewConvoModal({ onClose, onStart }) {
             try {
                 const res = await api.get(`/users/search?q=${q}`)
                 setUsers(res.data.users || [])
-            } catch { } finally { setLoading(false) }
+            } catch (err) {
+                console.error('[NEW CONVO] Search failed:', err)
+            } finally { setLoading(false) }
         }, 300)
         return () => clearTimeout(t)
     }, [q])

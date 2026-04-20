@@ -60,20 +60,23 @@ export default function Login() {
             saveCurrentAccount(user)
             toast.success('Logged in with Google!')
             navigate('/')
-        } catch {
-            toast.error('Google login failed')
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Google login failed'
+            toast.error(msg, { id: 'google-error' })
         } finally { setLoading(false) }
     }
 
     const handleGuestLogin = async () => {
+        if (loading) return
         setLoading(true)
         try {
             const user = await loginGuest()
             saveCurrentAccount(user)
-            toast.success('Welcome, Guest!')
+            toast.success('Welcome, Guest!', { id: 'guest-success' })
             navigate('/')
-        } catch {
-            toast.error('Guest login failed')
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Guest login failed'
+            toast.error(msg, { id: 'guest-error' })
         } finally { setLoading(false) }
     }
 
@@ -155,10 +158,10 @@ export default function Login() {
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
-                            onError={() => toast.error('Google login cancelled')}
+                            onError={() => toast.error('Google login cancelled', { id: 'google-cancel' })}
                             theme="filled_black"
                             shape="pill"
-                            width="100%"
+                            width={320}
                         />
                     </div>
 

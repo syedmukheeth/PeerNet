@@ -1,4 +1,3 @@
-import React from 'react'
 import { HiChevronLeft, HiPhone, HiVideoCamera, HiInformationCircle, HiBadgeCheck } from 'react-icons/hi'
 
 export default function ChatHeader({ participant, isOnline, onBack, onNavigateProfile }) {

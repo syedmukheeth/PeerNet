@@ -1,6 +1,4 @@
-import React from 'react'
 import { HiPencilAlt, HiSearch, HiBadgeCheck } from 'react-icons/hi'
-import { useNavigate } from 'react-router-dom'
 
 const ListSkeleton = () => (
     <div className="dm-list-skeleton">
@@ -29,7 +27,6 @@ export default function ConversationList({
     timeago,
     className = ''
 }) {
-    const navigate = useNavigate()
 
     const getOther = (c) => c.participants?.find(p => p._id !== user?._id)
 

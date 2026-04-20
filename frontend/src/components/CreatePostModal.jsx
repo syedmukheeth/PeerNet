@@ -3,12 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
     HiX, 
     HiPhotograph, 
-    HiVideoCamera, 
     HiSparkles, 
     HiPencilAlt, 
     HiCheckCircle,
     HiCloudUpload,
-    HiHashtag,
     HiTrash
 } from 'react-icons/hi'
 import { useNavigate } from 'react-router-dom'

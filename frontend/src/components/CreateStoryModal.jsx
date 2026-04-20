@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-    HiX, HiEmojiHappy, HiTypeBackground, HiTextAlignmentLeft, 
+    HiX, HiEmojiHappy, HiTextAlignmentLeft, 
     HiTextAlignmentCenter, HiTextAlignmentRight, HiSparkles 
 } from 'react-icons/hi'
 import EmojiPicker from 'emoji-picker-react'

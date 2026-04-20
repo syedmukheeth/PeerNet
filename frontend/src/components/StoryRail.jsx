@@ -138,14 +138,22 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                                 </div>
                             )
                         })()
-                        : story.mediaType === 'video' ? (
-                            <video src={optimizeCloudinaryVideo(story.mediaUrl)} 
-                                className="story-media"
-                                autoPlay muted loop playsInline />
-                        ) : (
-                            <img src={optimizeCloudinaryUrl(story.mediaUrl, 1000)} alt=""
-                                className="story-media" />
-                        )}
+                                 : story.mediaType === 'video' ? (
+                                    <video src={optimizeCloudinaryVideo(story.mediaUrl)} 
+                                        className="story-media"
+                                        style={{ boxShadow: 'var(--shadow-specular)', filter: paused ? 'brightness(0.8)' : 'none' }}
+                                        autoPlay muted loop playsInline
+                                        ref={el => {
+                                            if (el) {
+                                                if (paused) el.pause()
+                                                else el.play().catch(() => {})
+                                            }
+                                        }} />
+                                ) : (
+                                    <img src={optimizeCloudinaryUrl(story.mediaUrl, 1000)} alt=""
+                                        className="story-media"
+                                        style={{ boxShadow: 'var(--shadow-specular)' }} />
+                                )}
                     </motion.div>
                 </AnimatePresence>
 
@@ -219,33 +227,78 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
     return (
         <motion.div
-            className="flex flex-col items-center gap-2 cursor-pointer shrink-0"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', flexShrink: 0 }}
             onClick={onClick}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05, duration: 0.22 }}
             whileHover={{ y: -3 }}
             whileTap={{ scale: 0.93 }}>
-            <div className="relative w-16 h-16 shrink-0">
-                {!isAdd && (
-                    <div style={{
-                        position: 'absolute', inset: -3,
-                        borderRadius: '50%',
-                        background: seen ? 'var(--border-md)' : IG_GRADIENT,
-                        animation: seen ? 'none' : 'rotateBorder 3s linear infinite',
-                        padding: 2,
-                    }} />
-                )}
-                <div className="relative w-full h-full rounded-full bg-surface p-[2.5px] z-10 border border-border-md">
-                    <img src={avatar} alt={label} className="w-full h-full rounded-full object-cover" />
-                    {isAdd && (
-                        <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center border-2 border-surface shadow-sm">
-                            <HiPlus className="text-white text-[10px]" />
-                        </div>
-                    )}
+            <div style={{ position: 'relative', width: '64px', height: '64px', flexShrink: 0 }}>
+                <div style={{
+                    position: 'absolute',
+                    inset: '-3px',
+                    borderRadius: '50%',
+                    background: seen ? 'var(--border-md)' : IG_GRADIENT,
+                    padding: '2px',
+                    transition: 'all 0.3s ease'
+                }} />
+                <div style={{ 
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    background: 'var(--surface)',
+                    padding: '2px',
+                    zIndex: 10,
+                    border: '1px solid var(--border-md)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <img src={avatar} alt={label} 
+                        style={{ 
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            border: '2px solid var(--surface)'
+                        }} 
+                    />
                 </div>
+                {isAdd && (
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '0',
+                        right: '0',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        background: 'var(--accent)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid var(--surface)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                        zIndex: 20
+                    }}>
+                        <HiPlus style={{ color: '#fff', fontSize: '10px' }} />
+                    </div>
+                )}
             </div>
-            <span className={`text-[11px] truncate w-16 text-center tracking-tight ${seen ? 'opacity-40' : 'font-bold opacity-80'}`}>{label}</span>
+            <span style={{
+                fontSize: '11px',
+                width: '64px',
+                textAlign: 'center',
+                letterSpacing: '-0.02em',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'block',
+                opacity: seen ? 0.4 : 0.8,
+                fontWeight: seen ? 400 : 700
+            }}>{label}</span>
         </motion.div>
     )
 }
@@ -289,7 +342,7 @@ export default function StoryRail() {
                     <>
                         <StoryCircle
                             label="Your story"
-                            avatar={userAvatar}
+                            avatar={optimizeAvatarUrl(userAvatar)}
                             isAdd={true}
                             seen={false}
                             index={0}

@@ -188,24 +188,24 @@ const googleLogin = async (token) => {
 };
 
 const guestLogin = async () => {
-    // Search by both to prevent duplicate key errors if email/username already taken distinctly
-    let user = await User.findOne({ 
-        $or: [{ username: 'guest' }, { email: 'guest@peernet.app' }] 
-    }).select('+passwordHash');
+    // Generate a unique identifier for each guest session to avoid Collisions
+    const guestId = require('crypto').randomBytes(4).toString('hex');
+    const username = `guest_${guestId}`;
+    const email = `guest_${guestId}@peernet.app`;
+    const fullName = `Guest ${guestId.toUpperCase()}`;
+    
+    const randomPassword = require('crypto').randomBytes(16).toString('hex');
+    const passwordHash = await User.hashPassword(randomPassword);
 
-    if (!user) {
-        const randomPassword = require('crypto').randomBytes(16).toString('hex');
-        const passwordHash = await User.hashPassword(randomPassword);
-        user = await User.create({
-            username: 'guest',
-            email: 'guest@peernet.app',
-            fullName: 'Guest User',
-            passwordHash,
-            bio: 'This is a temporary guest account.'
-        });
-    }
+    const user = await User.create({
+        username,
+        email,
+        fullName,
+        passwordHash,
+        bio: 'This is a temporary guest account.'
+    });
 
-    // AUTO-FOLLOW ADMINS: Ensure interviewer sees content immediately on every login
+    // AUTO-FOLLOW ADMINS: Ensure guest sees content immediately
     try {
         const Follower = require('../user/Follower');
         const admins = await User.find({ role: 'admin' });

@@ -1,4 +1,3 @@
-import React from 'react'
 import { HiDotsVertical } from 'react-icons/hi'
 
 export default function MessageBubble({ 

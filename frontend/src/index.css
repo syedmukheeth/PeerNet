@@ -42,11 +42,12 @@
 
   /* Shadows — Refined with depth on charcoal */
   --input-bg: #111112;
-  --overlay: rgba(0, 0, 0, 0.8);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.6);
-  --shadow-accent: 0 0 30px rgba(124, 58, 237, 0.1);
+  --overlay: rgba(0, 0, 0, 0.85);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 32px 80px rgba(0, 0, 0, 0.8);
+  --shadow-accent: 0 0 40px rgba(124, 58, 237, 0.15);
+  --shadow-specular: inset 0 1px 1px rgba(255, 255, 255, 0.1);
 
   /* UI Elements */
   --story-ring: linear-gradient(135deg, #7C3AED, #6366F1, #06B6D4, #7C3AED);
@@ -276,7 +277,7 @@
   background: var(--card);
   border: 1px solid var(--border-md);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-premium);
+  box-shadow: var(--shadow-premium), var(--shadow-specular);
   transition: all var(--trans-fast);
 }
 
@@ -1391,10 +1392,12 @@ textarea:focus-visible {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--surface); /* Dark Matte */
+  background: rgba(18, 18, 20, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
   z-index: var(--z-fixed);
-  padding: 24px 12px 20px;
+  padding: 32px 12px 20px;
   overflow-y: auto;
   scrollbar-width: none;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1476,21 +1479,21 @@ textarea:focus-visible {
 /* Active State: Minimalist & Elegant */
 .ig-link--active {
   color: var(--accent) !important;
-  font-weight: 700;
+  font-weight: 800;
   background: var(--accent-subtle) !important;
-  box-shadow: inset 0 0 0 1px var(--accent-low);
+  box-shadow: inset 0 0 0 1px var(--accent-ring);
 }
 
 .ig-link--active::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 12px;
-  bottom: 12px;
-  width: 4px;
+  left: -4px;
+  top: 10px;
+  bottom: 10px;
+  width: 8px;
   background: var(--accent);
-  border-radius: 0 4px 4px 0;
-  box-shadow: 4px 0 12px var(--accent-ring);
+  border-radius: 4px;
+  box-shadow: 0 0 20px var(--accent);
 }
 
 .ig-link--active .ig-icon {

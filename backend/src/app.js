@@ -92,6 +92,24 @@ const createApp = () => {
         res.status(404).json({ message: 'Requested resource not found' });
     });
 
+    // Final Global Error Handler
+    app.use((err, req, res, _next) => {
+        const statusCode = err.statusCode || 500;
+        const message = err.message || 'Internal Server Error';
+        
+        if (statusCode === 500) {
+            logger.error(`[INTERNAL-ERROR] ${req.method} ${req.path}`, err);
+        } else {
+            logger.warn(`[API-ERROR] ${statusCode} - ${req.method} ${req.path}: ${message}`);
+        }
+
+        res.status(statusCode).json({
+            success: false,
+            message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
+    });
+
     return app;
 };
 

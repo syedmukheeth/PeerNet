@@ -79,44 +79,53 @@ function RightPanel() {
             {/* ── Suggested for you ─────────────── */}
             {suggestions.length > 0 && (
                 <div className="l-stack">
-                    <div className="l-cluster justify-between mb-1">
-                        <span className="t-label opacity-60">
-                            Suggested for you
+                    <div className="l-cluster justify-between mb-4 px-1">
+                        <span className="t-label opacity-60 font-black tracking-[0.15em]">
+                            Global_Registry
                         </span>
-                        <Link to="/search" className="t-caption font-bold text-primary no-underline hover:opacity-60">
-                            See all
+                        <Link to="/search" className="t-caption font-black text-accent no-underline hover:brightness-125 transition-all">
+                            EXPLORE_ALL
                         </Link>
                     </div>
 
                     <div className="l-stack l-stack-sm">
-                        {suggestions.map(u => {
+                        {suggestions.map((u, idx) => {
                             const rawAv = u.avatarUrl ||
                                 `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
                             const av = optimizeAvatarUrl(rawAv)
                             const isFollowed = followed[u._id]
                             return (
-                                <div key={u._id} className="l-cluster gap-3 py-1">
-                                    <Link to={`/profile/${u._id}`} className="shrink-0">
-                                        <img src={av} className="w-10 h-10 rounded-full object-cover" alt="" />
+                                <motion.div 
+                                    key={u._id} 
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1 * idx, type: 'spring', damping: 20 }}
+                                    className="l-cluster gap-4 p-3 rounded-2xl hover:bg-surface/50 border border-transparent hover:border-border/30 transition-all group"
+                                >
+                                    <Link to={`/profile/${u._id}`} className="shrink-0 relative">
+                                        <img src={av} className="w-11 h-11 rounded-xl object-cover shadow-lg border border-border/20 group-hover:scale-105 transition-transform" alt="" />
+                                        {isFollowed && (
+                                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-surface animate-pulse" />
+                                        )}
                                     </Link>
                                     <div className="flex-1 truncate">
                                         <Link to={`/profile/${u._id}`} className="block text-primary no-underline">
-                                            <div className="l-cluster gap-1">
-                                                <span className="t-h3 font-bold">{u.username}</span>
-                                                {u.isVerified && <HiBadgeCheck className="text-accent text-xs" />}
+                                            <div className="l-cluster gap-1.5 mb-0.5">
+                                                <span className="t-h3 font-black tracking-tight">{u.username.toUpperCase()}</span>
+                                                {u.isVerified && <HiBadgeCheck className="text-accent text-sm" />}
                                             </div>
-                                            <div className="t-caption opacity-60">
-                                                Suggested for you
+                                            <div className="t-caption opacity-40 font-bold uppercase text-[9px] tracking-widest">
+                                                Active_Node
                                             </div>
                                         </Link>
                                     </div>
                                     <button 
                                         onClick={() => handleFollow(u)} 
-                                        className={`font-bold text-[12px] shrink-0 transition-colors ${isFollowed ? 'text-muted' : 'text-accent hover:text-accent-hover'}`}
+                                        className={`h-8 px-4 rounded-lg font-black text-[10px] tracking-widest uppercase transition-all ${isFollowed ? 'bg-surface text-text-3 border border-border/40' : 'bg-accent/10 text-accent border border-accent/20 hover:bg-accent hover:text-white'}`}
                                     >
-                                        {isFollowed ? 'Following' : 'Follow'}
+                                        {isFollowed ? 'Following' : 'Connect'}
                                     </button>
-                                </div>
+                                </motion.div>
                             )
                         })}
                     </div>

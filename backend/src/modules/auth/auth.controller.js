@@ -73,14 +73,7 @@ const guestLogin = async (req, res, next) => {
         res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
         res.json({ success: true, data: { user, accessToken, refreshToken } });
     } catch (err) {
-        // TEMP DEBUG: Expose error to frontend
-        console.error('GUEST LOGIN CRASH:', err);
-        res.status(500).json({ 
-            success: false, 
-            message: err.message, 
-            stack: err.stack,
-            context: 'guestLogin controller'
-        });
+        next(err);
     }
 };
 

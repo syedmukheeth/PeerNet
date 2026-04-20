@@ -146,7 +146,10 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     return (
         <>
             <motion.div 
-                className="l-card-premium l-post-card overflow-hidden"
+                className="l-card-premium l-post-card glass-card relative"
+                style={{ 
+                    boxShadow: 'var(--shadow-premium), var(--shadow-specular)',
+                }}
                 initial={{ opacity: 0, scale: 0.99 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}>

@@ -1,10 +1,8 @@
-import React from 'react'
-import { HiPlus, HiEmojiHappy, HiPhotograph, HiPaperClip, HiPaperAirplane, HiX } from 'react-icons/hi'
+import { HiEmojiHappy, HiPhotograph, HiPaperClip, HiPaperAirplane, HiX } from 'react-icons/hi'
 import EmojiPicker from 'emoji-picker-react'
 
 export default function MessageComposer({
     text,
-    setText,
     handleType,
     handleSend,
     handleFileSelect,

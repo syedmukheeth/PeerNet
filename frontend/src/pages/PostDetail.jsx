@@ -535,7 +535,7 @@ export default function PostDetail() {
                             <button className="post-action-btn" onClick={handleShare}>
                                 <HiShare className="text-[22px]" />
                             </button>
-                            <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`} onClick={handleSave} whileTap={{ scale: 0.85 }} className="ml-auto">
+                            <motion.button className={`post-action-btn ${saved ? 'saved' : ''} ml-auto`} onClick={handleSave} whileTap={{ scale: 0.85 }}>
                                 {saved ? <HiBookmark className="text-[22px]" /> : <HiOutlineBookmark className="text-[22px]" />}
                             </motion.button>
                         </div>

@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
 import {
     HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiDotsHorizontal
 } from 'react-icons/hi'
-import toast from 'react-hot-toast'
 
 // Premium Time Formatter (IG Style)
 const formatTime = (date) => {

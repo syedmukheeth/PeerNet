@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
     HiUsers, HiCollection, HiChartBar, HiTrash, 
-    HiBadgeCheck, HiRefresh, HiCheckCircle, HiInbox,
+    HiBadgeCheck, HiRefresh, HiInbox,
     HiLightningBolt, HiShieldCheck, HiArrowRight,
-    HiPhotograph, HiVideoCamera, HiChevronRight, HiExclamation, HiX,
-    HiKey, HiDatabase, HiGlobe, HiEye
+    HiVideoCamera, HiExclamation,
+    HiKey, HiDatabase, HiGlobe, HiEye, HiSearch
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -26,6 +26,11 @@ export default function Admin() {
     const [showNukeModal, setShowNukeModal] = useState(false)
     const [nukeType, setNukeType] = useState('')
     const [nukeConfirm, setNukeConfirm] = useState('')
+
+    const confirmPurgeUser = (userId) => {
+        setUserToPurge(userId)
+        setShowPurgeModal(true)
+    }
 
     const fetchStats = useCallback(async () => {
         try {
@@ -364,6 +369,59 @@ export default function Admin() {
                                         ))}
                                     </tbody>
                                 </table>
+                            </div>
+                        </motion.div>
+                    )}
+
+
+                    {/* AUDIT (CONTENT MANAGEMENT) */}
+                    {activeTab === 'content' && (
+                        <motion.div key="content" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
+                            <div className="flex flex-wrap gap-4 mb-10">
+                                {['all', 'image', 'video'].map(t => (
+                                    <button 
+                                        key={t}
+                                        onClick={() => { setContentType(t); fetchPosts(t); }}
+                                        className={`px-8 py-4 rounded-2xl font-black text-xs tracking-widest uppercase transition-all ${contentType === t ? 'bg-accent text-white' : 'bg-surface/50 text-text-3 border border-border/40 hover:border-accent/40'}`}
+                                    >
+                                        {t}_payloads
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {posts.map(p => (
+                                    <div key={p._id} className="glass-card rounded-[40px] border border-border/40 overflow-hidden group hover:border-accent/40 transition-all">
+                                        <div className="aspect-square relative overflow-hidden bg-black">
+                                            {p.mediaType === 'video' ? (
+                                                <video src={p.mediaUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                            ) : (
+                                                <img src={p.mediaUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />
+                                            )}
+                                            <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                                                <button onClick={() => handleDeletePost(p._id)} className="p-3 bg-error text-white rounded-xl shadow-xl hover:brightness-110 active:scale-90 transition-all">
+                                                    <HiTrash size={20} />
+                                                </button>
+                                            </div>
+                                            {p.mediaType === 'video' && (
+                                                <div className="absolute bottom-6 left-6 p-2 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
+                                                    <HiVideoCamera className="text-white" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-8">
+                                            <div className="flex items-center gap-4 mb-4">
+                                                <img src={p.author?.avatarUrl || `https://ui-avatars.com/api/?name=${p.author?.username}&background=202020&color=fff`} className="w-10 h-10 rounded-xl" alt="" />
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-black text-text-1">@{p.author?.username}</span>
+                                                    <span className="text-[10px] font-bold text-text-3 uppercase">{new Date(p.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-text-2 font-medium line-clamp-2 leading-relaxed italic">&ldquo;{p.caption || 'NO_CAPTION_SIGNAL'}&rdquo;</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {posts.length === 0 && <div className="col-span-full text-center py-40 opacity-20 text-2xl font-black uppercase tracking-[0.4em]">Audit Stream Null</div>}
                             </div>
                         </motion.div>
                     )}

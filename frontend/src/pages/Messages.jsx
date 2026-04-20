@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api, { chatApi } from '../api/axios'
@@ -34,8 +34,6 @@ export default function Messages() {
     const [showEmoji, setShowEmoji] = useState(false)
     const [filePreview, setFilePreview] = useState(null)
     const [isUploading, setIsUploading] = useState(false)
-    const [editingMessageId, setEditingMessageId] = useState(null)
-    const [editBody, setEditBody] = useState('')
     const [mobilePanel, setMobilePanel] = useState('list') // 'list' | 'chat'
 
     const bottomRef = useRef()
@@ -58,8 +56,8 @@ export default function Messages() {
         try {
             const { data } = await chatApi.get('')
             setConversations(data.data || [])
-        } catch (err) {
-            console.error("Failed to load conversations:", err)
+        } catch {
+            console.error("Failed to load conversations")
         } finally {
             setInitialLoad(false)
         }
@@ -75,8 +73,8 @@ export default function Messages() {
             await chatApi.patch(`${convoId}/messages/read`, {})
             window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
             scrollToBottom('instant')
-        } catch (err) {
-            console.error("Failed to load messages:", err)
+        } catch {
+            console.error("Failed to load messages")
         } finally {
             setLoadingMessages(false)
         }
@@ -119,7 +117,7 @@ export default function Messages() {
                     c._id === msg.conversationId 
                     ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + 1 } 
                     : c
-                ).sort((a,b) => (a._id === msg.conversationId ? -1 : 1)))
+                ).sort((a, b) => (a._id === msg.conversationId ? -1 : (b._id === msg.conversationId ? 1 : 0))))
                 return
             }
 
@@ -223,7 +221,7 @@ export default function Messages() {
                 mediaUrl,
                 tempId
             })
-        } catch (err) {
+        } catch {
             setMessages(prev => prev.map(m => m._id === optimisticMsg._id ? { ...m, status: 'failed' } : m))
             toast.error("Failed to send message")
         } finally {
@@ -252,7 +250,7 @@ export default function Messages() {
                 return [newC, ...prev]
             })
             handleSelectConvo(newC)
-        } catch (err) {
+        } catch {
             toast.error("Failed to start conversation")
         } finally {
             setStarting(false)
@@ -269,16 +267,6 @@ export default function Messages() {
         }
     }
 
-    const saveEdit = async (m) => {
-        if (!editBody.trim()) return
-        try {
-            const { data } = await chatApi.patch(`${activeConvo._id}/messages/${m._id}`, { body: editBody })
-            setMessages(prev => prev.map(x => x._id === m._id ? data.data : x))
-            setEditingMessageId(null)
-        } catch {
-            toast.error("Edit failed")
-        }
-    }
 
     const peer = activeConvo?.participants?.find(p => p._id !== user?._id) || activeConvo?.participant;
 
@@ -322,13 +310,12 @@ export default function Messages() {
                                         <button className="dm-info-view-btn" onClick={() => navigate(`/profile/${peer?._id}`)}>View Profile</button>
                                     </div>
 
-                                    {messages.map((m, idx) => (
+                                    {messages.map((m) => (
                                         <MessageBubble 
                                             key={m._id}
                                             message={m}
                                             isSelf={m.sender === user?._id}
                                             onDelete={deleteMessage}
-                                            onEdit={(msg) => { setEditingMessageId(msg._id); setEditBody(msg.body); }}
                                             timeago={timeago}
                                         />
                                     ))}

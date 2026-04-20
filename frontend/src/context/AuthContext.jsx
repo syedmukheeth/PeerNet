@@ -37,10 +37,14 @@ export const AuthProvider = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        // Always silently validate session on mount.
-        // If there's a cached user, loading is already false so no flash.
-        // Axios interceptor auto-uses the refresh-token cookie when access token expires.
-        fetchMe()
+        // Only attempt to fetch user if a token exists. 
+        // This prevents 401/500 spam on initial mount for logged-out users.
+        const token = localStorage.getItem('accessToken')
+        if (token) {
+            fetchMe()
+        } else {
+            setLoading(false)
+        }
     }, [fetchMe])
 
     const login = async (identifier, password) => {
