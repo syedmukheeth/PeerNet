@@ -8,11 +8,13 @@ import {
     HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
     HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
     HiBadgeCheck, HiEmojiHappy, HiShieldCheck,
-    HiOutlineChat, HiOutlinePaperAirplane
+    HiOutlineChat
 } from 'react-icons/hi'
+import { FiSend, FiMoreHorizontal } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'
+import ShareModal from '../components/ShareModal'
 import { PostDetailSkeleton } from '../components/SkeletonLoader'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -40,6 +42,7 @@ export default function PostDetail() {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const [suggestions, setSuggestions] = useState([])
     const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+    const [showShareModal, setShowShareModal] = useState(false)
     const inputRef = useRef()
     const menuRef = useRef()
     const commentsEndRef = useRef()
@@ -133,9 +136,7 @@ export default function PostDetail() {
     }
 
     const handleShare = () => {
-        const url = `${window.location.origin}/posts/${id}`
-        if (navigator.share) navigator.share({ title: 'PeerNet post', url })
-        else navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'))
+        setShowShareModal(true)
     }
 
     const handleDelete = async () => {
@@ -534,8 +535,8 @@ export default function PostDetail() {
                                 <button className="post-action-btn" onClick={() => inputRef.current?.focus()}>
                                     <HiOutlineChat size={28} />
                                 </button>
-                                <button className="post-action-btn" onClick={handleShare}>
-                                    <HiOutlinePaperAirplane className="rotate-45 relative right-[2px] top-[-2px]" size={28} />
+                                <button className="post-action-btn relative top-[1px]" onClick={handleShare}>
+                                    <FiSend size={28} />
                                 </button>
                             </div>
                             
@@ -606,6 +607,12 @@ export default function PostDetail() {
                     onSave={(updated) => { setPost(p => ({ ...p, ...updated })); setEditOpen(false) }}
                 />
             )}
+
+            <ShareModal 
+                isOpen={showShareModal}
+                onClose={() => setShowShareModal(false)}
+                postId={post?._id}
+            />
         </>
     )
 }
