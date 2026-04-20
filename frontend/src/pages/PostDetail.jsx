@@ -517,28 +517,31 @@ export default function PostDetail() {
 
                     {/* Action bar */}
                     <div className="post-detail-actions-wrap">
-                        <div className="l-cluster gap-3.5 mb-2">
-                            <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={handleLike} whileTap={{ scale: 0.85 }}>
-                                {liked ? <HiHeart className="text-[24px]" /> : <HiOutlineHeart className="text-[24px]" />}
-                            </motion.button>
-                            <div className="relative" ref={emojiRef}>
-                                <button className="post-action-btn" onClick={() => setShowEmojiPicker(p => !p)}>
-                                    <HiEmojiHappy className="text-[22px]" />
+                        <div className="flex items-center justify-between w-full mb-3">
+                            <div className="flex items-center gap-4">
+                                <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={handleLike} whileTap={{ scale: 0.85 }}>
+                                    {liked ? <HiHeart className="text-[26px]" /> : <HiOutlineHeart className="text-[26px]" />}
+                                </motion.button>
+                                <div className="relative" ref={emojiRef}>
+                                    <button className="post-action-btn" onClick={() => setShowEmojiPicker(p => !p)}>
+                                        <HiEmojiHappy className="text-[26px]" />
+                                    </button>
+                                    {showEmojiPicker && (
+                                        <div className="emoji-picker-popover">
+                                            <EmojiPicker 
+                                                theme="dark"
+                                                onEmojiClick={(e) => setBody(prev => prev + e.emoji)}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                <button className="post-action-btn" onClick={handleShare}>
+                                    <HiShare className="text-[26px]" />
                                 </button>
-                                {showEmojiPicker && (
-                                    <div className="emoji-picker-popover">
-                                        <EmojiPicker 
-                                            theme="dark"
-                                            onEmojiClick={(e) => setBody(prev => prev + e.emoji)}
-                                        />
-                                    </div>
-                                )}
                             </div>
-                            <button className="post-action-btn" onClick={handleShare}>
-                                <HiShare className="text-[22px]" />
-                            </button>
-                            <motion.button className={`post-action-btn ${saved ? 'saved' : ''} ml-auto`} onClick={handleSave} whileTap={{ scale: 0.85 }}>
-                                {saved ? <HiBookmark className="text-[22px]" /> : <HiOutlineBookmark className="text-[22px]" />}
+                            
+                            <motion.button className={`post-action-btn ${saved ? 'saved' : ''}`} onClick={handleSave} whileTap={{ scale: 0.85 }}>
+                                {saved ? <HiBookmark className="text-[26px]" /> : <HiOutlineBookmark className="text-[26px]" />}
                             </motion.button>
                         </div>
                         <div className="font-bold text-[13px] mb-1">{likesCount.toLocaleString()} likes</div>
