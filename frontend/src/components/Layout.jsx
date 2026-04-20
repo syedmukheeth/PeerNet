@@ -255,7 +255,7 @@ export default function Layout() {
                     
                     <motion.button 
                         variants={navItemVariants} 
-                        className="ig-link w-full border-none bg-transparent text-left" 
+                        className="ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer" 
                         onClick={() => setShowCreate(true)}
                     >
                         <motion.div 
@@ -335,7 +335,7 @@ export default function Layout() {
                             )}
                         </AnimatePresence>
                         <motion.button 
-                            className={`ig-link w-full border-none bg-transparent text-left ${showMore ? 'ig-link--active' : ''}`} 
+                            className={`ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer ${showMore ? 'ig-link--active' : ''}`} 
                             onClick={() => setShowMore(!showMore)}
                         >
                             <motion.div 
