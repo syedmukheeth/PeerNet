@@ -13,12 +13,13 @@ const notificationSchema = new mongoose.Schema(
         sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         type: {
             type: String,
-            enum: ['like', 'comment', 'reply', 'follow', 'mention', 'message'],
+            enum: ['like', 'comment', 'reply', 'follow', 'mention', 'message', 'system_warning'],
             required: true,
         },
         entityId: { type: mongoose.Schema.Types.ObjectId, refPath: 'entityModel', default: null },
         entityModel: { type: String, enum: ['Post', 'Comment', 'Dscroll', 'Message', null], default: null },
         isRead: { type: Boolean, default: false },
+        message: { type: String, default: '' },
     },
     { timestamps: true },
 );

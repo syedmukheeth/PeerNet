@@ -412,8 +412,8 @@ export default function Layout() {
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* Hide Footer on Messages and Shorts pages for app-screen style */}
-                    {!['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) && (
+                    {/* Hide Footer on Messages, Shorts, and Admin pages for app-screen style */}
+                    {!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p)) && (
                         <footer className="site-footer">
                             <div className="site-footer__inner">
                                 {/* Left: Brand + Links */}

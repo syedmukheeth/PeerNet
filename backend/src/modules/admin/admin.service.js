@@ -149,6 +149,39 @@ const updatePostVisibility = async (adminId, postId, isHidden, reason = '') => {
     });
 };
 
+const deleteComment = async (adminId, commentId, reason = '') => {
+    const comment = await Comment.findByIdAndDelete(commentId);
+    if (!comment) throw new ApiError(404, 'Comment not found');
+
+    await AdminLog.create({
+        adminId,
+        action: 'DELETE_COMMENT',
+        targetType: 'Comment',
+        targetId: commentId,
+        details: `Deleted comment by @${comment.author?.username || 'unknown'}. Reason: ${reason}`
+    });
+};
+
+const warnUser = async (adminId, userId, message) => {
+    const user = await User.findById(userId);
+    if (!user) throw new ApiError(404, 'User not found');
+
+    await Notification.create({
+        recipient: userId,
+        sender: adminId,
+        type: 'system_warning',
+        message
+    });
+
+    await AdminLog.create({
+        adminId,
+        action: 'WARN_USER',
+        targetType: 'User',
+        targetId: userId,
+        details: `Issued system warning to @${user.username}. Message: ${message}`
+    });
+};
+
 const deleteStory = async (storyId) => {
     const story = await Story.findByIdAndDelete(storyId);
     if (!story) throw new ApiError(404, 'Story not found');
@@ -238,14 +271,30 @@ const getAuditLogs = async ({ limit = 50, skip = 0, search = '' }) => {
 
 const getAdvancedStats = async () => {
     const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    const midNight = new Date(now.setHours(0, 0, 0, 0));
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     
-    const [userCount, postCount, storyCount, bannedCount, pendingReports] = await Promise.all([
+    const [
+        userCount, 
+        postCount, 
+        storyCount, 
+        commentCount,
+        bannedCount, 
+        pendingReports,
+        activeToday,
+        signupsToday,
+        commentsToday
+    ] = await Promise.all([
         User.countDocuments(),
         Post.countDocuments(),
         Story.countDocuments(),
+        Comment.countDocuments(),
         User.countDocuments({ status: 'banned' }),
-        Report.countDocuments({ status: 'pending' })
+        Report.countDocuments({ status: 'pending' }),
+        User.countDocuments({ lastLogin: { $gte: twentyFourHoursAgo } }),
+        User.countDocuments({ createdAt: { $gte: midNight } }),
+        Comment.countDocuments({ createdAt: { $gte: midNight } })
     ]);
 
     // Daily Growth Aggregation
@@ -271,12 +320,22 @@ const getAdvancedStats = async () => {
         { $sort: { _id: 1 } }
     ]);
 
+    // Infrastructure Calculation (Footprint)
+    // Avg Post: 2.1MB, Avg Story: 1.5MB, Metadata: 0.1MB
+    const estimatedStorageBytes = (postCount * 2.1 * 1024 * 1024) + (storyCount * 1.5 * 1024 * 1024);
+    const storageUsedMB = Math.round(estimatedStorageBytes / (1024 * 1024));
+
     return {
         totalUsers: userCount,
         totalPosts: postCount,
         totalStories: storyCount,
+        totalComments: commentCount,
         bannedUsers: bannedCount,
         pendingReports,
+        activeToday,
+        signupsToday,
+        commentsToday,
+        storageUsedMB,
         charts: {
             userGrowth,
             postGrowth
@@ -359,5 +418,7 @@ module.exports = {
     getAdvancedStats,
     toggleUserVerification,
     resolveReport,
+    deleteComment,
+    warnUser,
     nukeInfrastructure
 };

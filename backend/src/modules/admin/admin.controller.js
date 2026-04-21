@@ -22,6 +22,13 @@ const updateUserStatus = catchAsync(async (req, res) => {
     res.json({ success: true, data: user, message: `User status updated to ${status}` });
 });
 
+const warnUser = catchAsync(async (req, res) => {
+    const { message } = req.body;
+    if (!message) throw new ApiError(400, 'Warning message is required');
+    await adminService.warnUser(req.user.id, req.params.userId, message);
+    res.json({ success: true, message: 'User warned successfully' });
+});
+
 const resetUserPassword = catchAsync(async (req, res) => {
     const { newPassword } = req.body;
     if (!newPassword || newPassword.length < 6) throw new ApiError(400, 'Password must be at least 6 characters');
@@ -99,6 +106,12 @@ const deleteStory = catchAsync(async (req, res) => {
     res.json({ success: true, message: 'Story deleted' });
 });
 
+const deleteComment = catchAsync(async (req, res) => {
+    const { reason } = req.body;
+    await adminService.deleteComment(req.user.id, req.params.commentId || req.params.id, reason);
+    res.json({ success: true, message: 'Comment deleted' });
+});
+
 const getStats = catchAsync(async (req, res) => {
     // Basic stats for top cards
     const stats = await adminService.getPlatformStats();
@@ -117,10 +130,21 @@ const verifyUser = catchAsync(async (req, res) => {
 });
 
 const nukeInfrastructure = catchAsync(async (req, res) => {
-    const { type, confirmationCode } = req.body;
+    const { type, confirmationCode, adminPassword } = req.body;
     
-    if (confirmationCode !== 'PURGE_NETWORK') {
-        throw new ApiError(400, 'Invalid confirmation code for infrastructure nuke');
+    // 1. Strict String Confirmation
+    if (confirmationCode !== 'DELETE') {
+        throw new ApiError(400, 'Invalid confirmation code. Please type "DELETE" exactly.');
+    }
+
+    // 2. Multi-Factor Password Verification
+    if (!adminPassword) {
+        throw new ApiError(400, 'Administrator password is required to authorize this action.');
+    }
+
+    const admin = await User.findById(req.user.id).select('+passwordHash');
+    if (!admin || !(await admin.matchPassword(adminPassword))) {
+        throw new ApiError(403, 'Critical Authentication Failure: Incorrect administrator password.');
     }
 
     const result = await adminService.nukeInfrastructure(req.user.id, type);
