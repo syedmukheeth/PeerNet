@@ -5656,21 +5656,6 @@ textarea:focus-visible {
   color: #71717a;
 }
 
-/* Mobile Support */
-@media (max-width: 1024px) {
-  .v4-nav-panel { display: none; }
-}
-
-@media (max-width: 768px) {
-  .v4-middle-panel {
-    display: none;
-    width: 100%;
-  }
-  .v4-root.mobile-chat-active .v4-middle-panel { display: none; }
-  .v4-root.mobile-chat-active .v4-chat-main { display: flex; }
-  .v4-root:not(.mobile-chat-active) .v4-middle-panel { display: flex; }
-  .v4-root:not(.mobile-chat-active) .v4-chat-main { display: none; }
-}
 /* Message Composer */
 .v4-composer-wrap {
   padding: 16px 32px 24px;
@@ -5841,46 +5826,52 @@ textarea:focus-visible {
     height: 48px;
   }
 
-/* Mobile Bottom Nav Bar */
-.v4-mobile-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(32px);
-  border-top: 1px solid var(--v4-border);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  z-index: 50;
-}
+  /* Mobile Bottom Nav Bar */
+  .v4-mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 64px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(32px);
+    border-top: 1px solid var(--v4-border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 50;
+  }
 
-.v4-mobile-nav-item {
-  color: var(--v4-text-s);
-  transition: all 0.3s ease;
-}
+  .v4-mobile-nav-item {
+    color: var(--v4-text-s);
+    transition: all 0.3s ease;
+    position: relative;
+  }
 
-.v4-mobile-nav-item.active {
-  color: var(--v4-accent-solid);
-  transform: translateY(-2px);
-}
+  .v4-mobile-nav-item.active {
+    color: var(--v4-accent-solid);
+    transform: translateY(-2px);
+  }
 
-.v4-mobile-nav-item.active::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--v4-accent-solid);
-  box-shadow: 0 0 10px var(--v4-accent-solid);
-}
+  .v4-mobile-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--v4-accent-solid);
+    box-shadow: 0 0 10px var(--v4-accent-solid);
+  }
 
-/* Hide mobile nav when chat is open on mobile */
-.mobile-chat-active .v4-mobile-nav {
-  display: none;
+  /* Hide mobile nav when chat is open on mobile */
+  .mobile-chat-active .v4-mobile-nav {
+    display: none;
+  }
+
+  .v4-msg-wrapper {
+    padding: 0 12px;
+  }
 }
