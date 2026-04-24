@@ -4728,247 +4728,39 @@ textarea:focus-visible {
 
 
 /* ═══════════════════════════════════════════════════════════
-   PeerNet Senior CSS - Messaging Module V1.0 "Obsidian Flow"
-   Hardened against "intern" styles. Premium layout only.
-   ═══════════════════════════════════════════════════════════ */
-
-/* 1. Global Messaging Root */
-
-/* 2. Enhanced Conversation Sidebar */
-
-
-
-
-
-/* 3. Premium Message Bubbles */
-
-
-@keyframes dm-bubble-pop {
-  from { opacity: 0; transform: scale(0.9) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-
-
-
-
-/* 4. SENIOR GRADE COMPOSER - Bulletproof */
-
-
-
-/* ELIMINATE THE RECTANGULAR BORDER GLITCH */
-
-
-
-
-
-
-
-
-/* 5. Light Mode Polish */
-
-
-
-/* 6. Fix for the "Red Dot" mystery */
 
 
 /* ═══════════════════════════════════════════════════════════
-   Strictly enforced premium layout. No overrides allowed.
+   PeerNet OBSIDIAN MASTER CSS V6.0 - "The Final Truth"
+   Design: Syed Mukheeth | Standard: Instagram Elite
    ═══════════════════════════════════════════════════════════ */
 
-
-
-
-
-
-
-
-
-/* COMPOSER - THE SENIOR WAY */
-
-
-
-
-
-
-
-
-
-
-
-
-/* Light Mode Overrides */
-
-
-
-/* ═══════════════════════════════════════════════════════════
-   PeerNet ULTIMATE MASTER CSS - Unified Messaging V3.0
-   Design: Syed Mukheeth | Standard: Senior Grade
-   ═══════════════════════════════════════════════════════════ */
-
-/* 1. Layout & High-Level Containers */
-
-
-/* 2. Sidebar / Conversation List */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* 3. Empty States & Skeletons */
-
-
-
-
-
-
-
-
-
-
-
-/* 4. Chat Area Root */
-
-
-
-/* 5. Message Bubbles - Senior Style */
-
-
-
-
-
-
-
-/* 6. Composer - The Final Word */
-
-
-
-
-
-
-
-/* Light Mode Overrides for Mess Cleanup */
-
-/* ═══════════════════════════════════════════════════════════
-   PeerNet SENIOR MASTER CSS V4.0 - "Obsidian Perfection"
-   Standard: Instagram Enterprise | Author: Syed Mukheeth
-   ═══════════════════════════════════════════════════════════ */
-
-/* 1. Root & High-Level Shell */
-
-
-/* 2. Unified Sidebar (Perfected) */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* 3. Chat Area & Header (The Perfect Flow) */
-
-
-
-
-
-
-
-/* 4. Message List & Bubbles (Hardened) */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* 5. Composer (The Senior Masterpiece) */
-
-
-
-
-
-
-
-
-/* 6. Light Mode Polish (Final) */
-
-/* ═══════════════════════════════════════════════════════════
-   PeerNet OBSIDIAN MASTER CSS V5.0 - The Final Perfection
-   Design System: Digital Obsidian | Author: Syed Mukheeth
-   ═══════════════════════════════════════════════════════════ */
-
-/* 1. Base Framework */
+/* 1. LAYOUT SHELL */
 .dm-premium-container {
   height: 100dvh;
+  width: 100vw;
   display: flex;
-  background: #000000;
+  background: #000;
   overflow: hidden;
-  color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .dm-premium-content {
   display: flex;
   width: 100%;
-  max-width: 100%;
-  background: #000000;
+  height: 100%;
+  background: #000;
 }
 
-/* 2. Sidebar (The Obsidian Way) */
+/* 2. SIDEBAR - ELITE OBSIDIAN */
 .dm-list-panel {
-  width: 400px;
+  width: 380px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.08);
-  background: #000000;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  background: #000;
   flex-shrink: 0;
 }
 
@@ -4976,106 +4768,108 @@ textarea:focus-visible {
   padding: 40px 24px 20px;
 }
 
+.dm-list-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px !important;
+}
+
 .dm-list-title {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
-  letter-spacing: -0.06em;
-  color: #ffffff;
+  color: #fff;
+  margin: 0;
 }
+
+.dm-search-container { margin-bottom: 12px; }
 
 .dm-search-input {
-  width: 100%;
-  background: #18181b !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
-  border-radius: 16px;
-  padding: 14px 14px 14px 48px;
-  color: #ffffff !important;
-  font-size: 15px;
-  outline: none;
-  transition: 0.3s;
+  width: 100% !important;
+  background: #121214 !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 12px !important;
+  padding: 14px 14px 14px 44px !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  outline: none !important;
 }
 
-.dm-search-input::placeholder {
+.dm-search-icon {
+  position: absolute;
+  left: 14px;
   color: #71717a;
-  opacity: 1;
-}
-
-.dm-search-input:focus {
-  background: #27272a !important;
-  border-color: var(--accent) !important;
+  z-index: 5;
 }
 
 .dm-convo-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 24px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 14px;
+  padding: 14px 20px;
+  margin: 2px 10px;
+  border-radius: 14px;
   cursor: pointer;
-  position: relative;
+  transition: 0.2s;
 }
 
-.dm-convo-item:hover {
-  background: rgba(255,255,255,0.03);
-}
-
-.dm-convo-item.active {
-  background: rgba(124, 58, 237, 0.08);
-}
-
-.dm-convo-item.active::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 15%;
-  height: 70%;
-  width: 4px;
-  background: var(--accent);
-  border-radius: 0 4px 4px 0;
-}
+.dm-convo-item:hover { background: rgba(255,255,255,0.05); }
+.dm-convo-item.active { background: rgba(124, 58, 237, 0.15); }
 
 .dm-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: 2px solid #000;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
 }
 
-.dm-username { font-weight: 800; font-size: 16px; color: #fff; }
-.dm-last-msg { color: #a1a1aa; font-size: 14px; }
-.dm-convo-item.unread .dm-last-msg { color: #fff; font-weight: 800; }
+.dm-username { font-weight: 700; color: #fff; font-size: 15px; }
+.dm-last-msg { color: #a1a1aa; font-size: 13px; margin: 0; }
 
-/* 3. Chat Core (Clean & High-Density) */
+/* 3. CHAT AREA & HEADER (FIXED) */
 .dm-chat-area-root {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #000000;
+  background: #000;
+  height: 100%;
   position: relative;
 }
 
 .dm-chat-header {
-  height: 76px;
+  height: 72px;
+  width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 32px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   background: rgba(0,0,0,0.8);
   backdrop-filter: blur(20px);
-  z-index: 100;
 }
+
+.dm-avatar-sm {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+.dm-header-user { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.dm-user-name { font-weight: 700; color: #fff; }
+.dm-user-status { font-size: 12px; color: #71717a; }
+.dm-user-status.online { color: #10b981; }
 
 .dm-messages-scroll {
   flex: 1;
   overflow-y: auto;
-  padding-top: 20px;
+  background: #000;
 }
 
 .dm-messages-inner {
-  max-width: 900px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
 }
@@ -5084,64 +4878,53 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 80px 0 60px;
-  text-align: center;
+  padding: 60px 0 40px;
 }
 
 .dm-info-avatar {
   width: 110px !important;
   height: 110px !important;
-  border-radius: 50%;
-  margin-bottom: 16px;
-  border: 3px solid #18181b;
+  border-radius: 50% !important;
+  margin-bottom: 16px !important;
+  border: 3px solid #121214 !important;
 }
 
-.dm-info-view-btn {
-  margin-top: 16px;
-  background: #18181b;
-  color: #fff;
-  padding: 8px 20px;
-  border-radius: 10px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-}
-
-/* 4. Bubbles (Refined) */
-.dm-message-row { display: flex; gap: 12px; margin-bottom: 6px; }
+/* 4. BUBBLES - THE PERFECT PILL */
+.dm-message-row { display: flex; width: 100%; margin-bottom: 4px; }
 .dm-message-row.self { justify-content: flex-end; }
 .dm-message-row.peer { justify-content: flex-start; }
 
 .dm-bubble {
-  padding: 12px 20px;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.5;
-  transition: transform 0.1s;
+  padding: 10px 16px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  max-width: 70%;
 }
 
 .dm-bubble-primary {
   background: linear-gradient(135deg, #7C3AED, #6366F1) !important;
-  color: #ffffff !important;
-  border-radius: 24px 24px 4px 24px;
+  color: #fff !important;
+  border-radius: 20px 20px 4px 20px !important;
 }
 
 .dm-bubble-secondary {
   background: #18181b !important;
-  color: #ffffff !important;
-  border-radius: 24px 24px 24px 4px;
+  color: #fff !important;
+  border-radius: 20px 20px 20px 4px !important;
 }
 
-.dm-message-meta {
-  font-size: 11px;
-  color: #71717a;
-  margin-top: 6px;
-  font-weight: 600;
+.dm-bubble-avatar {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  margin-right: 8px;
+  align-self: flex-end;
+  margin-bottom: 12px;
 }
 
-/* 5. Composer (Integrated Pill) */
+/* 5. COMPOSER - INTEGRATED */
 .dm-composer-root {
-  padding: 24px 40px 48px;
+  padding: 20px 32px 32px;
   background: #000;
 }
 
@@ -5149,60 +4932,44 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   background: #09090b !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  border-radius: 40px;
-  padding: 10px 14px 10px 24px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 32px !important;
+  padding: 6px 10px 6px 20px !important;
 }
 
 .dm-textarea-pill {
-  flex: 1;
+  flex: 1 !important;
   background: transparent !important;
   border: none !important;
   outline: none !important;
-  padding: 12px 0 !important;
   color: #fff !important;
-  font-size: 16px;
-  resize: none;
-  max-height: 180px;
+  font-size: 16px !important;
+  padding: 10px 0 !important;
+  resize: none !important;
+  max-height: 150px !important;
 }
 
 .dm-send-btn-pill {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
   background: linear-gradient(135deg, #7C3AED, #6366F1) !important;
   color: #fff !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   border: none !important;
-  cursor: pointer;
-  transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dm-send-btn-pill:hover:not(:disabled) {
-  transform: scale(1.1) rotate(-8deg);
-}
-
-.dm-composer-pill-action, .dm-emoji-btn-pill {
-  color: #a1a1aa;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-}
-
-.dm-composer-pill-action:hover, .dm-emoji-btn-pill:hover { color: #fff; }
-
-/* 6. Light Mode Sync (Full Quality) */
-[data-theme="light"] .dm-premium-container { background: #ffffff; color: #000; }
-[data-theme="light"] .dm-list-panel { background: #ffffff; border-color: #f1f1f4; }
+/* 6. LIGHT MODE OVERRIDES */
+[data-theme="light"] .dm-premium-container { background: #fff; }
+[data-theme="light"] .dm-list-panel { background: #fff; border-color: #eee; }
 [data-theme="light"] .dm-list-title { color: #000; }
-[data-theme="light"] .dm-search-input { background: #f4f4f7 !important; color: #000 !important; }
-[data-theme="light"] .dm-username { color: #000; }
-[data-theme="light"] .dm-chat-area-root { background: #ffffff; }
-[data-theme="light"] .dm-chat-header { background: rgba(255,255,255,0.8); border-color: #f1f1f4; }
+[data-theme="light"] .dm-search-input { background: #f0f0f2 !important; color: #000 !important; }
+[data-theme="light"] .dm-convo-item:hover { background: #f4f4f6; }
+[data-theme="light"] .dm-chat-area-root { background: #fff; }
+[data-theme="light"] .dm-chat-header { background: rgba(255,255,255,0.8); border-color: #eee; }
+[data-theme="light"] .dm-user-name { color: #000; }
 [data-theme="light"] .dm-bubble-secondary { background: #efeff3 !important; color: #000 !important; }
-[data-theme="light"] .dm-composer-main-pill { background: #ffffff !important; border-color: #e4e4e7 !important; }
+[data-theme="light"] .dm-composer-main-pill { background: #fff !important; border-color: #ddd !important; }
 [data-theme="light"] .dm-textarea-pill { color: #000 !important; }
