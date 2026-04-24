@@ -1,398 +1,277 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
 import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
-
-// New Modular Components
-import MessagesLayout from './messages/MessagesLayout'
-import ConversationList from './messages/ConversationList'
-import ChatHeader from './messages/ChatHeader'
-import MessageBubble from './messages/MessageBubble'
-import MessageComposer from './messages/MessageComposer'
-import EmptyState from './messages/EmptyState'
-import NewConvoModal from './messages/NewConvoModal'
+import EmojiPicker from '@emoji-mart/react'
 
 export default function Messages() {
-    const { id: paramConvoId } = useParams()
+    const { id: convoId } = useParams()
     const { user } = useAuth()
     const navigate = useNavigate()
     const socket = useSocket(user)
 
+    // ─── State ──────────────────────────────────────────────────
     const [conversations, setConversations] = useState([])
     const [activeConvo, setActiveConvo] = useState(null)
     const [messages, setMessages] = useState([])
-    const [loadingMessages, setLoadingMessages] = useState(false)
-    const [initialLoad, setInitialLoad] = useState(true)
-    const [starting, setStarting] = useState(false)
-    const [convoSearch, setConvoSearch] = useState('')
-    const [text, setText] = useState('')
-    const [editingMessage, setEditingMessage] = useState(null)
-    const [peerTyping, setPeerTyping] = useState(false)
-    const [showNewConvo, setShowNewConvo] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [searchText, setSearchText] = useState('')
+    const [inputText, setInputText] = useState('')
     const [showEmoji, setShowEmoji] = useState(false)
-    const [filePreview, setFilePreview] = useState(null)
-    const [isUploading, setIsUploading] = useState(false)
-    const [mobilePanel, setMobilePanel] = useState('list') // 'list' | 'chat'
+    const [peerTyping, setPeerTyping] = useState(false)
 
-    const bottomRef = useRef()
-    const fileRef = useRef()
+    const scrollRef = useRef()
     const inputRef = useRef()
     const typingTimer = useRef()
-    
-    // Refs for socket callbacks (to avoid stale closures)
-    const activeConvoRef = useRef(activeConvo)
-    useEffect(() => { activeConvoRef.current = activeConvo }, [activeConvo])
 
-    const scrollToBottom = (behavior = 'smooth') => {
-        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior }), 50)
-    }
-
-    // ─── Data Loading ──────────────────────────────────────────
-
-    const loadConvos = async (isFirst = false) => {
-        if (isFirst) setInitialLoad(true)
+    // ─── Loading Data ───────────────────────────────────────────
+    const fetchConvos = async () => {
         try {
             const { data } = await chatApi.get('')
             setConversations(data.data || [])
-        } catch {
-            console.error("Failed to load conversations")
-        } finally {
-            setInitialLoad(false)
+        } catch (err) {
+            console.error("Convo error", err)
         }
     }
 
-    const loadMessages = useCallback(async (convoId) => {
-        if (!convoId) return
-        setLoadingMessages(true)
+    const fetchMessages = useCallback(async (id) => {
+        if (!id) return
+        setLoading(true)
         try {
-            // FIX: chatApi already has /conversations base
-            const { data } = await chatApi.get(`${convoId}/messages`, { params: { limit: 50 } })
+            const { data } = await chatApi.get(`${id}/messages`)
             setMessages(data.data || [])
-            await chatApi.patch(`${convoId}/messages/read`, {})
+            await chatApi.patch(`${id}/messages/read`, {})
             window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
             scrollToBottom('instant')
-        } catch {
-            console.error("Failed to load messages")
+        } catch (err) {
+            toast.error("Failed to load messages")
         } finally {
-            setLoadingMessages(false)
+            setLoading(false)
         }
     }, [])
 
-    useEffect(() => {
-        loadConvos(true)
-    }, [])
+    useEffect(() => { fetchConvos() }, [])
 
     useEffect(() => {
-        if (paramConvoId && conversations.length > 0) {
-            const match = conversations.find(c => c._id === paramConvoId)
-            if (match && match._id !== activeConvo?._id) {
-                setActiveConvo(match)
-                setMobilePanel('chat')
-            }
-        }
-    }, [paramConvoId, conversations, activeConvo?._id])
-
-    useEffect(() => {
-        const convoId = activeConvo?._id
         if (convoId) {
-            loadMessages(convoId)
+            const match = conversations.find(c => c._id === convoId)
+            if (match) setActiveConvo(match)
+            fetchMessages(convoId)
             socket?.emit('join_conversation', convoId)
         }
-        return () => {
-            if (convoId) socket?.emit('leave_conversation', convoId)
-        }
-    }, [activeConvo?._id, loadMessages, socket])
+        return () => { if (convoId) socket?.emit('leave_conversation', convoId) }
+    }, [convoId, conversations, fetchMessages, socket])
 
-    // ─── Socket Event Handlers ───────────────────────────────────
-
+    // ─── Socket Events ──────────────────────────────────────────
     useEffect(() => {
         if (!socket) return
-
-        const onNewMsg = (msg) => {
-            if (msg.conversationId !== activeConvoRef.current?._id) {
-                setConversations(prev => prev.map(c => 
-                    c._id === msg.conversationId 
-                    ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + 1 } 
-                    : c
-                ).sort((a, b) => (a._id === msg.conversationId ? -1 : (b._id === msg.conversationId ? 1 : 0))))
-                return
+        const handleNewMsg = (msg) => {
+            if (msg.conversationId === convoId) {
+                setMessages(prev => {
+                    const exists = prev.find(m => m._id === msg._id || m.tempId === msg.tempId)
+                    if (exists) return prev.map(m => (m._id === exists._id ? msg : m))
+                    return [...prev, msg]
+                })
+                scrollToBottom()
             }
-
-            setMessages(prev => {
-                const exists = prev.find(m => m._id === msg._id || m._id === `opt_${msg.tempId}`)
-                if (exists) return prev.map(m => m._id === exists._id ? msg : m)
-                return [...prev, msg]
-            })
-            
-            chatApi.patch(`${msg.conversationId}/messages/read`, {})
-            scrollToBottom()
-            
+            // Update sidebar
             setConversations(prev => prev.map(c => 
                 c._id === msg.conversationId ? { ...c, lastMessage: msg } : c
             ))
         }
 
-        const onTyping = ({ userId }) => {
-            if (userId !== user?._id) setPeerTyping(true)
-        }
-        const onStopTyping = ({ userId }) => {
-            if (userId !== user?._id) setPeerTyping(false)
-        }
-
-        socket.on('new_message', onNewMsg)
-        socket.on('user_typing_start', onTyping)
-        socket.on('user_typing_stop', onStopTyping)
-
-        socket.on('message_edited', (msg) => {
-            if (msg.conversationId === activeConvoRef.current?._id) {
-                setMessages(prev => prev.map(m => m._id === msg._id ? msg : m))
-            }
-        })
-
-        socket.on('message_deleted', ({ messageId }) => {
-            setMessages(prev => prev.filter(m => m._id !== messageId))
-        })
-
+        socket.on('new_message', handleNewMsg)
+        socket.on('user_typing_start', ({ userId }) => { if (userId !== user?._id) setPeerTyping(true) })
+        socket.on('user_typing_stop', ({ userId }) => { if (userId !== user?._id) setPeerTyping(false) })
+        
         return () => {
-            socket.off('new_message', onNewMsg)
+            socket.off('new_message')
             socket.off('user_typing_start')
             socket.off('user_typing_stop')
-            socket.off('message_edited')
-            socket.off('message_deleted')
         }
-    }, [socket, user?._id])
+    }, [socket, convoId, user?._id])
 
-    // ─── Action Handlers ────────────────────────────────────────
-
-    const handleSelectConvo = (c) => {
-        if (activeConvo?._id === c._id) return;
-        setMessages([]) // Instant clear to prevent seeing old chat
-        navigate(`/messages/${c._id}`)
+    // ─── Actions ────────────────────────────────────────────────
+    const scrollToBottom = (behavior = 'smooth') => {
+        setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior }), 100)
     }
 
-    const handleType = (e) => {
-        setText(e.target.value)
-        if (!socket || !activeConvo) return
-        
-        socket.emit('typing_start', { conversationId: activeConvo._id })
-        clearTimeout(typingTimer.current)
-        typingTimer.current = setTimeout(() => {
-            socket.emit('typing_stop', { conversationId: activeConvo._id })
-        }, 2000)
-    }
-
-    const handleSend = async (e) => {
-        e?.preventDefault()
-        if ((!text.trim() && !filePreview) || isUploading) return
-
-        const currentConvoId = activeConvo?._id;
-        if (!currentConvoId) return;
-
-        if (editingMessage) {
-            const originalId = editingMessage._id
-            const newBody = text
-            setMessages(prev => prev.map(m => m._id === originalId ? { ...m, body: newBody } : m))
-            setEditingMessage(null)
-            setText('')
-            
-            try {
-                await chatApi.patch(`${currentConvoId}/messages/${originalId}`, { body: newBody })
-            } catch {
-                toast.error("Failed to update message")
-                // Rollback not strictly necessary here as socket will eventually sync, but good for UX
-            }
-            return
-        }
-
+    const handleSend = async () => {
+        if (!inputText.trim() || !convoId) return
         const tempId = Date.now()
-        const optimisticMsg = {
-            _id: `opt_${tempId}`,
-            body: text,
-            sender: user._id,
-            createdAt: new Date().toISOString(),
-            status: 'sending'
-        }
+        const body = inputText
+        setInputText('')
 
-        setMessages(prev => [...prev, optimisticMsg])
-        setText('')
-        setFilePreview(null)
+        // Optimistic
+        const opt = { _id: `temp_${tempId}`, tempId, body, sender: user._id, createdAt: new Date().toISOString(), status: 'sending' }
+        setMessages(prev => [...prev, opt])
         scrollToBottom()
 
         try {
-            let mediaUrl = null
-            if (filePreview) {
-                setIsUploading(true)
-                const formData = new FormData()
-                formData.append('file', filePreview.file)
-                const uploadRes = await api.post('/upload', formData)
-                mediaUrl = uploadRes.data.url
-            }
-
-            // FIX: chatApi already has /conversations base
-            await chatApi.post(`${currentConvoId}/messages`, {
-                body: text,
-                mediaUrl,
-                tempId
-            })
-        } catch {
-            setMessages(prev => prev.map(m => m._id === optimisticMsg._id ? { ...m, status: 'failed' } : m))
-            toast.error("Failed to send message")
-        } finally {
-            setIsUploading(false)
+            await chatApi.post(`${convoId}/messages`, { body, tempId })
+        } catch (err) {
+            setMessages(prev => prev.map(m => m.tempId === tempId ? { ...m, status: 'failed' } : m))
+            toast.error("Failed to send")
         }
     }
 
-    const startEditing = (m) => {
-        setEditingMessage(m)
-        setText(m.body)
-        inputRef.current?.focus()
+    const handleType = (e) => {
+        setInputText(e.target.value)
+        if (!socket || !convoId) return
+        socket.emit('typing_start', { conversationId: convoId })
+        clearTimeout(typingTimer.current)
+        typingTimer.current = setTimeout(() => {
+            socket.emit('typing_stop', { conversationId: convoId })
+        }, 2000)
     }
 
-    const handleFileSelect = (e) => {
-        const file = e.target.files[0]
-        if (!file) return
-        const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'doc'
-        const url = URL.createObjectURL(file)
-        setFilePreview({ file, url, type, name: file.name })
-    }
+    const filtered = conversations.filter(c => {
+        const peer = c.participants?.find(p => p._id !== user?._id)
+        return peer?.username?.toLowerCase().includes(searchText.toLowerCase())
+    })
 
-    const startNewConvo = async (otherUser) => {
-        setShowNewConvo(false)
-        setStarting(true)
-        try {
-            // FIX: chatApi already has /conversations base
-            // Use api.post('/conversations') or chatApi.post('')
-            const { data } = await chatApi.post('', { targetUserId: otherUser._id })
-            const newC = data.data
-            setConversations(prev => {
-                if (prev.find(c => c._id === newC._id)) return prev
-                return [newC, ...prev]
-            })
-            handleSelectConvo(newC)
-        } catch {
-            toast.error("Failed to start conversation")
-        } finally {
-            setStarting(false)
-        }
-    }
-
-    const deleteMessage = async (m) => {
-        if (!window.confirm("Delete this message?")) return
-        try {
-            await chatApi.delete(`${activeConvo._id}/messages/${m._id}`)
-            setMessages(prev => prev.filter(x => x._id !== m._id))
-        } catch {
-            toast.error("Delete failed")
-        }
-    }
-
-
-    const peer = activeConvo?.participants?.find(p => (p._id || p) !== user?._id) || activeConvo?.participant;
+    const activePeer = activeConvo?.participants?.find(p => p._id !== user?._id)
 
     return (
-        <MessagesLayout>
-            <div className="dm-premium-content" style={{ display: 'flex', width: '100%', height: '100%' }}>
-                <ConversationList 
-                    user={user}
-                    conversations={conversations}
-                    activeConvo={activeConvo}
-                    onSelectConvo={handleSelectConvo}
-                    onNewConvo={() => setShowNewConvo(true)}
-                    initialLoad={initialLoad}
-                    starting={starting}
-                    convoSearch={convoSearch}
-                    setConvoSearch={setConvoSearch}
-                    timeago={timeago}
-                    className={mobilePanel === 'chat' ? 'dm-list-mobile-hidden' : ''}
-                />
-    
-                <main className={`dm-chat-area-root ${mobilePanel === 'list' ? 'dm-chat-mobile-hidden' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <div className="ig-root">
+            {/* Sidebar */}
+            <aside className="ig-sidebar">
+                <header className="ig-sidebar-header">
+                    <div className="ig-sidebar-title-row">
+                        <h1 className="ig-sidebar-title">{user?.username}</h1>
+                        <HiPencilAlt className="ig-sidebar-action" onClick={() => {}} />
+                    </div>
+                    <div className="ig-search-wrap" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <HiSearch style={{ position: 'absolute', left: 12, color: '#8e8e8e' }} />
+                        <input 
+                            className="ig-composer-input" 
+                            style={{ background: '#262626', borderRadius: 8, padding: '8px 12px 8px 36px', width: '100%' }}
+                            placeholder="Search"
+                            value={searchText}
+                            onChange={e => setSearchText(e.target.value)}
+                        />
+                    </div>
+                </header>
+
+                <div className="ig-convo-list no-scrollbar">
+                    {filtered.map(c => {
+                        const peer = c.participants?.find(p => p._id !== user?._id)
+                        const avatar = peer?.avatarUrl || \`https://ui-avatars.com/api/?name=\${peer?.username}&background=7C3AED&color=fff\`
+                        return (
+                            <div 
+                                key={c._id} 
+                                className={\`ig-convo-item \${convoId === c._id ? 'active' : ''}\`}
+                                onClick={() => navigate(\`/messages/\${c._id}\`)}
+                            >
+                                <img src={avatar} className="ig-avatar" alt="" />
+                                <div className="ig-convo-info">
+                                    <span className="ig-username">{peer?.username}</span>
+                                    <p className="ig-last-msg truncate">
+                                        {c.lastMessage?.body || 'Sent an attachment'} · {timeago(c.lastMessage?.createdAt || c.updatedAt)}
+                                    </p>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </aside>
+
+            {/* Main Chat Area */}
+            <main className="ig-chat-main">
                 {activeConvo ? (
                     <>
-                        <ChatHeader 
-                            participant={peer}
-                            isOnline={activeConvo.isOnline}
-                            onBack={() => setMobilePanel('list')}
-                            onNavigateProfile={(uid) => navigate(`/profile/${uid}`)}
-                        />
-                        
-                        <div className="dm-messages-scroll dark-scrollbar">
-                            <div className="dm-messages-inner">
-                                <div className="dm-messages-header-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 0 40px', textAlign: 'center' }}>
-                                        <img 
-                                            src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`} 
-                                            className="dm-info-avatar" 
-                                            alt="" 
-                                            style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover', marginBottom: 16, border: '4px solid #121214' }}
-                                        />
-                                        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: '#fff' }}>{peer?.fullName || peer?.username}</h2>
-                                        <p style={{ color: '#a1a1aa', fontSize: 14, marginTop: 4 }}>{peer?.username} · PeerNet Member</p>
-                                        <button className="dm-info-view-btn" style={{ marginTop: 16, background: '#18181b', color: '#fff', padding: '8px 20px', borderRadius: 10, fontWeight: 700 }} onClick={() => navigate(`/profile/${peer?._id}`)}>View Profile</button>
-                                    </div>
-
-                                    {messages.map((m) => (
-                                        <MessageBubble 
-                                            key={m._id}
-                                            message={m}
-                                            isSelf={(m.sender?._id || m.sender) === user?._id}
-                                            peer={peer}
-                                            onDelete={deleteMessage}
-                                            onEdit={startEditing}
-                                            timeago={timeago}
-                                        />
-                                    ))}
-                                    {peerTyping && (
-                                        <div className="dm-typing-indicator">
-                                            <span>{peer?.username} is typing...</span>
-                                        </div>
-                                    )}
-                                    {messages.length === 0 && !loadingMessages && (
-                                        <div className="dm-no-messages-yet">
-                                            <div className="dm-no-messages-icon">✉️</div>
-                                            <p>No messages here yet...</p>
-                                            <span className="t-small">Send a message to start the conversation</span>
-                                        </div>
-                                    )}
-                                    <div ref={bottomRef} style={{ height: 20 }} />
+                        <header className="ig-chat-header">
+                            <div className="ig-header-user" onClick={() => navigate(\`/profile/\${activePeer?._id}\`)}>
+                                <img 
+                                    src={activePeer?.avatarUrl || \`https://ui-avatars.com/api/?name=\${activePeer?.username}&background=7C3AED&color=fff\`} 
+                                    className="ig-avatar-sm" 
+                                    alt="" 
+                                />
+                                <div>
+                                    <div className="ig-header-name">{activePeer?.fullName || activePeer?.username}</div>
+                                    <div style={{ fontSize: 12, color: '#a8a8a8' }}>{activeConvo.isOnline ? 'Active now' : 'Offline'}</div>
                                 </div>
+                            </div>
+                        </header>
+
+                        <div className="ig-messages-viewport dark-scrollbar" ref={scrollRef}>
+                            <div className="ig-messages-inner">
+                                {messages.map((m, i) => {
+                                    const isSelf = (m.sender?._id || m.sender) === user?._id
+                                    return (
+                                        <div key={m._id} className={\`ig-msg-row \${isSelf ? 'self' : 'peer'}\`}>
+                                            {!isSelf && (
+                                                <img 
+                                                    src={activePeer?.avatarUrl || \`https://ui-avatars.com/api/?name=\${activePeer?.username}&background=7C3AED&color=fff\`} 
+                                                    className="ig-avatar" 
+                                                    style={{ width: 28, height: 28, marginRight: 8, alignSelf: 'flex-end', marginBottom: 4 }}
+                                                    alt="" 
+                                                />
+                                            )}
+                                            <div className={\`ig-bubble \${isSelf ? 'ig-bubble-self' : 'ig-bubble-peer'}\`}>
+                                                {m.body}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                                {peerTyping && (
+                                    <div className="ig-last-msg" style={{ paddingLeft: 36, marginBottom: 12 }}>Typing...</div>
+                                )}
+                            </div>
                         </div>
 
-                        <MessageComposer 
-                            text={text}
-                            setText={setText}
-                            handleType={handleType}
-                            handleSend={handleSend}
-                            handleFileSelect={handleFileSelect}
-                            filePreview={filePreview}
-                            setFilePreview={setFilePreview}
-                            showEmoji={showEmoji}
-                            setShowEmoji={setShowEmoji}
-                            insertEmoji={(e) => setText(prev => prev + (e.native || e.emoji))}
-                            isUploading={isUploading}
-                            inputRef={inputRef}
-                            fileRef={fileRef}
-                            editingMessage={editingMessage}
-                            onCancelEdit={() => {
-                                setEditingMessage(null)
-                                setText('')
-                            }}
-                        />
+                        <div className="ig-composer-area">
+                            <div className="ig-composer-pill">
+                                <HiOutlineEmojiHappy 
+                                    className="ig-sidebar-action" 
+                                    style={{ marginRight: 12 }} 
+                                    onClick={() => setShowEmoji(!showEmoji)} 
+                                />
+                                <textarea 
+                                    rows="1"
+                                    className="ig-composer-input"
+                                    placeholder="Message..."
+                                    value={inputText}
+                                    onChange={handleType}
+                                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+                                />
+                                {inputText.trim() ? (
+                                    <span className="ig-composer-btn" onClick={handleSend}>Send</span>
+                                ) : (
+                                    <HiOutlinePhotograph className="ig-sidebar-action" style={{ marginLeft: 12 }} />
+                                )}
+                            </div>
+                            {showEmoji && (
+                                <div style={{ position: 'absolute', bottom: 100, right: 40, z-index: 1000 }}>
+                                    <EmojiPicker 
+                                        onEmojiSelect={(e) => setInputText(prev => prev + e.native)} 
+                                        theme="dark"
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </>
                 ) : (
-                    <EmptyState onNewMessage={() => setShowNewConvo(true)} />
+                    <div className="ig-chat-main items-center justify-center">
+                        <div className="text-center">
+                            <div style={{ fontSize: 80, marginBottom: 20 }}>✉️</div>
+                            <h2 className="ig-sidebar-title" style={{ fontSize: 20 }}>Your Messages</h2>
+                            <p className="ig-last-msg">Send private photos and messages to a friend or group.</p>
+                            <button 
+                                className="btn" 
+                                style={{ background: '#0095f6', color: '#fff', padding: '8px 24px', borderRadius: 8, marginTop: 20 }}
+                                onClick={() => {}}
+                            >
+                                Send Message
+                            </button>
+                        </div>
+                    </div>
                 )}
             </main>
-
-            {showNewConvo && (
-                <NewConvoModal 
-                    onClose={() => setShowNewConvo(false)}
-                    onStart={startNewConvo}
-                />
-            )}
-            </div>
-        </MessagesLayout>
+        </div>
     )
 }
