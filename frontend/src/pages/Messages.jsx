@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
@@ -54,17 +54,37 @@ export default function Messages() {
         }
     }, [])
 
-    useEffect(() => { fetchConvos() }, [])
-
+    // ─── Loading Data ───────────────────────────────────────────
     useEffect(() => {
-        if (convoId) {
+        if (!convoId) {
+            setActiveConvo(null)
+            setMessages([])
+            return
+        }
+
+        const switchChat = async () => {
+            // SYNC CLEAR: Prevent stale messages from showing
+            setMessages([])
+            setLoading(true)
+            
             const match = conversations.find(c => c._id === convoId)
             if (match) setActiveConvo(match)
-            fetchMessages(convoId)
-            socket?.emit('join_conversation', convoId)
+            
+            try {
+                await fetchMessages(convoId)
+                socket?.emit('join_conversation', convoId)
+            } catch (err) {
+                console.error("Switch error", err)
+            } finally {
+                setLoading(false)
+            }
         }
+
+        switchChat()
         return () => { if (convoId) socket?.emit('leave_conversation', convoId) }
     }, [convoId, conversations, fetchMessages, socket])
+
+    useEffect(() => { fetchConvos() }, [])
 
     // ─── Socket Events ──────────────────────────────────────────
     useEffect(() => {
@@ -78,7 +98,6 @@ export default function Messages() {
                 })
                 scrollToBottom()
             }
-            // Update sidebar
             setConversations(prev => prev.map(c => 
                 c._id === msg.conversationId ? { ...c, lastMessage: msg } : c
             ))
@@ -97,7 +116,9 @@ export default function Messages() {
 
     // ─── Actions ────────────────────────────────────────────────
     const scrollToBottom = (behavior = 'smooth') => {
-        setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior }), 100)
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+        }
     }
 
     const handleSend = async () => {
@@ -210,41 +231,53 @@ export default function Messages() {
 
                         <div className="ig-messages-viewport dark-scrollbar" ref={scrollRef}>
                             <div className="ig-messages-inner">
-                                <div className="text-center py-10 flex flex-col items-center">
-                                    <img 
-                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                        className="rounded-full mb-4 border-4 border-zinc-900" 
-                                        style={{ width: 110, height: 110, objectFit: 'cover' }}
-                                        alt="" 
-                                    />
-                                    <h2 className="text-2xl font-extrabold text-white">{activePeer?.fullName || activePeer?.username}</h2>
-                                    <p className="text-zinc-500 text-sm">{activePeer?.username} · PeerNet Member</p>
-                                    <button 
-                                        className="mt-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors"
-                                        onClick={() => navigate(`/profile/${activePeer?._id}`)}
-                                    >
-                                        View Profile
-                                    </button>
-                                </div>
-
-                                {messages.map((m, i) => {
-                                    const isSelf = (m.sender?._id || m.sender) === user?._id
-                                    return (
-                                        <div key={m._id} className={`ig-msg-row ${isSelf ? 'self' : 'peer'}`}>
-                                            {!isSelf && (
-                                                <img 
-                                                    src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                                    className="ig-avatar" 
-                                                    style={{ width: 28, height: 28, marginRight: 8, alignSelf: 'flex-end', marginBottom: 4 }}
-                                                    alt="" 
-                                                />
-                                            )}
-                                            <div className={`ig-bubble ${isSelf ? 'ig-bubble-self' : 'ig-bubble-peer'}`}>
-                                                {m.body}
+                                {loading ? (
+                                    <div className="flex flex-col gap-4 py-10">
+                                        {[1,2,3,4,5].map(i => (
+                                            <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                                                <div className="ig-skeleton" style={{ width: i % 2 === 0 ? '40%' : '60%', height: 40, borderRadius: 20 }} />
                                             </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="text-center py-10 flex flex-col items-center">
+                                            <img 
+                                                src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                                className="rounded-full mb-4 border-4 border-zinc-900" 
+                                                style={{ width: 110, height: 110, objectFit: 'cover' }}
+                                                alt="" 
+                                            />
+                                            <h2 className="text-2xl font-extrabold text-white">{activePeer?.fullName || activePeer?.username}</h2>
+                                            <p className="text-zinc-500 text-sm">{activePeer?.username} · PeerNet Member</p>
+                                            <button 
+                                                className="mt-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors"
+                                                onClick={() => navigate(`/profile/${activePeer?._id}`)}
+                                            >
+                                                View Profile
+                                            </button>
                                         </div>
-                                    )
-                                })}
+
+                                        {messages.map((m, i) => {
+                                            const prev = messages[i-1]
+                                            const next = messages[i+1]
+                                            const isSelf = (m.sender?._id || m.sender) === user?._id
+                                            const isPrevSame = prev && (prev.sender?._id || prev.sender) === (m.sender?._id || m.sender)
+                                            const isNextSame = next && (next.sender?._id || next.sender) === (m.sender?._id || m.sender)
+
+                                            return (
+                                                <MessageItem 
+                                                    key={m._id} 
+                                                    message={m} 
+                                                    isSelf={isSelf} 
+                                                    isPrevSame={isPrevSame} 
+                                                    isNextSame={isNextSame} 
+                                                    activePeer={activePeer}
+                                                />
+                                            )
+                                        })}
+                                    </>
+                                )}
                                 {peerTyping && (
                                     <div className="ig-last-msg" style={{ paddingLeft: 36, marginBottom: 12 }}>Typing...</div>
                                 )}
@@ -302,3 +335,44 @@ export default function Messages() {
         </div>
     )
 }
+
+// ─── Sub-Components ───────────────────────────────────────────
+
+const MessageItem = React.memo(({ message, isSelf, isPrevSame, isNextSame, activePeer }) => {
+    // Adaptive Radius Logic
+    let radius = '22px'
+    if (isSelf) {
+        if (isPrevSame && isNextSame) radius = '22px 4px 4px 22px'
+        else if (isPrevSame) radius = '22px 4px 22px 22px'
+        else if (isNextSame) radius = '22px 22px 4px 22px'
+        else radius = '22px 22px 4px 22px'
+    } else {
+        if (isPrevSame && isNextSame) radius = '4px 22px 22px 4px'
+        else if (isPrevSame) radius = '4px 22px 22px 22px'
+        else if (isNextSame) radius = '22px 22px 22px 4px'
+        else radius = '22px 22px 22px 4px'
+    }
+
+    return (
+        <div className={`ig-msg-row ${isSelf ? 'self' : 'peer'}`} style={{ marginBottom: isNextSame ? 2 : 12 }}>
+            {!isSelf && (
+                <div style={{ width: 28, height: 28, marginRight: 8, alignSelf: 'flex-end', marginBottom: 4 }}>
+                    {!isNextSame && (
+                        <img 
+                            src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                            className="ig-avatar" 
+                            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+                            alt="" 
+                        />
+                    )}
+                </div>
+            )}
+            <div 
+                className={`ig-bubble ${isSelf ? 'ig-bubble-self' : 'ig-bubble-peer'}`}
+                style={{ borderRadius: radius }}
+            >
+                {message.body}
+            </div>
+        </div>
+    )
+})

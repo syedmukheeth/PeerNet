@@ -5341,3 +5341,52 @@ textarea:focus-visible {
 }
 
 .ig-composer-btn:hover { opacity: 0.7; }
+
+/* ═══════════════════════════════════════════════════════════
+   PeerNet V3.0 - PREMIUM OVERLAYS
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1. Glassmorphism */
+.ig-chat-header {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(24px) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+}
+
+.ig-composer-area {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(24px) !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 10 !important;
+}
+
+/* 2. Skeleton Shimmer */
+@keyframes ig-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.ig-skeleton {
+  background: linear-gradient(90deg, #121212 25%, #1a1a1a 50%, #121212 75%);
+  background-size: 200% 100%;
+  animation: ig-shimmer 1.5s infinite linear;
+  border-radius: 8px;
+}
+
+/* 3. Refined Sidebar */
+.ig-convo-item.active {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-left: 3px solid #7C3AED !important;
+}
+
+.ig-convo-item:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* 4. Scroll Precision */
+.dark-scrollbar::-webkit-scrollbar { width: 6px; }
+.dark-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.dark-scrollbar::-webkit-scrollbar-thumb { background: #262626; border-radius: 10px; }
