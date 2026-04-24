@@ -50,13 +50,14 @@ export default function ConversationList({
                 </div>
                 
                 <div className="dm-search-container">
-                    <div className="dm-search-wrap">
-                        <HiSearch className="dm-search-icon" />
+                    <div className="dm-search-wrap" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <HiSearch className="dm-search-icon" style={{ position: 'absolute', left: 14, color: '#71717a' }} />
                         <input
                             value={convoSearch}
                             onChange={e => setConvoSearch(e.target.value)}
                             placeholder="Search chats"
                             className="dm-search-input"
+                            style={{ width: '100%', paddingLeft: 42 }}
                         />
                     </div>
                 </div>
@@ -78,8 +79,8 @@ export default function ConversationList({
                             onClick={() => onSelectConvo(c)}
                             className={`dm-convo-item ${isActive ? 'active' : ''} ${isUnread ? 'unread' : ''}`}
                         >
-                            <div className="dm-avatar-wrap">
-                                <img src={avatar} className="dm-avatar" alt={peer?.username} />
+                            <div className="dm-avatar-wrap" style={{ position: 'relative', flexShrink: 0 }}>
+                                <img src={avatar} className="dm-avatar" alt={peer?.username} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover' }} />
                                 {c.isOnline && <span className="dm-online-indicator" />}
                             </div>
 

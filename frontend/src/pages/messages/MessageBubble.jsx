@@ -24,19 +24,27 @@ export default function MessageBubble({
     }, [showMenu])
 
     return (
-        <div className={`dm-message-row ${isSelf ? 'self' : 'peer'}`}>
+        <div className={`dm-message-row ${isSelf ? 'self' : 'peer'}`} style={{ display: 'flex', width: '100%', marginBottom: 8, gap: 12, justifyContent: isSelf ? 'flex-end' : 'flex-start' }}>
             {!isSelf && (
                 <img 
                     src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`} 
                     alt="" 
                     className="dm-bubble-avatar" 
+                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', alignSelf: 'flex-end', marginBottom: 4 }}
                 />
             )}
             
-            <div className="dm-message-container">
+            <div className="dm-message-container" style={{ display: 'flex', flexDirection: 'column', maxWidth: '75%', alignItems: isSelf ? 'flex-end' : 'flex-start' }}>
                 <motion.div 
                     layout
                     className={`dm-bubble ${isSelf ? 'dm-bubble-primary' : 'dm-bubble-secondary'}`}
+                    style={{ 
+                        padding: '10px 16px', 
+                        borderRadius: isSelf ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                        fontSize: 15,
+                        lineHeight: 1.5,
+                        width: 'fit-content'
+                    }}
                 >
                     {message.mediaUrl && (
                         <div className="dm-message-media">

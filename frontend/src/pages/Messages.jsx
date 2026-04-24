@@ -294,21 +294,22 @@ export default function Messages() {
 
     return (
         <MessagesLayout>
-            <ConversationList 
-                user={user}
-                conversations={conversations}
-                activeConvo={activeConvo}
-                onSelectConvo={handleSelectConvo}
-                onNewConvo={() => setShowNewConvo(true)}
-                initialLoad={initialLoad}
-                starting={starting}
-                convoSearch={convoSearch}
-                setConvoSearch={setConvoSearch}
-                timeago={timeago}
-                className={mobilePanel === 'chat' ? 'dm-list-mobile-hidden' : ''}
-            />
-
-            <main className={`dm-chat-area-root ${mobilePanel === 'list' ? 'dm-chat-mobile-hidden' : ''}`}>
+            <div className="dm-premium-content" style={{ display: 'flex', width: '100%', height: '100%' }}>
+                <ConversationList 
+                    user={user}
+                    conversations={conversations}
+                    activeConvo={activeConvo}
+                    onSelectConvo={handleSelectConvo}
+                    onNewConvo={() => setShowNewConvo(true)}
+                    initialLoad={initialLoad}
+                    starting={starting}
+                    convoSearch={convoSearch}
+                    setConvoSearch={setConvoSearch}
+                    timeago={timeago}
+                    className={mobilePanel === 'chat' ? 'dm-list-mobile-hidden' : ''}
+                />
+    
+                <main className={`dm-chat-area-root ${mobilePanel === 'list' ? 'dm-chat-mobile-hidden' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 {activeConvo ? (
                     <>
                         <ChatHeader 
@@ -320,11 +321,16 @@ export default function Messages() {
                         
                         <div className="dm-messages-scroll dark-scrollbar">
                             <div className="dm-messages-inner">
-                                <div className="dm-messages-header-info">
-                                        <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`} className="dm-info-avatar" alt="" />
-                                        <h2>{peer?.fullName || peer?.username}</h2>
-                                        <p>{peer?.username} · PeerNet Member</p>
-                                        <button className="dm-info-view-btn" onClick={() => navigate(`/profile/${peer?._id}`)}>View Profile</button>
+                                <div className="dm-messages-header-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 0 40px', textAlign: 'center' }}>
+                                        <img 
+                                            src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`} 
+                                            className="dm-info-avatar" 
+                                            alt="" 
+                                            style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover', marginBottom: 16, border: '4px solid #121214' }}
+                                        />
+                                        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: '#fff' }}>{peer?.fullName || peer?.username}</h2>
+                                        <p style={{ color: '#a1a1aa', fontSize: 14, marginTop: 4 }}>{peer?.username} · PeerNet Member</p>
+                                        <button className="dm-info-view-btn" style={{ marginTop: 16, background: '#18181b', color: '#fff', padding: '8px 20px', borderRadius: 10, fontWeight: 700 }} onClick={() => navigate(`/profile/${peer?._id}`)}>View Profile</button>
                                     </div>
 
                                     {messages.map((m) => (
@@ -386,6 +392,7 @@ export default function Messages() {
                     onStart={startNewConvo}
                 />
             )}
+            </div>
         </MessagesLayout>
     )
 }

@@ -19,8 +19,8 @@ export default function ChatHeader({ participant, isOnline, onBack, onNavigatePr
                 </motion.button>
                 
                 <div className="dm-header-user" onClick={() => onNavigateProfile(participant._id)}>
-                    <div className="dm-avatar-wrap-sm">
-                        <img src={avatar} className="dm-avatar-sm" alt="" />
+                    <div className="dm-avatar-wrap-sm" style={{ position: 'relative', flexShrink: 0 }}>
+                        <img src={avatar} className="dm-avatar-sm" alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
                         {isOnline && <span className="dm-online-indicator-sm" />}
                     </div>
                     <div className="dm-user-meta">
