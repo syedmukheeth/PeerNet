@@ -158,25 +158,35 @@ export default function Messages() {
                 </header>
 
                 <div className="ig-convo-list no-scrollbar">
-                    {filtered.map(c => {
-                        const peer = c.participants?.find(p => (p._id || p) !== user?._id)
-                        const avatar = peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`
-                        return (
-                            <div 
-                                key={c._id} 
-                                className={`ig-convo-item ${convoId === c._id ? 'active' : ''}`}
-                                onClick={() => navigate(`/messages/${c._id}`)}
-                            >
-                                <img src={avatar} className="ig-avatar" alt="" />
-                                <div className="ig-convo-info">
-                                    <span className="ig-username">{peer?.username}</span>
-                                    <p className="ig-last-msg truncate">
-                                        {c.lastMessage?.body || 'Sent an attachment'} · {timeago(c.lastMessage?.createdAt || c.updatedAt)}
-                                    </p>
+                    {conversations.length === 0 ? (
+                        <div className="p-10 text-center">
+                            <p className="text-zinc-500 text-sm">No messages yet. Start a new conversation to connect with friends.</p>
+                        </div>
+                    ) : filtered.length === 0 ? (
+                        <div className="p-10 text-center">
+                            <p className="text-zinc-500 text-sm">No results found for "{searchText}"</p>
+                        </div>
+                    ) : (
+                        filtered.map(c => {
+                            const peer = c.participants?.find(p => (p._id || p) !== user?._id)
+                            const avatar = peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`
+                            return (
+                                <div 
+                                    key={c._id} 
+                                    className={`ig-convo-item ${convoId === c._id ? 'active' : ''}`}
+                                    onClick={() => navigate(`/messages/${c._id}`)}
+                                >
+                                    <img src={avatar} className="ig-avatar" alt="" />
+                                    <div className="ig-convo-info">
+                                        <span className="ig-username">{peer?.username}</span>
+                                        <p className="ig-last-msg truncate">
+                                            {c.lastMessage?.body || 'Sent an attachment'} · {timeago(c.lastMessage?.createdAt || c.updatedAt)}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })
+                    )}
                 </div>
             </aside>
 
@@ -200,6 +210,23 @@ export default function Messages() {
 
                         <div className="ig-messages-viewport dark-scrollbar" ref={scrollRef}>
                             <div className="ig-messages-inner">
+                                <div className="text-center py-10 flex flex-col items-center">
+                                    <img 
+                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                        className="rounded-full mb-4 border-4 border-zinc-900" 
+                                        style={{ width: 110, height: 110, objectFit: 'cover' }}
+                                        alt="" 
+                                    />
+                                    <h2 className="text-2xl font-extrabold text-white">{activePeer?.fullName || activePeer?.username}</h2>
+                                    <p className="text-zinc-500 text-sm">{activePeer?.username} · PeerNet Member</p>
+                                    <button 
+                                        className="mt-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors"
+                                        onClick={() => navigate(`/profile/${activePeer?._id}`)}
+                                    >
+                                        View Profile
+                                    </button>
+                                </div>
+
                                 {messages.map((m, i) => {
                                     const isSelf = (m.sender?._id || m.sender) === user?._id
                                     return (
