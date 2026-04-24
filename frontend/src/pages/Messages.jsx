@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
     HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy, HiChevronLeft,
@@ -12,6 +12,60 @@ import toast from 'react-hot-toast'
 import EmojiPicker from '@emoji-mart/react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// ─── Memoized Components ──────────────────────────────────────
+const MessageItem = React.memo(({ m, isSelf, groupClass, activePeer, timeLabel }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.2 }}
+        className={`v4-msg-wrapper ${isSelf ? 'self' : 'peer'} ${groupClass}`}
+    >
+        {!isSelf && (
+            <img 
+                src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                className="v4-msg-avatar" 
+                alt="" 
+                loading="lazy"
+            />
+        )}
+        <div className="v4-msg-bubble">
+            {m.body}
+            <div className="v4-msg-time">{timeLabel}</div>
+        </div>
+    </motion.div>
+))
+
+const ConvoItem = React.memo(({ c, isActive, hasUnread, peer, peerTyping, onClick }) => (
+    <div 
+        className={`v4-convo-item ${isActive ? 'active' : ''}`}
+        onClick={onClick}
+    >
+        <div className="v4-avatar-wrap">
+            <img 
+                src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
+                className="v4-avatar" 
+                alt="" 
+                loading="lazy"
+            />
+            {c.isOnline && <div className="v4-online-dot" />}
+        </div>
+        <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-center">
+                <span className={`v4-header-name ${hasUnread ? 'font-black' : ''}`}>
+                    {peer?.username}
+                </span>
+                <span className="text-[10px] text-zinc-500">
+                    {timeago(c.lastMessage?.createdAt || c.updatedAt)}
+                </span>
+            </div>
+            <p className={`text-sm truncate ${hasUnread ? 'text-white font-bold' : 'text-zinc-500'}`}>
+                {peerTyping ? 'typing...' : (c.lastMessage?.body || 'Sent an attachment')}
+            </p>
+        </div>
+        {hasUnread && <div className="v4-unread-badge v4-badge-pop">{c.unreadCount}</div>}
+    </div>
+))
+
 export default function Messages() {
     const { id: convoId } = useParams()
     const { user, logout } = useAuth()
@@ -20,10 +74,11 @@ export default function Messages() {
 
     // ─── State ──────────────────────────────────────────────────
     const [conversations, setConversations] = useState([])
-    const [activeConvo, setActiveConvo] = useState(null)
     const [messages, setMessages] = useState([])
+    const [messageCache, setMessageCache] = useState({}) // CACHE
     const [loading, setLoading] = useState(false)
     const [searchText, setSearchText] = useState('')
+    const [debouncedSearch, setDebouncedSearch] = useState('')
     const [inputText, setInputText] = useState('')
     const [showEmoji, setShowEmoji] = useState(false)
     const [peerTyping, setPeerTyping] = useState(false)
@@ -33,36 +88,48 @@ export default function Messages() {
     const typingTimer = useRef()
     const currentFetchId = useRef(0)
 
-    // ─── App Nav Links ──────────────────────────────────────────
-    const navLinks = [
+    // ─── Debounced Search ───────────────────────────────────────
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchText), 300)
+        return () => clearTimeout(timer)
+    }, [searchText])
+
+    // ─── Navigation Links ───────────────────────────────────────
+    const navLinks = useMemo(() => [
         { to: '/', icon: HiHome, label: 'Home' },
         { to: '/search', icon: HiSearch, label: 'Search' },
         { to: '/shorts', icon: HiFilm, label: 'Shorts' },
         { to: '/messages', icon: HiChatAlt2, label: 'Messages', active: true },
         { to: '/notifications', icon: HiBell, label: 'Notifications' },
-    ]
+    ], [])
 
-    // ─── API Methods ────────────────────────────────────────────
-    const fetchConvos = async () => {
+    // ─── Fetch Conversations ────────────────────────────────────
+    const fetchConvos = useCallback(async () => {
         try {
             const { data } = await chatApi.get('')
             setConversations(data.data || [])
         } catch (err) { console.error("Convo error", err) }
-    }
+    }, [])
 
+    useEffect(() => { fetchConvos() }, [fetchConvos])
+
+    // ─── Fetch Messages with Caching ────────────────────────────
     useEffect(() => {
         if (!convoId) {
-            setActiveConvo(null)
             setMessages([])
             return
         }
 
-        setMessages([])
-        setLoading(true)
+        // Use cache if available for instant switch
+        if (messageCache[convoId]) {
+            setMessages(messageCache[convoId])
+            setLoading(false)
+            setTimeout(() => scrollToBottom('instant'), 50)
+        } else {
+            setMessages([])
+            setLoading(true)
+        }
         
-        const match = conversations.find(c => c._id === convoId)
-        if (match) setActiveConvo(match)
-
         const fetchId = ++currentFetchId.current
 
         const switchChat = async () => {
@@ -70,7 +137,11 @@ export default function Messages() {
                 socket?.emit('join_conversation', convoId)
                 const { data } = await chatApi.get(`${convoId}/messages`)
                 if (fetchId !== currentFetchId.current) return
-                setMessages(data.data || [])
+                
+                const newMsgs = data.data || []
+                setMessages(newMsgs)
+                setMessageCache(prev => ({ ...prev, [convoId]: newMsgs }))
+                
                 await chatApi.patch(`${convoId}/messages/read`, {})
                 window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
                 setTimeout(() => scrollToBottom('instant'), 50)
@@ -82,9 +153,7 @@ export default function Messages() {
         }
         switchChat()
         return () => { if (convoId) socket?.emit('leave_conversation', convoId) }
-    }, [convoId, conversations, socket])
-
-    useEffect(() => { fetchConvos() }, [])
+    }, [convoId, socket])
 
     // ─── Socket Logic ───────────────────────────────────────────
     useEffect(() => {
@@ -93,10 +162,17 @@ export default function Messages() {
             if (msg.conversationId === convoId) {
                 setMessages(prev => {
                     const exists = prev.find(m => m._id === msg._id || m.tempId === msg.tempId)
-                    if (exists) return prev.map(m => (m._id === exists._id ? msg : m))
-                    return [...prev, msg]
+                    const updated = exists ? prev.map(m => (m._id === exists._id ? msg : m)) : [...prev, msg]
+                    setMessageCache(cache => ({ ...cache, [convoId]: updated }))
+                    return updated
                 })
                 setTimeout(() => scrollToBottom(), 50)
+            } else {
+                // Update cache even if not active
+                setMessageCache(cache => {
+                    const existing = cache[msg.conversationId] || []
+                    return { ...cache, [msg.conversationId]: [...existing, msg] }
+                })
             }
             setConversations(prev => prev.map(c => 
                 c._id === msg.conversationId ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + (convoId === c._id ? 0 : 1) } : c
@@ -113,11 +189,11 @@ export default function Messages() {
     }, [socket, convoId, user?._id])
 
     // ─── Actions ────────────────────────────────────────────────
-    const scrollToBottom = (behavior = 'smooth') => {
+    const scrollToBottom = useCallback((behavior = 'smooth') => {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior })
         }
-    }
+    }, [])
 
     const handleSend = async () => {
         if (!inputText.trim() || !convoId) return
@@ -148,17 +224,20 @@ export default function Messages() {
         typingTimer.current = setTimeout(() => socket.emit('typing_stop', { conversationId: convoId }), 2000)
     }
 
-    const filtered = conversations.filter(c => {
+    const filtered = useMemo(() => conversations.filter(c => {
         const peer = c.participants?.find(p => (p._id || p) !== user?._id)
-        return peer?.username?.toLowerCase().includes(searchText.toLowerCase())
-    })
+        return peer?.username?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    }), [conversations, debouncedSearch, user?._id])
 
-    const activePeer = activeConvo?.participants?.find(p => (p._id || p) !== user?._id)
+    const activePeer = useMemo(() => {
+        const active = conversations.find(c => c._id === convoId)
+        return active?.participants?.find(p => (p._id || p) !== user?._id)
+    }, [conversations, convoId, user?._id])
 
     return (
         <div className={`v4-root ${convoId ? 'mobile-chat-active' : ''}`}>
             
-            {/* PANEL 1: Global Navigation */}
+            {/* PANEL 1: Global Navigation (Desktop) */}
             <aside className="v4-nav-panel">
                 <div className="mb-8">
                     <img src="/assets/logo.png" className="w-8 h-8 rounded-lg" alt="" />
@@ -178,6 +257,19 @@ export default function Messages() {
                     <div className="v4-nav-item" onClick={() => logout()} title="Logout"><HiLogout size={22} /></div>
                 </div>
             </aside>
+
+            {/* MOBILE NAVIGATION BAR */}
+            <nav className="v4-mobile-nav lg:hidden">
+                {navLinks.map(link => (
+                    <div 
+                        key={link.to} 
+                        className={`v4-mobile-nav-item ${link.active ? 'active' : ''}`}
+                        onClick={() => navigate(link.to)}
+                    >
+                        <link.icon size={20} />
+                    </div>
+                ))}
+            </nav>
 
             {/* PANEL 2: Conversation List */}
             <aside className="v4-middle-panel">
@@ -199,7 +291,7 @@ export default function Messages() {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto no-scrollbar">
+                <div className="flex-1 overflow-y-auto no-scrollbar pb-24 lg:pb-0">
                     {conversations.length === 0 ? (
                         <div className="space-y-2 p-4">
                             {[1,2,3,4,5,6].map(i => (
@@ -214,43 +306,26 @@ export default function Messages() {
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="p-10 text-center">
-                            <p className="text-zinc-500 text-sm">No results found for "{searchText}"</p>
+                            <div className="w-16 h-16 bg-zinc-900/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
+                                <HiSearch size={24} className="text-zinc-600" />
+                            </div>
+                            <p className="text-zinc-500 text-sm">No results for "{searchText}"</p>
                         </div>
                     ) : (
                         filtered.map(c => {
                             const peer = c.participants?.find(p => (p._id || p) !== user?._id)
                             const isActive = convoId === c._id
                             const hasUnread = c.unreadCount > 0 && !isActive
-                            
                             return (
-                                <div 
-                                    key={c._id} 
-                                    className={`v4-convo-item ${isActive ? 'active' : ''}`}
+                                <ConvoItem 
+                                    key={c._id}
+                                    c={c}
+                                    isActive={isActive}
+                                    hasUnread={hasUnread}
+                                    peer={peer}
+                                    peerTyping={peerTyping && isActive}
                                     onClick={() => navigate(`/messages/${c._id}`)}
-                                >
-                                    <div className="v4-avatar-wrap">
-                                        <img 
-                                            src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
-                                            className="v4-avatar" 
-                                            alt="" 
-                                        />
-                                        {c.isOnline && <div className="v4-online-dot" />}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-center">
-                                            <span className={`v4-header-name ${hasUnread ? 'font-black' : ''}`}>
-                                                {peer?.username}
-                                            </span>
-                                            <span className="text-[10px] text-zinc-500">
-                                                {timeago(c.lastMessage?.createdAt || c.updatedAt)}
-                                            </span>
-                                        </div>
-                                        <p className={`text-sm truncate ${hasUnread ? 'text-white font-bold' : 'text-zinc-500'}`}>
-                                            {peerTyping && isActive ? 'typing...' : (c.lastMessage?.body || 'Sent an attachment')}
-                                        </p>
-                                    </div>
-                                    {hasUnread && <div className="v4-unread-badge">{c.unreadCount}</div>}
-                                </div>
+                                />
                             )
                         })
                     )}
@@ -259,7 +334,7 @@ export default function Messages() {
 
             {/* PANEL 3: Chat Viewport */}
             <main className="v4-chat-main">
-                {activeConvo ? (
+                {activePeer ? (
                     <>
                         <header className="v4-chat-header">
                             <div className="v4-header-user">
@@ -275,30 +350,47 @@ export default function Messages() {
                                 <div>
                                     <div className="v4-header-name">{activePeer?.fullName || activePeer?.username}</div>
                                     <div className="v4-header-status">
-                                        {activeConvo.isOnline ? (
+                                        {activePeer.isOnline ? (
                                             <span className="flex items-center gap-1.5 text-green-500">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                                                 Active Now
                                             </span>
-                                        ) : 'Offline'}
+                                        ) : (
+                                            <span className="text-zinc-500">
+                                                {activePeer.lastSeen ? `Last seen ${timeago(activePeer.lastSeen)}` : 'Offline'}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </header>
 
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar" ref={scrollRef} key={convoId}>
-                            {loading ? (
+                        <motion.div 
+                            key={convoId}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar" 
+                            ref={scrollRef}
+                        >
+                            {loading && !messageCache[convoId] ? (
                                 <div className="space-y-6 py-10">
                                     {[1,2,3,4].map(i => (
                                         <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
-                                            <div className="w-2/3 h-12 bg-zinc-900 rounded-2xl animate-pulse" />
+                                            <div className="w-2/3 h-14 v4-shimmer rounded-2xl" />
                                         </div>
                                     ))}
                                 </div>
                             ) : (
                                 <>
-                                    <div className="flex flex-col items-center py-12 border-b border-zinc-900/50 mb-8">
-                                        <img src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} className="w-24 h-24 rounded-3xl mb-4 shadow-2xl" alt="" />
+                                    <div className="flex flex-col items-center py-12 border-b border-white/5 mb-8">
+                                        <motion.img 
+                                            initial={{ scale: 0.9, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                            className="w-24 h-24 rounded-3xl mb-4 shadow-2xl" 
+                                            alt="" 
+                                        />
                                         <h2 className="text-2xl font-black text-white">{activePeer?.fullName || activePeer?.username}</h2>
                                         <p className="text-zinc-500 mb-4">@{activePeer?.username}</p>
                                         <button className="px-6 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl transition-all border border-white/5" onClick={() => navigate(`/profile/${activePeer?._id}`)}>View Profile</button>
@@ -308,7 +400,6 @@ export default function Messages() {
                                         const isSelf = (m.sender?._id || m.sender) === user?._id
                                         const prevM = messages[i-1]
                                         const nextM = messages[i+1]
-                                        
                                         const isPrevSame = prevM && (prevM.sender?._id || prevM.sender) === (m.sender?._id || m.sender)
                                         const isNextSame = nextM && (nextM.sender?._id || nextM.sender) === (m.sender?._id || m.sender)
 
@@ -318,39 +409,29 @@ export default function Messages() {
                                         else if (!isPrevSame && isNextSame) groupClass = 'group-start'
                                         
                                         return (
-                                            <motion.div
+                                            <MessageItem 
                                                 key={m._id}
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                className={`v4-msg-wrapper ${isSelf ? 'self' : 'peer'} ${groupClass}`}
-                                            >
-                                                {!isSelf && (
-                                                    <img 
-                                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                                        className="v4-msg-avatar" 
-                                                        alt="" 
-                                                    />
-                                                )}
-                                                <div className="v4-msg-bubble">
-                                                    {m.body}
-                                                    <div className="v4-msg-time">{timeago(m.createdAt)}</div>
-                                                </div>
-                                            </motion.div>
+                                                m={m}
+                                                isSelf={isSelf}
+                                                groupClass={groupClass}
+                                                activePeer={activePeer}
+                                                timeLabel={timeago(m.createdAt)}
+                                            />
                                         )
                                     })}
                                     
                                     <AnimatePresence>
                                         {peerTyping && (
-                                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex gap-1 py-2">
-                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex gap-1 py-2 px-12">
+                                                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
                                 </>
                             )}
-                        </div>
+                        </motion.div>
 
                         <footer className="v4-composer-wrap">
                             <div className="v4-composer">
@@ -404,7 +485,7 @@ export default function Messages() {
                         </div>
                         <h2 className="text-3xl font-black text-white mb-2">Direct Messages</h2>
                         <p className="text-zinc-500 max-w-sm mb-8">Connect with friends and share your thoughts in a private, secure space.</p>
-                        <button className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-purple-500/20">Start New Chat</button>
+                        <button className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-purple-500/20" onClick={() => navigate('/')}>Back to Feed</button>
                     </div>
                 )}
             </main>
