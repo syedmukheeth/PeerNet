@@ -306,27 +306,34 @@ export default function Messages() {
 
                                     {messages.map((m, i) => {
                                         const isSelf = (m.sender?._id || m.sender) === user?._id
-                                        const isPrevSame = messages[i-1] && (messages[i-1].sender?._id || messages[i-1].sender) === (m.sender?._id || m.sender)
-                                        const isNextSame = messages[i+1] && (messages[i+1].sender?._id || messages[i+1].sender) === (m.sender?._id || m.sender)
+                                        const prevM = messages[i-1]
+                                        const nextM = messages[i+1]
+                                        
+                                        const isPrevSame = prevM && (prevM.sender?._id || prevM.sender) === (m.sender?._id || m.sender)
+                                        const isNextSame = nextM && (nextM.sender?._id || nextM.sender) === (m.sender?._id || m.sender)
+
+                                        let groupClass = 'group-none'
+                                        if (isPrevSame && isNextSame) groupClass = 'group-mid'
+                                        else if (isPrevSame && !isNextSame) groupClass = 'group-end'
+                                        else if (!isPrevSame && isNextSame) groupClass = 'group-start'
                                         
                                         return (
                                             <motion.div
                                                 key={m._id}
-                                                initial={{ opacity: 0, scale: 0.98, y: 5 }}
-                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                className={`flex ${isSelf ? 'justify-end' : 'justify-start'}`}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className={`v4-msg-wrapper ${isSelf ? 'self' : 'peer'} ${groupClass}`}
                                             >
-                                                <div 
-                                                    className={`max-w-[75%] px-4 py-3 text-[15px] leading-relaxed shadow-sm
-                                                        ${isSelf ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white' : 'bg-zinc-900 text-zinc-100'}
-                                                    `}
-                                                    style={{
-                                                        borderRadius: isSelf 
-                                                            ? `${isPrevSame ? '20px' : '20px'} ${isPrevSame ? '4px' : '20px'} ${isNextSame ? '4px' : '20px'} 20px`
-                                                            : `${isPrevSame ? '4px' : '20px'} ${isPrevSame ? '20px' : '20px'} 20px ${isNextSame ? '4px' : '20px'}`
-                                                    }}
-                                                >
+                                                {!isSelf && (
+                                                    <img 
+                                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                                        className="v4-msg-avatar" 
+                                                        alt="" 
+                                                    />
+                                                )}
+                                                <div className="v4-msg-bubble">
                                                     {m.body}
+                                                    <div className="v4-msg-time">{timeago(m.createdAt)}</div>
                                                 </div>
                                             </motion.div>
                                         )
@@ -345,34 +352,50 @@ export default function Messages() {
                             )}
                         </div>
 
-                        <div className="p-6">
-                            <div className="relative flex items-end gap-3 bg-zinc-900/50 border border-white/5 rounded-3xl p-3 focus-within:border-purple-500/50 transition-all">
-                                <button className="p-2 text-zinc-400 hover:text-white" onClick={() => setShowEmoji(!showEmoji)}>
-                                    <HiOutlineEmojiHappy size={24} />
+                        <footer className="v4-composer-wrap">
+                            <div className="v4-composer">
+                                <button className="v4-composer-btn" onClick={() => setShowEmoji(!showEmoji)}>
+                                    <HiOutlineEmojiHappy size={22} />
                                 </button>
+                                <button className="v4-composer-btn">
+                                    <HiOutlinePhotograph size={22} />
+                                </button>
+                                
                                 <textarea 
                                     ref={inputRef}
                                     rows="1"
-                                    className="flex-1 bg-transparent border-none outline-none text-white py-2 resize-none no-scrollbar"
-                                    placeholder="Write a message..."
+                                    className="v4-composer-input no-scrollbar"
+                                    placeholder="Message..."
                                     value={inputText}
                                     onChange={handleType}
                                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-                                    style={{ maxHeight: 120 }}
                                 />
-                                {inputText.trim() ? (
-                                    <button className="px-4 py-2 text-purple-500 font-black hover:scale-110 transition-transform" onClick={handleSend}>Send</button>
-                                ) : (
-                                    <button className="p-2 text-zinc-400 hover:text-white"><HiOutlinePhotograph size={24} /></button>
-                                )}
+
+                                <AnimatePresence>
+                                    {inputText.trim() && (
+                                        <motion.button 
+                                            initial={{ scale: 0, opacity: 0, rotate: -45 }}
+                                            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                                            exit={{ scale: 0, opacity: 0, rotate: 45 }}
+                                            className="v4-send-btn"
+                                            onClick={handleSend}
+                                        >
+                                            <HiPlusCircle size={24} style={{ transform: 'rotate(45deg)' }} />
+                                        </motion.button>
+                                    )}
+                                </AnimatePresence>
 
                                 {showEmoji && (
                                     <div className="absolute bottom-full mb-4 right-0 z-50">
-                                        <EmojiPicker onEmojiSelect={(e) => setInputText(prev => prev + e.native)} theme="dark" />
+                                        <EmojiPicker 
+                                            onEmojiSelect={(e) => setInputText(prev => prev + e.native)} 
+                                            theme="dark"
+                                            set="native"
+                                        />
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </footer>
                     </>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
