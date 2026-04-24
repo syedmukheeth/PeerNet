@@ -2399,16 +2399,6 @@ textarea:focus-visible {
   border-left: 1px solid var(--border);
 }
 
-.dm-list-panel {
-  width: 360px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--border);
-  background: var(--surface);
-  z-index: 10;
-  height: 100%;
-}
 
 .dm-list-header {
   padding: 24px 20px 16px;
@@ -2672,16 +2662,6 @@ textarea:focus-visible {
   border-left: 1px solid var(--border);
 }
 
-.dm-list-panel {
-  width: 360px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--border);
-  background: var(--surface);
-  z-index: 10;
-  height: 100%;
-}
 
 .dm-list-header {
   padding: 24px 20px 16px;
@@ -2756,19 +2736,6 @@ textarea:focus-visible {
 
 .dm-list-scroll { flex: 1; overflow-y: auto; padding: 6px 0; }
 
-.dm-convo-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: background var(--trans-fast);
-  position: relative;
-  margin: 1px 8px;
-  border-radius: var(--r-md);
-}
-.dm-convo-item:hover { background: var(--hover); }
-.dm-convo-item.active { background: var(--accent-low); border-right: 2px solid var(--accent); }
 
 .dm-avatar-wrap { position: relative; flex-shrink: 0; }
 
@@ -2779,7 +2746,6 @@ textarea:focus-visible {
   object-fit: cover;
   transition: transform var(--trans-fast);
 }
-.dm-convo-item:hover .dm-avatar { transform: scale(1.04); }
 
 .dm-online-indicator {
   position: absolute;
@@ -2790,7 +2756,6 @@ textarea:focus-visible {
   border-radius: 50%;
 }
 
-.dm-convo-info { flex: 1; min-width: 0; }
 
 .dm-convo-row {
   display: flex;
@@ -2819,13 +2784,6 @@ textarea:focus-visible {
 .unread .dm-time { color: var(--accent); font-weight: 700; }
 
 /* Chat area */
-.dm-chat-area-root {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  overflow: hidden;
-}
 
 .dm-chat-header {
   height: 64px;
@@ -2919,14 +2877,6 @@ textarea:focus-visible {
   flex-direction: column;
 }
 
-.dm-messages-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 900px;
-  width: 100%;
-  margin: 0 auto;
-}
 
 .dm-messages-header-info {
   display: flex;
@@ -3068,8 +3018,6 @@ textarea:focus-visible {
 }
 .dm-msg-menu button:hover { background: var(--hover); }
 
-.dm-convo-item.unread .dm-username { font-weight: 800; color: var(--text-1); }
-.dm-convo-item.unread .dm-last-msg { font-weight: 700; color: var(--text-2); opacity: 1; }
 
 .dm-unread-dot {
   width: 10px;
@@ -5041,6 +4989,9 @@ textarea:focus-visible {
 .bg-surface-1{ background: var(--surface-1); }
 .border-surface  { border-color: var(--surface); }
 .border-border-md { border-color: var(--border-md); }
+
+
+
 .border-border   { border-color: var(--border); }
 
 /* ══════════ LAYOUT UTILITIES ══════════ */
@@ -5251,1199 +5202,247 @@ textarea:focus-visible {
   }
 }
 
-/* ── Premium Messaging Composer ───────────────────────────── */
-.dm-composer-root {
-  padding: 16px 20px 24px;
-  background: transparent;
-  position: sticky;
-  bottom: 0;
-  z-index: var(--z-fixed);
+
+/* ═══════════════════════════════════════════════════════════
+   PeerNet Senior CSS - Messaging Module V1.0 "Obsidian Flow"
+   Hardened against "intern" styles. Premium layout only.
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1. Global Messaging Root */
+
+/* 2. Enhanced Conversation Sidebar */
+
+
+
+
+
+/* 3. Premium Message Bubbles */
+
+
+@keyframes dm-bubble-pop {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.dm-composer-container {
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
+
+
+
+
+/* 4. SENIOR GRADE COMPOSER - Bulletproof */
+
+
+
+/* ELIMINATE THE RECTANGULAR BORDER GLITCH */
+
+
+
+
+
+
+
+
+/* 5. Light Mode Polish */
+[data-theme="light"] .dm-composer-main-pill {
+  background: #fff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-.dm-composer-main-pill {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  background: rgba(15, 15, 20, 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--border-md);
-  border-radius: 28px;
-  padding: 8px 14px;
-  transition: all var(--trans-spring);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-.dm-composer-main-pill:focus-within {
-  border-color: var(--accent);
-  background: var(--surface);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent);
-  transform: translateY(-2px);
-}
-
-.dm-composer-pill-action {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: var(--text-3);
-  background: none;
+[data-theme="light"] .dm-bubble-wrapper.is-peer .dm-bubble-content {
+  background: #f1f1f4;
   border: none;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-  flex-shrink: 0;
-  margin-bottom: 2px;
 }
 
-.dm-composer-pill-action:hover {
-  color: var(--text-1);
-  background: var(--hover);
-  transform: scale(1.1);
+[data-theme="light"] .dm-textarea-pill {
+  color: #1a1a1b !important;
 }
 
-.dm-input-flex-wrapper {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  min-height: 42px;
-}
-
-.dm-textarea-pill {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  padding: 10px 4px;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-1);
-  resize: none;
-  max-height: 150px;
-  line-height: 1.4;
-  font-family: inherit;
-}
-
-.dm-textarea-pill::placeholder {
-  color: var(--text-3);
-  font-style: normal;
-  font-weight: 400;
-  opacity: 0.6;
-}
-
-.dm-pill-emoji-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-.dm-emoji-btn-pill {
-  background: none;
-  border: none;
-  color: var(--text-3);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: all var(--trans-fast);
-  display: flex;
-}
-
-.dm-emoji-btn-pill:hover {
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
-}
-
-.dm-send-btn-pill {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--logo-gradient);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: all var(--trans-spring);
-  flex-shrink: 0;
-  margin-bottom: 2px;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
-}
-
-.dm-send-btn-pill:hover:not(:disabled) {
-  transform: scale(1.1) rotate(-8deg);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
-}
-
-.dm-send-btn-pill:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.dm-send-btn-pill:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  filter: grayscale(1);
-}
-
-.dm-emoji-popover-pill {
-  position: absolute;
-  bottom: 100%;
-  right: -10px;
-  margin-bottom: 24px;
-  z-index: var(--z-dropdown);
-  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
-}
-
-   ADMIN CONSOLE — Premium Governance UI
-   ══════════════════════════════════════════════════════════ */
-
-.admin-page {
-  --admin-bg: #000;
-  --admin-surface: #0a0a0c;
-  --admin-border: rgba(255, 255, 255, 0.05);
-  --admin-text-primary: #fff;
-  --admin-text-secondary: #71717a;
-  --admin-accent: var(--accent);
-}
-
-.admin-surface-el {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  position: relative;
-  overflow: hidden;
-}
-
-.admin-stat-card {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  height: 100%;
-  transition: all 0.3s var(--ease-out);
-}
-
-.admin-stat-card:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: #0d0d0f;
-  transform: translateY(-1px);
-}
-
-.admin-stat-label {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--admin-text-secondary);
-}
-
-.admin-stat-value {
-  font-size: 20px;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-/* Custom Table for Admin */
-.admin-table-container {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: 10px;
-  border: 1px solid var(--admin-border);
-  background: var(--admin-surface);
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.admin-table th {
-  background: rgba(255, 255, 255, 0.02);
-  text-align: left;
-  padding: 12px 16px;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--admin-text-secondary);
-  border-bottom: 1px solid var(--admin-border);
-}
-
-.admin-table td {
-  padding: 12px 16px;
-  color: var(--admin-text-primary);
-  border-bottom: 1px solid var(--admin-border);
-  vertical-align: middle;
-}
-
-.admin-table tr:hover td {
-  background: rgba(255, 255, 255, 0.015);
-}
-
-.admin-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Scrollbar Overrides for Dashboard */
-.admin-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-}
-
-.admin-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.admin-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-osition: absolute;
-  top: -6px;
-  right: -6px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--error);
-  color: #fff;
-  border: 2px solid var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--trans-fast);
-}
-
-.dm-preview-remove:hover {
-  transform: scale(1.1);
-}
-
-.dm-edit-banner {
-  border-left: 3px solid var(--accent);
-  background: rgba(var(--accent-rgb), 0.05);
-  width: 100%;
-  max-width: none;
-}
-
-.dm-edit-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 800;
-  color: var(--accent);
-  display: block;
-}
-
-.dm-edit-body {
-  font-size: 13px;
-  color: var(--text-2);
-  display: block;
-}
-
-/* ══════════ PREMIUM SHORTS (VIDEO FEED) ══════════ */
-.shorts-viewer-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-fixed);
-  background: #000;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-}
-
-.shorts-phone-wrapper {
-  width: 100%;
-  max-width: 430px;
-  height: 100dvh;
-  position: relative;
-  background: #000;
-  overflow: hidden;
-}
-
-.shorts-scroll-container {
-  height: 100dvh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.shorts-scroll-container::-webkit-scrollbar { display: none; }
-
-.shorts-item-root {
-  position: relative;
-  width: 100%;
-  height: 100dvh;
-  background: #000;
-  overflow: hidden;
-  user-select: none;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-
-.shorts-video-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.shorts-ui-gradient {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.3) 0%,
-    transparent 20%,
-    transparent 50%,
-    rgba(0,0,0,0.4) 70%,
-    rgba(0,0,0,0.85) 100%
-  );
-}
-
-.shorts-side-actions {
-  position: absolute;
-  right: 12px;
-  bottom: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  z-index: 10;
-}
-
-.shorts-author-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: var(--shadow-md);
-  object-fit: cover;
-  transition: transform var(--trans-fast);
-}
-.shorts-author-avatar:hover { transform: scale(1.05); }
-
-.shorts-action-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-}
-
-.shorts-action-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 24px;
-  transition: all var(--trans-fast);
-}
-.shorts-action-btn:hover .shorts-action-icon {
-  background: rgba(255,255,255,0.2);
-  transform: scale(1.1);
-}
-.shorts-action-btn.active .shorts-action-icon { color: #ff3040; }
-
-.shorts-action-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-}
-
-.shorts-bottom-info {
-  position: absolute;
-  bottom: 32px;
-  left: 16px;
-  right: 72px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.shorts-author-name {
-  font-size: 15px;
-  font-weight: 800;
-  color: #fff;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.8);
-  pointer-events: auto;
-}
-
-.shorts-caption {
-  font-size: 14px;
-  color: #fff;
-  margin-top: 8px;
-  line-height: 1.45;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-  pointer-events: auto;
-}
-
-.shorts-progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: rgba(255,255,255,0.2);
-  z-index: 10;
-  cursor: pointer;
-}
-.shorts-progress-fill {
-  height: 100%;
-  background: #fff;
-  transition: width 0.1s linear;
-  box-shadow: 0 0 10px rgba(255,255,255,0.5);
-}
-
-.shorts-status-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.4);
-  color: #fff;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ══════════ REVAMPED MESSAGING COMPONENTS ══════════ */
-.dm-chat-header-revamped {
-  height: 64px;
-  padding: 0 var(--s-4);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--surface-1);
-  border-bottom: 1px solid var(--border-md);
-  backdrop-filter: blur(20px);
-  z-index: var(--z-fixed);
-}
-
-.dm-user-status.online {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.dm-message-actions-wrap {
-  position: relative;
-  margin-left: 8px;
-  display: flex;
-  align-items: center;
-}
-
-.dm-msg-action-trigger {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-3);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-  opacity: 0;
-}
-
-.dm-message-row:hover .dm-msg-action-trigger,
-.dm-msg-action-trigger.active {
-  opacity: 1;
-}
-
-.dm-msg-action-trigger:hover {
-  background: var(--surface-3);
-  color: var(--text-primary);
-}
-
-.dm-msg-context-menu {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  margin-bottom: 8px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-xl);
-  overflow: hidden;
-  z-index: 100;
-  min-width: 140px;
-  padding: 4px;
-  backdrop-filter: blur(16px);
-}
-
-.dm-msg-context-menu button {
-  width: 100%;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: none;
-  background: transparent;
-  color: var(--text-2);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: var(--r-sm);
-  transition: all var(--trans-fast);
-}
-
-.dm-msg-context-menu button:hover {
-  background: var(--surface-3);
-  color: var(--text-primary);
-}
-
-.dm-msg-context-menu button.text-error:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-/* ══════════ FINAL SHORTS POLISH ══════════ */
-.shorts-header-actions {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 20;
-  pointer-events: none;
-}
-
-.shorts-pill-btn {
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 40px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-}
-.shorts-pill-btn:hover { background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.2); }
-
-.shorts-icon-btn {
-  pointer-events: auto;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.shorts-status-indicator {
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(8px);
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.play-icon-glow {
-  font-size: 32px;
-  color: #fff;
-  padding-left: 6px;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
-}
-
-/* -----------------------------------------------------------
-/* -----------------------------------------------------------
-/* -----------------------------------------------------------
-   ADMIN CONSOLE - SaaS Pro Design System (Stripe/Vercel)
-   ----------------------------------------------------------- */
-:root {
-  --admin-bg: #09090b;
-  --admin-surface: #0e0e11;
-  --admin-surface-2: #16161a;
-  --admin-surface-3: #1c1c21;
-  --admin-accent: #00f0ff;
-  --admin-accent-subtle: rgba(0, 240, 255, 0.05);
-  --admin-border: rgba(255, 255, 255, 0.04);
-  --admin-border-up: rgba(255, 255, 255, 0.08);
-  --admin-text-primary: #ffffff;
-  --admin-text-secondary: rgba(255, 255, 255, 0.5);
-  --admin-text-muted: rgba(255, 255, 255, 0.3);
-  --admin-gutter: 32px;
-}
-
-.admin-page {
-  background: var(--admin-bg);
-  color: var(--admin-text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
-  letter-spacing: -0.01em;
-}
-
-/* Stat Cards - Sparse & Professional */
-.admin-stat-card {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  padding: 24px;
-  transition: all 0.2s var(--trans-fast);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-}
-
-.admin-stat-card:hover {
-  border-color: var(--admin-accent);
-  background: var(--admin-surface-up);
-}
-
-.admin-stat-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--admin-text-secondary);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.admin-stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--admin-text-primary);
-  margin-top: 8px;
-  display: block;
-}
-
-/* Sidebar - Notion/Stripe Style */
-.admin-side-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px;
-}
-
-.admin-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  color: var(--admin-text-secondary);
-  font-weight: 500;
-  font-size: 14px;
-  transition: all 0.15s ease;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  width: 100%;
-  text-align: left;
-}
-
-.admin-nav-item:hover {
-  background: rgba(255,255,255,0.04);
-  color: var(--admin-text-primary);
-}
-
-.admin-nav-item.active {
-  background: var(--admin-accent-subtle);
-  color: var(--admin-accent);
-}
-
-.admin-nav-item .icon {
-  font-size: 18px;
-  opacity: 0.7;
-}
-
-.admin-nav-item.active .icon {
-  opacity: 1;
-}
-
-/* Professional Utilities */
-.admin-surface-el {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.admin-surface-el-up {
-  background: var(--admin-surface-2);
-  border: 1px solid var(--admin-border-up);
-  border-radius: 12px;
-}
-
-.status-dot-pulse {
-  width: 8px;
-  height: 8px;
-  background: var(--success);
-  border-radius: 50%;
-  position: relative;
-  display: inline-block;
-}
-
-/* Table - Minimal & Clean */
-.admin-table-container {
-  overflow-x: auto;
-  border-radius: 12px;
-  border: 1px solid var(--admin-border);
-  background: var(--admin-surface);
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.admin-table th {
-  background: rgba(255,255,255,0.02);
-  text-align: left;
-  padding: 16px 20px;
-  color: var(--admin-text-secondary);
-  font-weight: 600;
-  border-bottom: 1px solid var(--admin-border);
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-}
-
-.admin-table td {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--admin-border);
-  color: var(--admin-text-primary);
-}
-
-.admin-table tr:last-child td {
-  border-bottom: none;
-}
-
-.admin-table tr:hover td {
-  background: rgba(255,255,255,0.01);
-}
-
-/* Scrollbar Overrides */
-.admin-page ::-webkit-scrollbar {
-  width: 5px;
-}
-.admin-page ::-webkit-scrollbar-thumb {
-  background: var(--admin-border);
-  border-radius: 10px;
-}
-
-/* Responsive Overrides */
-@media (max-width: 1024px) {
-  .admin-side-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 10px;
-    background: var(--admin-surface);
-    border-bottom: 1px solid var(--admin-border);
-  }
-  .admin-nav-item {
-    flex-shrink: 0;
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-}
-
-/* Global Premium Input Polish */
-input::placeholder, 
-textarea::placeholder {
-  color: var(--text-3);
-  opacity: 0.45;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
-
-.dm-no-messages-yet {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  opacity: 0.6;
-}
-
-.dm-no-messages-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
-}
-
-.dm-no-messages-yet p {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-/* ── Premium DM Extras ── */
-.dm-empty-state {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
-}
-
-.dm-empty-state-content {
-  text-align: center;
-  max-width: 380px;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.dm-empty-illustration {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dm-empty-circle-large {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 2px solid var(--border-md);
-  border-radius: 50%;
-  opacity: 0.3;
-}
-
-.dm-empty-circle-medium {
-  position: absolute;
-  width: 70%;
-  height: 70%;
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  opacity: 0.2;
-}
-
-.dm-empty-icon-ring {
-  width: 80px;
-  height: 80px;
-  border: 3px solid var(--text-1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  background: var(--surface);
-}
-
-.dm-empty-icon-main {
-  font-size: 40px;
-  color: var(--text-1);
-}
-
-.dm-empty-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-1);
-  margin-bottom: 12px;
-}
-
-.dm-empty-text {
-  color: var(--text-2);
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 24px;
-}
-
-.dm-empty-cta {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 10px 24px;
-  border-radius: var(--r-md);
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-}
-
-.dm-empty-cta:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--accent-ring);
-}
-
-.dm-convo-item {
-  display: flex;
-  align-items: center;
-  padding: 14px 20px;
-  gap: 12px;
-  cursor: pointer;
-  transition: background var(--trans-fast);
-}
-
-.dm-convo-item:hover {
-  background: var(--hover);
-}
-
-.dm-convo-item.active {
-  background: var(--surface-2);
-}
-
-.dm-convo-item.unread {
-  background: rgba(var(--accent-rgb, 99, 102, 241), 0.05);
-}
-
-.dm-unread-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.dm-online-indicator {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  background: #22c55e;
-  border: 3px solid var(--surface);
-  border-radius: 50%;
-}
+/* 6. Fix for the "Red Dot" mystery */
 
-/* ── Unified Messaging Design (Premium Polish) ──────────────── */
 
-/* 1. Sidebar / Conversation List */
-.dm-list-panel {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-}
-
-.dm-list-header {
-  padding: 24px 16px 12px;
-}
-
-.dm-list-title {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  color: var(--text-1);
-}
-
-.dm-convo-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-  position: relative;
-  margin: 2px 8px;
-  border-radius: 12px;
-}
-
-.dm-convo-item:hover {
-  background: var(--hover);
-}
-
-.dm-convo-item.active {
-  background: var(--accent-subtle);
-}
-
-.dm-convo-item.active::before {
-  content: '';
-  position: absolute;
-  left: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 32px;
-  background: var(--accent);
-  border-radius: 0 4px 4px 0;
-}
-
-.dm-convo-avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.dm-convo-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid var(--border-md);
-}
-
-.dm-convo-online-badge {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  background: var(--success);
-  border: 3px solid var(--surface);
-  border-radius: 50%;
-}
-
-.dm-convo-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.dm-convo-name {
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--text-1);
-  margin-bottom: 2px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dm-convo-time {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-3);
-}
-
-.dm-convo-last {
-  font-size: 13px;
-  color: var(--text-2);
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dm-convo-item.unread .dm-convo-last {
-  color: var(--text-1);
-  font-weight: 700;
-}
-
-.dm-convo-unread-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  margin-left: 8px;
-  flex-shrink: 0;
-}
+/* ═══════════════════════════════════════════════════════════
+   PeerNet SENIOR MASTER CSS - Obsidian Messaging V2.0
+   Strictly enforced premium layout. No overrides allowed.
+   ═══════════════════════════════════════════════════════════ */
 
-/* 2. Chat Area & Bubbles */
 .dm-chat-area-root {
   background: var(--bg);
   display: flex;
   flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .dm-messages-inner {
-  padding: 20px;
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .dm-bubble-wrapper {
+  max-width: 70%;
+  margin-bottom: 4px;
   display: flex;
   flex-direction: column;
-  max-width: 70%;
-  margin-bottom: 2px;
 }
 
-.dm-bubble-wrapper.is-self {
-  align-self: flex-end;
-  align-items: flex-end;
-}
-
-.dm-bubble-wrapper.is-peer {
-  align-self: flex-start;
-  align-items: flex-start;
-}
+.dm-bubble-wrapper.is-self { align-self: flex-end; align-items: flex-end; }
+.dm-bubble-wrapper.is-peer { align-self: flex-start; align-items: flex-start; }
 
 .dm-bubble-content {
-  padding: 10px 16px;
-  border-radius: 20px;
+  padding: 12px 18px;
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.55;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  transition: all var(--trans-fast);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .dm-bubble-wrapper.is-self .dm-bubble-content {
-  background: var(--logo-gradient);
-  color: #fff;
-  border-bottom-right-radius: 4px;
+  background: linear-gradient(135deg, #7C3AED, #6366F1) !important;
+  color: #ffffff !important;
+  border-radius: 22px 22px 4px 22px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
 }
 
 .dm-bubble-wrapper.is-peer .dm-bubble-content {
-  background: var(--surface-1);
-  color: var(--text-1);
-  border-bottom-left-radius: 4px;
-  border: 1px solid var(--border);
+  background: var(--surface-el) !important;
+  color: var(--text-1) !important;
+  border-radius: 22px 22px 22px 4px;
+  border: 1px solid var(--border-lg);
 }
 
 .dm-bubble-time {
   font-size: 11px;
   color: var(--text-3);
-  margin-top: 4px;
-  opacity: 0;
-  transition: opacity 0.2s;
+  margin-top: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.dm-bubble-wrapper:hover .dm-bubble-time {
-  opacity: 1;
+/* COMPOSER - THE SENIOR WAY */
+.dm-composer-root {
+  padding: 24px 32px 40px;
+  background: linear-gradient(to top, var(--bg) 50%, transparent);
+  border-top: 1px solid var(--border);
 }
 
-/* 3. Composer (Light Mode Fixes) */
+.dm-composer-container {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.dm-composer-main-pill {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface-el) !important;
+  border: 1.5px solid var(--border-lg) !important;
+  border-radius: 36px;
+  padding: 8px 12px 8px 20px;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dm-composer-main-pill:focus-within {
+  border-color: var(--accent) !important;
+  background: var(--surface) !important;
+  box-shadow: 0 12px 48px rgba(124, 58, 237, 0.18), 0 0 0 1px var(--accent);
+  transform: translateY(-3px) scale(1.01);
+}
+
+.dm-input-flex-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dm-textarea-pill {
+  flex: 1;
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  padding: 14px 0 !important;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-1) !important;
+  resize: none;
+  max-height: 200px;
+  line-height: 1.5;
+  -webkit-appearance: none;
+}
+
+.dm-textarea-pill::placeholder {
+  color: var(--text-3);
+  opacity: 0.5;
+}
+
+.dm-composer-pill-action, .dm-emoji-btn-pill {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+}
+
+.dm-composer-pill-action:hover, .dm-emoji-btn-pill:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+.dm-send-btn-pill {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C3AED, #6366F1) !important;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dm-send-btn-pill:hover:not(:disabled) {
+  transform: scale(1.1) rotate(-8deg);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.6);
+}
+
+.dm-send-btn-pill:disabled {
+  background: var(--border-lg) !important;
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Light Mode Overrides */
 [data-theme="light"] .dm-composer-main-pill {
-  background: #fff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.06) !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .dm-bubble-wrapper.is-peer .dm-bubble-content {
+  background: #f1f1f4 !important;
+  border: none;
 }
 
 [data-theme="light"] .dm-textarea-pill {
-  color: #000;
-}
-
-/* 4. Instant Transition Styling */
-.dm-messages-scroll {
-  flex: 1;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+  color: #0f172a !important;
 }

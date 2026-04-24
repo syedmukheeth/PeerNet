@@ -95,7 +95,7 @@ export default function MessageComposer({
                                 <div className="dm-emoji-popover-pill">
                                     <EmojiPicker 
                                         onEmojiClick={insertEmoji}
-                                        theme="dark"
+                                        theme={document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'}
                                         width={300}
                                         height={400}
                                     />
@@ -113,7 +113,7 @@ export default function MessageComposer({
                         {isUploading ? (
                             <div className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
                         ) : (
-                            <HiPaperAirplane size={20} style={{ transform: 'rotate(45deg)', marginLeft: -2 }} />
+                            <HiPaperAirplane size={24} style={{ transform: 'rotate(45deg)', marginLeft: -2 }} />
                         )}
                     </button>
                 </div>
