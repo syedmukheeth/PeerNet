@@ -146,6 +146,9 @@ export default function Messages() {
         const tempId = Date.now()
         const body = inputText
         setInputText('')
+        
+        // Reset height
+        if (inputRef.current) inputRef.current.style.height = 'auto'
 
         // Optimistic
         const opt = { _id: `temp_${tempId}`, tempId, body, sender: user._id, createdAt: new Date().toISOString(), status: 'sending' }
@@ -162,6 +165,11 @@ export default function Messages() {
 
     const handleType = (e) => {
         setInputText(e.target.value)
+        
+        // Auto-expand height
+        e.target.style.height = 'auto'
+        e.target.style.height = `${e.target.scrollHeight}px`
+
         if (!socket || !convoId) return
         socket.emit('typing_start', { conversationId: convoId })
         clearTimeout(typingTimer.current)
@@ -221,7 +229,13 @@ export default function Messages() {
                                     <div className="ig-convo-info">
                                         <span className="ig-username">{peer?.username}</span>
                                         <p className="ig-last-msg truncate">
-                                            {c.lastMessage?.body || 'Sent an attachment'} · {timeago(c.lastMessage?.createdAt || c.updatedAt)}
+                                            {peerTyping && convoId === c._id ? (
+                                                <span className="text-purple-500 font-bold">typing...</span>
+                                            ) : (
+                                                <>
+                                                    {c.lastMessage?.body || 'Sent an attachment'} · {timeago(c.lastMessage?.createdAt || c.updatedAt)}
+                                                </>
+                                            )}
                                         </p>
                                     </div>
                                 </div>
@@ -336,8 +350,10 @@ export default function Messages() {
                                     onClick={() => setShowEmoji(!showEmoji)} 
                                 />
                                 <textarea 
+                                    ref={inputRef}
                                     rows="1"
-                                    className="ig-composer-input"
+                                    className="ig-composer-input no-scrollbar"
+                                    style={{ maxHeight: 150 }}
                                     placeholder="Message..."
                                     value={inputText}
                                     onChange={handleType}
