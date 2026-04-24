@@ -66,7 +66,6 @@ export default function Messages() {
 
     const loadMessages = useCallback(async (convoId) => {
         if (!convoId) return
-        setLoadingMessages(true)
         try {
             // FIX: chatApi already has /conversations base
             const { data } = await chatApi.get(`${convoId}/messages`, { params: { limit: 50 } })
@@ -171,6 +170,8 @@ export default function Messages() {
     // ─── Action Handlers ────────────────────────────────────────
 
     const handleSelectConvo = (c) => {
+        if (activeConvo?._id === c._id) return;
+        setMessages([]) // Instant clear for smooth transition
         setActiveConvo(c)
         setMobilePanel('chat')
         navigate(`/messages/${c._id}`)
@@ -322,13 +323,8 @@ export default function Messages() {
                         />
                         
                         <div className="dm-messages-scroll dark-scrollbar">
-                            {loadingMessages ? (
-                                <div className="dm-loading-center">
-                                    <div className="dm-loading-spinner" />
-                                </div>
-                            ) : (
-                                <div className="dm-messages-inner">
-                                    <div className="dm-messages-header-info">
+                            <div className="dm-messages-inner">
+                                <div className="dm-messages-header-info">
                                         <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=6366F1&color=fff`} className="dm-info-avatar" alt="" />
                                         <h2>{peer?.fullName || peer?.username}</h2>
                                         <p>{peer?.username} · PeerNet Member</p>
@@ -360,7 +356,6 @@ export default function Messages() {
                                     )}
                                     <div ref={bottomRef} style={{ height: 20 }} />
                                 </div>
-                            )}
                         </div>
 
                         <MessageComposer 
