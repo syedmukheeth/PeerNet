@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy, HiChevronLeft } from 'react-icons/hi'
+import { 
+    HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy, HiChevronLeft,
+    HiHome, HiFilm, HiChatAlt2, HiBell, HiPlusCircle, HiCog, HiLogout
+} from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
 import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
@@ -11,7 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Messages() {
     const { id: convoId } = useParams()
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
     const navigate = useNavigate()
     const socket = useSocket(user)
 
@@ -28,35 +31,24 @@ export default function Messages() {
     const scrollRef = useRef()
     const inputRef = useRef()
     const typingTimer = useRef()
+    const currentFetchId = useRef(0)
 
-    // ─── Loading Data ───────────────────────────────────────────
+    // ─── App Nav Links ──────────────────────────────────────────
+    const navLinks = [
+        { to: '/', icon: HiHome, label: 'Home' },
+        { to: '/search', icon: HiSearch, label: 'Search' },
+        { to: '/shorts', icon: HiFilm, label: 'Shorts' },
+        { to: '/messages', icon: HiChatAlt2, label: 'Messages', active: true },
+        { to: '/notifications', icon: HiBell, label: 'Notifications' },
+    ]
+
+    // ─── API Methods ────────────────────────────────────────────
     const fetchConvos = async () => {
         try {
             const { data } = await chatApi.get('')
             setConversations(data.data || [])
-        } catch (err) {
-            console.error("Convo error", err)
-        }
+        } catch (err) { console.error("Convo error", err) }
     }
-
-    const fetchMessages = useCallback(async (id) => {
-        if (!id) return
-        setLoading(true)
-        try {
-            const { data } = await chatApi.get(`${id}/messages`)
-            setMessages(data.data || [])
-            await chatApi.patch(`${id}/messages/read`, {})
-            window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
-            scrollToBottom('instant')
-        } catch (err) {
-            toast.error("Failed to load messages")
-        } finally {
-            setLoading(false)
-        }
-    }, [])
-
-    // ─── Loading Data ───────────────────────────────────────────
-    const currentFetchId = useRef(0)
 
     useEffect(() => {
         if (!convoId) {
@@ -65,7 +57,6 @@ export default function Messages() {
             return
         }
 
-        // 1. SYNC RESET: Immediate render-blocking clear
         setMessages([])
         setLoading(true)
         
@@ -76,37 +67,26 @@ export default function Messages() {
 
         const switchChat = async () => {
             try {
-                // Join socket immediately for typing events
                 socket?.emit('join_conversation', convoId)
-                
-                // Fetch data
                 const { data } = await chatApi.get(`${convoId}/messages`)
-                
-                // 2. RACE GUARD: Discard if user already clicked someone else
                 if (fetchId !== currentFetchId.current) return
-
                 setMessages(data.data || [])
                 await chatApi.patch(`${convoId}/messages/read`, {})
                 window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
-                scrollToBottom('instant')
+                setTimeout(() => scrollToBottom('instant'), 50)
             } catch (err) {
-                if (fetchId === currentFetchId.current) {
-                    toast.error("Failed to load messages")
-                }
+                if (fetchId === currentFetchId.current) toast.error("Failed to load")
             } finally {
-                if (fetchId === currentFetchId.current) {
-                    setLoading(false)
-                }
+                if (fetchId === currentFetchId.current) setLoading(false)
             }
         }
-
         switchChat()
         return () => { if (convoId) socket?.emit('leave_conversation', convoId) }
     }, [convoId, conversations, socket])
 
     useEffect(() => { fetchConvos() }, [])
 
-    // ─── Socket Events ──────────────────────────────────────────
+    // ─── Socket Logic ───────────────────────────────────────────
     useEffect(() => {
         if (!socket) return
         const handleNewMsg = (msg) => {
@@ -116,17 +96,15 @@ export default function Messages() {
                     if (exists) return prev.map(m => (m._id === exists._id ? msg : m))
                     return [...prev, msg]
                 })
-                scrollToBottom()
+                setTimeout(() => scrollToBottom(), 50)
             }
             setConversations(prev => prev.map(c => 
-                c._id === msg.conversationId ? { ...c, lastMessage: msg } : c
+                c._id === msg.conversationId ? { ...c, lastMessage: msg, unreadCount: (c.unreadCount || 0) + (convoId === c._id ? 0 : 1) } : c
             ))
         }
-
         socket.on('new_message', handleNewMsg)
         socket.on('user_typing_start', ({ userId }) => { if (userId !== user?._id) setPeerTyping(true) })
         socket.on('user_typing_stop', ({ userId }) => { if (userId !== user?._id) setPeerTyping(false) })
-        
         return () => {
             socket.off('new_message')
             socket.off('user_typing_start')
@@ -137,23 +115,20 @@ export default function Messages() {
     // ─── Actions ────────────────────────────────────────────────
     const scrollToBottom = (behavior = 'smooth') => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior })
         }
     }
 
     const handleSend = async () => {
         if (!inputText.trim() || !convoId) return
-        const tempId = Date.now()
         const body = inputText
+        const tempId = Date.now()
         setInputText('')
-        
-        // Reset height
         if (inputRef.current) inputRef.current.style.height = 'auto'
 
-        // Optimistic
         const opt = { _id: `temp_${tempId}`, tempId, body, sender: user._id, createdAt: new Date().toISOString(), status: 'sending' }
         setMessages(prev => [...prev, opt])
-        scrollToBottom()
+        setTimeout(() => scrollToBottom(), 50)
 
         try {
             await chatApi.post(`${convoId}/messages`, { body, tempId })
@@ -165,17 +140,12 @@ export default function Messages() {
 
     const handleType = (e) => {
         setInputText(e.target.value)
-        
-        // Auto-expand height
         e.target.style.height = 'auto'
         e.target.style.height = `${e.target.scrollHeight}px`
-
         if (!socket || !convoId) return
         socket.emit('typing_start', { conversationId: convoId })
         clearTimeout(typingTimer.current)
-        typingTimer.current = setTimeout(() => {
-            socket.emit('typing_stop', { conversationId: convoId })
-        }, 2000)
+        typingTimer.current = setTimeout(() => socket.emit('typing_stop', { conversationId: convoId }), 2000)
     }
 
     const filtered = conversations.filter(c => {
@@ -186,30 +156,61 @@ export default function Messages() {
     const activePeer = activeConvo?.participants?.find(p => (p._id || p) !== user?._id)
 
     return (
-        <div className={`ig-root ${convoId ? 'mobile-chat-active' : ''}`}>
-            {/* Sidebar */}
-            <aside className="ig-sidebar">
-                <header className="ig-sidebar-header">
-                    <div className="ig-sidebar-title-row">
-                        <h1 className="ig-sidebar-title">{user?.username}</h1>
-                        <HiPencilAlt className="ig-sidebar-action" onClick={() => {}} />
+        <div className={`v4-root ${convoId ? 'mobile-chat-active' : ''}`}>
+            
+            {/* PANEL 1: Global Navigation */}
+            <aside className="v4-nav-panel">
+                <div className="mb-8">
+                    <img src="/assets/logo.png" className="w-8 h-8 rounded-lg" alt="" />
+                </div>
+                {navLinks.map(link => (
+                    <div 
+                        key={link.to} 
+                        className={`v4-nav-item ${link.active ? 'active' : ''}`}
+                        onClick={() => navigate(link.to)}
+                        title={link.label}
+                    >
+                        <link.icon size={22} />
                     </div>
-                    <div className="ig-search-wrap" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                        <HiSearch style={{ position: 'absolute', left: 12, color: '#8e8e8e' }} />
+                ))}
+                <div className="mt-auto flex flex-col gap-4">
+                    <div className="v4-nav-item" onClick={() => navigate('/settings')} title="Settings"><HiCog size={22} /></div>
+                    <div className="v4-nav-item" onClick={() => logout()} title="Logout"><HiLogout size={22} /></div>
+                </div>
+            </aside>
+
+            {/* PANEL 2: Conversation List */}
+            <aside className="v4-middle-panel">
+                <header className="v4-middle-header">
+                    <div className="flex justify-between items-center mb-4">
+                        <h1 className="v4-middle-title">Messages</h1>
+                        <button className="v4-nav-item" style={{ marginBottom: 0, width: 32, height: 32 }}>
+                            <HiPencilAlt size={18} />
+                        </button>
+                    </div>
+                    <div className="v4-search-box">
+                        <HiSearch className="text-zinc-500" />
                         <input 
-                            className="ig-composer-input" 
-                            style={{ background: '#262626', borderRadius: 8, padding: '8px 12px 8px 36px', width: '100%' }}
-                            placeholder="Search"
+                            className="v4-search-input" 
+                            placeholder="Search chats..." 
                             value={searchText}
                             onChange={e => setSearchText(e.target.value)}
                         />
                     </div>
                 </header>
 
-                <div className="ig-convo-list no-scrollbar">
+                <div className="flex-1 overflow-y-auto no-scrollbar">
                     {conversations.length === 0 ? (
-                        <div className="p-10 text-center">
-                            <p className="text-zinc-500 text-sm">No messages yet. Start a new conversation to connect with friends.</p>
+                        <div className="space-y-2 p-4">
+                            {[1,2,3,4,5,6].map(i => (
+                                <div key={i} className="flex items-center gap-3 p-2 animate-pulse">
+                                    <div className="w-12 h-12 bg-zinc-900 rounded-xl" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-3 bg-zinc-900 rounded w-1/2" />
+                                        <div className="h-2 bg-zinc-900 rounded w-3/4" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="p-10 text-center">
@@ -218,26 +219,37 @@ export default function Messages() {
                     ) : (
                         filtered.map(c => {
                             const peer = c.participants?.find(p => (p._id || p) !== user?._id)
-                            const avatar = peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`
+                            const isActive = convoId === c._id
+                            const hasUnread = c.unreadCount > 0 && !isActive
+                            
                             return (
                                 <div 
                                     key={c._id} 
-                                    className={`ig-convo-item ${convoId === c._id ? 'active' : ''}`}
+                                    className={`v4-convo-item ${isActive ? 'active' : ''}`}
                                     onClick={() => navigate(`/messages/${c._id}`)}
                                 >
-                                    <img src={avatar} className="ig-avatar" alt="" />
-                                    <div className="ig-convo-info">
-                                        <span className="ig-username">{peer?.username}</span>
-                                        <p className="ig-last-msg truncate">
-                                            {peerTyping && convoId === c._id ? (
-                                                <span className="text-purple-500 font-bold">typing...</span>
-                                            ) : (
-                                                <>
-                                                    {c.lastMessage?.body || 'Sent an attachment'} · {timeago(c.lastMessage?.createdAt || c.updatedAt)}
-                                                </>
-                                            )}
+                                    <div className="v4-avatar-wrap">
+                                        <img 
+                                            src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
+                                            className="v4-avatar" 
+                                            alt="" 
+                                        />
+                                        {c.isOnline && <div className="v4-online-dot" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-center">
+                                            <span className={`v4-header-name ${hasUnread ? 'font-black' : ''}`}>
+                                                {peer?.username}
+                                            </span>
+                                            <span className="text-[10px] text-zinc-500">
+                                                {timeago(c.lastMessage?.createdAt || c.updatedAt)}
+                                            </span>
+                                        </div>
+                                        <p className={`text-sm truncate ${hasUnread ? 'text-white font-bold' : 'text-zinc-500'}`}>
+                                            {peerTyping && isActive ? 'typing...' : (c.lastMessage?.body || 'Sent an attachment')}
                                         </p>
                                     </div>
+                                    {hasUnread && <div className="v4-unread-badge">{c.unreadCount}</div>}
                                 </div>
                             )
                         })
@@ -245,194 +257,134 @@ export default function Messages() {
                 </div>
             </aside>
 
-            {/* Main Chat Area */}
-            <main className="ig-chat-main">
+            {/* PANEL 3: Chat Viewport */}
+            <main className="v4-chat-main">
                 {activeConvo ? (
                     <>
-                        <header className="ig-chat-header">
-                            <div className="ig-header-user">
+                        <header className="v4-chat-header">
+                            <div className="v4-header-user">
                                 <HiChevronLeft 
-                                    className="ig-mobile-back" 
+                                    className="lg:hidden text-2xl mr-2 cursor-pointer" 
                                     onClick={() => navigate('/messages')} 
-                                    style={{ fontSize: 24, marginRight: 12, cursor: 'pointer' }}
                                 />
-                                <div className="flex items-center" onClick={() => navigate(`/profile/${activePeer?._id}`)}>
-                                    <img 
-                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                        className="ig-avatar-sm" 
-                                        alt="" 
-                                    />
-                                    <div>
-                                        <div className="ig-header-name">{activePeer?.fullName || activePeer?.username}</div>
-                                        <div style={{ fontSize: 12, color: '#a8a8a8' }}>{activeConvo.isOnline ? 'Active now' : 'Offline'}</div>
+                                <img 
+                                    src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                    className="w-10 h-10 rounded-xl object-cover" 
+                                    alt="" 
+                                />
+                                <div>
+                                    <div className="v4-header-name">{activePeer?.fullName || activePeer?.username}</div>
+                                    <div className="v4-header-status">
+                                        {activeConvo.isOnline ? (
+                                            <span className="flex items-center gap-1.5 text-green-500">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                Active Now
+                                            </span>
+                                        ) : 'Offline'}
                                     </div>
                                 </div>
                             </div>
                         </header>
 
-                        <div className="ig-messages-viewport dark-scrollbar" ref={scrollRef} key={convoId}>
-                            <div className="ig-messages-inner">
-                                {loading ? (
-                                    <div className="flex flex-col gap-4 py-10">
-                                        {[1,2,3,4,5].map(i => (
-                                            <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
-                                                <div className="ig-skeleton" style={{ width: i % 2 === 0 ? '40%' : '60%', height: 40, borderRadius: 20 }} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="text-center py-10 flex flex-col items-center">
-                                            <img 
-                                                src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                                className="rounded-full mb-4 border-4 border-zinc-900" 
-                                                style={{ width: 110, height: 110, objectFit: 'cover' }}
-                                                alt="" 
-                                            />
-                                            <h2 className="text-2xl font-extrabold text-white">{activePeer?.fullName || activePeer?.username}</h2>
-                                            <p className="text-zinc-500 text-sm">{activePeer?.username} · PeerNet Member</p>
-                                            <button 
-                                                className="mt-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors"
-                                                onClick={() => navigate(`/profile/${activePeer?._id}`)}
-                                            >
-                                                View Profile
-                                            </button>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar" ref={scrollRef} key={convoId}>
+                            {loading ? (
+                                <div className="space-y-6 py-10">
+                                    {[1,2,3,4].map(i => (
+                                        <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                                            <div className="w-2/3 h-12 bg-zinc-900 rounded-2xl animate-pulse" />
                                         </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex flex-col items-center py-12 border-b border-zinc-900/50 mb-8">
+                                        <img src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} className="w-24 h-24 rounded-3xl mb-4 shadow-2xl" alt="" />
+                                        <h2 className="text-2xl font-black text-white">{activePeer?.fullName || activePeer?.username}</h2>
+                                        <p className="text-zinc-500 mb-4">@{activePeer?.username}</p>
+                                        <button className="px-6 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl transition-all border border-white/5" onClick={() => navigate(`/profile/${activePeer?._id}`)}>View Profile</button>
+                                    </div>
 
-                                        {messages.map((m, i) => {
-                                            const prev = messages[i-1]
-                                            const next = messages[i+1]
-                                            const isSelf = (m.sender?._id || m.sender) === user?._id
-                                            const isPrevSame = prev && (prev.sender?._id || prev.sender) === (m.sender?._id || m.sender)
-                                            const isNextSame = next && (next.sender?._id || next.sender) === (m.sender?._id || m.sender)
-
-                                            return (
-                                                <motion.div
-                                                    key={m._id}
-                                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                    transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+                                    {messages.map((m, i) => {
+                                        const isSelf = (m.sender?._id || m.sender) === user?._id
+                                        const isPrevSame = messages[i-1] && (messages[i-1].sender?._id || messages[i-1].sender) === (m.sender?._id || m.sender)
+                                        const isNextSame = messages[i+1] && (messages[i+1].sender?._id || messages[i+1].sender) === (m.sender?._id || m.sender)
+                                        
+                                        return (
+                                            <motion.div
+                                                key={m._id}
+                                                initial={{ opacity: 0, scale: 0.98, y: 5 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                className={`flex ${isSelf ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div 
+                                                    className={`max-w-[75%] px-4 py-3 text-[15px] leading-relaxed shadow-sm
+                                                        ${isSelf ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white' : 'bg-zinc-900 text-zinc-100'}
+                                                    `}
+                                                    style={{
+                                                        borderRadius: isSelf 
+                                                            ? `${isPrevSame ? '20px' : '20px'} ${isPrevSame ? '4px' : '20px'} ${isNextSame ? '4px' : '20px'} 20px`
+                                                            : `${isPrevSame ? '4px' : '20px'} ${isPrevSame ? '20px' : '20px'} 20px ${isNextSame ? '4px' : '20px'}`
+                                                    }}
                                                 >
-                                                    <MessageItem 
-                                                        message={m} 
-                                                        isSelf={isSelf} 
-                                                        isPrevSame={isPrevSame} 
-                                                        isNextSame={isNextSame} 
-                                                        activePeer={activePeer}
-                                                    />
-                                                </motion.div>
-                                            )
-                                        })}
-                                    </>
-                                )}
-                                <AnimatePresence>
-                                    {peerTyping && (
-                                        <motion.div 
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="ig-typing-indicator"
-                                        >
-                                            <div className="dot" />
-                                            <div className="dot" />
-                                            <div className="dot" />
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
+                                                    {m.body}
+                                                </div>
+                                            </motion.div>
+                                        )
+                                    })}
+                                    
+                                    <AnimatePresence>
+                                        {peerTyping && (
+                                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex gap-1 py-2">
+                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </>
+                            )}
                         </div>
 
-                        <div className="ig-composer-area" style={{ position: 'relative' }}>
-                            <div className="ig-composer-pill">
-                                <HiOutlineEmojiHappy 
-                                    className="ig-sidebar-action" 
-                                    style={{ marginRight: 12 }} 
-                                    onClick={() => setShowEmoji(!showEmoji)} 
-                                />
+                        <div className="p-6">
+                            <div className="relative flex items-end gap-3 bg-zinc-900/50 border border-white/5 rounded-3xl p-3 focus-within:border-purple-500/50 transition-all">
+                                <button className="p-2 text-zinc-400 hover:text-white" onClick={() => setShowEmoji(!showEmoji)}>
+                                    <HiOutlineEmojiHappy size={24} />
+                                </button>
                                 <textarea 
                                     ref={inputRef}
                                     rows="1"
-                                    className="ig-composer-input no-scrollbar"
-                                    style={{ maxHeight: 150 }}
-                                    placeholder="Message..."
+                                    className="flex-1 bg-transparent border-none outline-none text-white py-2 resize-none no-scrollbar"
+                                    placeholder="Write a message..."
                                     value={inputText}
                                     onChange={handleType}
                                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+                                    style={{ maxHeight: 120 }}
                                 />
                                 {inputText.trim() ? (
-                                    <span className="ig-composer-btn" onClick={handleSend}>Send</span>
+                                    <button className="px-4 py-2 text-purple-500 font-black hover:scale-110 transition-transform" onClick={handleSend}>Send</button>
                                 ) : (
-                                    <HiOutlinePhotograph className="ig-sidebar-action" style={{ marginLeft: 12 }} />
+                                    <button className="p-2 text-zinc-400 hover:text-white"><HiOutlinePhotograph size={24} /></button>
+                                )}
+
+                                {showEmoji && (
+                                    <div className="absolute bottom-full mb-4 right-0 z-50">
+                                        <EmojiPicker onEmojiSelect={(e) => setInputText(prev => prev + e.native)} theme="dark" />
+                                    </div>
                                 )}
                             </div>
-                            {showEmoji && (
-                                <div style={{ position: 'absolute', bottom: 80, right: 20, zIndex: 1000 }}>
-                                    <EmojiPicker 
-                                        onEmojiSelect={(e) => setInputText(prev => prev + e.native)} 
-                                        theme="dark"
-                                    />
-                                </div>
-                            )}
                         </div>
                     </>
                 ) : (
-                    <div className="ig-chat-main items-center justify-center">
-                        <div className="text-center">
-                            <div style={{ fontSize: 80, marginBottom: 20 }}>✉️</div>
-                            <h2 className="ig-sidebar-title" style={{ fontSize: 20 }}>Your Messages</h2>
-                            <p className="ig-last-msg">Send private photos and messages to a friend or group.</p>
-                            <button 
-                                className="btn" 
-                                style={{ background: '#0095f6', color: '#fff', padding: '8px 24px', borderRadius: 8, marginTop: 20 }}
-                                onClick={() => {}}
-                            >
-                                Send Message
-                            </button>
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                        <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-full flex items-center justify-center mb-6 border border-white/5">
+                            <HiChatAlt2 size={48} className="text-purple-500" />
                         </div>
+                        <h2 className="text-3xl font-black text-white mb-2">Direct Messages</h2>
+                        <p className="text-zinc-500 max-w-sm mb-8">Connect with friends and share your thoughts in a private, secure space.</p>
+                        <button className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-purple-500/20">Start New Chat</button>
                     </div>
                 )}
             </main>
         </div>
     )
 }
-
-// ─── Sub-Components ───────────────────────────────────────────
-
-const MessageItem = React.memo(({ message, isSelf, isPrevSame, isNextSame, activePeer }) => {
-    // Adaptive Radius Logic
-    let radius = '22px'
-    if (isSelf) {
-        if (isPrevSame && isNextSame) radius = '22px 4px 4px 22px'
-        else if (isPrevSame) radius = '22px 4px 22px 22px'
-        else if (isNextSame) radius = '22px 22px 4px 22px'
-        else radius = '22px 22px 4px 22px'
-    } else {
-        if (isPrevSame && isNextSame) radius = '4px 22px 22px 4px'
-        else if (isPrevSame) radius = '4px 22px 22px 22px'
-        else if (isNextSame) radius = '22px 22px 22px 4px'
-        else radius = '22px 22px 22px 4px'
-    }
-
-    return (
-        <div className={`ig-msg-row ${isSelf ? 'self' : 'peer'}`} style={{ marginBottom: isNextSame ? 2 : 12 }}>
-            {!isSelf && (
-                <div style={{ width: 28, height: 28, marginRight: 8, alignSelf: 'flex-end', marginBottom: 4 }}>
-                    {!isNextSame && (
-                        <img 
-                            src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                            className="ig-avatar" 
-                            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
-                            alt="" 
-                        />
-                    )}
-                </div>
-            )}
-            <div 
-                className={`ig-bubble ${isSelf ? 'ig-bubble-self' : 'ig-bubble-peer'}`}
-                style={{ borderRadius: radius }}
-            >
-                {message.body}
-            </div>
-        </div>
-    )
-})
