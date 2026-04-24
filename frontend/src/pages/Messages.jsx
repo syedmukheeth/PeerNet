@@ -308,10 +308,10 @@ export default function Messages() {
                 convoSearch={convoSearch}
                 setConvoSearch={setConvoSearch}
                 timeago={timeago}
-                className={mobilePanel === 'chat' ? 'dm-mobile-hidden' : ''}
+                className={mobilePanel === 'chat' ? 'dm-list-mobile-hidden' : ''}
             />
 
-            <main className={`dm-chat-area-root ${mobilePanel === 'list' ? 'dm-mobile-hidden' : ''}`}>
+            <main className={`dm-chat-area-root ${mobilePanel === 'list' ? 'dm-chat-mobile-hidden' : ''}`}>
                 {activeConvo ? (
                     <>
                         <ChatHeader 
@@ -373,7 +373,7 @@ export default function Messages() {
                             setFilePreview={setFilePreview}
                             showEmoji={showEmoji}
                             setShowEmoji={setShowEmoji}
-                            insertEmoji={(e) => setText(prev => prev + e.emoji)}
+                            insertEmoji={(e) => setText(prev => prev + (e.native || e.emoji))}
                             isUploading={isUploading}
                             inputRef={inputRef}
                             fileRef={fileRef}
