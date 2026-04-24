@@ -66,6 +66,7 @@ export default function Messages() {
 
     const loadMessages = useCallback(async (convoId) => {
         if (!convoId) return
+        setLoadingMessages(true)
         try {
             // FIX: chatApi already has /conversations base
             const { data } = await chatApi.get(`${convoId}/messages`, { params: { limit: 50 } })
@@ -87,24 +88,21 @@ export default function Messages() {
     useEffect(() => {
         if (paramConvoId && conversations.length > 0) {
             const match = conversations.find(c => c._id === paramConvoId)
-            if (match) {
+            if (match && match._id !== activeConvo?._id) {
                 setActiveConvo(match)
                 setMobilePanel('chat')
-            } else if (!initialLoad) {
-                // If not found and not loading, maybe it's a new convo from profile
-                // Try reloading convos once to see if it appeared
-                loadConvos()
             }
         }
-    }, [paramConvoId, conversations, initialLoad])
+    }, [paramConvoId, conversations, activeConvo?._id])
 
     useEffect(() => {
-        if (activeConvo?._id) {
-            loadMessages(activeConvo._id)
-            socket?.emit('join_conversation', activeConvo._id)
+        const convoId = activeConvo?._id
+        if (convoId) {
+            loadMessages(convoId)
+            socket?.emit('join_conversation', convoId)
         }
         return () => {
-            if (activeConvo?._id) socket?.emit('leave_conversation', activeConvo._id)
+            if (convoId) socket?.emit('leave_conversation', convoId)
         }
     }, [activeConvo?._id, loadMessages, socket])
 
@@ -171,9 +169,7 @@ export default function Messages() {
 
     const handleSelectConvo = (c) => {
         if (activeConvo?._id === c._id) return;
-        setMessages([]) // Instant clear for smooth transition
-        setActiveConvo(c)
-        setMobilePanel('chat')
+        setMessages([]) // Instant clear to prevent seeing old chat
         navigate(`/messages/${c._id}`)
     }
 
