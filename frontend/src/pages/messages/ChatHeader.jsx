@@ -7,7 +7,7 @@ export default function ChatHeader({ participant, isOnline, onBack, onNavigatePr
     const avatar = participant.avatarUrl || `https://ui-avatars.com/api/?name=${participant.username}&background=6366F1&color=fff`
 
     return (
-        <header className="dm-chat-header-revamped">
+        <header className="dm-chat-header">
             <div className="dm-header-left">
                 <motion.button 
                     className="dm-back-btn" 

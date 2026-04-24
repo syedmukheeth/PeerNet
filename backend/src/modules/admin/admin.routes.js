@@ -22,6 +22,7 @@ router.delete('/comments/:commentId', ...guard, adminController.deleteComment);
 
 // Analytics & Issues
 router.get('/stats', ...guard, adminController.getStats);
+router.get('/logs', ...guard, adminController.getAuditLogs);
 router.get('/feedback', ...guard, adminController.getFeedback);
 router.get('/reports', ...guard, adminController.getReports);
 router.patch('/reports/:reportId', ...guard, adminController.resolveReport);

@@ -86,16 +86,18 @@ export default function Messages() {
     }, [])
 
     useEffect(() => {
-        if (!conversations.length) return
-        if (paramConvoId) {
+        if (paramConvoId && conversations.length > 0) {
             const match = conversations.find(c => c._id === paramConvoId)
             if (match) {
                 setActiveConvo(match)
                 setMobilePanel('chat')
-                return
+            } else if (!initialLoad) {
+                // If not found and not loading, maybe it's a new convo from profile
+                // Try reloading convos once to see if it appeared
+                loadConvos()
             }
         }
-    }, [paramConvoId, conversations])
+    }, [paramConvoId, conversations, initialLoad])
 
     useEffect(() => {
         if (activeConvo?._id) {
@@ -266,7 +268,7 @@ export default function Messages() {
         try {
             // FIX: chatApi already has /conversations base
             // Use api.post('/conversations') or chatApi.post('')
-            const { data } = await chatApi.post('', { recipientId: otherUser._id })
+            const { data } = await chatApi.post('', { targetUserId: otherUser._id })
             const newC = data.data
             setConversations(prev => {
                 if (prev.find(c => c._id === newC._id)) return prev
@@ -291,7 +293,7 @@ export default function Messages() {
     }
 
 
-    const peer = activeConvo?.participants?.find(p => p._id !== user?._id) || activeConvo?.participant;
+    const peer = activeConvo?.participants?.find(p => (p._id || p) !== user?._id) || activeConvo?.participant;
 
     return (
         <MessagesLayout>
@@ -347,6 +349,13 @@ export default function Messages() {
                                     {peerTyping && (
                                         <div className="dm-typing-indicator">
                                             <span>{peer?.username} is typing...</span>
+                                        </div>
+                                    )}
+                                    {messages.length === 0 && !loadingMessages && (
+                                        <div className="dm-no-messages-yet">
+                                            <div className="dm-no-messages-icon">✉️</div>
+                                            <p>No messages here yet...</p>
+                                            <span className="t-small">Send a message to start the conversation</span>
                                         </div>
                                     )}
                                     <div ref={bottomRef} style={{ height: 20 }} />

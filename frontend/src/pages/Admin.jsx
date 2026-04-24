@@ -194,6 +194,7 @@ export default function Admin() {
     const [posts, setPosts] = useState([])
     const [feedback, setFeedback] = useState([])
     const [reports, setReports] = useState([])
+    const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [contentType, setContentType] = useState('all')
@@ -247,9 +248,18 @@ export default function Admin() {
     const fetchReports = useCallback(async () => {
         try {
             const { data } = await api.get('/admin/reports?status=pending')
-            if (data.success) setReports(data.reports)
+            if (data.success) setReports(data.reports || [])
         } catch {
             toast.error('Failed to load pending reports')
+        }
+    }, [])
+
+    const fetchLogs = useCallback(async () => {
+        try {
+            const { data } = await api.get('/admin/logs')
+            if (data.success) setLogs(data.logs || [])
+        } catch {
+            toast.error('Audit trail disconnected')
         }
     }, [])
 
@@ -293,9 +303,9 @@ export default function Admin() {
 
     const init = useCallback(async () => {
         setLoading(true)
-        await Promise.all([fetchStats(), fetchUsers(), fetchPosts(contentType), fetchFeedback()])
+        await Promise.all([fetchStats(), fetchUsers(), fetchPosts(contentType), fetchFeedback(), fetchReports(), fetchLogs()])
         setLoading(false)
-    }, [fetchStats, fetchUsers, fetchPosts, fetchFeedback, contentType])
+    }, [fetchStats, fetchUsers, fetchPosts, fetchFeedback, fetchReports, fetchLogs, contentType])
 
     useEffect(() => {
         init()
@@ -420,7 +430,7 @@ export default function Admin() {
             <section className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-12">
                 <StatCard 
                     label="Active Users" 
-                    value={stats?.totalUsers?.toLocaleString() || 0} 
+                    value={(stats?.totalUsers || 0).toLocaleString()} 
                     sub="NETWORK CAPACITY" 
                     icon={<HiUsers size={12} />} 
                     chartData={stats?.charts?.userGrowth?.map(d => d.count)}
@@ -440,7 +450,7 @@ export default function Admin() {
                 />
                 <StatCard 
                     label="Posts" 
-                    value={stats?.totalPosts?.toLocaleString() || 0} 
+                    value={(stats?.totalPosts || 0).toLocaleString()} 
                     sub="TOTAL VOID" 
                     icon={<HiCollection size={12} />} 
                     chartData={stats?.charts?.postGrowth?.map(d => d.count)}
@@ -448,21 +458,12 @@ export default function Admin() {
                 <StatCard 
                     label="Comments" 
                     value={stats?.commentsToday || 0} 
-                    sub="ENGAGEMENT" 
+                    sub="DAILY ECHO" 
                     icon={<HiChatAlt2 size={12} />} 
-                />
-                <StatCard 
-                    label="Storage" 
-                    value={`${(stats?.storageUsedMB / 1024).toFixed(1)}GB`} 
-                    sub="SNAPSHOT" 
-                    icon={<HiDatabase size={12} />} 
                 />
                 <StatCard 
                     label="Reports" 
                     value={stats?.pendingReports || 0} 
-                    sub="CRITICAL" 
-                    icon={<HiFlag size={12} />} 
-                    color={stats?.pendingReports > 0 ? '#EF4444' : 'accent'}
                     accent={stats?.pendingReports > 0}
                 />
             </section>
@@ -513,19 +514,19 @@ export default function Admin() {
                                                 <div>
                                                     <div className="flex justify-between text-[10px] font-bold text-text-3 uppercase tracking-[0.2em] mb-3 opacity-40">
                                                         <span>Network Synchronicity</span>
-                                                        <span className="text-success">98.4%</span>
+                                                        <span className="text-success">{stats?.health?.synchronicity || 0}%</span>
                                                     </div>
                                                     <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                                        <motion.div initial={{ width: 0 }} animate={{ width: '98.4%' }} className="h-full bg-success opacity-60" />
+                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.health?.synchronicity || 0}%` }} className="h-full bg-success opacity-60" />
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <div className="flex justify-between text-[10px] font-bold text-text-3 uppercase tracking-[0.2em] mb-3 opacity-40">
                                                         <span>Allocation Quota</span>
-                                                        <span className="text-accent">42.1%</span>
+                                                        <span className="text-accent">{stats?.storage?.percentage || 0}%</span>
                                                     </div>
                                                     <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                                        <motion.div initial={{ width: 0 }} animate={{ width: '42.1%' }} className="h-full bg-accent opacity-60" />
+                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.storage?.percentage || 0}%` }} className="h-full bg-accent opacity-60" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -533,7 +534,7 @@ export default function Admin() {
                                         <div className="mt-10 p-5 rounded-xl bg-accent/5 border border-accent/10">
                                             <div className="flex items-center gap-3 mb-2">
                                                 <HiShieldCheck size={14} className="text-accent" />
-                                                <span className="text-[9px] font-black text-white uppercase tracking-widest">Protocol Active</span>
+                                                <span className="text-[9px] font-black text-white uppercase tracking-widest">Protocol {stats?.health?.status || 'Online'}</span>
                                             </div>
                                             <p className="text-[10px] font-bold text-text-3 uppercase tracking-tight leading-relaxed opacity-50">Infrastructure operating within nominal parameters.</p>
                                         </div>
@@ -596,7 +597,7 @@ export default function Admin() {
                                                     </td>
                                                     <td>
                                                         <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded border ${u.role === 'admin' ? 'bg-accent/5 text-accent border-accent/20' : 'bg-white/5 border-white/10 text-text-3'}`}>
-                                                            {u.role}
+                                                            {u.role || 'user'}
                                                         </span>
                                                     </td>
                                                     <td className="text-right">
@@ -798,12 +799,57 @@ export default function Admin() {
                             </motion.div>
                         )}
 
-                        {/* SECURITY MODULE (STUB) */}
+                        {/* SECURITY MODULE */}
                         {activeTab === 'security' && (
-                            <motion.div key="security" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="admin-surface-el p-12 text-center opacity-20 border-dashed">
-                                    <HiShieldCheck size={24} className="mx-auto mb-4" />
-                                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Security Audit Logs</p>
+                            <motion.div key="security" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                                <div className="admin-table-container">
+                                    <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                                        <h3 className="text-xs font-black text-white uppercase tracking-widest">Administrative Audit Trail</h3>
+                                        <span className="text-[10px] font-bold text-text-3 opacity-30 uppercase tracking-[0.2em]">Live Registry</span>
+                                    </div>
+                                    <table className="admin-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Administrator</th>
+                                                <th>Operation</th>
+                                                <th>Target</th>
+                                                <th className="text-right">Timestamp</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {loading ? (
+                                                <tr><td colSpan="4" className="p-0">{[...Array(8)].map((_, i) => <TableRowSkeleton key={i} />)}</td></tr>
+                                            ) : logs.map(log => (
+                                                <tr key={log._id} className="hover:bg-white/[0.01]">
+                                                    <td>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-5 h-5 rounded overflow-hidden bg-white/5">
+                                                                <img src={log.adminId?.avatarUrl || `https://ui-avatars.com/api/?name=${log.adminId?.username}&background=0A0A0A&color=fff`} className="w-full h-full object-cover" alt="" />
+                                                            </div>
+                                                            <span className="text-[11px] font-bold text-white lowercase">@{log.adminId?.username || 'system'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
+                                                            <span className="text-[9px] text-text-3 opacity-40 truncate max-w-xs">{log.details}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span className="text-[9px] font-bold text-text-3 uppercase px-2 py-0.5 rounded bg-white/5 border border-white/5">{log.targetType}</span>
+                                                    </td>
+                                                    <td className="text-right">
+                                                        <span className="text-[10px] font-medium text-text-3 opacity-40 uppercase">{new Date(log.createdAt).toLocaleString()}</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {logs.length === 0 && !loading && (
+                                                <tr>
+                                                    <td colSpan="4" className="py-32 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em]">Audit Trail Empty</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </motion.div>
                         )}

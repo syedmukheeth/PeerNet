@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
@@ -30,7 +31,7 @@ const typeConfig = {
 function SectionHeader({ label }) {
     return (
         <div className="px-4 py-4 mt-2">
-            <span className="text-[15px] font-bold text-white/90">{label}</span>
+            <span className="text-[15px] font-bold opacity-90">{label}</span>
         </div>
     )
 }
@@ -50,7 +51,7 @@ function NotifRow({ n, index, onAction }) {
     }
 
     const actionText = (n.type === 'comment' || n.type === 'reply') && n.commentBody
-        ? `${cfg.text.split(':')[0]} commented: "${n.commentBody}"`
+        ? `commented: "${n.commentBody}"`
         : cfg.text
 
     const navTarget = n.targetUrl || (n.type === 'follow' ? `/profile/${n.sender?._id}` : `/posts/${n.targetId || n.entityId?._id || n.entityId}`)
@@ -61,7 +62,7 @@ function NotifRow({ n, index, onAction }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.03 }}
             className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}
-            onClick={() => window.location.href = navTarget}
+            onClick={() => navigate(navTarget)}
         >
             {/* Left: Avatar */}
             <div className="relative shrink-0">
@@ -79,12 +80,12 @@ function NotifRow({ n, index, onAction }) {
             {/* Middle: Content */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <div className="text-[14px] leading-[1.4]">
-                    <span className="font-bold text-white hover:underline cursor-pointer" onClick={(e) => { e.stopPropagation(); window.location.href = `/profile/${n.sender?._id}` }}>
+                    <span className="font-bold hover:underline cursor-pointer" onClick={(e) => { e.stopPropagation(); window.location.href = `/profile/${n.sender?._id}` }}>
                         {n.sender?.username}
                     </span>
                     {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-1 text-accent align-middle" size={14} />}
-                    <span className="ml-1 text-white/80">{actionText}</span>
-                    <span className="ml-1.5 text-white/40 whitespace-nowrap">{formatTime(n.createdAt)}</span>
+                    <span className="ml-1 opacity-80"> {actionText}</span>
+                    <span className="ml-1.5 opacity-40 whitespace-nowrap">{formatTime(n.createdAt)}</span>
                 </div>
             </div>
 
@@ -93,7 +94,7 @@ function NotifRow({ n, index, onAction }) {
                 {n.type === 'follow' ? (
                     <button 
                         onClick={handleAction}
-                        className={`h-8 px-4 rounded-lg text-[13px] font-bold transition-all ${isFollowed ? 'bg-white/10 text-white/60' : 'bg-accent text-white hover:brightness-110'}`}
+                        className={`h-8 px-4 rounded-lg text-[13px] font-bold transition-all ${isFollowed ? 'bg-[var(--surface-2)] text-[var(--text-2)]' : 'bg-accent text-white hover:brightness-110'}`}
                     >
                         {isFollowed ? 'Following' : 'Follow'}
                     </button>
@@ -112,6 +113,7 @@ function NotifRow({ n, index, onAction }) {
 
 export default function Notifications() {
     const { user } = useAuth()
+    const navigate = useNavigate()
     const [notifs, setNotifs] = useState([])
     const [loading, setLoading] = useState(true)
     const socket = useSocket(user)
@@ -164,7 +166,7 @@ export default function Notifications() {
         <div className="min-h-dvh pb-20">
             {/* Header */}
             <div className="l-main-col mt-4 mb-2 flex items-center justify-between px-4">
-                <h1 className="text-[24px] font-black tracking-tight text-white">Notifications</h1>
+                <h1 className="text-[24px] font-black tracking-tight">Notifications</h1>
                 <button className="btn btn-ghost btn-icon-sm">
                     <HiDotsHorizontal size={20} />
                 </button>

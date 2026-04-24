@@ -18,7 +18,7 @@ const getOrCreateConversation = async (userId, targetUserId) => {
         conversation = await Conversation.create({ participants: [userId, targetUserId] });
     }
 
-    return conversation;
+    return conversation.populate('participants', 'username avatarUrl fullName isVerified');
 };
 
 const getUserConversations = async (userId) => {

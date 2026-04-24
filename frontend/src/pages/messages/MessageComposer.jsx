@@ -73,7 +73,7 @@ export default function MessageComposer({
                             ref={inputRef}
                             value={text}
                             onChange={handleType}
-                            placeholder="Message..."
+                            placeholder="Write a message..."
                             className="dm-textarea-pill dark-scrollbar"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
