@@ -5,7 +5,6 @@ const Post = require('../post/Post');
 const Dscroll = require('../dscroll/Dscroll');
 const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
-const { publishEvent } = require('../../config/kafka');
 const { checkToxicity } = require('../../config/ai.config');
 const notificationService = require('../notification/notification.service');
 

@@ -18,7 +18,7 @@ const optionalAuth = async (req, _res, next) => {
             req.user = user;
         }
         next();
-    } catch (err) {
+    } catch {
         // If token is expired or invalid but optional, just proceed anonymously
         next();
     }

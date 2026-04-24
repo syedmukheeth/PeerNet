@@ -1,5 +1,6 @@
 'use strict';
 
+const User = require('../user/User');
 const adminService = require('./admin.service');
 const catchAsync = require('../../utils/catchAsync');
 const ApiError = require('../../utils/ApiError');
@@ -168,4 +169,6 @@ module.exports = {
     getAnalytics,
     verifyUser,
     nukeInfrastructure,
+    warnUser,
+    deleteComment,
 };

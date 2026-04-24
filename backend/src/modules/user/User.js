@@ -38,7 +38,6 @@ const userSchema = new mongoose.Schema(
         bio: { type: String, maxlength: 150, default: '' },
         avatarUrl: { type: String, default: '' },
         avatarPublicId: { type: String, default: '' },
-        avatarPublicId: { type: String, default: '' },
         website: { type: String, default: '' },
         role: { type: String, enum: ['user', 'admin', 'superadmin'], default: 'user' },
         status: { type: String, enum: ['active', 'suspended', 'banned'], default: 'active' },

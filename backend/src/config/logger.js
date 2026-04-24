@@ -6,7 +6,7 @@ const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
 const { getRequestId } = require('../middleware/tracing.middleware');
 
-const { combine, timestamp, errors, json, colorize, printf } = winston.format;
+const { combine, timestamp, errors, colorize, printf } = winston.format;
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const logDir = process.env.LOG_DIR || 'logs';
@@ -56,7 +56,7 @@ try {
     fs.writeFileSync(testFile, '');
     fs.unlinkSync(testFile);
     fileTransportsOk = true;
-} catch (_) {
+} catch {
     // Filesystem not writable — console-only logging
 }
 

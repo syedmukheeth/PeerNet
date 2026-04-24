@@ -77,23 +77,23 @@ const register = async ({ username, email, password, fullName }) => {
 
 const login = async ({ email: identifier, password }) => {
     // The identifier could be an actual email or a username
-    console.log(`[AUTH SERVICE] Attempting login for identifier: ${identifier}`);
+    logger.info(`[AUTH SERVICE] Attempting login for identifier: ${identifier}`);
     const user = await User.findOne({
         $or: [{ email: identifier }, { username: identifier }]
     }).select('+passwordHash');
     
     if (!user) {
-        console.warn(`[AUTH SERVICE] User not found: ${identifier}`);
+        logger.warn(`[AUTH SERVICE] User not found: ${identifier}`);
         throw new ApiError(401, 'Invalid credentials');
     }
 
     const match = await user.matchPassword(password);
     if (!match) {
-        console.warn(`[AUTH SERVICE] Password mismatch for: ${identifier}`);
+        logger.warn(`[AUTH SERVICE] Password mismatch for: ${identifier}`);
         throw new ApiError(401, 'Invalid credentials');
     }
 
-    console.log(`[AUTH SERVICE] Successful login for: ${identifier} (${user._id})`);
+    logger.info(`[AUTH SERVICE] Successful login for: ${identifier} (${user._id})`);
 
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
@@ -218,7 +218,7 @@ const guestLogin = async () => {
             }
         }
     } catch (err) {
-        console.error('Failed to auto-follow admins for guest', err);
+        logger.error('Failed to auto-follow admins for guest', err);
     }
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });

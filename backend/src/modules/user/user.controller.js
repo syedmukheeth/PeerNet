@@ -2,7 +2,7 @@
 
 const userService = require('./user.service');
 const postService = require('../post/post.service');
-const { parsePagination, paginatedResponse } = require('../../utils/pagination.utils');
+const { parsePagination } = require('../../utils/pagination.utils');
 
 const getProfile = async (req, res, next) => {
     try {
