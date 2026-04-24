@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy } from 'react-icons/hi'
+import { HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy, HiChevronLeft } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
 import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
 import EmojiPicker from '@emoji-mart/react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Messages() {
     const { id: convoId } = useParams()
@@ -158,7 +159,7 @@ export default function Messages() {
     const activePeer = activeConvo?.participants?.find(p => (p._id || p) !== user?._id)
 
     return (
-        <div className="ig-root">
+        <div className={`ig-root ${convoId ? 'mobile-chat-active' : ''}`}>
             {/* Sidebar */}
             <aside className="ig-sidebar">
                 <header className="ig-sidebar-header">
@@ -216,15 +217,22 @@ export default function Messages() {
                 {activeConvo ? (
                     <>
                         <header className="ig-chat-header">
-                            <div className="ig-header-user" onClick={() => navigate(`/profile/${activePeer?._id}`)}>
-                                <img 
-                                    src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                    className="ig-avatar-sm" 
-                                    alt="" 
+                            <div className="ig-header-user">
+                                <HiChevronLeft 
+                                    className="ig-mobile-back" 
+                                    onClick={() => navigate('/messages')} 
+                                    style={{ fontSize: 24, marginRight: 12, cursor: 'pointer' }}
                                 />
-                                <div>
-                                    <div className="ig-header-name">{activePeer?.fullName || activePeer?.username}</div>
-                                    <div style={{ fontSize: 12, color: '#a8a8a8' }}>{activeConvo.isOnline ? 'Active now' : 'Offline'}</div>
+                                <div className="flex items-center" onClick={() => navigate(`/profile/${activePeer?._id}`)}>
+                                    <img 
+                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                        className="ig-avatar-sm" 
+                                        alt="" 
+                                    />
+                                    <div>
+                                        <div className="ig-header-name">{activePeer?.fullName || activePeer?.username}</div>
+                                        <div style={{ fontSize: 12, color: '#a8a8a8' }}>{activeConvo.isOnline ? 'Active now' : 'Offline'}</div>
+                                    </div>
                                 </div>
                             </div>
                         </header>
@@ -266,21 +274,38 @@ export default function Messages() {
                                             const isNextSame = next && (next.sender?._id || next.sender) === (m.sender?._id || m.sender)
 
                                             return (
-                                                <MessageItem 
-                                                    key={m._id} 
-                                                    message={m} 
-                                                    isSelf={isSelf} 
-                                                    isPrevSame={isPrevSame} 
-                                                    isNextSame={isNextSame} 
-                                                    activePeer={activePeer}
-                                                />
+                                                <motion.div
+                                                    key={m._id}
+                                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                    transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+                                                >
+                                                    <MessageItem 
+                                                        message={m} 
+                                                        isSelf={isSelf} 
+                                                        isPrevSame={isPrevSame} 
+                                                        isNextSame={isNextSame} 
+                                                        activePeer={activePeer}
+                                                    />
+                                                </motion.div>
                                             )
                                         })}
                                     </>
                                 )}
-                                {peerTyping && (
-                                    <div className="ig-last-msg" style={{ paddingLeft: 36, marginBottom: 12 }}>Typing...</div>
-                                )}
+                                <AnimatePresence>
+                                    {peerTyping && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="ig-typing-indicator"
+                                        >
+                                            <div className="dot" />
+                                            <div className="dot" />
+                                            <div className="dot" />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
 
