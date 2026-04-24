@@ -3113,145 +3113,7 @@ textarea:focus-visible {
   font-style: italic;
 }
 
-/* Modern Message Composer (Floating Pill) */
-.dm-composer-root {
-  background: transparent;
-  padding: 10px 20px 24px;
-}
 
-.dm-composer-container {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.dm-composer-main-pill {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(var(--surface-color-rgb, 20, 20, 25), 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-md);
-  border-radius: 30px;
-  padding: 6px 12px;
-  transition: all var(--trans-spring);
-  box-shadow: var(--shadow-lg);
-}
-
-.dm-composer-main-pill:focus-within {
-  border-color: var(--accent);
-  background: var(--surface);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 4px var(--accent-ring);
-  transform: translateY(-2px);
-}
-
-.dm-composer-pill-action {
-  background: none;
-  border: none;
-  color: var(--text-2);
-  cursor: pointer;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all var(--trans-fast);
-  flex-shrink: 0;
-}
-
-.dm-composer-pill-action:hover {
-  background: var(--hover);
-  color: var(--accent);
-}
-
-.dm-input-flex-wrapper {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-.dm-textarea-pill {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-1);
-  padding: 10px 8px;
-  font-size: 15px;
-  max-height: 120px;
-  resize: none;
-  line-height: 1.4;
-  font-family: inherit;
-  font-weight: 500;
-}
-
-.dm-pill-emoji-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.dm-emoji-btn-pill {
-  background: none;
-  border: none;
-  color: var(--text-3);
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  border-radius: 50%;
-  transition: all var(--trans-fast);
-}
-
-.dm-emoji-btn-pill:hover {
-  background: var(--hover);
-  color: var(--accent);
-}
-
-.dm-emoji-popover-pill {
-  position: absolute;
-  bottom: 100%;
-  right: -10px;
-  margin-bottom: 24px;
-  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
-  z-index: 100;
-}
-
-.dm-send-btn-pill {
-  background: var(--logo-gradient);
-  border: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  cursor: pointer;
-  transition: all var(--trans-spring);
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(var(--accent-rgb, 99, 102, 241), 0.3);
-}
-
-.dm-send-btn-pill:not(.disabled):hover {
-  transform: scale(1.1) rotate(-5deg);
-  box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.5);
-}
-
-.dm-send-btn-pill.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  filter: grayscale(1);
-}
-
-.dm-loading-spinner-pill {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: dm-spin 0.6s linear infinite;
-}
 
 @keyframes dm-spin {
   to { transform: rotate(360deg); }
@@ -5389,11 +5251,10 @@ textarea:focus-visible {
   }
 }
 
-/* ══════════ PREMIUM MESSAGING COMPOSER ══════════ */
+/* ── Premium Messaging Composer ───────────────────────────── */
 .dm-composer-root {
-  padding: 12px 16px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
+  padding: 16px 20px 24px;
+  background: transparent;
   position: sticky;
   bottom: 0;
   z-index: var(--z-fixed);
@@ -5408,24 +5269,26 @@ textarea:focus-visible {
 .dm-composer-main-pill {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
-  background: var(--surface-1);
+  gap: 12px;
+  background: rgba(15, 15, 20, 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--border-md);
-  border-radius: 26px;
-  padding: 6px 12px;
-  transition: all var(--trans-fast);
-  box-shadow: var(--shadow-sm);
+  border-radius: 28px;
+  padding: 8px 14px;
+  transition: all var(--trans-spring);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .dm-composer-main-pill:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
   background: var(--surface);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent);
+  transform: translateY(-2px);
 }
 
 .dm-composer-pill-action {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5440,89 +5303,105 @@ textarea:focus-visible {
 }
 
 .dm-composer-pill-action:hover {
+  color: var(--text-1);
   background: var(--hover);
-  color: var(--accent);
+  transform: scale(1.1);
 }
 
 .dm-input-flex-wrapper {
   flex: 1;
   display: flex;
   align-items: flex-end;
-  padding: 8px 0;
+  gap: 8px;
+  min-height: 42px;
 }
 
 .dm-textarea-pill {
-  width: 100%;
+  flex: 1;
   background: none;
   border: none;
   outline: none;
-  color: var(--text-1);
+  padding: 10px 4px;
   font-size: 15px;
-  line-height: 1.5;
+  font-weight: 500;
+  color: var(--text-1);
   resize: none;
-  max-height: 120px;
-  padding: 0;
-  margin: 0;
+  max-height: 150px;
+  line-height: 1.4;
   font-family: inherit;
 }
 
 .dm-textarea-pill::placeholder {
   color: var(--text-3);
-  font-style: italic;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.6;
 }
 
 .dm-pill-emoji-wrap {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   margin-bottom: 2px;
 }
 
 .dm-emoji-btn-pill {
-  width: 40px;
-  height: 40px;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all var(--trans-fast);
+  display: flex;
+}
+
+.dm-emoji-btn-pill:hover {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.dm-send-btn-pill {
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: var(--text-3);
-  background: none;
+  background: var(--logo-gradient);
+  color: #fff;
   border: none;
   cursor: pointer;
-  transition: all var(--trans-fast);
+  transition: all var(--trans-spring);
+  flex-shrink: 0;
+  margin-bottom: 2px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
 }
 
-.dm-emoji-btn-pill:hover {
-  background: var(--hover);
-  color: #ff9d00;
+.dm-send-btn-pill:hover:not(:disabled) {
+  transform: scale(1.1) rotate(-8deg);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+}
+
+.dm-send-btn-pill:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.dm-send-btn-pill:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 .dm-emoji-popover-pill {
   position: absolute;
   bottom: 100%;
-  right: 0;
-  margin-bottom: 12px;
+  right: -10px;
+  margin-bottom: 24px;
   z-index: var(--z-dropdown);
-  box-shadow: var(--shadow-xl);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  border: 1px solid var(--border-md);
+  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
 }
 
-.dm-send-btn-pill {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-  margin-bottom: 2px;
-/* ══════════════════════════════════════════════════════════
    ADMIN CONSOLE — Premium Governance UI
    ══════════════════════════════════════════════════════════ */
 
