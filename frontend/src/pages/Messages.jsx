@@ -130,11 +130,11 @@ export default function Messages() {
     }
 
     const filtered = conversations.filter(c => {
-        const peer = c.participants?.find(p => p._id !== user?._id)
+        const peer = c.participants?.find(p => (p._id || p) !== user?._id)
         return peer?.username?.toLowerCase().includes(searchText.toLowerCase())
     })
 
-    const activePeer = activeConvo?.participants?.find(p => p._id !== user?._id)
+    const activePeer = activeConvo?.participants?.find(p => (p._id || p) !== user?._id)
 
     return (
         <div className="ig-root">
@@ -159,13 +159,13 @@ export default function Messages() {
 
                 <div className="ig-convo-list no-scrollbar">
                     {filtered.map(c => {
-                        const peer = c.participants?.find(p => p._id !== user?._id)
-                        const avatar = peer?.avatarUrl || \`https://ui-avatars.com/api/?name=\${peer?.username}&background=7C3AED&color=fff\`
+                        const peer = c.participants?.find(p => (p._id || p) !== user?._id)
+                        const avatar = peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`
                         return (
                             <div 
                                 key={c._id} 
-                                className={\`ig-convo-item \${convoId === c._id ? 'active' : ''}\`}
-                                onClick={() => navigate(\`/messages/\${c._id}\`)}
+                                className={`ig-convo-item ${convoId === c._id ? 'active' : ''}`}
+                                onClick={() => navigate(`/messages/${c._id}`)}
                             >
                                 <img src={avatar} className="ig-avatar" alt="" />
                                 <div className="ig-convo-info">
@@ -185,9 +185,9 @@ export default function Messages() {
                 {activeConvo ? (
                     <>
                         <header className="ig-chat-header">
-                            <div className="ig-header-user" onClick={() => navigate(\`/profile/\${activePeer?._id}\`)}>
+                            <div className="ig-header-user" onClick={() => navigate(`/profile/${activePeer?._id}`)}>
                                 <img 
-                                    src={activePeer?.avatarUrl || \`https://ui-avatars.com/api/?name=\${activePeer?.username}&background=7C3AED&color=fff\`} 
+                                    src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
                                     className="ig-avatar-sm" 
                                     alt="" 
                                 />
@@ -203,16 +203,16 @@ export default function Messages() {
                                 {messages.map((m, i) => {
                                     const isSelf = (m.sender?._id || m.sender) === user?._id
                                     return (
-                                        <div key={m._id} className={\`ig-msg-row \${isSelf ? 'self' : 'peer'}\`}>
+                                        <div key={m._id} className={`ig-msg-row ${isSelf ? 'self' : 'peer'}`}>
                                             {!isSelf && (
                                                 <img 
-                                                    src={activePeer?.avatarUrl || \`https://ui-avatars.com/api/?name=\${activePeer?.username}&background=7C3AED&color=fff\`} 
+                                                    src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
                                                     className="ig-avatar" 
                                                     style={{ width: 28, height: 28, marginRight: 8, alignSelf: 'flex-end', marginBottom: 4 }}
                                                     alt="" 
                                                 />
                                             )}
-                                            <div className={\`ig-bubble \${isSelf ? 'ig-bubble-self' : 'ig-bubble-peer'}\`}>
+                                            <div className={`ig-bubble ${isSelf ? 'ig-bubble-self' : 'ig-bubble-peer'}`}>
                                                 {m.body}
                                             </div>
                                         </div>
@@ -224,7 +224,7 @@ export default function Messages() {
                             </div>
                         </div>
 
-                        <div className="ig-composer-area">
+                        <div className="ig-composer-area" style={{ position: 'relative' }}>
                             <div className="ig-composer-pill">
                                 <HiOutlineEmojiHappy 
                                     className="ig-sidebar-action" 
@@ -246,7 +246,7 @@ export default function Messages() {
                                 )}
                             </div>
                             {showEmoji && (
-                                <div style={{ position: 'absolute', bottom: 100, right: 40, z-index: 1000 }}>
+                                <div style={{ position: 'absolute', bottom: 80, right: 20, zIndex: 1000 }}>
                                     <EmojiPicker 
                                         onEmojiSelect={(e) => setInputText(prev => prev + e.native)} 
                                         theme="dark"
