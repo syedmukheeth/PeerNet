@@ -56,6 +56,8 @@ export default function Messages() {
     }, [])
 
     // ─── Loading Data ───────────────────────────────────────────
+    const currentFetchId = useRef(0)
+
     useEffect(() => {
         if (!convoId) {
             setActiveConvo(null)
@@ -63,27 +65,44 @@ export default function Messages() {
             return
         }
 
+        // 1. SYNC RESET: Immediate render-blocking clear
+        setMessages([])
+        setLoading(true)
+        
+        const match = conversations.find(c => c._id === convoId)
+        if (match) setActiveConvo(match)
+
+        const fetchId = ++currentFetchId.current
+
         const switchChat = async () => {
-            // SYNC CLEAR: Prevent stale messages from showing
-            setMessages([])
-            setLoading(true)
-            
-            const match = conversations.find(c => c._id === convoId)
-            if (match) setActiveConvo(match)
-            
             try {
-                await fetchMessages(convoId)
+                // Join socket immediately for typing events
                 socket?.emit('join_conversation', convoId)
+                
+                // Fetch data
+                const { data } = await chatApi.get(`${convoId}/messages`)
+                
+                // 2. RACE GUARD: Discard if user already clicked someone else
+                if (fetchId !== currentFetchId.current) return
+
+                setMessages(data.data || [])
+                await chatApi.patch(`${convoId}/messages/read`, {})
+                window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+                scrollToBottom('instant')
             } catch (err) {
-                console.error("Switch error", err)
+                if (fetchId === currentFetchId.current) {
+                    toast.error("Failed to load messages")
+                }
             } finally {
-                setLoading(false)
+                if (fetchId === currentFetchId.current) {
+                    setLoading(false)
+                }
             }
         }
 
         switchChat()
         return () => { if (convoId) socket?.emit('leave_conversation', convoId) }
-    }, [convoId, conversations, fetchMessages, socket])
+    }, [convoId, conversations, socket])
 
     useEffect(() => { fetchConvos() }, [])
 
@@ -237,7 +256,7 @@ export default function Messages() {
                             </div>
                         </header>
 
-                        <div className="ig-messages-viewport dark-scrollbar" ref={scrollRef}>
+                        <div className="ig-messages-viewport dark-scrollbar" ref={scrollRef} key={convoId}>
                             <div className="ig-messages-inner">
                                 {loading ? (
                                     <div className="flex flex-col gap-4 py-10">
