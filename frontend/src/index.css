@@ -6376,3 +6376,44 @@ textarea:focus-visible {
   box-shadow: 0 0 10px var(--accent);
 }
 
+
+
+/* --- PREMIUM WOW UTILITIES --- */
+.glass-panel {
+  background: rgba(var(--bg-rgb), 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.neon-glow {
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.3);
+}
+.story-ring {
+  padding: 2.5px;
+  background: var(--story-ring);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.story-ring .avatar {
+  border: 3px solid var(--bg) !important;
+}
+.radial-depth {
+  background: radial-gradient(circle at center, #121218 0%, #000000 100%) !important;
+}
+.floating {
+  animation: floating 3.5s ease-in-out infinite;
+}
+@keyframes floating {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.active-pill {
+  position: absolute;
+  left: 0;
+  width: 4px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 12px var(--accent);
+}

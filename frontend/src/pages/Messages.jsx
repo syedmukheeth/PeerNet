@@ -29,32 +29,35 @@ MessageItem.displayName = 'MessageItem'
 
 const ConvoItem = React.memo(({ c, isActive, hasUnread, peer, peerTyping, onClick }) => (
     <div 
-        className={`convo-item ${isActive ? 'active' : ''}`}
+        className={`convo-item ${isActive ? 'active' : ''} group relative`}
         onClick={onClick}
     >
-        <div className="avatar-wrap">
+        {isActive && <div className="active-pill" />}
+        
+        <div className={`avatar-wrap ${hasUnread ? 'story-ring' : ''}`}>
             <img 
                 src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
-                className="avatar" 
+                className="avatar transition-transform group-hover:scale-105" 
                 alt="" 
                 loading="lazy"
             />
-            {c.isOnline && <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#09090b] rounded-full" />}
+            {c.isOnline && <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#09090b] rounded-full z-10" />}
         </div>
+        
         <div className="flex-1 min-w-0">
             <div className="flex justify-between items-center mb-0.5">
-                <span className={`text-[15px] ${hasUnread ? 'font-bold text-white' : 'font-semibold text-zinc-300'}`}>
+                <span className={`text-[15px] tracking-tight ${hasUnread ? 'font-bold text-white' : 'font-semibold text-zinc-300'}`}>
                     {peer?.username}
                 </span>
-                <span className="text-[11px] opacity-40">
+                <span className="text-[11px] opacity-40 font-medium">
                     {timeago(c.lastMessage?.createdAt || c.updatedAt)}
                 </span>
             </div>
             <p className={`text-[13px] truncate ${hasUnread ? 'text-white font-semibold' : 'text-zinc-500'}`}>
-                {peerTyping ? <span className="text-accent">typing...</span> : (c.lastMessage?.body || 'Sent an attachment')}
+                {peerTyping ? <span className="text-accent animate-pulse">typing...</span> : (c.lastMessage?.body || 'Sent an attachment')}
             </p>
         </div>
-        {hasUnread && <div className="unread-dot" />}
+        {hasUnread && <div className="unread-dot neon-glow" />}
     </div>
 ))
 ConvoItem.displayName = 'ConvoItem'
@@ -237,23 +240,44 @@ export default function Messages() {
         <div className={`messages-layout ${convoId ? 'mobile-chat-active' : ''}`}>
             
             {/* PANEL 1: Global Navigation (Desktop) */}
-            <aside className="messages-nav">
-                <div className="mb-8">
-                    <img src="/assets/logo.png" className="w-8 h-8 rounded-lg" alt="" />
-                </div>
-                {navLinks.map(link => (
-                    <div 
-                        key={link.to} 
-                        className={`messages-nav-item ${link.active ? 'active' : ''}`}
-                        onClick={() => navigate(link.to)}
-                        title={link.label}
-                    >
-                        <link.icon size={22} />
+            <aside className="messages-nav glass-panel !border-r-0 !bg-black/20">
+                <div className="mb-10 px-4">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent-2 flex items-center justify-center shadow-lg shadow-accent/20 cursor-pointer hover:scale-110 transition-transform">
+                        <span className="text-white font-black text-xl">P</span>
                     </div>
-                ))}
-                <div className="mt-auto flex flex-col gap-4">
-                    <div className="messages-nav-item" onClick={() => navigate('/settings')} title="Settings"><HiCog size={22} /></div>
-                    <div className="messages-nav-item" onClick={() => logout()} title="Logout"><HiLogout size={22} /></div>
+                </div>
+                
+                <div className="flex flex-col items-center gap-3 w-full">
+                    {navLinks.map(link => (
+                        <div 
+                            key={link.to} 
+                            className={`messages-nav-item relative group ${link.active ? 'active text-white' : 'text-zinc-500 hover:text-white'}`}
+                            onClick={() => navigate(link.to)}
+                        >
+                            <link.icon size={24} className="relative z-10 transition-all group-hover:scale-110" />
+                            {link.active && (
+                                <motion.div 
+                                    layoutId="nav-active"
+                                    className="absolute inset-0 bg-accent/20 rounded-2xl blur-md"
+                                />
+                            )}
+                            <div className="absolute left-full ml-4 px-3 py-1.5 bg-zinc-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                {link.label}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-auto flex flex-col gap-6 items-center w-full">
+                    <div className="messages-nav-item text-zinc-500 hover:text-white group relative" onClick={() => navigate('/settings')}>
+                        <HiCog size={24} className="group-hover:rotate-45 transition-transform" />
+                    </div>
+                    <div className="messages-nav-item text-zinc-500 hover:text-red-400 group relative" onClick={() => logout()}>
+                        <HiLogout size={24} />
+                    </div>
+                    <div className="w-10 h-10 rounded-full border-2 border-white/10 overflow-hidden cursor-pointer hover:border-accent transition-colors">
+                        <img src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}`} alt="" className="w-full h-full object-cover" />
+                    </div>
                 </div>
             </aside>
 
@@ -271,19 +295,21 @@ export default function Messages() {
             </nav>
 
             {/* PANEL 2: Conversation List */}
-            <aside className="messages-sidebar">
-                <header>
-                    <div className="flex justify-between items-center px-1">
-                        <div className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity">
-                            <span className="text-lg font-bold tracking-tight">{user?.username}</span>
-                            <HiChevronDown size={18} className="mt-0.5 opacity-60" />
+            <aside className="messages-sidebar bg-[#050505]">
+                <header className="px-6 py-6 border-b border-white/[0.03]">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-2 cursor-pointer group">
+                            <span className="text-xl font-bold tracking-tighter text-white group-hover:text-accent transition-colors">{user?.username}</span>
+                            <HiChevronDown size={18} className="mt-1 opacity-40 group-hover:opacity-100 transition-all group-hover:translate-y-0.5" />
                         </div>
-                        <HiPencilAlt size={24} className="cursor-pointer hover:text-accent transition-colors" />
+                        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                            <HiPencilAlt size={20} className="text-white" />
+                        </div>
                     </div>
-                    <div className="search-box">
-                        <HiSearch className="opacity-40" />
+                    <div className="search-box bg-white/[0.03] border border-white/[0.05] hover:border-white/10 transition-all">
+                        <HiSearch className="text-zinc-500" size={18} />
                         <input 
-                            className="bg-transparent border-none outline-none text-[15px] w-full placeholder:text-zinc-600" 
+                            className="bg-transparent border-none outline-none text-[15px] w-full placeholder:text-zinc-600 text-white font-medium" 
                             placeholder="Search" 
                             value={searchText}
                             onChange={e => setSearchText(e.target.value)}
@@ -491,18 +517,25 @@ export default function Messages() {
                         </footer>
                     </>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                        <div className="w-24 h-24 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-full flex items-center justify-center mb-6 border border-white/5 relative">
-                            <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full" />
-                            <HiChatAlt2 size={44} className="text-accent relative z-10" />
-                        </div>
-                        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Your Messages</h2>
-                        <p className="text-zinc-500 max-w-[280px] mb-8 text-sm leading-relaxed">Send private photos and messages to a friend or group.</p>
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center radial-depth">
+                        <motion.div 
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="w-28 h-28 bg-gradient-to-br from-accent/20 to-indigo-500/20 rounded-full flex items-center justify-center mb-8 border border-white/10 relative floating"
+                        >
+                            <div className="absolute inset-0 bg-accent/30 blur-3xl rounded-full" />
+                            <div className="w-20 h-20 bg-black/40 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/10 relative z-10">
+                                <HiChatAlt2 size={40} className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                            </div>
+                        </motion.div>
+                        <h2 className="text-4xl font-black text-white mb-4 tracking-tighter bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">Your Messages</h2>
+                        <p className="text-zinc-400 max-w-[320px] mb-10 text-[15px] leading-relaxed font-medium">Connect with friends and share your world in a private space.</p>
                         <button 
-                            className="px-8 py-2.5 bg-accent hover:opacity-90 text-white font-bold rounded-xl transition-all shadow-xl shadow-accent/20" 
+                            className="px-10 py-3.5 bg-accent hover:opacity-90 text-white font-bold rounded-2xl transition-all shadow-2xl shadow-accent/40 active:scale-95 group relative overflow-hidden" 
                             onClick={() => navigate('/')}
                         >
-                            Send Message
+                            <span className="relative z-10">Send a Message</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                         </button>
                     </div>
                 )}
