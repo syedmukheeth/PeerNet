@@ -82,23 +82,37 @@ export default function Messages() {
     const [loading, setLoading] = useState(true)
     const viewportRef = useRef(null)
 
-    // Find Active Conversation Data
-    const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
-    const peer = useMemo(() => activeConvo?.participants.find(p => p._id !== user?._id), [activeConvo, user])
+    // Find Active Conversation Data (Added Array.isArray guard)
+    const activeConvo = useMemo(() => {
+        if (!Array.isArray(convos)) return null
+        return convos.find(c => c._id === convoId)
+    }, [convos, convoId])
+
+    const peer = useMemo(() => {
+        if (!activeConvo || !Array.isArray(activeConvo.participants)) return null
+        return activeConvo.participants.find(p => p._id !== user?._id)
+    }, [activeConvo, user])
 
     // Fetch Conversations
     useEffect(() => {
         const fetchConvos = async () => {
             try {
-                // Using chatApi (baseURL: /conversations)
-                const { data } = await chatApi.get('/')
+                const res = await chatApi.get('/')
+                // Deep extraction: Try common API patterns
+                let data = res.data
+                if (data?.data && Array.isArray(data.data)) data = data.data
+                else if (data?.conversations && Array.isArray(data.conversations)) data = data.conversations
+                else if (!Array.isArray(data)) data = []
+                
                 setConvos(data)
-                // Desktop: Auto-open latest chat if none selected
+                
                 if (!convoId && data.length > 0 && window.innerWidth > 1024) {
                     navigate(`/messages/${data[0]._id}`, { replace: true })
                 }
-            } catch (e) { console.error('[Zenith] Convo Fetch Error:', e) }
-            finally { setLoading(false) }
+            } catch (e) { 
+                console.error('[Zenith] Convo Fetch Error:', e) 
+                setConvos([]) 
+            } finally { setLoading(false) }
         }
         fetchConvos()
     }, [convoId, navigate])
@@ -108,10 +122,18 @@ export default function Messages() {
         if (!convoId) return
         const fetchMsgs = async () => {
             try {
-                const { data } = await chatApi.get(`/${convoId}/messages`)
+                const res = await chatApi.get(`/${convoId}/messages`)
+                let data = res.data
+                if (data?.data && Array.isArray(data.data)) data = data.data
+                else if (data?.messages && Array.isArray(data.messages)) data = data.messages
+                else if (!Array.isArray(data)) data = []
+                
                 setMessages(data)
                 setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'instant' }), 50)
-            } catch (e) { console.error('[Zenith] Msg Fetch Error:', e) }
+            } catch (e) { 
+                console.error('[Zenith] Msg Fetch Error:', e)
+                setMessages([])
+            }
         }
         fetchMsgs()
     }, [convoId])
@@ -121,13 +143,17 @@ export default function Messages() {
         const body = inputText
         setInputText('')
         try {
-            const { data } = await chatApi.post(`/${convoId}/messages`, { body })
-            setMessages(prev => [...prev, data])
-            setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' }), 50)
+            const res = await chatApi.post(`/${convoId}/messages`, { body })
+            const data = res.data?.data || res.data
+            if (data && typeof data === 'object') {
+                setMessages(prev => [...prev, data])
+                setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' }), 50)
+            }
         } catch (e) { console.error('[Zenith] Send Error:', e) }
     }
 
     const getGroupClass = (i) => {
+        if (!Array.isArray(messages)) return ''
         const m = messages[i], p = messages[i-1], n = messages[i+1]
         const ps = p && p.sender === m.sender, ns = n && n.sender === m.sender
         if (!ps && !ns) return 'msg-single'
@@ -138,6 +164,7 @@ export default function Messages() {
     }
 
     const formatDate = (date) => {
+        if (!date) return ''
         const d = new Date(date), today = new Date()
         if (d.toDateString() === today.toDateString()) return 'Today'
         return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })
@@ -151,7 +178,7 @@ export default function Messages() {
                 <div className="zn-sidebar-header">
                     <div className="flex justify-between items-center mb-8">
                         <div className="flex items-center gap-2 cursor-pointer">
-                            <span className="text-2xl font-black text-white tracking-tighter leading-none">{user?.username}</span>
+                            <span className="text-2xl font-black text-white tracking-tighter leading-none">{user?.username || 'Messages'}</span>
                             <HiChevronDown size={18} className="text-zinc-500" />
                         </div>
                         <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all">
@@ -173,7 +200,7 @@ export default function Messages() {
                                 <div className="flex-1 py-2 space-y-2"><div className="h-3 bg-white/5 w-24 rounded" /><div className="h-3 bg-white/5 w-40 rounded" /></div>
                             </div>)}
                         </div>
-                    ) : convos.length > 0 ? (
+                    ) : (Array.isArray(convos) && convos.length > 0) ? (
                         convos.map(c => (
                             <ConvoItem 
                                 key={c._id} 
@@ -201,9 +228,9 @@ export default function Messages() {
                                 <button className="lg-hide p-2 -ml-2" onClick={() => navigate('/messages')}>
                                     <HiArrowLeft size={24} className="text-white" />
                                 </button>
-                                <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} className="w-10 h-10 rounded-full border border-white/10" alt="" />
+                                <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username || 'User'}`} className="w-10 h-10 rounded-full border border-white/10" alt="" />
                                 <div>
-                                    <h3 className="text-base font-bold text-white tracking-tight leading-none mb-1">{peer?.username}</h3>
+                                    <h3 className="text-base font-bold text-white tracking-tight leading-none mb-1">{peer?.username || 'User'}</h3>
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                                         <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Active Now</span>
@@ -220,19 +247,19 @@ export default function Messages() {
                         <div ref={viewportRef} className="zn-viewport no-scrollbar">
                             <div className="flex-1" />
                             <div className="flex flex-col items-center py-16 mb-12 border-b border-white/5">
-                                <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} className="w-24 h-24 rounded-full mb-6 border border-white/10 shadow-2xl" alt="" />
-                                <h2 className="text-3xl font-black text-white tracking-tighter mb-1">{peer?.username}</h2>
+                                <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username || 'User'}`} className="w-24 h-24 rounded-full mb-6 border border-white/10 shadow-2xl" alt="" />
+                                <h2 className="text-3xl font-black text-white tracking-tighter mb-1">{peer?.username || 'User'}</h2>
                                 <p className="text-zinc-500 text-sm font-medium mb-6">PeerNet Professional Network</p>
                                 <button className="px-8 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[11px] rounded-xl tracking-widest border border-white/5">
                                     VIEW PROFILE
                                 </button>
                             </div>
                             
-                            {messages.map((m, i) => {
+                            {Array.isArray(messages) && messages.map((m, i) => {
                                 const day = formatDate(m.createdAt)
                                 const prevDay = i > 0 ? formatDate(messages[i-1].createdAt) : null
                                 return (
-                                    <React.Fragment key={m._id}>
+                                    <React.Fragment key={m._id || i}>
                                         {day !== prevDay && <div className="zn-day"><span>{day}</span></div>}
                                         <MessageBubble m={m} isSelf={m.sender === user?._id} groupClass={getGroupClass(i)} />
                                     </React.Fragment>
