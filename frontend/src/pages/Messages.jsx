@@ -16,37 +16,37 @@ import timeago from '../utils/timeago'
    ------------------------------------------------------------------------- */
 const ZenithConvoRow = React.memo(({ c, isActive, peer, onClick }) => (
     <div 
-        className={`flex items-center gap-4 px-6 py-4 cursor-pointer transition-all border-l-[3px]
-            ${isActive ? 'bg-white/5 border-zn-accent' : 'hover:bg-white/[0.03] border-transparent'}`}
+        className={`zn-convo-row ${isActive ? 'active' : ''}`}
         onClick={onClick}
     >
         <div className="relative shrink-0">
-            <div className="w-14 h-14 rounded-full overflow-hidden border border-white/5 bg-zinc-900">
+            <div className="zn-avatar-wrap">
                 <img 
                     src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
                     className="w-full h-full object-cover" 
                     alt="" 
                 />
             </div>
-            {c.isOnline && <div className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black" />}
+            {c.isOnline && <div className="zn-online-dot" />}
         </div>
 
         <div className="flex-1 min-w-0">
-            <div className="flex justify-between items-baseline mb-0.5">
-                <h4 className={`text-[15px] font-bold tracking-tight truncate ${isActive ? 'text-white' : 'text-zinc-300'}`}>
+            <div className="flex justify-between items-baseline mb-1">
+                <h4 className={`zn-convo-name ${isActive ? 'active' : ''}`}>
                     {peer?.username}
                 </h4>
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">
+                <span className="zn-convo-time">
                     {timeago(c.lastMessage?.createdAt || c.updatedAt)}
                 </span>
             </div>
-            <p className={`text-[13px] truncate ${c.unreadCount > 0 ? 'text-white font-bold' : 'text-zinc-500 font-medium opacity-70'}`}>
+            <p className={`zn-convo-msg ${c.unreadCount > 0 ? 'unread' : ''}`}>
                 {c.lastMessage?.body || 'Sent an attachment'}
             </p>
         </div>
-        {c.unreadCount > 0 && <div className="w-2 h-2 bg-zn-accent rounded-full shadow-[0_0_12px_var(--zn-accent)]" />}
+        {c.unreadCount > 0 && <div className="zn-unread-badge" />}
     </div>
 ))
+
 
 /* -------------------------------------------------------------------------
    SUB-COMPONENTS: ZENITH MESSAGE BUBBLE

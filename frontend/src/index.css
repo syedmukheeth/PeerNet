@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
@@ -465,9 +465,51 @@ textarea:focus-visible {
 .w-9  { width: 36px; }  .h-9  { height: 36px; }
 .w-10 { width: 40px; }  .h-10 { height: 40px; }
 .w-12 { width: 48px; }  .h-12 { height: 48px; }
+.w-14 { width: 56px; }  .h-14 { height: 56px; }
 .w-16 { width: 64px; }  .h-16 { height: 64px; }
+.w-24 { width: 96px; }  .h-24 { height: 96px; }
+
+/* Font Weights */
+.font-medium { font-weight: 500; }
+.font-bold   { font-weight: 700; }
+.font-black  { font-weight: 900; }
+
+/* Font Sizes */
+.text-xs     { font-size: 11px; }
+.text-sm     { font-size: 13px; }
+.text-base   { font-size: 15px; }
+.text-lg     { font-size: 17px; }
+.text-xl     { font-size: 20px; }
+.text-2xl    { font-size: 24px; }
+.text-3xl    { font-size: 30px; }
+.text-4xl    { font-size: 36px; }
+
+/* Colors */
+.text-white { color: #ffffff; }
+.text-zinc-300 { color: #d4d4d8; }
+.text-zinc-400 { color: #a1a1aa; }
+.text-zinc-500 { color: #71717a; }
+.text-zinc-600 { color: #52525b; }
+.bg-zinc-800 { background-color: #27272a; }
+.bg-zinc-900 { background-color: #18181b; }
+.bg-white\/5 { background-color: rgba(255,255,255,0.05); }
+.bg-white\/10 { background-color: rgba(255,255,255,0.1); }
+
+/* Other */
+.rounded-xl { border-radius: 12px; }
+.rounded-2xl { border-radius: 16px; }
+.rounded-full { border-radius: 9999px; }
+.tracking-tight { letter-spacing: -0.02em; }
+.tracking-tighter { letter-spacing: -0.04em; }
+.tracking-widest { letter-spacing: 0.1em; }
+.leading-none { line-height: 1; }
+.leading-relaxed { line-height: 1.625; }
+.overflow-hidden { overflow: hidden; }
+.object-cover { object-fit: cover; }
+.italic { font-style: italic; }
 
 .inset-0 { inset: 0; }
+
 
 /* ========================================================================================================================================================================================================================================
    GLASS & SURFACE COMPONENTS
@@ -6117,8 +6159,10 @@ textarea:focus-visible {
   .xl\:text-left { text-align: left; }
   .xl\:w-auto { width: auto; }
   .xl\:w-48 { width: 192px; }
+}
+
 /* ==========================================================================
-   PROJECT ZENITH: PREMIUM MESSAGES (Instagram Desktop Grade)
+   PROJECT ZENITH: PREMIUM MESSAGING (STABILIZED)
    ========================================================================== */
 
 :root {
@@ -6138,9 +6182,10 @@ textarea:focus-visible {
   background: var(--zn-bg);
   overflow: hidden;
   position: relative;
+  z-index: 10;
 }
 
-/* 1. Sidebar (360px) */
+/* 1. Sidebar */
 .zn-sidebar {
   width: var(--zn-list-w);
   height: 100%;
@@ -6148,14 +6193,101 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   background: var(--zn-bg);
-  z-index: 20;
+  flex-shrink: 0;
 }
 
 .zn-sidebar-header {
   padding: 32px 24px 20px;
 }
 
+/* Sidebar List Items */
+.zn-convo-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.zn-convo-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.zn-convo-row.active {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: var(--zn-accent);
+}
+
+.zn-avatar-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--zn-border);
+  background: #18181b;
+}
+
+.zn-online-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background: #10b981;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.zn-convo-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #d4d4d8;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zn-convo-name.active {
+  color: #fff;
+}
+
+.zn-convo-time {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: #52525b;
+}
+
+.zn-convo-msg {
+  font-size: 13px;
+  font-weight: 500;
+  color: #71717a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zn-convo-msg.unread {
+  color: #fff;
+  font-weight: 700;
+}
+
+.zn-unread-badge {
+  width: 8px;
+  height: 8px;
+  background: var(--zn-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--zn-accent);
+}
+
 .zn-search-box {
+
   background: var(--zn-surface-raised);
   border-radius: 12px;
   padding: 10px 16px;
@@ -6163,7 +6295,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 12px;
   border: 1px solid transparent;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 
 .zn-search-box:focus-within {
@@ -6171,7 +6303,7 @@ textarea:focus-visible {
   box-shadow: 0 0 0 2px var(--zn-accent-glow);
 }
 
-/* 2. Main Chat View */
+/* 2. Main View */
 .zn-main {
   flex: 1;
   min-width: 0;
@@ -6191,10 +6323,11 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--zn-border);
   background: rgba(0,0,0,0.7);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   z-index: 50;
 }
 
-/* 3. BUBBLE ENGINE (Zenith Fixed) */
+/* 3. Viewport & Bubbles */
 .zn-viewport {
   flex: 1;
   overflow-y: auto;
@@ -6210,6 +6343,7 @@ textarea:focus-visible {
   max-width: 65%;
   position: relative;
   margin-bottom: 2px;
+  /* FORCE FIX FOR VERTICAL TEXT */
   writing-mode: horizontal-tb !important;
 }
 
@@ -6218,11 +6352,12 @@ textarea:focus-visible {
 
 .zn-bubble {
   display: block !important;
-  min-width: 120px;
+  min-width: 80px;
   padding: 12px 18px;
-  border-radius: 24px;
+  border-radius: 20px;
   font-size: 15px;
   line-height: 1.5;
+  /* FORCE FIX FOR WRAPPING */
   white-space: normal !important;
   word-break: break-word !important;
   overflow-wrap: break-word !important;
@@ -6242,12 +6377,12 @@ textarea:focus-visible {
   border: 1px solid var(--zn-border);
 }
 
-/* Grouping Physics */
-.zn-row.msg-top.self .zn-bubble { border-bottom-right-radius: 4px; }
-.zn-row.msg-middle.self .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
-.zn-row.msg-bottom.self .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 24px; }
+/* Grouping Class Modifiers */
+.zn-row.msg-top.self .zn-bubble { border-bottom-right-radius: 4px; border-top-right-radius: 20px; }
+.zn-row.msg-middle.self .zn-bubble { border-radius: 20px 4px 4px 20px; }
+.zn-row.msg-bottom.self .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 20px; }
 
-/* 4. Zenith Composer */
+/* 4. Composer */
 .zn-footer {
   padding: 20px 40px 32px;
 }
@@ -6260,12 +6395,6 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all 0.3s ease;
-}
-
-.zn-composer-pill:focus-within {
-  border-color: rgba(255,255,255,0.15);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 .zn-input {
@@ -6278,15 +6407,15 @@ textarea:focus-visible {
   padding: 10px 0;
 }
 
-/* Day Separator */
+/* Day & Meta */
 .zn-day {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 32px 0 20px;
+  margin: 40px 0 20px;
   font-size: 11px;
   font-weight: 800;
-  color: var(--text-3);
+  color: #52525b;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   width: 100%;
@@ -6295,12 +6424,14 @@ textarea:focus-visible {
 .zn-meta {
   font-size: 10px;
   font-weight: 700;
-  color: var(--text-3);
+  color: #52525b;
   margin-top: 4px;
   padding: 0 8px;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
-/* Scrollbar */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* Custom Color Support */
+.text-zn-accent { color: var(--zn-accent); }
+.border-zn-accent { border-color: var(--zn-accent); }
+.bg-zn-accent { background-color: var(--zn-accent); }
+
