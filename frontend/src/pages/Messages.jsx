@@ -12,7 +12,7 @@ import {
     useConvos, useMessages, useSendMessage, 
     useMessageActions, useConvoActions, useChatState 
 } from '../hooks/useChat'
-import formatTime from '../utils/timeago'
+import { timeago as formatTime } from '../utils/timeago'
 import toast from 'react-hot-toast'
 
 /**
@@ -195,8 +195,8 @@ export default function Messages() {
 
     // Side Effects
     useEffect(() => { if (viewportRef.current) viewportRef.current.scrollTop = viewportRef.current.scrollHeight }, [messages])
-    useEffect(() => { setInputText(getDraft() || '') }, [convoId])
-    useEffect(() => { setDraft(inputText) }, [inputText])
+    useEffect(() => { setInputText(getDraft() || '') }, [convoId, getDraft])
+    useEffect(() => { setDraft(inputText) }, [inputText, setDraft])
     useEffect(() => { if (convoId) localStorage.setItem('zn_last_convo_id', convoId) }, [convoId])
 
     // Event Handlers
@@ -206,7 +206,7 @@ export default function Messages() {
         const replyId = replyingTo?._id
         setInputText('')
         setReplyingTo(null)
-        try { await sendMutation.mutateAsync({ text: body, replyToId: replyId }) } catch (e) { toast.error('Failed to send') }
+        try { await sendMutation.mutateAsync({ text: body, replyToId: replyId }) } catch { toast.error('Failed to send') }
     }
 
     const onReact = (messageId, emoji) => reactMutation.mutate({ messageId, emoji })
@@ -241,7 +241,7 @@ export default function Messages() {
                 <div className="zn-sidebar-scroll no-scrollbar">
                     {loadingConvos ? (
                         <div className="p-4 space-y-4">
-                            {[1,2,3,4,5].map(i => <div key={i} className="flex gap-3 animate-pulse">
+                            {[1,2,3,4,5].map(id => <div key={id} className="flex gap-3 animate-pulse">
                                 <div className="w-12 h-12 rounded-2xl bg-white/5" />
                                 <div className="flex-1 py-1 space-y-2"><div className="h-2.5 bg-white/5 w-24 rounded" /><div className="h-2 bg-white/5 w-40 rounded" /></div>
                             </div>)}
@@ -305,12 +305,12 @@ export default function Messages() {
                             {loadingMsgs ? (
                                 <div className="flex-1 flex items-center justify-center"><div className="w-6 h-6 border-2 border-zn-accent border-t-transparent rounded-full animate-spin" /></div>
                             ) : filteredMessages.length > 0 ? (
-                                filteredMessages.map((m, i) => (
+                                filteredMessages.map((m) => (
                                     <MessageBubble 
                                         key={m._id} m={m} 
                                         isSelf={m.sender?._id === user?._id || m.sender === user?._id} 
                                         onReply={setReplyingTo}
-                                        onForward={(msg) => toast.success('Select chat to forward')}
+                                        onForward={() => toast.success('Select chat to forward')}
                                         onEdit={(msg) => { setEditingId(msg._id); setEditingText(msg.body) }}
                                         onDelete={deleteMutation.mutate}
                                         onReact={(emoji) => onReact(m._id, emoji)}
@@ -381,7 +381,7 @@ export default function Messages() {
                                             await editMutation.mutateAsync({ messageId: editingId, text: editingText })
                                             setEditingId(null)
                                             toast.success('Updated')
-                                        } catch (e) { toast.error('Failed') }
+                                        } catch { toast.error('Failed') }
                                     }}
                                     className="px-8 py-2.5 bg-zn-accent rounded-xl font-bold text-white"
                                 >
