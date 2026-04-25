@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
     HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy, HiChevronLeft,
-    HiHome, HiFilm, HiChatAlt2, HiBell, HiCog, HiLogout
+    HiHome, HiFilm, HiChatAlt2, HiBell, HiCog, HiLogout, HiOutlineVideoCamera, HiOutlinePhone, HiOutlineInformationCircle, HiChevronDown
 } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
 import { chatApi } from '../api/axios'
@@ -15,13 +15,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 // ─── Memoized Components ──────────────────────────────────────
 const MessageItem = React.memo(({ m, isSelf, groupClass, timeLabel }) => (
     <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
         className={`message-row ${isSelf ? 'self' : 'peer'} ${groupClass}`}
     >
         <div className="message-bubble">
             {m.body}
-            <div className="text-[10px] opacity-50 mt-1">{timeLabel}</div>
+            <div className="text-[10px] opacity-40 mt-1 font-medium">{timeLabel}</div>
         </div>
     </motion.div>
 ))
@@ -39,22 +39,22 @@ const ConvoItem = React.memo(({ c, isActive, hasUnread, peer, peerTyping, onClic
                 alt="" 
                 loading="lazy"
             />
-            {c.isOnline && <div className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 border-2 border-[#09090b] rounded-full" />}
+            {c.isOnline && <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#09090b] rounded-full" />}
         </div>
         <div className="flex-1 min-w-0">
             <div className="flex justify-between items-center mb-0.5">
-                <span className={`text-[15px] ${hasUnread ? 'font-black' : 'font-bold'}`}>
+                <span className={`text-[15px] ${hasUnread ? 'font-bold text-white' : 'font-semibold text-zinc-300'}`}>
                     {peer?.username}
                 </span>
                 <span className="text-[11px] opacity-40">
                     {timeago(c.lastMessage?.createdAt || c.updatedAt)}
                 </span>
             </div>
-            <p className={`text-[13px] truncate ${hasUnread ? 'text-white font-bold' : 'opacity-50'}`}>
-                {peerTyping ? 'typing...' : (c.lastMessage?.body || 'Sent an attachment')}
+            <p className={`text-[13px] truncate ${hasUnread ? 'text-white font-semibold' : 'text-zinc-500'}`}>
+                {peerTyping ? <span className="text-accent">typing...</span> : (c.lastMessage?.body || 'Sent an attachment')}
             </p>
         </div>
-        {hasUnread && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
+        {hasUnread && <div className="unread-dot" />}
     </div>
 ))
 ConvoItem.displayName = 'ConvoItem'
@@ -273,15 +273,18 @@ export default function Messages() {
             {/* PANEL 2: Conversation List */}
             <aside className="messages-sidebar">
                 <header>
-                    <div className="flex justify-between items-center">
-                        <h1 className="text-xl font-black">Messages</h1>
-                        <HiPencilAlt size={22} className="cursor-pointer hover:opacity-70 transition-opacity" />
+                    <div className="flex justify-between items-center px-1">
+                        <div className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity">
+                            <span className="text-lg font-bold tracking-tight">{user?.username}</span>
+                            <HiChevronDown size={18} className="mt-0.5 opacity-60" />
+                        </div>
+                        <HiPencilAlt size={24} className="cursor-pointer hover:text-accent transition-colors" />
                     </div>
                     <div className="search-box">
                         <HiSearch className="opacity-40" />
                         <input 
-                            className="bg-transparent border-none outline-none text-sm w-full" 
-                            placeholder="Search messages..." 
+                            className="bg-transparent border-none outline-none text-[15px] w-full placeholder:text-zinc-600" 
+                            placeholder="Search" 
                             value={searchText}
                             onChange={e => setSearchText(e.target.value)}
                         />
@@ -339,20 +342,35 @@ export default function Messages() {
                                     className="lg:hidden text-2xl cursor-pointer" 
                                     onClick={() => navigate('/messages')} 
                                 />
-                                <div className="relative">
-                                    <img 
-                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                        className="w-10 h-10 rounded-xl object-cover" 
-                                        alt="" 
-                                    />
-                                    {activePeer.isOnline && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#09090b] rounded-full" />}
-                                </div>
-                                <div>
-                                    <div className="font-bold text-[15px]">{activePeer?.fullName || activePeer?.username}</div>
-                                    <div className="text-[11px] opacity-50">
-                                        {activePeer.isOnline ? 'Online' : activePeer.lastSeen ? `Active ${timeago(activePeer.lastSeen)}` : 'Offline'}
+                                <div 
+                                    className="flex items-center gap-3 cursor-pointer group"
+                                    onClick={() => navigate(`/profile/${activePeer?._id}`)}
+                                >
+                                    <div className="relative">
+                                        <img 
+                                            src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                            className="w-10 h-10 rounded-full object-cover border border-white/5" 
+                                            alt="" 
+                                        />
+                                        {activePeer.isOnline && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#09090b] rounded-full" />}
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-[15px] group-hover:text-accent transition-colors">{activePeer?.fullName || activePeer?.username}</div>
+                                        <div className="text-[11px] opacity-50 flex items-center gap-1.5">
+                                            {activePeer.isOnline ? (
+                                                <>
+                                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                                                    <span>Active now</span>
+                                                </>
+                                            ) : activePeer.lastSeen ? `Active ${timeago(activePeer.lastSeen)}` : 'Offline'}
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div className="flex items-center gap-5 text-zinc-400">
+                                <HiOutlinePhone size={24} className="cursor-pointer hover:text-white transition-colors" />
+                                <HiOutlineVideoCamera size={26} className="cursor-pointer hover:text-white transition-colors" />
+                                <HiOutlineInformationCircle size={26} className="cursor-pointer hover:text-white transition-colors" />
                             </div>
                         </header>
 
@@ -395,9 +413,10 @@ export default function Messages() {
                                         const isNextSame = nextM && (nextM.sender?._id || nextM.sender) === (m.sender?._id || m.sender)
 
                                         let groupClass = ''
-                                        if (isPrevSame && isNextSame) groupClass = 'mt-0.5'
-                                        else if (isPrevSame) groupClass = 'mt-0.5'
-                                        else groupClass = 'mt-4'
+                                        if (isPrevSame && isNextSame) groupClass = 'msg-middle'
+                                        else if (isPrevSame) groupClass = 'msg-bottom'
+                                        else if (isNextSame) groupClass = 'msg-top'
+                                        else groupClass = 'msg-single'
                                         
                                         return (
                                             <MessageItem 
@@ -412,10 +431,17 @@ export default function Messages() {
                                     
                                     <AnimatePresence>
                                         {peerTyping && (
-                                            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex gap-1 py-2">
-                                                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            <motion.div 
+                                                initial={{ opacity: 0, scale: 0.8 }} 
+                                                animate={{ opacity: 1, scale: 1 }} 
+                                                exit={{ opacity: 0, scale: 0.8 }} 
+                                                className="message-row peer msg-single"
+                                            >
+                                                <div className="message-bubble py-3 px-4 bg-surface-1 border border-border-sm flex gap-1.5 items-center">
+                                                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                                </div>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
@@ -466,12 +492,18 @@ export default function Messages() {
                     </>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                        <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-full flex items-center justify-center mb-6 border border-white/5">
-                            <HiChatAlt2 size={48} className="text-purple-500" />
+                        <div className="w-24 h-24 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-full flex items-center justify-center mb-6 border border-white/5 relative">
+                            <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full" />
+                            <HiChatAlt2 size={44} className="text-accent relative z-10" />
                         </div>
-                        <h2 className="text-3xl font-black text-white mb-2">Direct Messages</h2>
-                        <p className="text-zinc-500 max-w-sm mb-8">Connect with friends and share your thoughts in a private, secure space.</p>
-                        <button className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-purple-500/20" onClick={() => navigate('/')}>Back to Feed</button>
+                        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Your Messages</h2>
+                        <p className="text-zinc-500 max-w-[280px] mb-8 text-sm leading-relaxed">Send private photos and messages to a friend or group.</p>
+                        <button 
+                            className="px-8 py-2.5 bg-accent hover:opacity-90 text-white font-bold rounded-xl transition-all shadow-xl shadow-accent/20" 
+                            onClick={() => navigate('/')}
+                        >
+                            Send Message
+                        </button>
                     </div>
                 )}
             </main>
