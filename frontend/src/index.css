@@ -6728,3 +6728,28 @@ textarea:focus-visible {
     gap: 12px;
 }
 
+/* -------------------------------------------------------------------------
+   PREMIUM SHIMMER & ANIMATIONS
+   ------------------------------------------------------------------------- */
+@keyframes zn-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.zn-shimmer {
+    background: linear-gradient(90deg, 
+        rgba(255,255,255,0.03) 25%, 
+        rgba(255,255,255,0.08) 50%, 
+        rgba(255,255,255,0.03) 75%
+    );
+    background-size: 200% 100%;
+    animation: zn-shimmer 2s infinite linear;
+}
+
+.zn-page-transition {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+

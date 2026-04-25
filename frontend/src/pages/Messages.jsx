@@ -76,7 +76,12 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
     const quickEmojis = ['❤️', '😂', '🔥', '👍', '😢', '😮']
 
     return (
-        <div className={`zn-row ${isSelf ? 'self' : 'peer'}`}>
+        <motion.div 
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+            className={`zn-row ${isSelf ? 'self' : 'peer'}`}
+        >
             <div className="zn-bubble-container group">
                 {/* Reply Context */}
                 {m.replyTo && (
@@ -136,7 +141,7 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }
 
@@ -239,37 +244,81 @@ export default function Messages() {
                 </div>
 
                 <div className="zn-sidebar-scroll no-scrollbar">
-                    {loadingConvos ? (
-                        <div className="p-4 space-y-4">
-                            {[1,2,3,4,5].map(id => <div key={id} className="flex gap-3 animate-pulse">
-                                <div className="w-12 h-12 rounded-2xl bg-white/5" />
-                                <div className="flex-1 py-1 space-y-2"><div className="h-2.5 bg-white/5 w-24 rounded" /><div className="h-2 bg-white/5 w-40 rounded" /></div>
-                            </div>)}
-                        </div>
-                    ) : filteredConvos.length > 0 ? (
-                        filteredConvos.map(c => (
-                            <ConvoItem 
-                                key={c._id} c={c} isActive={convoId === c._id} user={user} 
-                                onClick={() => navigate(`/messages/${c._id}`)} 
-                                onPin={() => pinMutation.mutate(c._id)}
-                                onMute={() => muteMutation.mutate(c._id)}
-                                onArchive={() => archiveMutation.mutate(c._id)}
-                                onMarkUnread={() => toast.success('Marked unread')}
-                            />
-                        ))
-                    ) : (
-                        <div className="p-12 text-center">
-                            <div className="w-16 h-16 rounded-[24px] bg-white/5 flex items-center justify-center mx-auto mb-4 opacity-40"><HiBookmark size={32} className="text-zinc-500" /></div>
-                            <p className="text-zinc-600 font-bold text-sm">No conversations found</p>
-                        </div>
-                    )}
+                    <AnimatePresence mode="popLayout">
+                        {loadingConvos ? (
+                            <motion.div 
+                                key="skeleton"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="p-4 space-y-4"
+                            >
+                                {[1,2,3,4,5,6].map(id => (
+                                    <div key={id} className="flex gap-3">
+                                        <div className="w-12 h-12 rounded-2xl zn-shimmer" />
+                                        <div className="flex-1 py-1 space-y-2">
+                                            <div className="h-3 zn-shimmer w-24 rounded-full" />
+                                            <div className="h-2 zn-shimmer w-40 rounded-full opacity-60" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </motion.div>
+                        ) : filteredConvos.length > 0 ? (
+                            <motion.div 
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    visible: { transition: { staggerChildren: 0.05 } }
+                                }}
+                                className="pb-4"
+                            >
+                                {filteredConvos.map(c => (
+                                    <motion.div
+                                        key={c._id}
+                                        variants={{
+                                            hidden: { opacity: 0, x: -10 },
+                                            visible: { opacity: 1, x: 0 }
+                                        }}
+                                        transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+                                    >
+                                        <ConvoItem 
+                                            c={c} isActive={convoId === c._id} user={user} 
+                                            onClick={() => navigate(`/messages/${c._id}`)} 
+                                            onPin={() => pinMutation.mutate(c._id)}
+                                            onMute={() => muteMutation.mutate(c._id)}
+                                            onArchive={() => archiveMutation.mutate(c._id)}
+                                            onMarkUnread={() => toast.success('Marked unread')}
+                                        />
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="p-12 text-center"
+                            >
+                                <div className="w-16 h-16 rounded-[24px] bg-white/5 flex items-center justify-center mx-auto mb-4 opacity-40">
+                                    <HiBookmark size={32} className="text-zinc-500" />
+                                </div>
+                                <p className="text-zinc-600 font-bold text-sm">No conversations found</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </aside>
 
             {/* 2. CHAT MAIN */}
             <main className="zn-chat-main">
                 {convoId ? (
-                    <>
+                    <motion.div 
+                        key={convoId}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                        className="zn-page-transition"
+                    >
                         <header className="zn-chat-header">
                             <div className="flex items-center gap-4">
                                 <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} className="w-10 h-10 rounded-xl object-cover border border-white/5" alt="" />
@@ -302,23 +351,40 @@ export default function Messages() {
                         </AnimatePresence>
 
                         <div ref={viewportRef} className="zn-viewport no-scrollbar">
-                            {loadingMsgs ? (
-                                <div className="flex-1 flex items-center justify-center"><div className="w-6 h-6 border-2 border-zn-accent border-t-transparent rounded-full animate-spin" /></div>
-                            ) : filteredMessages.length > 0 ? (
-                                filteredMessages.map((m) => (
-                                    <MessageBubble 
-                                        key={m._id} m={m} 
-                                        isSelf={m.sender?._id === user?._id || m.sender === user?._id} 
-                                        onReply={setReplyingTo}
-                                        onForward={() => toast.success('Select chat to forward')}
-                                        onEdit={(msg) => { setEditingId(msg._id); setEditingText(msg.body) }}
-                                        onDelete={deleteMutation.mutate}
-                                        onReact={(emoji) => onReact(m._id, emoji)}
-                                    />
-                                ))
-                            ) : chatSearchQuery ? (
-                                <div className="flex-1 flex items-center justify-center text-zinc-500 font-bold text-sm">No messages match your search</div>
-                            ) : null}
+                            <AnimatePresence mode="popLayout" initial={false}>
+                                {loadingMsgs ? (
+                                    <motion.div 
+                                        key="chat-skeleton"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="space-y-6"
+                                    >
+                                        {[1,2,3,4].map(id => (
+                                            <div key={id} className={`flex flex-col ${id % 2 === 0 ? 'items-end' : 'items-start'}`}>
+                                                <div className={`h-12 zn-shimmer rounded-2xl mb-2 ${id % 2 === 0 ? 'w-48' : 'w-64'}`} />
+                                                <div className="h-2 zn-shimmer w-12 rounded-full opacity-40" />
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                ) : filteredMessages.length > 0 ? (
+                                    filteredMessages.map((m) => (
+                                        <MessageBubble 
+                                            key={m._id} m={m} 
+                                            isSelf={m.sender?._id === user?._id || m.sender === user?._id} 
+                                            onReply={setReplyingTo}
+                                            onForward={() => toast.success('Select chat to forward')}
+                                            onEdit={(msg) => { setEditingId(msg._id); setEditingText(msg.body) }}
+                                            onDelete={deleteMutation.mutate}
+                                            onReact={(emoji) => onReact(m._id, emoji)}
+                                        />
+                                    ))
+                                ) : chatSearchQuery ? (
+                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex items-center justify-center text-zinc-500 font-bold text-sm">
+                                        No messages match your search
+                                    </motion.div>
+                                ) : null}
+                            </AnimatePresence>
                         </div>
 
                         <footer className="zn-footer">
@@ -346,13 +412,14 @@ export default function Messages() {
                                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                                         className="zn-composer-input" 
                                         placeholder="Type a message..." 
+                                        autoFocus
                                     />
                                     <button className="text-zinc-500 hover:text-white"><HiMicrophone size={22} /></button>
                                     <button onClick={handleSend} className="zn-send-btn"><HiArrowRight size={20} /></button>
                                 </div>
                             </div>
                         </footer>
-                    </>
+                    </motion.div>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center p-12 text-center relative overflow-hidden">
                         {/* Animated Background Glow */}
