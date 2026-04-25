@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
@@ -6416,3 +6416,92 @@ textarea:focus-visible {
 /* Scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* --- ULTIMATE POLISH: MESSAGES --- */
+:root {
+  --ms-surface-base: #000000;
+  --ms-surface-raised: #0a0a0a;
+  --ms-surface-overlay: #121212;
+  --ms-border-subtle: rgba(255, 255, 255, 0.05);
+  --ms-border-bold: rgba(255, 255, 255, 0.12);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #121212 25%, #1a1a1a 50%, #121212 75%);
+  background-size: 800px 104px;
+  animation: shimmer 1.5s infinite linear;
+}
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+
+.ms-bubble {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.day-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0 16px;
+  position: relative;
+}
+.day-separator::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ms-border-subtle);
+  z-index: 0;
+}
+.day-label {
+  background: var(--ms-surface-base);
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  position: relative;
+  z-index: 1;
+  border-radius: 20px;
+}
+
+.ms-message-row .timestamp-hint {
+  font-size: 10px;
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin: 4px 8px;
+}
+.ms-message-row:hover .timestamp-hint {
+  opacity: 1;
+}
+
+.ms-search-box-premium {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--ms-border-subtle);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ms-search-box-premium:focus-within {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.1);
+}
+
+@media (max-width: 1024px) {
+  .messages-layout { --ms-sidebar-w: 100%; }
+  .ms-nav { display: none; }
+}
+
