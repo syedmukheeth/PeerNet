@@ -81,7 +81,7 @@ export default function App() {
               <Route path="shorts" element={<Shorts />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="messages" element={<Messages />} />
-              <Route path="messages/:id" element={<Messages />} />
+              <Route path="messages/:convoId" element={<Messages />} />
               <Route path="search" element={<Search />} />
               <Route path="profile/:id" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
