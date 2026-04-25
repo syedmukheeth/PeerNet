@@ -5948,18 +5948,17 @@ textarea:focus-visible {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   overflow: hidden;
 }
 .line-clamp-4 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   overflow: hidden;
 }
 
-.bg-black { background-color: #000; }
-.bg-zinc-950 { background-color: #09090b; }
-.bg-white\/5 { background-color: rgba(255,255,255,0.05); }
 .bg-white\/10 { background-color: rgba(255,255,255,0.10); }
 .bg-white\/20 { background-color: rgba(255,255,255,0.20); }
 .bg-white\/\[0\.01\] { background-color: rgba(255,255,255,0.01); }
