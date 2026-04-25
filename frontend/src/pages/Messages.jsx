@@ -9,6 +9,12 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { chatApi } from '../api/axios'
 import { timeago } from '../utils/timeago'
+import { 
+    useConvos, 
+    useMessages, 
+    useChatState, 
+    useSendMessage 
+} from '../hooks/useChat'
 
 /* -------------------------------------------------------------------------
    SUB-COMPONENT: CONVERSATION ITEM (SIDEBAR)
@@ -75,19 +81,43 @@ export default function Messages() {
     const { id: convoId } = useParams()
     const navigate = useNavigate()
     
-    const [convos, setConvos] = useState([])
-    const [messages, setMessages] = useState([])
-    const [inputText, setInputText] = useState('')
-    const [loading, setLoading] = useState(true)
-    const [loadingMsgs, setLoadingMsgs] = useState(false)
-    // ZENITH PERFORMANCE: Memory cache for instant switching
-    const [msgCache, setMsgCache] = useState({})
+    // ZENITH PRODUCT ARCHITECTURE: React Query + Persistent Cache
+    const { data: convos = [], isLoading: loadingConvos } = useConvos()
+    const { data: messages = [], isLoading: loadingMsgs } = useMessages(convoId)
+    const { getDraft, setDraft } = useChatState(convoId)
+    const sendMutation = useSendMessage(convoId)
+
+    const [inputText, setInputText] = useState(getDraft() || '')
     const viewportRef = useRef(null)
 
-    // Find Active Conversation Data (Added Array.isArray guard)
+    // Sync input with draft cache when switching conversations
+    useEffect(() => {
+        setInputText(getDraft() || '')
+    }, [convoId])
+
+    useEffect(() => {
+        setDraft(inputText)
+    }, [inputText, convoId])
+
+    // Persistence: Remember last opened conversation
+    useEffect(() => {
+        if (convoId) {
+            localStorage.setItem('zn_last_convo_id', convoId)
+        }
+    }, [convoId])
+
+    // Auto-Redirect to last convo or first convo
+    useEffect(() => {
+        if (!convoId && convos.length > 0 && window.innerWidth > 1024) {
+            const lastId = localStorage.getItem('zn_last_convo_id')
+            const targetId = convos.find(c => c._id === lastId) ? lastId : convos[0]._id
+            navigate(`/messages/${targetId}`, { replace: true })
+        }
+    }, [convoId, convos, navigate])
+
+    // Find Active Conversation Data
     const activeConvo = useMemo(() => {
-        if (!Array.isArray(convos)) return null
-        return convos.find(c => c._id === convoId)
+        return Array.isArray(convos) ? convos.find(c => c._id === convoId) : null
     }, [convos, convoId])
 
     const peer = useMemo(() => {
@@ -95,76 +125,36 @@ export default function Messages() {
         return activeConvo.participants.find(p => p._id !== user?._id)
     }, [activeConvo, user])
 
-    // Fetch Conversations
+    // Scroll to bottom on new messages
     useEffect(() => {
-        const fetchConvos = async () => {
-            try {
-                const res = await chatApi.get('/')
-                let data = res.data
-                if (data?.data && Array.isArray(data.data)) data = data.data
-                else if (data?.conversations && Array.isArray(data.conversations)) data = data.conversations
-                else if (!Array.isArray(data)) data = []
-                setConvos(data)
-                
-                if (!convoId && data.length > 0 && window.innerWidth > 1024) {
-                    navigate(`/messages/${data[0]._id}`, { replace: true })
-                }
-            } catch (e) { 
-                console.error('[Zenith] Convo Fetch Error:', e) 
-                setConvos([]) 
-            } finally { setLoading(false) }
+        if (messages.length > 0) {
+            setTimeout(() => {
+                viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' })
+            }, 100)
         }
-        fetchConvos()
-    }, [convoId, navigate])
+    }, [messages.length, convoId])
 
-    // Fetch Messages (with Performance Cache)
-    useEffect(() => {
-        if (!convoId) return
+    const handleSendMessage = async (e) => {
+        e?.preventDefault()
+        if (!inputText.trim() || sendMutation.isPending) return
         
-        const fetchMsgs = async () => {
-            // INSTANT SWITCH: Check cache first
-            if (msgCache[convoId]) {
-                setMessages(msgCache[convoId])
-                setLoadingMsgs(false)
-            } else {
-                setLoadingMsgs(true)
-                setMessages([]) 
-            }
-
-            try {
-                const res = await chatApi.get(`/${convoId}/messages`)
-                let data = res.data
-                if (data?.data && Array.isArray(data.data)) data = data.data
-                else if (data?.messages && Array.isArray(data.messages)) data = data.messages
-                else if (!Array.isArray(data)) data = []
-                
-                setMessages(data)
-                // Update Cache
-                setMsgCache(prev => ({ ...prev, [convoId]: data }))
-                
-                setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'instant' }), 50)
-            } catch (e) { 
-                console.error('[Zenith] Msg Fetch Error:', e)
-                if (!msgCache[convoId]) setMessages([])
-            } finally {
-                setLoadingMsgs(false)
-            }
-        }
-        fetchMsgs()
-    }, [convoId])
-
-    const handleSend = async () => {
-        if (!inputText.trim()) return
-        const body = inputText
+        const text = inputText
         setInputText('')
+        setDraft('')
+        
         try {
-            const res = await chatApi.post(`/${convoId}/messages`, { body })
-            const data = res.data?.data || res.data
-            if (data && typeof data === 'object') {
-                setMessages(prev => [...prev, data])
-                setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' }), 50)
-            }
-        } catch (e) { console.error('[Zenith] Send Error:', e) }
+            await sendMutation.mutateAsync(text)
+        } catch (e) {
+            console.error('[Zenith] Send Error:', e)
+            setInputText(text) // Restore on fail
+            setDraft(text)
+        }
+    }
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            handleSendMessage(e)
+        }
     }
 
     const getGroupClass = (i) => {
@@ -208,7 +198,7 @@ export default function Messages() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto no-scrollbar">
-                    {loading ? (
+                    {loadingConvos ? (
                         <div className="p-8 space-y-6">
                             {[1,2,3].map(i => <div key={i} className="flex gap-4 animate-pulse">
                                 <div className="w-14 h-14 rounded-full bg-white/5" />
@@ -255,7 +245,7 @@ export default function Messages() {
                         </header>
 
                         <div ref={viewportRef} className="zn-viewport no-scrollbar">
-                            {loadingMsgs ? (
+                            {loadingMsgs && messages.length === 0 ? (
                                 <div className="flex-1 flex items-center justify-center">
                                     <div className="w-8 h-8 border-2 border-zn-accent/20 border-t-zn-accent rounded-full animate-spin" />
                                 </div>
@@ -297,10 +287,16 @@ export default function Messages() {
                                     placeholder="Message..."
                                     value={inputText}
                                     onChange={e => setInputText(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleSend()}
+                                    onKeyDown={handleKeyPress}
                                 />
                                 {inputText.trim() ? (
-                                    <button className="px-4 py-2 text-zn-accent font-bold text-sm hover:text-white" onClick={handleSend}>Send</button>
+                                    <button 
+                                        className="px-4 py-2 text-zn-accent font-bold text-sm hover:text-white disabled:opacity-50" 
+                                        onClick={handleSendMessage}
+                                        disabled={sendMutation.isPending}
+                                    >
+                                        {sendMutation.isPending ? '...' : 'Send'}
+                                    </button>
                                 ) : (
                                     <div className="flex items-center gap-3 pr-2">
                                         <HiPhotograph size={22} className="text-zinc-500 cursor-pointer" />
