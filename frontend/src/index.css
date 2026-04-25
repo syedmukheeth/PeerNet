@@ -285,20 +285,21 @@ button:focus-visible {
 input, textarea {
   font-family: inherit;
   color: inherit;
+  background: none;
+  border: none;
+  outline: none;
   transition: all 0.2s var(--ease-out);
 }
 
 input::placeholder,
 textarea::placeholder {
   color: var(--text-3);
-  opacity: 1;
+  opacity: 0.6; /* Slightly more muted for elegance */
 }
 
 input:focus-visible,
 textarea:focus-visible {
   outline: none;
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 /* Smooth theme transitions - only for color props */
@@ -1705,22 +1706,21 @@ textarea:focus-visible {
    ======================================================================================================================================================================================================================================== */
 .input {
   width: 100%;
-  background: var(--input-bg);
+  background: var(--surface-1);
   border: 1px solid var(--border-md);
   border-radius: var(--r-md);
-  padding: 11px 14px;
+  padding: 12px 16px;
   color: var(--text-1);
-  font-size: 14px;
-  outline: none;
-  transition: border-color var(--trans-fast), box-shadow var(--trans-fast), background var(--trans-fast);
-  line-height: 1.5;
+  font-size: 15px;
+  transition: all 0.25s var(--ease-out);
 }
 
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-ring);
-  background: var(--surface);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-ring), 0 4px 20px -5px rgba(0,0,0,0.3);
 }
+
 
 .input-group {
   display: flex;
@@ -2427,18 +2427,22 @@ textarea:focus-visible {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--input-bg);
+  gap: 12px;
+  background: var(--surface-1);
   border: 1px solid var(--border-md);
-  border-radius: var(--r-md);
-  padding: 10px 14px;
+  border-radius: 14px;
+  padding: 12px 18px;
   margin-bottom: 20px;
-  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .search-bar:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-ring);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-ring), 
+              0 8px 30px -10px rgba(0,0,0,0.5);
+  transform: translateY(-1px);
 }
 
 .search-bar input {
@@ -3498,21 +3502,20 @@ textarea:focus-visible {
 
 .settings-input {
   width: 100%;
-  background: var(--input-bg);
+  background: var(--surface-1);
   border: 1px solid var(--border-md);
-  border-radius: var(--r-sm);
-  padding: 8px 12px;
-  font-size: 13.5px;
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 14px;
   color: var(--text-1);
-  transition: all var(--trans-fast);
+  transition: all 0.25s var(--ease-out);
   margin-top: 8px;
-  font-family: inherit;
 }
 
 .settings-input:focus {
-  outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-ring);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-ring);
 }
 
 .settings-edit-btn {
@@ -3745,10 +3748,23 @@ textarea:focus-visible {
 }
 
 .admin-search-bar {
-  margin-bottom: 18px;
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
+  border-radius: 12px;
+  padding: 10px 16px;
+  width: 100%;
   max-width: 380px;
+  transition: all 0.2s ease;
+  margin-bottom: 18px;
+}
+
+.admin-search-bar:focus-within {
+  border-color: var(--accent);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-ring);
 }
 
 .admin-action-btn {
@@ -4818,20 +4834,21 @@ textarea:focus-visible {
 }
 
 .v4-search-box {
-  background: var(--v4-card);
-  border: 1px solid var(--v4-border);
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
   border-radius: 14px;
   padding: 12px 18px;
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: 0.2s;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.25s ease;
 }
 
 .v4-search-box:focus-within {
-  border-color: var(--v4-accent-solid);
-  background: #181818;
+  border-color: var(--accent);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+  transform: translateY(-1px);
 }
 
 .v4-search-input {
