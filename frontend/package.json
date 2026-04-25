@@ -11,6 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@react-oauth/google": "^0.13.5",
     "@tanstack/react-query": "^5.90.21",
     "axios": "^1.13.6",

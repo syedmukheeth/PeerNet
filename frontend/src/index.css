@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
    Instagram-level layout * 8px spacing grid * Clean tokens
@@ -19,7 +21,6 @@
 
 
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* -- Dark Mode ---------------------------------------------- */
 :root,
