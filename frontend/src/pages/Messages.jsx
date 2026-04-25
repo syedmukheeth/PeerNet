@@ -80,6 +80,7 @@ export default function Messages() {
     const [messages, setMessages] = useState([])
     const [inputText, setInputText] = useState('')
     const [loading, setLoading] = useState(true)
+    const [loadingMsgs, setLoadingMsgs] = useState(false)
     const viewportRef = useRef(null)
 
     // Find Active Conversation Data (Added Array.isArray guard)
@@ -121,6 +122,9 @@ export default function Messages() {
     useEffect(() => {
         if (!convoId) return
         const fetchMsgs = async () => {
+            setLoadingMsgs(true)
+            // ZENITH OPTIMIZATION: Clear old messages immediately to prevent flicker
+            setMessages([]) 
             try {
                 const res = await chatApi.get(`/${convoId}/messages`)
                 let data = res.data
@@ -133,6 +137,8 @@ export default function Messages() {
             } catch (e) { 
                 console.error('[Zenith] Msg Fetch Error:', e)
                 setMessages([])
+            } finally {
+                setLoadingMsgs(false)
             }
         }
         fetchMsgs()
@@ -245,26 +251,38 @@ export default function Messages() {
                         </header>
 
                         <div ref={viewportRef} className="zn-viewport no-scrollbar">
-                            <div className="flex-1" />
-                            <div className="flex flex-col items-center py-16 mb-12 border-b border-white/5">
-                                <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username || 'User'}`} className="w-24 h-24 rounded-full mb-6 border border-white/10 shadow-2xl" alt="" />
-                                <h2 className="text-3xl font-black text-white tracking-tighter mb-1">{peer?.username || 'User'}</h2>
-                                <p className="text-zinc-500 text-sm font-medium mb-6">PeerNet Professional Network</p>
-                                <button className="px-8 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[11px] rounded-xl tracking-widest border border-white/5">
-                                    VIEW PROFILE
-                                </button>
-                            </div>
-                            
-                            {Array.isArray(messages) && messages.map((m, i) => {
-                                const day = formatDate(m.createdAt)
-                                const prevDay = i > 0 ? formatDate(messages[i-1].createdAt) : null
-                                return (
-                                    <React.Fragment key={m._id || i}>
-                                        {day !== prevDay && <div className="zn-day"><span>{day}</span></div>}
-                                        <MessageBubble m={m} isSelf={m.sender === user?._id} groupClass={getGroupClass(i)} />
-                                    </React.Fragment>
-                                )
-                            })}
+                            {loadingMsgs ? (
+                                <div className="flex-1 flex items-center justify-center">
+                                    <div className="w-8 h-8 border-2 border-zn-accent/20 border-t-zn-accent rounded-full animate-spin" />
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex-1" />
+                                    <div className="flex flex-col items-center py-16 mb-12 border-b border-white/5">
+                                        <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username || 'User'}`} className="w-24 h-24 rounded-full mb-6 border border-white/10 shadow-2xl" alt="" />
+                                        <h2 className="text-3xl font-black text-white tracking-tighter mb-1">{peer?.username || 'User'}</h2>
+                                        <p className="text-zinc-500 text-sm font-medium mb-6">PeerNet Professional Network</p>
+                                        <button className="px-8 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[11px] rounded-xl tracking-widest border border-white/5">
+                                            VIEW PROFILE
+                                        </button>
+                                    </div>
+                                    
+                                    {Array.isArray(messages) && messages.map((m, i) => {
+                                        const day = formatDate(m.createdAt)
+                                        const prevDay = i > 0 ? formatDate(messages[i-1].createdAt) : null
+                                        // Robust ID check: handle both string IDs and objects
+                                        const senderId = typeof m.sender === 'object' ? m.sender?._id : m.sender
+                                        const isSelf = senderId === user?._id
+                                        
+                                        return (
+                                            <React.Fragment key={m._id || i}>
+                                                {day !== prevDay && <div className="zn-day"><span>{day}</span></div>}
+                                                <MessageBubble m={m} isSelf={isSelf} groupClass={getGroupClass(i)} />
+                                            </React.Fragment>
+                                        )
+                                    })}
+                                </>
+                            )}
                         </div>
 
                         <footer className="zn-footer">
