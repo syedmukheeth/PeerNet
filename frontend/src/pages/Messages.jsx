@@ -12,20 +12,22 @@ import api from '../utils/api'
 import timeago from '../utils/timeago'
 
 /* -------------------------------------------------------------------------
-   SUB-COMPONENTS: CONVERSATION ITEM
+   SUB-COMPONENTS: ZENITH CONVERSATION ROW
    ------------------------------------------------------------------------- */
-const ConversationRow = React.memo(({ c, isActive, peer, onClick }) => (
+const ZenithConvoRow = React.memo(({ c, isActive, peer, onClick }) => (
     <div 
-        className={`flex items-center gap-4 px-6 py-4 cursor-pointer transition-all border-l-4
-            ${isActive ? 'bg-white/5 border-accent' : 'hover:bg-white/[0.03] border-transparent'}`}
+        className={`flex items-center gap-4 px-6 py-4 cursor-pointer transition-all border-l-[3px]
+            ${isActive ? 'bg-white/5 border-zn-accent' : 'hover:bg-white/[0.03] border-transparent'}`}
         onClick={onClick}
     >
         <div className="relative shrink-0">
-            <img 
-                src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
-                className="w-14 h-14 rounded-full border border-white/5 object-cover" 
-                alt="" 
-            />
+            <div className="w-14 h-14 rounded-full overflow-hidden border border-white/5 bg-zinc-900">
+                <img 
+                    src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
+                    className="w-full h-full object-cover" 
+                    alt="" 
+                />
+            </div>
             {c.isOnline && <div className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black" />}
         </div>
 
@@ -38,34 +40,34 @@ const ConversationRow = React.memo(({ c, isActive, peer, onClick }) => (
                     {timeago(c.lastMessage?.createdAt || c.updatedAt)}
                 </span>
             </div>
-            <p className={`text-[13px] truncate ${c.unreadCount > 0 ? 'text-white font-bold' : 'text-zinc-500 font-medium'}`}>
+            <p className={`text-[13px] truncate ${c.unreadCount > 0 ? 'text-white font-bold' : 'text-zinc-500 font-medium opacity-70'}`}>
                 {c.lastMessage?.body || 'Sent an attachment'}
             </p>
         </div>
-        {c.unreadCount > 0 && <div className="w-2 h-2 bg-accent rounded-full shadow-[0_0_10px_var(--accent)]" />}
+        {c.unreadCount > 0 && <div className="w-2 h-2 bg-zn-accent rounded-full shadow-[0_0_12px_var(--zn-accent)]" />}
     </div>
 ))
 
 /* -------------------------------------------------------------------------
-   SUB-COMPONENTS: MESSAGE BUBBLE
+   SUB-COMPONENTS: ZENITH MESSAGE BUBBLE
    ------------------------------------------------------------------------- */
-const MessageItem = React.memo(({ m, isSelf }) => (
+const ZenithMessage = React.memo(({ m, isSelf, groupClass }) => (
     <motion.div 
-        initial={{ opacity: 0, y: 5 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`ms-msg-row ${isSelf ? 'self' : 'peer'}`}
+        className={`zn-row ${isSelf ? 'self' : 'peer'} ${groupClass}`}
     >
-        <div className="ms-bubble">
+        <div className="zn-bubble shadow-xl">
             {m.body}
         </div>
-        <span className="ms-meta">
+        <span className="zn-meta">
             {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
     </motion.div>
 ))
 
 /* -------------------------------------------------------------------------
-   MAIN COMPONENT: MESSAGES
+   MAIN COMPONENT: PROJECT ZENITH
    ------------------------------------------------------------------------- */
 export default function Messages() {
     const { user } = useAuth()
@@ -76,40 +78,37 @@ export default function Messages() {
     const [messages, setMessages] = useState([])
     const [inputText, setInputText] = useState('')
     const [loading, setLoading] = useState(true)
-    const [msgsLoading, setMsgsLoading] = useState(false)
     const viewportRef = useRef(null)
 
     // Derived State
     const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
     const peer = useMemo(() => activeConvo?.participants.find(p => p._id !== user?._id), [activeConvo, user])
 
-    // Load Conversations
+    // Fetch Conversations & Auto-Open
     useEffect(() => {
-        const fetch = async () => {
+        const fetchConvos = async () => {
             try {
                 const { data } = await api.get('/chats')
                 setConvos(data)
-                // AUTO-OPEN LATEST: If on base /messages, redirect to first chat
-                if (!convoId && data.length > 0) {
+                // ZENITH LOGIC: Always auto-open latest chat on desktop
+                if (!convoId && data.length > 0 && window.innerWidth > 1024) {
                     navigate(`/messages/${data[0]._id}`, { replace: true })
                 }
             } catch (e) { console.error(e) }
             finally { setLoading(false) }
         }
-        fetch()
+        fetchConvos()
     }, [convoId, navigate])
 
-    // Load Messages
+    // Fetch Messages
     useEffect(() => {
         if (!convoId) return
         const fetchMsgs = async () => {
-            setMsgsLoading(true)
             try {
                 const { data } = await api.get(`/chats/${convoId}/messages`)
                 setMessages(data)
                 setTimeout(scrollToBottom, 100)
             } catch (e) { console.error(e) }
-            finally { setMsgsLoading(false) }
         }
         fetchMsgs()
     }, [convoId])
@@ -122,34 +121,50 @@ export default function Messages() {
 
     const handleSend = async () => {
         if (!inputText.trim()) return
-        const text = inputText
+        const body = inputText
         setInputText('')
         try {
-            const { data } = await api.post(`/chats/${convoId}/messages`, { body: text })
+            const { data } = await api.post(`/chats/${convoId}/messages`, { body })
             setMessages(prev => [...prev, data])
             setTimeout(scrollToBottom, 50)
         } catch (e) { console.error(e) }
     }
 
+    const getGroupClass = (i) => {
+        const m = messages[i], p = messages[i-1], n = messages[i+1]
+        const ps = p && p.sender === m.sender, ns = n && n.sender === m.sender
+        if (!ps && !ns) return 'msg-single'
+        if (!ps && ns) return 'msg-top'
+        if (ps && ns) return 'msg-middle'
+        if (ps && !ns) return 'msg-bottom'
+        return ''
+    }
+
+    const formatDate = (date) => {
+        const d = new Date(date), today = new Date()
+        if (d.toDateString() === today.toDateString()) return 'Today'
+        return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })
+    }
+
     return (
-        <div className="messages-layout">
+        <div className="zn-layout">
             
-            {/* PANEL 1: CONVERSATION LIST (380px) */}
-            <aside className={`ms-sidebar ${convoId ? 'hidden lg:flex' : 'flex'}`}>
-                <div className="ms-sidebar-header">
-                    <div className="flex justify-between items-center mb-6">
+            {/* PANEL 1: SIDEBAR (360px) */}
+            <aside className={`zn-sidebar ${convoId ? 'hidden lg:flex' : 'flex'}`}>
+                <div className="zn-sidebar-header">
+                    <div className="flex justify-between items-center mb-8">
                         <div className="flex items-center gap-2 cursor-pointer group">
-                            <span className="text-2xl font-black text-white tracking-tighter">{user?.username}</span>
-                            <HiChevronDown size={20} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                            <span className="text-2xl font-black text-white tracking-tighter leading-none">{user?.username}</span>
+                            <HiChevronDown size={18} className="opacity-40 group-hover:opacity-100 transition-opacity" />
                         </div>
-                        <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-colors">
+                        <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95">
                             <HiPencilAlt size={22} />
                         </button>
                     </div>
                     
-                    <div className="ms-search-box">
+                    <div className="zn-search-box">
                         <HiSearch size={20} className="text-zinc-500" />
-                        <input className="bg-transparent border-none outline-none text-sm text-white w-full placeholder:text-zinc-600 font-bold" placeholder="Search direct messages" />
+                        <input className="bg-transparent border-none outline-none text-[15px] text-white w-full placeholder:text-zinc-600 font-bold" placeholder="Search direct messages" />
                     </div>
                 </div>
 
@@ -166,7 +181,7 @@ export default function Messages() {
                         ))
                     ) : convos.length > 0 ? (
                         convos.map(c => (
-                            <ConversationRow 
+                            <ZenithConvoRow 
                                 key={c._id} 
                                 c={c} 
                                 isActive={convoId === c._id}
@@ -175,21 +190,23 @@ export default function Messages() {
                             />
                         ))
                     ) : (
-                        <div className="p-10 text-center">
-                            <HiChatAlt2 size={48} className="text-zinc-800 mx-auto mb-4" />
-                            <p className="text-zinc-500 font-bold text-sm">No conversations yet</p>
+                        <div className="p-12 text-center">
+                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <HiChatAlt2 size={32} className="text-zinc-700" />
+                            </div>
+                            <p className="text-zinc-500 font-black text-xs uppercase tracking-widest">No chats found</p>
                         </div>
                     )}
                 </div>
             </aside>
 
-            {/* PANEL 2: MAIN CHAT WINDOW */}
-            <main className={`ms-main ${!convoId ? 'hidden lg:flex' : 'flex'}`}>
+            {/* PANEL 2: CHAT VIEW */}
+            <main className={`zn-main ${!convoId ? 'hidden lg:flex' : 'flex'}`}>
                 {convoId ? (
                     <>
-                        <header className="ms-header">
+                        <header className="zn-header">
                             <div className="flex items-center gap-4">
-                                <button className="lg:hidden p-2" onClick={() => navigate('/messages')}>
+                                <button className="lg:hidden p-2 -ml-2" onClick={() => navigate('/messages')}>
                                     <HiArrowLeft size={24} className="text-white" />
                                 </button>
                                 <div className="relative group cursor-pointer" onClick={() => navigate(`/profile/${peer?.username}`)}>
@@ -202,7 +219,7 @@ export default function Messages() {
                                     </h3>
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                                        <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Online</span>
+                                        <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Active Now</span>
                                     </div>
                                 </div>
                             </div>
@@ -213,13 +230,13 @@ export default function Messages() {
                             </div>
                         </header>
 
-                        <div ref={viewportRef} className="ms-viewport no-scrollbar">
+                        <div ref={viewportRef} className="zn-viewport no-scrollbar">
                             <div className="flex-1 min-h-[40px]" />
-                            <div className="flex flex-col items-center py-16 mb-8 border-b border-white/5">
-                                <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} className="w-24 h-24 rounded-full mb-4 ring-8 ring-white/5" alt="" />
-                                <h2 className="text-2xl font-black text-white tracking-tighter mb-1">{peer?.username}</h2>
-                                <p className="text-zinc-500 text-sm font-bold mb-8">PeerNet Professional User</p>
-                                <button className="px-8 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-black text-xs rounded-xl tracking-widest transition-all">
+                            <div className="flex flex-col items-center py-16 mb-12 border-b border-white/5">
+                                <img src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} className="w-24 h-24 rounded-full mb-6 ring-[12px] ring-white/[0.03] border border-white/10" alt="" />
+                                <h2 className="text-3xl font-black text-white tracking-tighter mb-2">{peer?.username}</h2>
+                                <p className="text-zinc-500 text-sm font-bold tracking-tight mb-8">You follow each other on PeerNet</p>
+                                <button className="px-10 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[11px] rounded-xl tracking-widest transition-all border border-white/5">
                                     VIEW PROFILE
                                 </button>
                             </div>
@@ -229,47 +246,47 @@ export default function Messages() {
                                 const prevDay = i > 0 ? formatDate(messages[i-1].createdAt) : null
                                 return (
                                     <React.Fragment key={m._id}>
-                                        {day !== prevDay && <div className="ms-day"><span>{day}</span></div>}
-                                        <MessageItem m={m} isSelf={m.sender === user?._id} />
+                                        {day !== prevDay && <div className="zn-day"><span>{day}</span></div>}
+                                        <ZenithMessage m={m} isSelf={m.sender === user?._id} groupClass={getGroupClass(i)} />
                                     </React.Fragment>
                                 )
                             })}
-
                         </div>
 
-                        <footer className="ms-footer">
-                            <div className="ms-composer">
+                        <footer className="zn-footer">
+                            <div className="zn-composer-pill">
                                 <button className="p-2 hover:bg-white/5 rounded-full transition-colors"><HiEmojiHappy size={24} className="text-zinc-500" /></button>
                                 <input 
-                                    className="ms-input"
+                                    className="zn-input"
                                     placeholder="Message..."
                                     value={inputText}
                                     onChange={e => setInputText(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleSend()}
                                 />
                                 {inputText.trim() ? (
-                                    <button className="px-4 py-2 text-accent font-black text-sm hover:text-white transition-colors" onClick={handleSend}>
+                                    <button className="px-5 py-2 text-zn-accent font-black text-sm hover:text-white transition-all transform active:scale-95" onClick={handleSend}>
                                         Send
                                     </button>
                                 ) : (
-                                    <div className="flex items-center pr-2">
+                                    <div className="flex items-center gap-1 pr-2">
                                         <button className="p-2 hover:bg-white/5 rounded-full transition-colors"><HiMicrophone size={22} className="text-zinc-500" /></button>
                                         <button className="p-2 hover:bg-white/5 rounded-full transition-colors"><HiPhotograph size={22} className="text-zinc-500" /></button>
+                                        <button className="p-2 hover:bg-white/5 rounded-full transition-colors"><HiPlusCircle size={22} className="text-zinc-500" /></button>
                                     </div>
                                 )}
                             </div>
                         </footer>
                     </>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-10 border border-accent/20 shadow-2xl">
-                            <HiChatAlt2 size={48} className="text-accent" />
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                        <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-zn-accent/20 to-zn-accent/5 flex items-center justify-center mb-10 border border-zn-accent/20 shadow-2xl rotate-3">
+                            <HiChatAlt2 size={48} className="text-zn-accent" />
                         </div>
-                        <h2 className="text-3xl font-black text-white tracking-tighter mb-4 italic">Direct Messaging</h2>
-                        <p className="text-zinc-500 max-w-[340px] text-center font-bold leading-relaxed mb-10 opacity-60">
-                            Select a friend from the left sidebar to start chatting. Your conversations are secured.
+                        <h2 className="text-4xl font-black text-white tracking-tighter mb-4">Direct Messaging</h2>
+                        <p className="text-zinc-500 max-w-[340px] font-bold leading-relaxed mb-12 opacity-60">
+                            Select a conversation from the left to start chatting with your network.
                         </p>
-                        <button className="px-10 py-4 bg-accent hover:opacity-90 text-white font-black rounded-2xl transition-all shadow-xl shadow-accent/20">
+                        <button className="px-12 py-4 bg-zn-accent hover:opacity-90 text-white font-black rounded-2xl transition-all shadow-2xl shadow-zn-accent/20 active:scale-95">
                             NEW CONVERSATION
                         </button>
                     </div>

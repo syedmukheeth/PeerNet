@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
@@ -6117,63 +6117,62 @@ textarea:focus-visible {
   .xl\:text-left { text-align: left; }
   .xl\:w-auto { width: auto; }
   .xl\:w-48 { width: 192px; }
-}
-/* ========================================================================================================================================================================================================================================
-   MESSAGES REFINED: FUNCTIONAL PRODUCT GRADE
-   ======================================================================================================================================================================================================================================== */
+/* ==========================================================================
+   PROJECT ZENITH: PREMIUM MESSAGES (Instagram Desktop Grade)
+   ========================================================================== */
 
 :root {
-  --ms-sidebar-w: 380px;
-  --ms-bg: #000000;
-  --ms-surface: #0a0a0a;
-  --ms-border: rgba(255, 255, 255, 0.08);
-  --ms-accent: #7c3aed;
+  --zn-bg: #000000;
+  --zn-surface: #0a0a0a;
+  --zn-surface-raised: #121212;
+  --zn-border: rgba(255, 255, 255, 0.06);
+  --zn-accent: #7c3aed;
+  --zn-accent-glow: rgba(124, 58, 237, 0.3);
+  --zn-list-w: 360px;
 }
 
-.messages-layout {
+.zn-layout {
   display: flex;
   height: 100dvh;
   width: 100%;
-  background: var(--ms-bg);
+  background: var(--zn-bg);
   overflow: hidden;
   position: relative;
 }
 
-/* 1. Conversation List (380px) */
-.ms-sidebar {
-  width: var(--ms-sidebar-w);
+/* 1. Sidebar (360px) */
+.zn-sidebar {
+  width: var(--zn-list-w);
   height: 100%;
-  flex-shrink: 0;
-  border-right: 1px solid var(--ms-border);
+  border-right: 1px solid var(--zn-border);
   display: flex;
   flex-direction: column;
-  background: var(--ms-bg);
+  background: var(--zn-bg);
   z-index: 20;
 }
 
-.ms-sidebar-header {
-  padding: 32px 24px 24px;
+.zn-sidebar-header {
+  padding: 32px 24px 20px;
 }
 
-.ms-search-box {
-  width: 100%;
-  background: #121212;
+.zn-search-box {
+  background: var(--zn-surface-raised);
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.ms-search-box:focus-within {
-  border-color: rgba(255,255,255,0.15);
-  background: #1a1a1a;
+.zn-search-box:focus-within {
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: 0 0 0 2px var(--zn-accent-glow);
 }
 
-/* 2. Main Chat Window */
-.ms-main {
+/* 2. Main Chat View */
+.zn-main {
   flex: 1;
   min-width: 0;
   height: 100%;
@@ -6183,65 +6182,104 @@ textarea:focus-visible {
   position: relative;
 }
 
-.ms-header {
+.zn-header {
   height: 72px;
   padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--ms-border);
-  background: rgba(0,0,0,0.8);
+  border-bottom: 1px solid var(--zn-border);
+  background: rgba(0,0,0,0.7);
   backdrop-filter: blur(20px);
+  z-index: 50;
 }
 
-/* 3. BUBBLE ENGINE (Force Correctness) */
-.ms-viewport {
+/* 3. BUBBLE ENGINE (Zenith Fixed) */
+.zn-viewport {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 32px;
+  padding: 24px 40px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
-.ms-msg-row {
+.zn-row {
   display: flex;
   flex-direction: column;
-  max-width: 70%;
+  max-width: 65%;
   position: relative;
   margin-bottom: 2px;
+  writing-mode: horizontal-tb !important;
 }
 
-.ms-msg-row.self { align-self: flex-end; align-items: flex-end; }
-.ms-msg-row.peer { align-self: flex-start; align-items: flex-start; }
+.zn-row.self { align-self: flex-end; align-items: flex-end; }
+.zn-row.peer { align-self: flex-start; align-items: flex-start; }
 
-.ms-bubble {
+.zn-bubble {
   display: block !important;
-  min-width: 80px;
+  min-width: 120px;
   padding: 12px 18px;
-  border-radius: 22px;
+  border-radius: 24px;
   font-size: 15px;
   line-height: 1.5;
   white-space: normal !important;
   word-break: break-word !important;
   overflow-wrap: break-word !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.ms-msg-row.self .ms-bubble {
-  background: var(--ms-accent);
+.zn-row.self .zn-bubble {
+  background: var(--zn-accent);
   color: #fff;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
 }
 
-.ms-msg-row.peer .ms-bubble {
+.zn-row.peer .zn-bubble {
   background: #262626;
   color: #fff;
   border-bottom-left-radius: 4px;
+  border: 1px solid var(--zn-border);
 }
 
-/* Day Separator & Meta */
-.ms-day {
+/* Grouping Physics */
+.zn-row.msg-top.self .zn-bubble { border-bottom-right-radius: 4px; }
+.zn-row.msg-middle.self .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+.zn-row.msg-bottom.self .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 24px; }
+
+/* 4. Zenith Composer */
+.zn-footer {
+  padding: 20px 40px 32px;
+}
+
+.zn-composer-pill {
+  background: var(--zn-surface-raised);
+  border: 1px solid var(--zn-border);
+  border-radius: 32px;
+  padding: 6px 8px 6px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.zn-composer-pill:focus-within {
+  border-color: rgba(255,255,255,0.15);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.zn-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 15px;
+  padding: 10px 0;
+}
+
+/* Day Separator */
+.zn-day {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6252,49 +6290,17 @@ textarea:focus-visible {
   text-transform: uppercase;
   letter-spacing: 1.5px;
   width: 100%;
-  white-space: nowrap !important; /* Force Horizontal */
 }
 
-.ms-meta {
+.zn-meta {
   font-size: 10px;
   font-weight: 700;
   color: var(--text-3);
   margin-top: 4px;
   padding: 0 8px;
-  opacity: 0.6;
-  white-space: nowrap !important; /* Force Horizontal */
+  opacity: 0.5;
 }
 
-
-/* 4. Floating Composer */
-.ms-footer {
-  padding: 20px 32px 32px;
-}
-
-.ms-composer {
-  background: #121212;
-  border: 1px solid var(--ms-border);
-  border-radius: 28px;
-  padding: 6px 8px 6px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ms-composer:focus-within {
-  border-color: rgba(255,255,255,0.2);
-}
-
-.ms-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: #fff;
-  font-size: 15px;
-  padding: 10px 0;
-}
-
-/* Scrollbar Utility */
+/* Scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
