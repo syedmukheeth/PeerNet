@@ -2,12 +2,11 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
     HiUsers, HiCollection, HiTrash, 
-    HiBadgeCheck, HiRefresh,
-    HiLightningBolt, HiArrowRight,
-    HiExclamation,
+    HiRefresh,
+    HiArrowRight,
     HiKey, HiDatabase, HiGlobe, HiSearch,
     HiChatAlt2, HiFlag, HiTrendingUp, HiCog, HiShieldCheck,
-    HiCheck, HiX, HiBan, HiSpeakerphone
+    HiCheck, HiBan, HiSpeakerphone
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -154,17 +153,7 @@ const TableRowSkeleton = () => (
     </div>
 )
 
-const PostSkeleton = () => (
-    <div className="admin-surface-el overflow-hidden animate-pulse opacity-30">
-        <div className="aspect-[4/5] bg-white/[0.02]" />
-        <div className="p-4 space-y-3">
-            <div className="h-3 w-3/4 bg-white/10 rounded" />
-            <div className="h-2 w-1/2 bg-white/5 rounded" />
-        </div>
-    </div>
-)
-
-const StatCard = ({ label, value, sub, icon, trend, chartData, color = 'accent', accent }) => (
+const StatCard = ({ label, value, sub, icon, chartData, color = 'accent', accent }) => (
     <div className={`admin-stat-card group ${accent ? 'border-red-500/30 bg-red-500/5' : ''}`}>
         <div className="flex items-center justify-between mb-3">
             <span className="admin-stat-label">{label}</span>

@@ -20,7 +20,7 @@ const seed = async () => {
 
     // Create admin
     const adminHash = await bcrypt.hash(SEED_PASSWORD, 12);
-    const admin = await User.create({
+    await User.create({
         username: 'admin',
         email: 'admin@peernet.dev',
         passwordHash: adminHash,

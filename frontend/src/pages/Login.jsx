@@ -42,8 +42,15 @@ export default function Login() {
             toast.success('Welcome back!')
             navigate('/')
         } catch (err) {
-            const msg = err.response?.data?.message || 'Login failed';
-            console.error('Login Result: FAILED', msg);
+            let msg = 'Login failed';
+            if (err.response) {
+                msg = err.response.data?.message || `Server error (${err.response.status})`;
+            } else if (err.request) {
+                msg = 'Cannot reach server. Is the backend running?';
+            } else {
+                msg = err.message;
+            }
+            console.error('Login Result: FAILED', err);
             // Deduplicate toasts using a unique ID
             toast.error(msg, { id: 'login-error' })
         } finally { 
@@ -101,15 +108,15 @@ export default function Login() {
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label>Username or Email</label>
-                        <input className="input" type="text" placeholder="johndoe or you@example.com"
+                        <label className="text-zinc-500 text-xs font-black uppercase tracking-widest mb-1 ml-1">Username or Email</label>
+                        <input className="obsidian-input" type="text" placeholder="Username or Email"
                             value={form.identifier} onChange={set('identifier')} required disabled={loading} />
                     </div>
                     <div className="input-group">
-                        <label>Password</label>
-                        <div className="password-input-wrap" style={{ position: 'relative' }}>
+                        <label className="text-zinc-500 text-xs font-black uppercase tracking-widest mb-1 ml-1">Password</label>
+                        <div className="relative">
                             <input 
-                                className="input" 
+                                className="obsidian-input w-full" 
                                 type={showPassword ? 'text' : 'password'} 
                                 placeholder="••••••••"
                                 style={{ paddingRight: '45px' }}
@@ -121,21 +128,8 @@ export default function Login() {
 
                             <button
                                 type="button"
-                                className="password-toggle"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100 transition-opacity"
                                 onClick={() => setShowPassword(!showPassword)}
-                                style={{
-                                    position: 'absolute',
-                                    right: '12px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    padding: '5px'
-                                }}
                             >
                                 {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
                             </button>

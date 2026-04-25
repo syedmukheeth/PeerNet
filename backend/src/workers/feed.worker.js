@@ -16,7 +16,7 @@ const initFeedWorker = async () => {
         await consumer.subscribe({ topic: 'comment_events', fromBeginning: false });
 
         await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
+        eachMessage: async ({ topic: _topic, partition: _partition, message }) => {
             const event = JSON.parse(message.value.toString());
             const { eventId, type, payload } = event;
 

@@ -82,10 +82,6 @@ const formatNotification = (notif, hydratedEntity = null) => {
     } : null;
 
     // 🚀 PRODUCTION TRACER: Log generated thumbnail
-    if (process.env.NODE_ENV !== 'test') {
-        console.log(`[NOTIF-THUMB] ID: ${obj._id} - Type: ${obj.type} - Thumb: ${thumbnail || 'NONE'}`);
-    }
-
     // For comment/reply, surface the comment body for frontend preview
     let commentBody = null;
     if ((type === 'comment' || type === 'reply') && e) {
@@ -160,8 +156,7 @@ const createNotification = async (data) => {
         }
 
         return formatted;
-    } catch (err) {
-        console.error('Failed to create/broadcast notification:', err);
+    } catch {
         return null;
     }
 };
@@ -180,8 +175,8 @@ const removeNotification = async (filter) => {
                 notificationId: notification._id.toString()
             }));
         }
-    } catch (err) {
-        console.error(`[NOTIF-SERVICE] Remove FAILED: ${err.message}`);
+    } catch {
+        // no-op: notification removal should not break request flow
     }
 };
 

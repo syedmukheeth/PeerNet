@@ -1,7 +1,6 @@
 'use strict';
 
 const { kafka } = require('../config/kafka');
-const notificationService = require('../modules/notification/notification.service');
 const { getRedisOptional } = require('../config/redis');
 const logger = require('../config/logger');
 
@@ -16,10 +15,10 @@ const initNotificationWorker = async () => {
         await consumer.subscribe({ topic: 'user_events', fromBeginning: false });
 
         await consumer.run({
-            eachMessage: async ({ topic, partition, message }) => {
+            eachMessage: async ({ topic: _topic, partition: _partition, message }) => {
                 try {
                     const event = JSON.parse(message.value.toString());
-                    const { eventId, type, payload } = event;
+                    const { eventId, type } = event;
 
                     // 1. Idempotency Check
                     const redis = getRedisOptional();

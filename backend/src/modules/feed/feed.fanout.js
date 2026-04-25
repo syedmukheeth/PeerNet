@@ -3,6 +3,7 @@
 const Follower = require('../user/Follower');
 const { getRedisOptional } = require('../../config/redis');
 const { calculateScore } = require('../../utils/rank.utils');
+const logger = require('../../config/logger');
 
 const MAX_FEED_SIZE = 500;
 
@@ -33,7 +34,7 @@ const fanoutPost = async (post) => {
 
         await pipeline.exec();
     } catch (err) {
-        console.error('Feed fan-out error:', err);
+        logger.error(`Feed fan-out error: ${err.message}`);
     }
 };
 
@@ -59,7 +60,7 @@ const updatePostScore = async (post) => {
         });
         await pipeline.exec();
     } catch (err) {
-        console.error('Feed score update error:', err);
+        logger.error(`Feed score update error: ${err.message}`);
     }
 };
 

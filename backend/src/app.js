@@ -78,13 +78,15 @@ const createApp = () => {
     app.use(express.static(path.join(__dirname, '../public')));
 
     // SPA Fallback: handle all navigation routes by serving index.html
-    app.get('*', (req, res, next) => {
-        // Skip fallback if request is specifically for API or Has File Extension
-        if (req.path.startsWith('/api/v1') || path.extname(req.path)) {
-            return next();
-        }
-        res.sendFile(path.join(__dirname, '../public/index.html'));
-    });
+    if (process.env.NODE_ENV === 'production') {
+        app.get('*', (req, res, next) => {
+            // Skip fallback if request is specifically for API or Has File Extension
+            if (req.path.startsWith('/api/v1') || path.extname(req.path)) {
+                return next();
+            }
+            res.sendFile(path.join(__dirname, '../public/index.html'));
+        });
+    }
 
     // ── ❌ Error Handling ──────────────────────────────────────────────────────
     app.use((req, res) => {

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
     HiPencilAlt, HiSearch, HiOutlinePhotograph, HiOutlineEmojiHappy, HiChevronLeft,
-    HiHome, HiFilm, HiChatAlt2, HiBell, HiPlusCircle, HiCog, HiLogout
+    HiHome, HiFilm, HiChatAlt2, HiBell, HiCog, HiLogout
 } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
-import api, { chatApi } from '../api/axios'
+import { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { timeago } from '../utils/timeago'
 import toast from 'react-hot-toast'
@@ -13,58 +13,51 @@ import EmojiPicker from '@emoji-mart/react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // ─── Memoized Components ──────────────────────────────────────
-const MessageItem = React.memo(({ m, isSelf, groupClass, activePeer, timeLabel }) => (
+const MessageItem = React.memo(({ m, isSelf, groupClass, timeLabel }) => (
     <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.2 }}
-        className={`v4-msg-wrapper ${isSelf ? 'self' : 'peer'} ${groupClass}`}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`message-row ${isSelf ? 'self' : 'peer'} ${groupClass}`}
     >
-        {!isSelf && (
-            <img 
-                src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                className="v4-msg-avatar" 
-                alt="" 
-                loading="lazy"
-            />
-        )}
-        <div className="v4-msg-bubble">
+        <div className="message-bubble">
             {m.body}
-            <div className="v4-msg-time">{timeLabel}</div>
+            <div className="text-[10px] opacity-50 mt-1">{timeLabel}</div>
         </div>
     </motion.div>
 ))
+MessageItem.displayName = 'MessageItem'
 
 const ConvoItem = React.memo(({ c, isActive, hasUnread, peer, peerTyping, onClick }) => (
     <div 
-        className={`v4-convo-item ${isActive ? 'active' : ''}`}
+        className={`convo-item ${isActive ? 'active' : ''}`}
         onClick={onClick}
     >
-        <div className="v4-avatar-wrap">
+        <div className="avatar-wrap">
             <img 
                 src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=7C3AED&color=fff`} 
-                className="v4-avatar" 
+                className="avatar" 
                 alt="" 
                 loading="lazy"
             />
-            {c.isOnline && <div className="v4-online-dot" />}
+            {c.isOnline && <div className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 border-2 border-[#09090b] rounded-full" />}
         </div>
         <div className="flex-1 min-w-0">
-            <div className="flex justify-between items-center">
-                <span className={`v4-header-name ${hasUnread ? 'font-black' : ''}`}>
+            <div className="flex justify-between items-center mb-0.5">
+                <span className={`text-[15px] ${hasUnread ? 'font-black' : 'font-bold'}`}>
                     {peer?.username}
                 </span>
-                <span className="text-[10px] text-zinc-500">
+                <span className="text-[11px] opacity-40">
                     {timeago(c.lastMessage?.createdAt || c.updatedAt)}
                 </span>
             </div>
-            <p className={`text-sm truncate ${hasUnread ? 'text-white font-bold' : 'text-zinc-500'}`}>
+            <p className={`text-[13px] truncate ${hasUnread ? 'text-white font-bold' : 'opacity-50'}`}>
                 {peerTyping ? 'typing...' : (c.lastMessage?.body || 'Sent an attachment')}
             </p>
         </div>
-        {hasUnread && <div className="v4-unread-badge v4-badge-pop">{c.unreadCount}</div>}
+        {hasUnread && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
     </div>
 ))
+ConvoItem.displayName = 'ConvoItem'
 
 export default function Messages() {
     const { id: convoId } = useParams()
@@ -87,6 +80,17 @@ export default function Messages() {
     const inputRef = useRef()
     const typingTimer = useRef()
     const currentFetchId = useRef(0)
+    const messageCacheRef = useRef({})
+
+    const scrollToBottom = useCallback((behavior = 'smooth') => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior })
+        }
+    }, [])
+
+    useEffect(() => {
+        messageCacheRef.current = messageCache
+    }, [messageCache])
 
     // ─── Debounced Search ───────────────────────────────────────
     useEffect(() => {
@@ -121,8 +125,9 @@ export default function Messages() {
         }
 
         // Use cache if available for instant switch
-        if (messageCache[convoId]) {
-            setMessages(messageCache[convoId])
+        const cachedMessages = messageCacheRef.current[convoId]
+        if (cachedMessages) {
+            setMessages(cachedMessages)
             setLoading(false)
             setTimeout(() => scrollToBottom('instant'), 50)
         } else {
@@ -145,7 +150,7 @@ export default function Messages() {
                 await chatApi.patch(`${convoId}/messages/read`, {})
                 window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
                 setTimeout(() => scrollToBottom('instant'), 50)
-            } catch (err) {
+            } catch {
                 if (fetchId === currentFetchId.current) toast.error("Failed to load")
             } finally {
                 if (fetchId === currentFetchId.current) setLoading(false)
@@ -153,7 +158,7 @@ export default function Messages() {
         }
         switchChat()
         return () => { if (convoId) socket?.emit('leave_conversation', convoId) }
-    }, [convoId, socket])
+    }, [convoId, socket, scrollToBottom])
 
     // ─── Socket Logic ───────────────────────────────────────────
     useEffect(() => {
@@ -186,15 +191,9 @@ export default function Messages() {
             socket.off('user_typing_start')
             socket.off('user_typing_stop')
         }
-    }, [socket, convoId, user?._id])
+    }, [socket, convoId, user?._id, scrollToBottom])
 
     // ─── Actions ────────────────────────────────────────────────
-    const scrollToBottom = useCallback((behavior = 'smooth') => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior })
-        }
-    }, [])
-
     const handleSend = async () => {
         if (!inputText.trim() || !convoId) return
         const body = inputText
@@ -208,7 +207,7 @@ export default function Messages() {
 
         try {
             await chatApi.post(`${convoId}/messages`, { body, tempId })
-        } catch (err) {
+        } catch {
             setMessages(prev => prev.map(m => m.tempId === tempId ? { ...m, status: 'failed' } : m))
             toast.error("Failed to send")
         }
@@ -235,17 +234,17 @@ export default function Messages() {
     }, [conversations, convoId, user?._id])
 
     return (
-        <div className={`v4-root ${convoId ? 'mobile-chat-active' : ''}`}>
+        <div className={`messages-layout ${convoId ? 'mobile-chat-active' : ''}`}>
             
             {/* PANEL 1: Global Navigation (Desktop) */}
-            <aside className="v4-nav-panel">
+            <aside className="messages-nav">
                 <div className="mb-8">
                     <img src="/assets/logo.png" className="w-8 h-8 rounded-lg" alt="" />
                 </div>
                 {navLinks.map(link => (
                     <div 
                         key={link.to} 
-                        className={`v4-nav-item ${link.active ? 'active' : ''}`}
+                        className={`messages-nav-item ${link.active ? 'active' : ''}`}
                         onClick={() => navigate(link.to)}
                         title={link.label}
                     >
@@ -253,17 +252,17 @@ export default function Messages() {
                     </div>
                 ))}
                 <div className="mt-auto flex flex-col gap-4">
-                    <div className="v4-nav-item" onClick={() => navigate('/settings')} title="Settings"><HiCog size={22} /></div>
-                    <div className="v4-nav-item" onClick={() => logout()} title="Logout"><HiLogout size={22} /></div>
+                    <div className="messages-nav-item" onClick={() => navigate('/settings')} title="Settings"><HiCog size={22} /></div>
+                    <div className="messages-nav-item" onClick={() => logout()} title="Logout"><HiLogout size={22} /></div>
                 </div>
             </aside>
 
             {/* MOBILE NAVIGATION BAR */}
-            <nav className="v4-mobile-nav lg:hidden">
+            <nav className="messages-mobile-nav lg:hidden">
                 {navLinks.map(link => (
                     <div 
                         key={link.to} 
-                        className={`v4-mobile-nav-item ${link.active ? 'active' : ''}`}
+                        className={`messages-mobile-nav-item ${link.active ? 'active' : ''}`}
                         onClick={() => navigate(link.to)}
                     >
                         <link.icon size={20} />
@@ -272,19 +271,17 @@ export default function Messages() {
             </nav>
 
             {/* PANEL 2: Conversation List */}
-            <aside className="v4-middle-panel">
-                <header className="v4-middle-header">
-                    <div className="flex justify-between items-center mb-4">
-                        <h1 className="v4-middle-title">Messages</h1>
-                        <button className="v4-nav-item" style={{ marginBottom: 0, width: 32, height: 32 }}>
-                            <HiPencilAlt size={18} />
-                        </button>
+            <aside className="messages-sidebar">
+                <header>
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-xl font-black">Messages</h1>
+                        <HiPencilAlt size={22} className="cursor-pointer hover:opacity-70 transition-opacity" />
                     </div>
-                    <div className="v4-search-box">
-                        <HiSearch className="text-zinc-500" />
+                    <div className="search-box">
+                        <HiSearch className="opacity-40" />
                         <input 
-                            className="v4-search-input" 
-                            placeholder="Search chats..." 
+                            className="bg-transparent border-none outline-none text-sm w-full" 
+                            placeholder="Search messages..." 
                             value={searchText}
                             onChange={e => setSearchText(e.target.value)}
                         />
@@ -309,7 +306,7 @@ export default function Messages() {
                             <div className="w-16 h-16 bg-zinc-900/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
                                 <HiSearch size={24} className="text-zinc-600" />
                             </div>
-                            <p className="text-zinc-500 text-sm">No results for "{searchText}"</p>
+                            <p className="text-zinc-500 text-sm">No results for &quot;{searchText}&quot;</p>
                         </div>
                     ) : (
                         filtered.map(c => {
@@ -333,33 +330,27 @@ export default function Messages() {
             </aside>
 
             {/* PANEL 3: Chat Viewport */}
-            <main className="v4-chat-main">
+            <main className="messages-content">
                 {activePeer ? (
                     <>
-                        <header className="v4-chat-header">
-                            <div className="v4-header-user">
+                        <header className="chat-header">
+                            <div className="flex items-center gap-3">
                                 <HiChevronLeft 
-                                    className="lg:hidden text-2xl mr-2 cursor-pointer" 
+                                    className="lg:hidden text-2xl cursor-pointer" 
                                     onClick={() => navigate('/messages')} 
                                 />
-                                <img 
-                                    src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                    className="w-10 h-10 rounded-xl object-cover" 
-                                    alt="" 
-                                />
+                                <div className="relative">
+                                    <img 
+                                        src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
+                                        className="w-10 h-10 rounded-xl object-cover" 
+                                        alt="" 
+                                    />
+                                    {activePeer.isOnline && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#09090b] rounded-full" />}
+                                </div>
                                 <div>
-                                    <div className="v4-header-name">{activePeer?.fullName || activePeer?.username}</div>
-                                    <div className="v4-header-status">
-                                        {activePeer.isOnline ? (
-                                            <span className="flex items-center gap-1.5 text-green-500">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                                Active Now
-                                            </span>
-                                        ) : (
-                                            <span className="text-zinc-500">
-                                                {activePeer.lastSeen ? `Last seen ${timeago(activePeer.lastSeen)}` : 'Offline'}
-                                            </span>
-                                        )}
+                                    <div className="font-bold text-[15px]">{activePeer?.fullName || activePeer?.username}</div>
+                                    <div className="text-[11px] opacity-50">
+                                        {activePeer.isOnline ? 'Online' : activePeer.lastSeen ? `Active ${timeago(activePeer.lastSeen)}` : 'Offline'}
                                     </div>
                                 </div>
                             </div>
@@ -370,14 +361,14 @@ export default function Messages() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar" 
+                            className="chat-viewport no-scrollbar" 
                             ref={scrollRef}
                         >
                             {loading && !messageCache[convoId] ? (
                                 <div className="space-y-6 py-10">
                                     {[1,2,3,4].map(i => (
                                         <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
-                                            <div className="w-2/3 h-14 v4-shimmer rounded-2xl" />
+                                            <div className="w-2/3 h-14 bg-zinc-900/50 rounded-2xl animate-pulse" />
                                         </div>
                                     ))}
                                 </div>
@@ -388,12 +379,12 @@ export default function Messages() {
                                             initial={{ scale: 0.9, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
                                             src={activePeer?.avatarUrl || `https://ui-avatars.com/api/?name=${activePeer?.username}&background=7C3AED&color=fff`} 
-                                            className="w-24 h-24 rounded-3xl mb-4 shadow-2xl" 
+                                            className="w-24 h-24 rounded-3xl mb-4 shadow-2xl border-2 border-white/10" 
                                             alt="" 
                                         />
                                         <h2 className="text-2xl font-black text-white">{activePeer?.fullName || activePeer?.username}</h2>
-                                        <p className="text-zinc-500 mb-4">@{activePeer?.username}</p>
-                                        <button className="px-6 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl transition-all border border-white/5" onClick={() => navigate(`/profile/${activePeer?._id}`)}>View Profile</button>
+                                        <p className="text-zinc-500 mb-4 text-sm">@{activePeer?.username}</p>
+                                        <button className="px-6 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl transition-all border border-white/5 text-sm" onClick={() => navigate(`/profile/${activePeer?._id}`)}>View Profile</button>
                                     </div>
 
                                     {messages.map((m, i) => {
@@ -403,10 +394,10 @@ export default function Messages() {
                                         const isPrevSame = prevM && (prevM.sender?._id || prevM.sender) === (m.sender?._id || m.sender)
                                         const isNextSame = nextM && (nextM.sender?._id || nextM.sender) === (m.sender?._id || m.sender)
 
-                                        let groupClass = 'group-none'
-                                        if (isPrevSame && isNextSame) groupClass = 'group-mid'
-                                        else if (isPrevSame && !isNextSame) groupClass = 'group-end'
-                                        else if (!isPrevSame && isNextSame) groupClass = 'group-start'
+                                        let groupClass = ''
+                                        if (isPrevSame && isNextSame) groupClass = 'mt-0.5'
+                                        else if (isPrevSame) groupClass = 'mt-0.5'
+                                        else groupClass = 'mt-4'
                                         
                                         return (
                                             <MessageItem 
@@ -414,7 +405,6 @@ export default function Messages() {
                                                 m={m}
                                                 isSelf={isSelf}
                                                 groupClass={groupClass}
-                                                activePeer={activePeer}
                                                 timeLabel={timeago(m.createdAt)}
                                             />
                                         )
@@ -422,7 +412,7 @@ export default function Messages() {
                                     
                                     <AnimatePresence>
                                         {peerTyping && (
-                                            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex gap-1 py-2 px-12">
+                                            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex gap-1 py-2">
                                                 <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                                                 <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                                                 <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -433,38 +423,34 @@ export default function Messages() {
                             )}
                         </motion.div>
 
-                        <footer className="v4-composer-wrap">
-                            <div className="v4-composer">
-                                <button className="v4-composer-btn" onClick={() => setShowEmoji(!showEmoji)}>
+                        <footer className="composer-wrap">
+                            <div className="composer-box">
+                                <button className="opacity-50 hover:opacity-100 transition-opacity" onClick={() => setShowEmoji(!showEmoji)}>
                                     <HiOutlineEmojiHappy size={22} />
-                                </button>
-                                <button className="v4-composer-btn">
-                                    <HiOutlinePhotograph size={22} />
                                 </button>
                                 
                                 <textarea 
                                     ref={inputRef}
                                     rows="1"
-                                    className="v4-composer-input no-scrollbar"
+                                    className="flex-1 bg-transparent border-none outline-none text-[15px] py-2 no-scrollbar"
                                     placeholder="Message..."
                                     value={inputText}
                                     onChange={handleType}
                                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
                                 />
 
-                                <AnimatePresence>
-                                    {inputText.trim() && (
-                                        <motion.button 
-                                            initial={{ scale: 0, opacity: 0, rotate: -45 }}
-                                            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                                            exit={{ scale: 0, opacity: 0, rotate: 45 }}
-                                            className="v4-send-btn"
-                                            onClick={handleSend}
-                                        >
-                                            <HiPlusCircle size={24} style={{ transform: 'rotate(45deg)' }} />
-                                        </motion.button>
-                                    )}
-                                </AnimatePresence>
+                                {inputText.trim() ? (
+                                    <button 
+                                        className="text-blue-500 font-bold text-sm px-2 hover:text-blue-400 transition-colors"
+                                        onClick={handleSend}
+                                    >
+                                        Send
+                                    </button>
+                                ) : (
+                                    <button className="opacity-50 hover:opacity-100 transition-opacity">
+                                        <HiOutlinePhotograph size={22} />
+                                    </button>
+                                )}
 
                                 {showEmoji && (
                                     <div className="absolute bottom-full mb-4 right-0 z-50">

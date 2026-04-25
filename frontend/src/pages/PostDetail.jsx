@@ -3,14 +3,13 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
-import EmojiPicker from 'emoji-picker-react';
 import {
     HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
     HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
-    HiBadgeCheck, HiEmojiHappy, HiShieldCheck,
+    HiBadgeCheck, HiShieldCheck,
     HiOutlineChat
 } from 'react-icons/hi'
-import { FiSend, FiMoreHorizontal } from 'react-icons/fi'
+import { FiSend } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'

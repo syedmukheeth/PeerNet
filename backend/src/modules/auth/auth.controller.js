@@ -21,10 +21,7 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const { email } = req.body;
-        console.log(`[AUTH CONTROLLER] Login request received for: ${email}`);
         const { user, accessToken, refreshToken } = await authService.login(req.body);
-        console.log(`[AUTH CONTROLLER] Login successful for: ${email}`);
         res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
 
         res.json({ success: true, data: { user, accessToken, refreshToken } });

@@ -90,10 +90,10 @@ export default function Register() {
                 <form className="auth-form" onSubmit={handleSubmit}>
                     {fields.map(({ k, label, placeholder, type }) => (
                         <div key={k} className="input-group">
-                            <label className="t-small">{label}</label>
+                            <label className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1 ml-1">{label}</label>
                             <div style={{ position: 'relative' }}>
                                 <input 
-                                    className="input" 
+                                    className="obsidian-input w-full" 
                                     type={k === 'password' ? (showPassword ? 'text' : 'password') : type} 
                                     placeholder={placeholder}
                                     value={form[k]} 
@@ -104,9 +104,8 @@ export default function Register() {
                                 {k === 'password' && (
                                     <button 
                                         type="button" 
-                                        className="password-toggle-btn"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100 transition-opacity"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer' }}
                                     >
                                         {showPassword ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
                                     </button>

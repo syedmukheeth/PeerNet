@@ -91,6 +91,6 @@ const bootstrap = async () => {
 };
 
 bootstrap().catch((err) => {
-    console.error(`FATAL BOOTSTRAP FAILURE: ${err.message}`);
+    logger.error(`FATAL BOOTSTRAP FAILURE: ${err.message}`);
     process.exit(1);
 });

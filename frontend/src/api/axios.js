@@ -31,7 +31,8 @@ const applyInterceptors = (instance) => {
         (res) => res,
         async (err) => {
             const original = err.config
-            if (err.response?.status === 401 && !original._retry) {
+            // Do not attempt refresh on login or refresh endpoints themselves
+            if (err.response?.status === 401 && !original._retry && !original.url.includes('/auth/login')) {
                 if (isRefreshing) {
                     return new Promise((resolve, reject) => {
                         queue.push({ resolve, reject })

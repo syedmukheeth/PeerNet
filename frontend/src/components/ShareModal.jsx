@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiX, HiBadgeCheck, HiUser } from 'react-icons/hi'
-import { FiSend } from 'react-icons/fi'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
-export default function ShareModal({ isOpen, onClose, postId }) {
+export default function ShareModal({ isOpen, onClose }) {
     const { user: currentUser } = useAuth()
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)

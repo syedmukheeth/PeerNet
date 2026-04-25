@@ -5,6 +5,15 @@
    Instagram-level layout * 8px spacing grid * Clean tokens
    ============================================================================================================================================================================================================================================ */
 
+/* Layer map:
+   1) Tokens
+   2) Base
+   3) Utilities
+   4) Design System
+   5) Modules
+   6) Responsive
+*/
+
 :root {
 
   --v4-nav-w: 72px;
@@ -141,6 +150,7 @@
   --bg-primary:   var(--bg);
   --bg-secondary: var(--surface);
   --bg-surface:   var(--surface);
+  --bg-rgb:       var(--surface-rgb);
   --bg-card:      var(--card);
   --bg-hover:     var(--hover);
   --text-primary:   var(--text-1);
@@ -149,6 +159,8 @@
 
   /* Border utilities */
   --border-subtle: 1px solid var(--border-md);
+  --border-sm: rgba(var(--border-rgb), 0.08);
+  --border-hover: rgba(var(--border-rgb), 0.2);
 
   /* Radius - 8px grid */
   --r-xs:   6px;
@@ -672,9 +684,21 @@ textarea:focus-visible {
 }
 
 .nav-label {
-  flex: 1; 
-  letter-spacing: -0.01em; 
-  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 700;
+}
+
+.nav-link-icon {
+  font-size: 24px;
 }
 
 /* Sidebar bottom (Footer) */
@@ -851,16 +875,6 @@ textarea:focus-visible {
   flex-shrink: 0;
   position: sticky;
   top: 0;
-}
-
-/* Legacy aliases */
-.l-main-col     { width: 100%; max-width: 620px; margin: 0 auto; }
-/* -- SIDE PANEL (Right Column) -------------------------- */
-.l-side-panel {
-  width: 320px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 24px;
 }
 
 .sp-container {
@@ -1410,39 +1424,6 @@ textarea:focus-visible {
 }
 .post-card-comments-link:hover { opacity: 0.8; }
 
-.story-name {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-1);
-  width: 100%;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  letter-spacing: -0.02em;
-}
-
-.story-name--seen {
-  color: var(--text-3);
-  font-weight: 400;
-}
-
-/* ========================================================================================================================================================================================================================================
-   POST CARD - Instagram Style
-   ======================================================================================================================================================================================================================================== */
-.l-post-card {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  overflow: hidden;
-  margin-bottom: 16px;
-  transition: border-color var(--trans-fast);
-}
-
-.l-post-card:hover { border-color: var(--border-md); }
-
 /* Post header */
 .post-header {
   display: flex;
@@ -1989,6 +1970,29 @@ textarea:focus-visible {
 }
 
 .auth-form .input { width: 100%; }
+
+.obsidian-input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.4;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast), background-color var(--trans-fast);
+}
+
+.obsidian-input::placeholder {
+  color: var(--text-3);
+  opacity: 0.8;
+}
+
+.obsidian-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
 
 .auth-divider {
   display: flex;
@@ -3926,7 +3930,7 @@ textarea:focus-visible {
 /* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
    COOKIE BANNER
    = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
-.cookie-banner {
+.compliance-banner {
   position: fixed;
   bottom: 20px; right: 20px;
   max-width: 440px;
@@ -3941,14 +3945,14 @@ textarea:focus-visible {
   gap: 14px;
 }
 
-.cookie-banner-content {
+.compliance-banner-content {
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
 }
 
-.cookie-icon-wrap {
+.compliance-icon-wrap {
   width: 40px; height: 40px;
   border-radius: var(--r-md);
   background: var(--accent-subtle);
@@ -3960,8 +3964,8 @@ textarea:focus-visible {
   font-size: 18px;
 }
 
-.cookie-text { flex: 1; }
-.cookie-actions { flex-shrink: 0; }
+.compliance-text { flex: 1; }
+.compliance-actions { flex-shrink: 0; }
 
 /* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
    SITE FOOTER
@@ -4328,7 +4332,6 @@ textarea:focus-visible {
     position: fixed;
     inset: 0;
     z-index: 1001;
-    grid-template-columns: 1fr;
     background: var(--bg);
   }
 
@@ -4363,7 +4366,7 @@ textarea:focus-visible {
   .post-detail-info   { flex: unset; width: 100%; border-left: none; border-top: 1px solid var(--border-md); }
 
   /* Cookie banner */
-  .cookie-banner { bottom: 72px; right: 12px; left: 12px; }
+  .compliance-banner { bottom: 72px; right: 12px; left: 12px; }
 
   /* Site footer */
   .site-footer { padding: 28px 16px 20px; }
@@ -6131,3 +6134,232 @@ textarea:focus-visible {
   .xl\:w-auto { width: auto; }
   .xl\:w-48 { width: 192px; }
 }
+
+/* ========================================================================================================================================================================================================================================
+   MESSAGES: INSTAGRAM-STYLE TWO-PANE
+   ======================================================================================================================================================================================================================================== */
+.messages-layout {
+  display: flex;
+  height: 100dvh;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.messages-sidebar {
+  width: 380px;
+  height: 100%;
+  border-right: 1px solid var(--border-md);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  z-index: 10;
+}
+
+.messages-content {
+  flex: 1;
+  height: 100%;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Mobile refinements */
+@media (max-width: 1024px) {
+  .messages-sidebar {
+    width: 100%;
+    position: absolute;
+    inset: 0;
+    transition: transform 0.3s ease;
+  }
+  .messages-content {
+    width: 100%;
+    position: absolute;
+    inset: 0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .mobile-chat-active .messages-sidebar { transform: translateX(-100%); }
+  .mobile-chat-active .messages-content { transform: translateX(0); }
+}
+
+.messages-sidebar header {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--border-sm);
+}
+
+.messages-sidebar .search-box {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.messages-sidebar .search-box:focus-within {
+  background: var(--surface-1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.convo-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.convo-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.convo-item:hover {
+  background: var(--surface-2);
+}
+
+.convo-item.active {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
+}
+
+.convo-item .avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.convo-item .avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid var(--border-sm);
+}
+
+.chat-header {
+  height: 72px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-sm);
+  background: rgba(var(--bg-rgb), 0.8);
+  backdrop-filter: blur(12px);
+  z-index: 5;
+}
+
+.chat-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message-row {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+  gap: 4px;
+}
+
+.message-row.self {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.message-row.peer {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.message-bubble {
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.message-row.self .message-bubble {
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.message-row.peer .message-bubble {
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border-sm);
+}
+
+.composer-wrap {
+  padding: 20px 24px;
+  background: var(--bg);
+}
+
+.composer-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border-md);
+  border-radius: 24px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.composer-box:focus-within {
+  border-color: var(--accent);
+  background: var(--surface-1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.messages-nav {
+  width: 72px;
+  height: 100%;
+  border-right: 1px solid var(--border-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  background: var(--surface-1);
+  z-index: 20;
+}
+
+.messages-nav-item {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.messages-nav-item:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+  transform: scale(1.05);
+}
+
+.messages-nav-item.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+

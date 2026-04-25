@@ -11,7 +11,6 @@ const notificationRoutes = require('../../modules/notification/notification.rout
 const adminRoutes = require('../../modules/admin/admin.routes');
 const chatRoutes = require('../../modules/chat/chat.routes');
 const aiRoutes = require('../../modules/ai/ai.routes');
-const { authenticate } = require('../../middleware/auth.middleware');
 
 // 🚀 NUCLEAR BYPASS: Diagnostic and Heartbeat routes defined directly to ensure visibility
 router.get('/ping', (_req, res) => res.json({ status: 'pong', version: 'v2.bypass', timestamp: new Date() }));

@@ -4,7 +4,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 import SplashScreen from './components/SplashScreen'
-import CookieConsent from './components/CookieConsent'
+import ComplianceNotice from './components/ComplianceNotice'
 
 const Feed = lazy(() => import('./pages/Feed'))
 const Login = lazy(() => import('./pages/Login'))
@@ -101,7 +101,7 @@ export default function App() {
           </Routes>
         </Suspense>
       )}
-      <CookieConsent />
+      <ComplianceNotice />
     </HelmetProvider>
   )
 }

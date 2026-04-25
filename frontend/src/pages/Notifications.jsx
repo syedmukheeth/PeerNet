@@ -36,7 +36,7 @@ function SectionHeader({ label }) {
     )
 }
 
-function NotifRow({ n, index, onAction }) {
+function NotifRow({ n, index, onAction, onNavigate }) {
     const cfg = typeConfig[n.type] || typeConfig.like
     const avatar = n.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${n.sender?.username}&background=6366F1&color=fff`
     const [isFollowed, setIsFollowed] = useState(false)
@@ -62,7 +62,7 @@ function NotifRow({ n, index, onAction }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.03 }}
             className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}
-            onClick={() => navigate(navTarget)}
+            onClick={() => onNavigate(navTarget)}
         >
             {/* Left: Avatar */}
             <div className="relative shrink-0">
@@ -184,19 +184,19 @@ export default function Notifications() {
                         {categorized.today.length > 0 && (
                             <div>
                                 <SectionHeader label="Today" />
-                                {categorized.today.map((n, i) => <NotifRow key={n._id} n={n} index={i} />)}
+                                {categorized.today.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
                             </div>
                         )}
                         {categorized.thisWeek.length > 0 && (
                             <div>
                                 <SectionHeader label="This Week" />
-                                {categorized.thisWeek.map((n, i) => <NotifRow key={n._id} n={n} index={i} />)}
+                                {categorized.thisWeek.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
                             </div>
                         )}
                         {categorized.earlier.length > 0 && (
                             <div>
                                 <SectionHeader label="Earlier" />
-                                {categorized.earlier.map((n, i) => <NotifRow key={n._id} n={n} index={i} />)}
+                                {categorized.earlier.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
                             </div>
                         )}
                     </div>

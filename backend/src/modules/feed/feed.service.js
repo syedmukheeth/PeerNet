@@ -208,7 +208,6 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     const rawCount = await Post.countDocuments({});
     if (rawCount === 0) {
         tier = 'self-heal';
-        console.log(`[SELF-HEAL] No posts found. Bootstrapping production data...`);
         posts = await Post.insertMany([
             {
                 author: userId,
@@ -230,7 +229,6 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     }
 
     const dbName = mongoose.connection.name;
-    console.log(`[FEED_TIER] User: ${userId} Tier: ${tier} Count: ${posts.length} DB_Total: ${rawCount} DB_Name: ${dbName}`);
 
     // Fetch affinity for personalization ranking
     const currentUser = await User.findById(userId).select('categoryAffinity').lean();

@@ -8,8 +8,6 @@ import CreateStoryModal from './CreateStoryModal'
 import { StorySkeleton } from './SkeletonLoader'
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
-const IG_GRADIENT = 'linear-gradient(215deg, #6559CA 0%, #C13584 25%, #E1306C 50%, #F77737 75%, #FCAF45 100%)'
-
 // ── Animated Progress Bar ────────────────────────────────────
 function ViewerProgressBar({ total, current, duration, paused, onNext }) {
     return (

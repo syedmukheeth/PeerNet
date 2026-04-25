@@ -1,6 +1,5 @@
 'use strict';
 
-const Post = require('../post/Post');
 const Dscroll = require('./Dscroll');
 const Like = require('../post/Like');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
@@ -8,12 +7,9 @@ const ApiError = require('../../utils/ApiError');
 const User = require('../user/User');
 const { getRedisOptional } = require('../../config/redis');
 const logger = require('../../config/logger');
-const { publishEvent } = require('../../config/kafka');
 const notificationService = require('../notification/notification.service');
 
 const createDscroll = async (userId, { caption, tags }, file) => {
-    if (!file) throw new ApiError(400, 'Video file is required');
-
     if (!file) throw new ApiError(400, 'Video file is required');
 
     let uploadResult;
