@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
     HiSearch, HiPencilAlt, HiChevronDown, 
     HiChatAlt2, HiEmojiHappy, HiPhotograph, 
-    HiArrowLeft, HiPlusCircle
+    HiArrowLeft, HiPlusCircle, HiDotsHorizontal,
+    HiTrash, HiPencil
 } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
 import { chatApi } from '../api/axios'
@@ -13,8 +14,11 @@ import {
     useConvos, 
     useMessages, 
     useChatState, 
-    useSendMessage 
+    useSendMessage,
+    useEditMessage,
+    useDeleteMessage
 } from '../hooks/useChat'
+import toast from 'react-hot-toast'
 
 /* -------------------------------------------------------------------------
    SUB-COMPONENT: CONVERSATION ITEM (SIDEBAR)
@@ -58,20 +62,73 @@ const ConvoItem = React.memo(({ c, isActive, user, onClick }) => {
 /* -------------------------------------------------------------------------
    SUB-COMPONENT: MESSAGE BUBBLE
    ------------------------------------------------------------------------- */
-const MessageBubble = React.memo(({ m, isSelf, groupClass }) => (
-    <motion.div 
-        initial={{ opacity: 0, y: 8, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className={`zn-row ${isSelf ? 'self' : 'peer'} ${groupClass}`}
-    >
-        <div className="zn-bubble">
-            {m.body}
-        </div>
-        <span className="zn-meta">
-            {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
-    </motion.div>
-))
+const MessageBubble = React.memo(({ 
+    m, isSelf, groupClass, 
+    isEditing, editingText, setEditingText, 
+    onStartEdit, onSaveEdit, onDelete, onEditKeyPress 
+}) => {
+    const [showMenu, setShowMenu] = useState(false)
+    
+    return (
+        <motion.div 
+            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className={`zn-row ${isSelf ? 'self' : 'peer'} ${groupClass} group`}
+            onMouseEnter={() => setShowMenu(true)}
+            onMouseLeave={() => setShowMenu(false)}
+        >
+            <div className="relative flex items-center gap-2">
+                {/* ACTIONS MENU (Only for self) */}
+                {isSelf && showMenu && !isEditing && (
+                    <motion.div 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-1 bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-full px-2 py-1 shadow-2xl z-10"
+                    >
+                        <button 
+                            onClick={() => onStartEdit(m)}
+                            className="p-1.5 text-zinc-400 hover:text-white transition-colors"
+                        >
+                            <HiPencil size={14} />
+                        </button>
+                        <button 
+                            onClick={() => onDelete(m._id)}
+                            className="p-1.5 text-zinc-400 hover:text-red-400 transition-colors"
+                        >
+                            <HiTrash size={14} />
+                        </button>
+                    </motion.div>
+                )}
+
+                <div className="zn-bubble-container">
+                    <div className="zn-bubble">
+                        {isEditing ? (
+                            <input 
+                                autoFocus
+                                className="bg-transparent border-none outline-none text-white w-full"
+                                value={editingText}
+                                onChange={e => setEditingText(e.target.value)}
+                                onKeyDown={onEditKeyPress}
+                                onBlur={() => onStartEdit(null)} // Cancel on blur
+                            />
+                        ) : (
+                            <>
+                                {m.body}
+                                {m.isEdited && (
+                                    <span className="text-[9px] opacity-40 ml-2 font-black uppercase tracking-widest italic">(edited)</span>
+                                )}
+                            </>
+                        )}
+                    </div>
+                    
+                    <span className="zn-meta flex items-center gap-1.5 mt-1 px-1">
+                        {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                </div>
+            </div>
+        </motion.div>
+    )
+})
 
 /* -------------------------------------------------------------------------
    MAIN PAGE: ZENITH MESSAGES
@@ -86,8 +143,12 @@ export default function Messages() {
     const { data: messages = [], isLoading: loadingMsgs } = useMessages(convoId)
     const { getDraft, setDraft } = useChatState(convoId)
     const sendMutation = useSendMessage(convoId)
+    const editMutation = useEditMessage(convoId)
+    const deleteMutation = useDeleteMessage(convoId)
 
     const [inputText, setInputText] = useState(getDraft() || '')
+    const [editingId, setEditingId] = useState(null)
+    const [editingText, setEditingText] = useState('')
     const viewportRef = useRef(null)
 
     // Sync input with draft cache when switching conversations
@@ -151,9 +212,45 @@ export default function Messages() {
         }
     }
 
+    const onStartEdit = (m) => {
+        setEditingId(m._id)
+        setEditingText(m.body)
+    }
+
+    const onSaveEdit = async () => {
+        if (!editingText.trim() || editMutation.isPending) return
+        const id = editingId
+        setEditingId(null)
+        try {
+            await editMutation.mutateAsync({ messageId: id, text: editingText })
+            toast.success('Message updated', { duration: 2000 })
+        } catch (e) {
+            toast.error('Failed to update')
+            setEditingId(id)
+        }
+    }
+
+    const onDeleteMessage = async (messageId) => {
+        if (!window.confirm('Delete this message for everyone?')) return
+        try {
+            await deleteMutation.mutateAsync(messageId)
+            toast.success('Message deleted')
+        } catch (e) {
+            toast.error('Failed to delete')
+        }
+    }
+
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             handleSendMessage(e)
+        }
+    }
+
+    const handleEditKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            onSaveEdit()
+        } else if (e.key === 'Escape') {
+            setEditingId(null)
         }
     }
 
@@ -271,7 +368,18 @@ export default function Messages() {
                                         return (
                                             <React.Fragment key={m._id || i}>
                                                 {day !== prevDay && <div className="zn-day"><span>{day}</span></div>}
-                                                <MessageBubble m={m} isSelf={isSelf} groupClass={getGroupClass(i)} />
+                                                <MessageBubble 
+                                                    m={m} 
+                                                    isSelf={isSelf} 
+                                                    groupClass={getGroupClass(i)}
+                                                    isEditing={editingId === m._id}
+                                                    editingText={editingText}
+                                                    setEditingText={setEditingText}
+                                                    onStartEdit={onStartEdit}
+                                                    onSaveEdit={onSaveEdit}
+                                                    onDelete={onDeleteMessage}
+                                                    onEditKeyPress={handleEditKeyPress}
+                                                />
                                             </React.Fragment>
                                         )
                                     })}

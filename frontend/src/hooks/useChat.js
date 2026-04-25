@@ -55,13 +55,85 @@ export const useChatState = (convoId) => {
 }
 
 /**
- * Hook for sending messages with optimistic updates (Coming soon)
+ * Hook for sending messages with optimistic updates
  */
 export const useSendMessage = (convoId) => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (text) => chatApi.post(`/${convoId}/messages`, { body: text }),
-        onSuccess: () => {
+        onMutate: async (text) => {
+            await queryClient.cancelQueries({ queryKey: ['messages', convoId] })
+            const previousMessages = queryClient.getQueryData(['messages', convoId])
+            
+            // Optimistic update
+            const optimisticMsg = {
+                _id: 'temp-' + Date.now(),
+                body: text,
+                sender: 'me', // Will be reconciled later
+                createdAt: new Date().toISOString(),
+                isOptimistic: true
+            }
+            queryClient.setQueryData(['messages', convoId], old => [...(old || []), optimisticMsg])
+            
+            return { previousMessages }
+        },
+        onError: (err, text, context) => {
+            queryClient.setQueryData(['messages', convoId], context.previousMessages)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['messages', convoId] })
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        }
+    })
+}
+
+/**
+ * Hook for editing messages with optimistic updates
+ */
+export const useEditMessage = (convoId) => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ messageId, text }) => chatApi.patch(`/${convoId}/messages/${messageId}`, { body: text }),
+        onMutate: async ({ messageId, text }) => {
+            await queryClient.cancelQueries({ queryKey: ['messages', convoId] })
+            const previousMessages = queryClient.getQueryData(['messages', convoId])
+            
+            queryClient.setQueryData(['messages', convoId], old => 
+                old?.map(m => m._id === messageId ? { ...m, body: text, isEdited: true } : m)
+            )
+            
+            return { previousMessages }
+        },
+        onError: (err, data, context) => {
+            queryClient.setQueryData(['messages', convoId], context.previousMessages)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['messages', convoId] })
+        }
+    })
+}
+
+/**
+ * Hook for deleting messages with optimistic updates
+ */
+export const useDeleteMessage = (convoId) => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (messageId) => chatApi.delete(`/${convoId}/messages/${messageId}`),
+        onMutate: async (messageId) => {
+            await queryClient.cancelQueries({ queryKey: ['messages', convoId] })
+            const previousMessages = queryClient.getQueryData(['messages', convoId])
+            
+            queryClient.setQueryData(['messages', convoId], old => 
+                old?.filter(m => m._id !== messageId)
+            )
+            
+            return { previousMessages }
+        },
+        onError: (err, messageId, context) => {
+            queryClient.setQueryData(['messages', convoId], context.previousMessages)
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['messages', convoId] })
             queryClient.invalidateQueries({ queryKey: ['conversations'] })
         }
