@@ -6337,26 +6337,137 @@ textarea:focus-visible {
   -webkit-backdrop-filter: blur(20px);
   z-index: 50;
 }
+/* ==========================================================================
+   ZENITH MESSAGING SYSTEM v2.0
+   ========================================================================== */
 
-/* 3. Viewport & Bubbles */
+.zn-messages-root {
+  display: flex;
+  height: calc(100vh - 64px); /* Subtract Header */
+  background: #000;
+  overflow: hidden;
+  color: #fff;
+}
+
+/* 1. Sidebar / Chat List */
+.zn-messages-sidebar {
+  width: 360px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  background: #050505;
+  display: flex;
+  flex-direction: column;
+}
+
+.zn-sidebar-header {
+  padding: 24px 20px 16px;
+}
+
+.zn-sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+.zn-convo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 4px;
+}
+
+.zn-convo-row:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.zn-convo-row.active {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.zn-convo-row.active .zn-convo-name {
+  color: var(--zn-accent);
+}
+
+.zn-avatar-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #111;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.zn-convo-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.zn-convo-msg {
+  font-size: 13px;
+  color: #71717a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.zn-convo-msg.unread {
+  color: #fff;
+  font-weight: 700;
+}
+
+.zn-online-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border: 2px solid #050505;
+  border-radius: 50%;
+}
+
+/* 2. Main Chat Area */
+.zn-chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  position: relative;
+}
+
+.zn-chat-header {
+  height: 64px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(20px);
+  z-index: 20;
+}
+
 .zn-viewport {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 40px;
+  padding: 24px 32px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
+/* 3. Bubbles & Actions */
 .zn-row {
   display: flex;
   flex-direction: column;
-  max-width: 65%;
-  position: relative;
-.zn-row {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 2px;
+  margin-bottom: 12px;
   width: 100%;
 }
 
@@ -6364,95 +6475,119 @@ textarea:focus-visible {
 .zn-row.peer { align-items: flex-start; }
 
 .zn-bubble-container {
-  max-width: 80%;
+  max-width: 70%;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
-.zn-row.self .zn-bubble-container { align-items: flex-end; }
-.zn-row.peer .zn-bubble-container { align-items: flex-start; }
-
 .zn-bubble {
-  padding: 12px 18px;
-  font-size: 14.5px;
-  font-weight: 600;
-  line-height: 1.45;
-  letter-spacing: -0.01em;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  border-radius: 18px;
   position: relative;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  word-break: break-word;
+  transition: all 0.2s;
 }
 
 .zn-row.self .zn-bubble {
   background: var(--zn-accent);
-  color: white;
-  border-radius: 20px 20px 4px 20px;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
+  color: #fff;
+  border-bottom-right-radius: 4px;
 }
 
 .zn-row.peer .zn-bubble {
-  background: #262626;
-  color: #fff;
-  border-radius: 20px 20px 20px 4px;
-  border: 1px solid var(--zn-border);
+  background: #18181b;
+  color: #efeff1;
+  border-bottom-left-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
-/* Grouping Class Modifiers */
-.zn-row.msg-top.self .zn-bubble { border-bottom-right-radius: 4px; border-top-right-radius: 20px; }
-.zn-row.msg-middle.self .zn-bubble { border-radius: 20px 4px 4px 20px; }
-.zn-row.msg-bottom.self .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 20px; }
+.zn-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0;
+  position: relative;
+}
+
+.zn-day::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+}
+
+.zn-day span {
+  background: #000;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: relative;
+  border-radius: 20px;
+}
 
 /* 4. Composer */
 .zn-footer {
-  padding: 20px 40px 32px;
+  padding: 16px 24px 32px;
+  background: linear-gradient(to top, #000 80%, transparent);
 }
 
 .zn-composer-pill {
-  background: var(--zn-surface-raised);
-  border: 1px solid var(--zn-border);
-  border-radius: 32px;
-  padding: 6px 8px 6px 20px;
+  background: #121214;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 6px 6px 6px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
+  transition: all 0.2s;
 }
 
-.zn-input {
+.zn-composer-pill:focus-within {
+  border-color: rgba(124, 58, 237, 0.4);
+  background: #18181b;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.05);
+}
+
+.zn-composer-input {
   flex: 1;
   background: transparent;
   border: none;
   outline: none;
   color: #fff;
-  font-size: 15px;
-  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
 }
 
-/* Day & Meta */
-.zn-day {
+.zn-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 14px;
+  background: var(--zn-accent);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 40px 0 20px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #52525b;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  width: 100%;
+  transition: all 0.2s;
 }
 
-.zn-meta {
-  font-size: 10px;
-  font-weight: 700;
-  color: #52525b;
-  margin-top: 4px;
-  padding: 0 8px;
-  opacity: 0.6;
+.zn-send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
-/* Custom Color Support */
-.text-zn-accent { color: var(--zn-accent); }
-.border-zn-accent { border-color: var(--zn-accent); }
-.bg-zn-accent { background-color: var(--zn-accent); }
+/* 5. Scrollbars */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.zn-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.zn-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.zn-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 

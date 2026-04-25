@@ -15,6 +15,7 @@ import CreatePostModal from './CreatePostModal'
 import FeedbackModal from './FeedbackModal'
 import AccountSwitcherModal from './AccountSwitcherModal'
 import { FaLinkedin } from 'react-icons/fa'
+import { useQueryClient } from '@tanstack/react-query'
 import logoImg from '../assets/logo.png'
 
 const links = [
@@ -41,6 +42,7 @@ export default function Layout() {
     const navigate = useNavigate()
     const location = useLocation()
     const socket = useSocket(user)
+    const queryClient = useQueryClient()
 
     const [showCreate, setShowCreate] = useState(false)
     const [showFeedback, setShowFeedback] = useState(false)
@@ -251,6 +253,15 @@ export default function Layout() {
                                 to={to} 
                                 end={exact} 
                                 className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
+                                onMouseEnter={() => {
+                                    if (to === '/messages') {
+                                        queryClient.prefetchQuery({ queryKey: ['convos'] })
+                                        const lastId = localStorage.getItem('zn_last_convo_id')
+                                        if (lastId) {
+                                            queryClient.prefetchQuery({ queryKey: ['messages', lastId] })
+                                        }
+                                    }
+                                }}
                             >
                                 <motion.div 
                                     className="flex items-center gap-4 w-full"
