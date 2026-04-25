@@ -5,11 +5,11 @@ import {
     HiSearch, HiPencilAlt, HiChevronDown, HiPhone, 
     HiVideoCamera, HiInformationCircle, HiChatAlt2,
     HiEmojiHappy, HiPhotograph, HiArrowLeft,
-    HiMicrophone, HiPlusCircle, HiPaperAirplane
+    HiPlusCircle
 } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
-import api from '../utils/api'
-import timeago from '../utils/timeago'
+import { chatApi } from '../api/axios'
+import { timeago } from '../utils/timeago'
 
 /* -------------------------------------------------------------------------
    SUB-COMPONENT: CONVERSATION ITEM (SIDEBAR)
@@ -90,7 +90,8 @@ export default function Messages() {
     useEffect(() => {
         const fetchConvos = async () => {
             try {
-                const { data } = await api.get('/chats')
+                // Using chatApi (baseURL: /conversations)
+                const { data } = await chatApi.get('/')
                 setConvos(data)
                 // Desktop: Auto-open latest chat if none selected
                 if (!convoId && data.length > 0 && window.innerWidth > 1024) {
@@ -107,7 +108,7 @@ export default function Messages() {
         if (!convoId) return
         const fetchMsgs = async () => {
             try {
-                const { data } = await api.get(`/chats/${convoId}/messages`)
+                const { data } = await chatApi.get(`/${convoId}/messages`)
                 setMessages(data)
                 setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'instant' }), 50)
             } catch (e) { console.error('[Zenith] Msg Fetch Error:', e) }
@@ -120,7 +121,7 @@ export default function Messages() {
         const body = inputText
         setInputText('')
         try {
-            const { data } = await api.post(`/chats/${convoId}/messages`, { body })
+            const { data } = await chatApi.post(`/${convoId}/messages`, { body })
             setMessages(prev => [...prev, data])
             setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' }), 50)
         } catch (e) { console.error('[Zenith] Send Error:', e) }
