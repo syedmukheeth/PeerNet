@@ -6591,3 +6591,140 @@ textarea:focus-visible {
 .zn-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
 .zn-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
+/* -------------------------------------------------------------------------
+   REPLY SYSTEM
+   ------------------------------------------------------------------------- */
+.zn-reply-preview {
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 16px 16px 0 0;
+    margin-bottom: -1px;
+}
+
+.zn-reply-line {
+    width: 2px;
+    height: 32px;
+    background: var(--zn-accent);
+    border-radius: 2px;
+}
+
+.zn-bubble-reply {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 2px solid var(--zn-accent);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: #a1a1aa;
+    max-width: 100%;
+}
+
+/* -------------------------------------------------------------------------
+   REACTIONS CLUSTER
+   ------------------------------------------------------------------------- */
+.zn-reactions {
+    position: absolute;
+    bottom: -10px;
+    display: flex;
+    gap: 2px;
+    z-index: 5;
+}
+
+.zn-row.self .zn-reactions { right: 8px; }
+.zn-row.peer .zn-reactions { left: 8px; }
+
+.zn-reaction-chip {
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zn-reaction-chip:hover {
+    background: #27272a;
+    transform: scale(1.1);
+}
+
+.zn-reaction-chip.active {
+    background: rgba(124, 58, 237, 0.2);
+    border-color: var(--zn-accent);
+}
+
+/* -------------------------------------------------------------------------
+   SIDEBAR INDICATORS (PIN/MUTE/ARCHIVE)
+   ------------------------------------------------------------------------- */
+.zn-convo-row { position: relative; }
+
+.zn-convo-badge-wrap {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 4px;
+}
+
+.zn-mini-icon {
+    color: #52525b;
+    font-size: 12px;
+}
+
+.zn-mini-icon.active { color: var(--zn-accent); }
+
+/* -------------------------------------------------------------------------
+   VOICE NOTES
+   ------------------------------------------------------------------------- */
+.zn-voice-wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 16px;
+}
+
+.zn-wave-bar {
+    width: 2px;
+    background: currentColor;
+    border-radius: 1px;
+}
+
+/* -------------------------------------------------------------------------
+   MEDIA GRID
+   ------------------------------------------------------------------------- */
+.zn-media-grid {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 4px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.zn-media-item {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: #18181b;
+}
+
+/* -------------------------------------------------------------------------
+   SEARCH BOX REFINEMENT
+   ------------------------------------------------------------------------- */
+.zn-search-inline {
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
