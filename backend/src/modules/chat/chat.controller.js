@@ -1,6 +1,25 @@
 'use strict';
 
 const chatService = require('./chat.service');
+const { getIO } = require('../../config/socket');
+const { uploadToCloudinary } = require('../../utils/cloudinary.utils');
+
+/**
+ * Standard broadcast helper to keep REST and Socket events consistent
+ */
+const broadcastToParticipants = (conversation, event, payload) => {
+    const io = getIO();
+    if (conversation && conversation.participants) {
+        conversation.participants.forEach(p => {
+            const pId = p._id ? p._id.toString() : p.toString();
+            io.to(`user:${pId}`).emit(event, payload);
+        });
+    }
+    // Also emit to the conversation room
+    if (conversation._id) {
+        io.to(`chat:${conversation._id.toString()}`).emit(event, payload);
+    }
+};
 
 const getConversations = async (req, res, next) => {
     try {
@@ -34,41 +53,34 @@ const getMessages = async (req, res, next) => {
 const postMessage = async (req, res, next) => {
     try {
         const { conversationId } = req.params;
-        const { body, tempId } = req.body;
+        const { body, clientSideId, replyTo } = req.body;
         const file = req.file;
 
         let mediaUrl = '';
         let mediaPublicId = '';
+        let mediaType = 'none';
 
         if (file) {
-            const { uploadToCloudinary } = require('../../utils/cloudinary.utils');
-            const result = await uploadToCloudinary(file.path, { folder: 'peernet/chats' });
+            const folder = file.mimetype.startsWith('video') ? 'peernet/videos' : 'peernet/chats';
+            const result = await uploadToCloudinary(file.path, { folder });
             mediaUrl = result.secure_url;
             mediaPublicId = result.public_id;
+            mediaType = file.mimetype.startsWith('video') ? 'video' : 'image';
         }
 
-        const { message, conversation } = await chatService.saveMessage(conversationId, req.user.id, {
+        const { message, conversation, isDuplicate } = await chatService.saveMessage(conversationId, req.user.id, {
             body,
             mediaUrl,
             mediaPublicId,
-            tempId
+            mediaType,
+            clientSideId,
+            replyTo
         });
         
-        // Broadcast to relevant room
-        const { getIO } = require('../../config/socket');
-        const io = getIO();
-        
-        // Use consistent 'chat:{id}' room name
-        const messageWithTemp = { ...message.toObject(), tempId, conversationId };
-        
-        // 1. Emit to active chat room (for users currently viewing the chat)
-        io.to(`chat:${conversationId}`).emit('new_message', messageWithTemp);
-
-        // 2. Emit to each participant's private user room (for global notifications/badges)
-        if (conversation && conversation.participants) {
-            conversation.participants.forEach(pId => {
-                io.to(`user:${pId.toString()}`).emit('new_message', messageWithTemp);
-            });
+        if (!isDuplicate) {
+            const payload = { ...message.toObject(), conversationId };
+            broadcastToParticipants(conversation, 'new_message', payload);
+            broadcastToParticipants(conversation, 'update_conversation', conversation);
         }
 
         res.json({ success: true, data: message });
@@ -81,7 +93,62 @@ const markSeen = async (req, res, next) => {
     try {
         const { conversationId } = req.params;
         await chatService.markAsSeen(conversationId, req.user.id);
+        
+        const io = getIO();
+        io.to(`chat:${conversationId}`).emit('messages_seen', { conversationId, viewerId: req.user.id });
+        
         res.json({ success: true, message: 'Marked as seen' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const reactMessage = async (req, res, next) => {
+    try {
+        const { messageId } = req.params;
+        const { emoji } = req.body;
+        const message = await chatService.reactToMessage(messageId, req.user.id, emoji);
+        
+        const io = getIO();
+        io.to(`chat:${message.conversation.toString()}`).emit('message_reacted', {
+            messageId,
+            reactions: message.reactions,
+            senderId: req.user.id
+        });
+
+        res.json({ success: true, data: message.reactions });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const editMessage = async (req, res, next) => {
+    try {
+        const { messageId } = req.params;
+        const { body } = req.body;
+        const message = await chatService.updateMessage(messageId, req.user.id, body);
+        
+        const io = getIO();
+        io.to(`chat:${message.conversation.toString()}`).emit('message_edited', message);
+
+        res.json({ success: true, data: message });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const deleteMessage = async (req, res, next) => {
+    try {
+        const { messageId } = req.params;
+        const message = await chatService.deleteMessage(messageId, req.user.id);
+        
+        const io = getIO();
+        io.to(`chat:${message.conversation.toString()}`).emit('message_deleted', { 
+            messageId: message._id,
+            conversationId: message.conversation
+        });
+
+        res.json({ success: true, message: 'Message deleted' });
     } catch (err) {
         next(err);
     }
@@ -96,61 +163,6 @@ const getUnreadCount = async (req, res, next) => {
     }
 };
 
-const editMessage = async (req, res, next) => {
-    try {
-        const { messageId } = req.params;
-        const { body } = req.body;
-        const message = await chatService.updateMessage(messageId, req.user.id, body);
-        
-        // Broadcast
-        const { getIO } = require('../../config/socket');
-        const io = getIO();
-        
-        // Find conversation to get participants
-        const Conversation = require('./Conversation');
-        const convo = await Conversation.findById(message.conversation);
-        if (convo) {
-            convo.participants.forEach(pId => {
-                io.to(`user:${pId.toString()}`).emit('message_edited', { 
-                    messageId: message._id, 
-                    body: message.body,
-                    conversationId: message.conversation 
-                });
-            });
-        }
-
-        res.json({ success: true, data: message });
-    } catch (err) {
-        next(err);
-    }
-};
-
-const deleteMessage = async (req, res, next) => {
-    try {
-        const { messageId } = req.params;
-        const message = await chatService.deleteMessage(messageId, req.user.id);
-        
-        // Broadcast
-        const { getIO } = require('../../config/socket');
-        const io = getIO();
-        
-        const Conversation = require('./Conversation');
-        const convo = await Conversation.findById(message.conversation);
-        if (convo) {
-            convo.participants.forEach(pId => {
-                io.to(`user:${pId.toString()}`).emit('message_deleted', { 
-                    messageId: message._id,
-                    conversationId: message.conversation
-                });
-            });
-        }
-
-        res.json({ success: true, message: 'Message deleted' });
-    } catch (err) {
-        next(err);
-    }
-};
-
 module.exports = {
     getConversations,
     getOrCreateConversation,
@@ -160,4 +172,5 @@ module.exports = {
     getUnreadCount,
     editMessage,
     deleteMessage,
+    reactMessage
 };

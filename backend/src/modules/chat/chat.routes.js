@@ -10,10 +10,13 @@ router.use(authenticate);
 router.get('/', chatController.getConversations);
 router.get('/unread-count', chatController.getUnreadCount);
 router.post('/', chatController.getOrCreateConversation);
+
 router.get('/:conversationId/messages', chatController.getMessages);
 router.post('/:conversationId/messages', uploadMedia.single('media'), chatController.postMessage);
 router.patch('/:conversationId/messages/read', chatController.markSeen);
+
 router.patch('/:conversationId/messages/:messageId', chatController.editMessage);
 router.delete('/:conversationId/messages/:messageId', chatController.deleteMessage);
+router.post('/:conversationId/messages/:messageId/react', chatController.reactMessage);
 
 module.exports = router;

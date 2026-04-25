@@ -4,25 +4,21 @@ const chatService = require('./chat.service');
 const logger = require('../../config/logger');
 const { getRedisOptional } = require('../../config/redis');
 
-const ONLINE_TTL = 35; // seconds — client should ping every 30s
+const ONLINE_TTL = 35; // seconds
 
 module.exports = (io, socket) => {
     const userId = (socket.user.userId || socket.user.id || socket.user._id || '').toString();
 
-    // ── Presence / Online Status ──
     const markOnline = async () => {
         const redis = getRedisOptional();
         if (redis && userId) {
             await redis.setEx(`online:${userId}`, ONLINE_TTL, '1');
+            // Broadcast online status to relevant rooms if needed
         }
     };
-    
-    // Initial online pulse
     markOnline();
 
     // ── Room Management ──
-    
-    // Standardized conversation room
     socket.on('join_conversation', (conversationId) => {
         socket.join(`chat:${conversationId}`);
         logger.info(`User ${userId} joined room: chat:${conversationId}`);
@@ -32,28 +28,29 @@ module.exports = (io, socket) => {
         socket.leave(`chat:${conversationId}`);
     });
 
-    socket.on('join_room', (id) => socket.join(id));
-    socket.on('leave_room', (id) => socket.leave(id));
-
-    // ── Messaging ──
+    // ── Messaging & Sync ──
     
     socket.on('send_message', async (data) => {
         try {
-            const { conversationId, body, mediaUrl } = data;
-            if (!conversationId || !body) return;
+            const { conversationId, body, mediaUrl, replyTo, clientSideId } = data;
+            if (!conversationId || (!body && !mediaUrl)) return;
 
-            const { message, conversation } = await chatService.saveMessage(conversationId, userId, { body, mediaUrl });
+            const { message, conversation } = await chatService.saveMessage(conversationId, userId, { 
+                body, mediaUrl, replyTo, clientSideId 
+            });
             
-            // Attach tempId for optimistic reconciliation on the sender's side
-            const messageWithTemp = { ...message.toObject(), tempId: data.tempId, conversationId };
+            const payload = { ...message.toObject(), conversationId };
             
-            // 1. Emit to active chat room
-            io.to(`chat:${conversationId}`).emit('new_message', messageWithTemp);
+            // 1. Broadcast to active chat room
+            io.to(`chat:${conversationId}`).emit('new_message', payload);
 
-            // 2. Emit to each participant's private user room
+            // 2. Broadcast to all participants' user rooms to update their Sidebars
             if (conversation && conversation.participants) {
-                conversation.participants.forEach(pId => {
-                    io.to(`user:${pId.toString()}`).emit('new_message', messageWithTemp);
+                conversation.participants.forEach(p => {
+                    const pId = p._id ? p._id.toString() : p.toString();
+                    io.to(`user:${pId}`).emit('update_conversation', conversation);
+                    // Also emit new_message to user room for global notifs
+                    io.to(`user:${pId}`).emit('new_message', payload);
                 });
             }
         } catch (err) {
@@ -61,9 +58,48 @@ module.exports = (io, socket) => {
         }
     });
 
+    socket.on('mark_seen', async ({ conversationId }) => {
+        try {
+            await chatService.markAsSeen(conversationId, userId);
+            // Broadcast to chat room so sender sees 'Seen' status update
+            socket.to(`chat:${conversationId}`).emit('messages_seen', { conversationId, viewerId: userId });
+        } catch (err) {
+            logger.error('Error in mark_seen socket event', err);
+        }
+    });
+
+    socket.on('edit_message', async ({ messageId, body, conversationId }) => {
+        try {
+            const message = await chatService.updateMessage(messageId, userId, body);
+            io.to(`chat:${conversationId}`).emit('message_edited', message);
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('delete_message', async ({ messageId, conversationId }) => {
+        try {
+            await chatService.deleteMessage(messageId, userId);
+            io.to(`chat:${conversationId}`).emit('message_deleted', { messageId });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('react_message', async ({ messageId, emoji, conversationId }) => {
+        try {
+            const message = await chatService.reactToMessage(messageId, userId, emoji);
+            io.to(`chat:${conversationId}`).emit('message_reacted', { 
+                messageId, 
+                reactions: message.reactions,
+                senderId: userId 
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     // ── Typing Indicators ──
-    
-    // Support both 'typing_start'/'typing_stop' and 'typing'/'stop_typing' patterns
     socket.on('typing_start', (conversationId) => {
         socket.to(`chat:${conversationId}`).emit('user_typing_start', { userId, conversationId });
     });
@@ -72,20 +108,10 @@ module.exports = (io, socket) => {
         socket.to(`chat:${conversationId}`).emit('user_typing_stop', { userId, conversationId });
     });
 
-    socket.on('typing', ({ conversationId }) => {
-        socket.to(`chat:${conversationId}`).emit('user_typing', { userId });
-    });
-
-    socket.on('stop_typing', ({ conversationId }) => {
-        socket.to(`chat:${conversationId}`).emit('user_stop_typing', { userId });
-    });
-
     // ── Maintenance ──
-    
     socket.on('ping_online', () => markOnline());
 
     socket.on('disconnect', async () => {
-        logger.info(`Socket disconnected: user=${userId}`);
         const redis = getRedisOptional();
         if (redis && userId) {
             await redis.del(`online:${userId}`);

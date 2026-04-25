@@ -6,12 +6,29 @@ const conversationSchema = new mongoose.Schema(
     {
         participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
         lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
+        
+        // Track unread counts per user for high performance sidebar loading
+        // Map of userId -> count
+        unreadCounts: {
+            type: Map,
+            of: Number,
+            default: {}
+        },
+
+        // Metadata for Pin/Mute/Archive (Backend persistence)
+        metadata: {
+            pinned: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+            muted: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+            archived: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+        }
     },
     { timestamps: true },
 );
 
-// Ensure a conversation can only exist once between specific participants
-// For 1-on-1 chats, sort the participants IDs to ensure uniqueness
+// Indexes
 conversationSchema.index({ participants: 1 });
+conversationSchema.index({ 'metadata.pinned': 1 });
+conversationSchema.index({ 'metadata.archived': 1 });
+conversationSchema.index({ updatedAt: -1 });
 
 module.exports = mongoose.model('Conversation', conversationSchema);
