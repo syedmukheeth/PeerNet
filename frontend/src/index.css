@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
@@ -6240,7 +6240,21 @@ textarea:focus-visible {
   border-bottom-left-radius: 4px;
 }
 
-/* Message Meta */
+/* Day Separator & Meta */
+.ms-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0 20px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  width: 100%;
+  white-space: nowrap !important; /* Force Horizontal */
+}
+
 .ms-meta {
   font-size: 10px;
   font-weight: 700;
@@ -6248,7 +6262,9 @@ textarea:focus-visible {
   margin-top: 4px;
   padding: 0 8px;
   opacity: 0.6;
+  white-space: nowrap !important; /* Force Horizontal */
 }
+
 
 /* 4. Floating Composer */
 .ms-footer {

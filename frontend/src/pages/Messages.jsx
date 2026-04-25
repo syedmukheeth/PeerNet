@@ -224,9 +224,17 @@ export default function Messages() {
                                 </button>
                             </div>
                             
-                            {messages.map((m, i) => (
-                                <MessageItem key={m._id} m={m} isSelf={m.sender === user?._id} />
-                            ))}
+                            {messages.map((m, i) => {
+                                const day = formatDate(m.createdAt)
+                                const prevDay = i > 0 ? formatDate(messages[i-1].createdAt) : null
+                                return (
+                                    <React.Fragment key={m._id}>
+                                        {day !== prevDay && <div className="ms-day"><span>{day}</span></div>}
+                                        <MessageItem m={m} isSelf={m.sender === user?._id} />
+                                    </React.Fragment>
+                                )
+                            })}
+
                         </div>
 
                         <footer className="ms-footer">
