@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { chatApi } from '../api/axios'
+import { useCallback } from 'react'
 
 // ZENITH SINGLETONS: These persist even when navigating away
 const draftCache = {}
@@ -60,11 +61,11 @@ export const useMessages = (convoId) => {
  * Hook for persistent drafts and UI state
  */
 export const useChatState = (convoId) => {
-    const getDraft = () => draftCache[convoId] || ''
-    const setDraft = (text) => { draftCache[convoId] = text }
+    const getDraft = useCallback(() => draftCache[convoId] || '', [convoId])
+    const setDraft = useCallback((text) => { draftCache[convoId] = text }, [convoId])
     
-    const getScroll = () => scrollCache[convoId] || 0
-    const setScroll = (pos) => { scrollCache[convoId] = pos }
+    const getScroll = useCallback(() => scrollCache[convoId] || 0, [convoId])
+    const setScroll = useCallback((pos) => { scrollCache[convoId] = pos }, [convoId])
 
     return { getDraft, setDraft, getScroll, setScroll }
 }
