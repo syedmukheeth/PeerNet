@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
@@ -6120,387 +6120,249 @@ textarea:focus-visible {
 }
 
 /* ========================================================================================================================================================================================================================================
-   MESSAGES REDESIGN: SENIOR DEV "DIGITAL OBSIDIAN"
-   Inspired by Instagram Web * High-Density * Glassmorphism
+   MESSAGES RE-ENGINEERING: SENIOR PRODUCT GRADE
+   Instagram + Discord + Telegram Standard * Fixes Vertical Text Bug
    ======================================================================================================================================================================================================================================== */
+
+:root {
+  --ms-nav-w: 72px;
+  --ms-list-w: 360px;
+  --ms-bg: #000000;
+  --ms-surface: #0a0a0a;
+  --ms-bubble-self: var(--accent-gradient);
+  --ms-bubble-peer: #262626;
+  --ms-border: rgba(255, 255, 255, 0.06);
+}
 
 .messages-layout {
   display: flex;
   height: 100dvh;
-  background: #000;
+  width: 100%;
+  background: var(--ms-bg);
   overflow: hidden;
   font-family: var(--font-sans);
-  --ms-sidebar-w: 360px;
-  --ms-nav-w: 76px;
 }
 
-/* Panel 1: Global Sidebar Icons */
-.ms-nav {
+/* 1. Nav Icon Rail (Fixed) */
+.ms-rail {
   width: var(--ms-nav-w);
   height: 100%;
-  border-right: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  border-right: 1px solid var(--ms-border);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0;
-  background: #000;
-  z-index: 50;
+  padding: 24px 0;
+  background: var(--ms-bg);
+  z-index: 100;
 }
 
-.ms-nav-item {
-  width: 48px;
-  height: 48px;
+.ms-rail-item {
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 14px;
   color: var(--text-3);
+  margin-bottom: 12px;
   cursor: pointer;
-  transition: all 0.2s var(--ease-standard);
-  margin-bottom: 8px;
+  transition: all 0.25s var(--ease-out);
   position: relative;
 }
 
-.ms-nav-item:hover {
-  background: rgba(255,255,255,0.05);
+.ms-rail-item:hover {
+  background: rgba(255,255,255,0.06);
   color: #fff;
-  transform: scale(1.05);
+  transform: translateY(-1px);
 }
 
-.ms-nav-item.active {
+.ms-rail-item.active {
   color: #fff;
+  background: var(--accent-subtle);
 }
 
-.ms-nav-item.active::after {
+.ms-rail-item.active::after {
   content: "";
   position: absolute;
   left: -14px;
   width: 4px;
-  height: 24px;
+  height: 20px;
   background: var(--accent);
   border-radius: 0 4px 4px 0;
   box-shadow: 0 0 15px var(--accent);
 }
 
-/* Panel 2: Conversation Sidebar */
+/* 2. Conversation List (Fixed) */
 .ms-sidebar {
-  width: var(--ms-sidebar-w);
+  width: var(--ms-list-w);
   height: 100%;
-  border-right: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  border-right: 1px solid var(--ms-border);
   display: flex;
   flex-direction: column;
-  background: #000;
+  background: var(--ms-bg);
 }
 
 .ms-sidebar-header {
-  padding: 24px 20px;
+  padding: 32px 24px 24px;
 }
 
-.ms-username-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: #fff;
-  cursor: pointer;
+.ms-search-wrap {
+  margin-top: 24px;
 }
 
-.ms-search-container {
-  margin-top: 20px;
-  padding: 10px 16px;
+.ms-search-input {
+  width: 100%;
   background: #121212;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 16px 10px 42px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.ms-search-container:focus-within {
-  border-color: rgba(255,255,255,0.1);
+.ms-search-input:focus {
   background: #1a1a1a;
+  border-color: var(--accent-ring);
+  outline: none;
 }
 
-.ms-convo-list {
+/* 3. Main Chat View (Flexible) */
+.ms-main {
   flex: 1;
-  overflow-y: auto;
-  padding: 8px 0;
-}
-
-.ms-convo-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  gap: 14px;
-  cursor: pointer;
-  transition: all 0.2s var(--ease-standard);
-  position: relative;
-}
-
-.ms-convo-item:hover {
-  background: #0a0a0a;
-}
-
-.ms-convo-item.active {
-  background: #121212;
-}
-
-.ms-avatar-container {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.ms-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.ms-story-ring {
-  padding: 2.5px;
-  background: var(--story-ring);
-  border-radius: 50%;
-}
-
-.ms-story-ring .ms-avatar {
-  border: 3px solid #000 !important;
-}
-
-.ms-online-badge {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  background: #10b981;
-  border: 3px solid #000;
-  border-radius: 50%;
-}
-
-/* Panel 3: Content Area */
-.ms-content {
-  flex: 1;
+  min-width: 0; /* Critical for flex stability */
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: radial-gradient(circle at center, #0a0a0f 0%, #000000 100%);
   position: relative;
 }
 
-.ms-chat-header {
+.ms-header {
   height: 72px;
   padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: rgba(0,0,0,0.8);
+  border-bottom: 1px solid var(--ms-border);
+  background: rgba(0,0,0,0.7);
   backdrop-filter: blur(20px);
   z-index: 10;
 }
 
+/* 4. THE FORCE FIX: BUBBLE RENDERING */
 .ms-viewport {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 32px 40px;
   display: flex;
   flex-direction: column;
-  background: #000;
+  gap: 4px;
 }
 
-.ms-empty-state {
-  flex: 1;
+.ms-row {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px;
-  background: radial-gradient(circle at center, #0a0a0f 0%, #000 100%);
-}
-
-.ms-empty-icon-box {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  max-width: 65%;
   position: relative;
+  writing-mode: horizontal-tb !important; /* Force Kill Vertical Bug */
 }
 
-.ms-empty-icon-box::before {
-  content: "";
-  position: absolute;
-  inset: -20px;
-  background: radial-gradient(circle, var(--accent-subtle) 0%, transparent 70%);
-  z-index: 0;
-}
-
-.ms-message-row {
-  display: flex;
-  flex-direction: column;
-  max-width: 70%;
-  margin-bottom: 2px;
-}
-
-.ms-message-row.self { align-self: flex-end; align-items: flex-end; }
-.ms-message-row.peer { align-self: flex-start; align-items: flex-start; }
+.ms-row.self { align-self: flex-end; align-items: flex-end; }
+.ms-row.peer { align-self: flex-start; align-items: flex-start; }
 
 .ms-bubble {
-  padding: 10px 16px;
-  border-radius: 22px;
+  display: block !important;
+  min-width: 120px;
+  max-width: 100%;
+  padding: 12px 18px;
+  border-radius: 24px;
   font-size: 15px;
-  line-height: 1.4;
-  position: relative;
+  line-height: 1.5;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
 }
 
-.ms-message-row.self .ms-bubble {
-  background: var(--accent-gradient);
+.ms-row.self .ms-bubble {
+  background: var(--ms-bubble-self);
   color: #fff;
   border-bottom-right-radius: 4px;
 }
 
-.ms-message-row.peer .ms-bubble {
-  background: #262626;
+.ms-row.peer .ms-bubble {
+  background: var(--ms-bubble-peer);
   color: #fff;
   border-bottom-left-radius: 4px;
+  border: 1px solid var(--ms-border);
 }
 
-/* Tapered corners for grouping */
-.ms-msg-top.self .ms-bubble { border-top-right-radius: 22px; border-bottom-right-radius: 4px; }
-.ms-msg-middle.self .ms-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
-.ms-msg-bottom.self .ms-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 22px; }
+/* Grouping Physics */
+.ms-row.msg-top.self .ms-bubble { border-top-right-radius: 24px; border-bottom-right-radius: 4px; }
+.ms-row.msg-middle.self .ms-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+.ms-row.msg-bottom.self .ms-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 24px; }
 
-.ms-msg-top.peer .ms-bubble { border-top-left-radius: 22px; border-bottom-left-radius: 4px; }
-.ms-msg-middle.peer .ms-bubble { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
-.ms-msg-bottom.peer .ms-bubble { border-top-left-radius: 4px; border-bottom-left-radius: 22px; }
-
-.ms-composer {
-  padding: 16px 20px 24px;
-  background: #000;
+/* 5. Premium Floating Composer */
+.ms-composer-area {
+  padding: 20px 40px 32px;
+  background: transparent;
 }
 
-.ms-composer-inner {
+.ms-composer-pill {
+  background: #121212;
+  border: 1px solid var(--ms-border);
+  border-radius: 32px;
+  padding: 6px 12px 6px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px;
-  border-radius: 26px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: #000;
+  transition: all 0.3s var(--ease-out);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-.ms-composer-inner:focus-within {
-  border-color: rgba(255,255,255,0.2);
+.ms-composer-pill:focus-within {
+  border-color: rgba(255,255,255,0.15);
+  background: #161616;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.5);
 }
 
-.ms-send-btn {
-  color: #0095f6;
+.ms-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 15px;
+  padding: 10px 0;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+/* Day Separator & Meta */
+.ms-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0 24px;
+  font-size: 12px;
   font-weight: 700;
-  font-size: 14px;
-  padding: 0 8px;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
 }
 
-.ms-send-btn:hover { color: #fff; }
+.ms-time {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 6px;
+  font-weight: 500;
+}
 
 /* Scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* --- ULTIMATE POLISH: MESSAGES --- */
-:root {
-  --ms-surface-base: #000000;
-  --ms-surface-raised: #0a0a0a;
-  --ms-surface-overlay: #121212;
-  --ms-border-subtle: rgba(255, 255, 255, 0.05);
-  --ms-border-bold: rgba(255, 255, 255, 0.12);
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #121212 25%, #1a1a1a 50%, #121212 75%);
-  background-size: 800px 104px;
-  animation: shimmer 1.5s infinite linear;
-}
-@keyframes shimmer {
-  0% { background-position: -468px 0; }
-  100% { background-position: 468px 0; }
-}
-
-.ms-bubble {
-  word-break: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.day-separator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 32px 0 16px;
-  position: relative;
-}
-.day-separator::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--ms-border-subtle);
-  z-index: 0;
-}
-.day-label {
-  background: var(--ms-surface-base);
-  padding: 4px 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-3);
-  position: relative;
-  z-index: 1;
-  border-radius: 20px;
-}
-
-.ms-message-row .timestamp-hint {
-  font-size: 10px;
-  color: var(--text-3);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  margin: 4px 8px;
-}
-.ms-message-row:hover .timestamp-hint {
-  opacity: 1;
-}
-
-.ms-search-box-premium {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--ms-border-subtle);
-  border-radius: 14px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.ms-search-box-premium:focus-within {
-  background: rgba(255,255,255,0.06);
-  border-color: var(--accent);
-  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.1);
-}
-
-@media (max-width: 1024px) {
-  .messages-layout { --ms-sidebar-w: 100%; }
-  .ms-nav { display: none; }
-}
-
