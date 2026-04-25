@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-    HiSearch, HiPencilAlt, HiChevronDown, HiPhone, 
-    HiVideoCamera, HiInformationCircle, HiChatAlt2,
-    HiEmojiHappy, HiPhotograph, HiArrowLeft,
-    HiPlusCircle
+    HiSearch, HiPencilAlt, HiChevronDown, 
+    HiChatAlt2, HiEmojiHappy, HiPhotograph, 
+    HiArrowLeft, HiPlusCircle
 } from 'react-icons/hi'
 import { useAuth } from '../context/AuthContext'
 import { chatApi } from '../api/axios'
@@ -81,6 +80,8 @@ export default function Messages() {
     const [inputText, setInputText] = useState('')
     const [loading, setLoading] = useState(true)
     const [loadingMsgs, setLoadingMsgs] = useState(false)
+    // ZENITH PERFORMANCE: Memory cache for instant switching
+    const [msgCache, setMsgCache] = useState({})
     const viewportRef = useRef(null)
 
     // Find Active Conversation Data (Added Array.isArray guard)
@@ -99,12 +100,10 @@ export default function Messages() {
         const fetchConvos = async () => {
             try {
                 const res = await chatApi.get('/')
-                // Deep extraction: Try common API patterns
                 let data = res.data
                 if (data?.data && Array.isArray(data.data)) data = data.data
                 else if (data?.conversations && Array.isArray(data.conversations)) data = data.conversations
                 else if (!Array.isArray(data)) data = []
-                
                 setConvos(data)
                 
                 if (!convoId && data.length > 0 && window.innerWidth > 1024) {
@@ -118,13 +117,20 @@ export default function Messages() {
         fetchConvos()
     }, [convoId, navigate])
 
-    // Fetch Messages
+    // Fetch Messages (with Performance Cache)
     useEffect(() => {
         if (!convoId) return
+        
         const fetchMsgs = async () => {
-            setLoadingMsgs(true)
-            // ZENITH OPTIMIZATION: Clear old messages immediately to prevent flicker
-            setMessages([]) 
+            // INSTANT SWITCH: Check cache first
+            if (msgCache[convoId]) {
+                setMessages(msgCache[convoId])
+                setLoadingMsgs(false)
+            } else {
+                setLoadingMsgs(true)
+                setMessages([]) 
+            }
+
             try {
                 const res = await chatApi.get(`/${convoId}/messages`)
                 let data = res.data
@@ -133,10 +139,13 @@ export default function Messages() {
                 else if (!Array.isArray(data)) data = []
                 
                 setMessages(data)
+                // Update Cache
+                setMsgCache(prev => ({ ...prev, [convoId]: data }))
+                
                 setTimeout(() => viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'instant' }), 50)
             } catch (e) { 
                 console.error('[Zenith] Msg Fetch Error:', e)
-                setMessages([])
+                if (!msgCache[convoId]) setMessages([])
             } finally {
                 setLoadingMsgs(false)
             }
@@ -242,11 +251,6 @@ export default function Messages() {
                                         <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Active Now</span>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-5 text-zinc-400 hide-mobile">
-                                <HiPhone size={24} className="hover:text-white cursor-pointer" />
-                                <HiVideoCamera size={26} className="hover:text-white cursor-pointer" />
-                                <HiInformationCircle size={26} className="hover:text-white cursor-pointer" />
                             </div>
                         </header>
 
