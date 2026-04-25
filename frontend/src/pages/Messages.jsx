@@ -232,8 +232,8 @@ export default function Messages() {
                         <input 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="zn-composer-input w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-bold placeholder:text-zinc-600 outline-none focus:border-zn-accent/30 focus:bg-white/10 transition-all" 
-                            placeholder="Search conversations" 
+                            className="zn-sidebar-search w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm font-bold placeholder:text-zinc-600 outline-none focus:border-zn-accent/50 focus:bg-white/10 focus:ring-4 focus:ring-zn-accent/5 transition-all" 
+                            placeholder="Search conversations..." 
                         />
                     </div>
                 </div>
@@ -354,10 +354,23 @@ export default function Messages() {
                         </footer>
                     </>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                        <div className="w-24 h-24 rounded-[40px] bg-white/5 border border-white/5 flex items-center justify-center mb-8"><HiBookmark size={48} className="text-zn-accent opacity-40" /></div>
-                        <h2 className="text-2xl font-black text-white mb-2">Select a conversation</h2>
-                        <p className="text-zinc-500 font-medium max-w-xs">Pick a chat from the sidebar or start a new one to begin messaging.</p>
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center relative overflow-hidden">
+                        {/* Animated Background Glow */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-zn-accent/5 blur-[120px] rounded-full pointer-events-none" />
+                        
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="relative z-10"
+                        >
+                            <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center mb-8 mx-auto shadow-2xl">
+                                <HiMailOpen size={40} className="text-zn-accent" />
+                            </div>
+                            <h2 className="text-3xl font-black text-white mb-3 tracking-tighter">Your Messages</h2>
+                            <p className="text-zinc-500 font-bold max-w-xs mx-auto leading-relaxed">
+                                Connect with your network instantly. Select a chat to start the conversation.
+                            </p>
+                        </motion.div>
                     </div>
                 )}
             </main>
