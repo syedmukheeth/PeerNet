@@ -146,16 +146,11 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     return (
         <>
             <motion.div 
-                className="l-post-card glass-card"
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                className="l-post-card"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ 
-                    type: "spring", 
-                    stiffness: 260, 
-                    damping: 20,
-                    delay: 0.05
-                }}
+                transition={{ duration: 0.3 }}
             >
                 
                 {/* ── Post Header ────────────────── */}

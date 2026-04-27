@@ -7,6 +7,10 @@ import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
     HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal
 } from 'react-icons/hi'
+import {
+    HiOutlineHome, HiOutlineSearch, HiOutlineFilm, HiOutlineChatAlt2,
+    HiOutlineBell, HiOutlinePlusCircle, HiOutlineShieldCheck
+} from 'react-icons/hi'
 import { useTheme } from '../context/ThemeContext'
 import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
@@ -19,11 +23,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import logoImg from '../assets/logo.png'
 
 const links = [
-    { to: '/', icon: HiHome, label: 'Home', exact: true },
-    { to: '/search', icon: HiSearch, label: 'Search' },
-    { to: '/shorts', icon: HiFilm, label: 'Shorts' },
-    { to: '/messages', icon: HiChatAlt2, label: 'Messages', msgBadge: true },
-    { to: '/notifications', icon: HiBell, label: 'Notifications', badge: true },
+    { to: '/', icon: HiOutlineHome, activeIcon: HiHome, label: 'Home', exact: true },
+    { to: '/search', icon: HiOutlineSearch, activeIcon: HiSearch, label: 'Search' },
+    { to: '/shorts', icon: HiOutlineFilm, activeIcon: HiFilm, label: 'Shorts' },
+    { to: '/messages', icon: HiOutlineChatAlt2, activeIcon: HiChatAlt2, label: 'Messages', msgBadge: true },
+    { to: '/notifications', icon: HiOutlineBell, activeIcon: HiBell, label: 'Notifications', badge: true },
 ]
 
 const mobileBottomLinksLeft = [
@@ -247,7 +251,7 @@ export default function Layout() {
                     initial="hidden"
                     animate="visible"
                 >
-                    {links.map(({ to, icon: Icon, label, exact, badge, msgBadge }) => (
+                    {links.map(({ to, icon: Icon, activeIcon: ActiveIcon, label, exact, badge, msgBadge }) => (
                         <motion.div key={to} variants={navItemVariants}>
                             <NavLink 
                                 to={to} 
@@ -263,18 +267,21 @@ export default function Layout() {
                                     }
                                 }}
                             >
-                                <motion.div 
-                                    className="flex items-center gap-4 w-full"
-                                    whileHover={{ x: 4 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                                >
-                                    <div className="ig-icon-wrap">
-                                        <Icon className="ig-icon" />
-                                        {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
-                                        {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
-                                    </div>
-                                    <span className="ig-label">{label}</span>
-                                </motion.div>
+                                {({ isActive }) => (
+                                    <motion.div 
+                                        className="flex items-center gap-4 w-full"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                                    >
+                                        <div className="ig-icon-wrap">
+                                            {isActive ? <ActiveIcon className="ig-icon" /> : <Icon className="ig-icon" />}
+                                            {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                            {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
+                                        </div>
+                                        <span className={`ig-label ${isActive ? 'font-black' : ''}`}>{label}</span>
+                                    </motion.div>
+                                )}
                             </NavLink>
                         </motion.div>
                     ))}
@@ -287,11 +294,12 @@ export default function Layout() {
                         >
                             <motion.div 
                                 className="flex items-center gap-4 w-full"
-                                whileHover={{ x: 4 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                             >
                                 <div className="ig-icon-wrap">
-                                    <HiPlusCircle className="ig-icon" />
+                                    <HiOutlinePlusCircle className="ig-icon" />
                                 </div>
                                 <span className="ig-label">Create</span>
                             </motion.div>
@@ -304,16 +312,19 @@ export default function Layout() {
                                 to="/admin" 
                                 className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
                             >
-                                <motion.div 
-                                    className="flex items-center gap-4 w-full"
-                                    whileHover={{ x: 4 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                                >
-                                    <div className="ig-icon-wrap">
-                                        <HiShieldCheck className="ig-icon text-accent" />
-                                    </div>
-                                    <span className="ig-label">Admin Console</span>
-                                </motion.div>
+                                {({ isActive }) => (
+                                    <motion.div 
+                                        className="flex items-center gap-4 w-full"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                                    >
+                                        <div className="ig-icon-wrap">
+                                            {isActive ? <HiShieldCheck className="ig-icon text-accent" /> : <HiOutlineShieldCheck className="ig-icon" />}
+                                        </div>
+                                        <span className={`ig-label ${isActive ? 'font-black' : ''}`}>Admin Console</span>
+                                    </motion.div>
+                                )}
                             </NavLink>
                         </motion.div>
                     )}
@@ -472,15 +483,20 @@ export default function Layout() {
             </main>
 
             <nav className="mobile-nav">
-                {mobileBottomLinksLeft.map(({ to, icon: Icon, exact }) => (
-                    <NavLink key={to} to={to} end={exact} className={({ isActive }) => isActive ? 'active' : ''}><Icon /></NavLink>
-                ))}
-                <button onClick={() => setShowCreate(true)} className="w-10 h-10 flex items-center justify-center border border-border-md rounded-xl bg-surface-1 shadow-sm"><HiPlusCircle size={28} /></button>
-                {mobileBottomLinksRight.map(({ to, icon: Icon, exact }) => (
-                    <NavLink key={to} to={to} end={exact} className={({ isActive }) => isActive ? 'active' : ''}><Icon /></NavLink>
-                ))}
-                <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => isActive ? 'active' : ''}>
-                    <img src={avatarUrl} alt="" className="w-[26px] h-[26px] rounded-full object-cover" />
+                <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    {({ isActive }) => isActive ? <HiHome size={26} /> : <HiOutlineHome size={26} />}
+                </NavLink>
+                <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    {({ isActive }) => isActive ? <HiSearch size={26} /> : <HiOutlineSearch size={26} />}
+                </NavLink>
+                <button onClick={() => setShowCreate(true)} className="mobile-nav-create">
+                    <HiPlusCircle size={30} />
+                </button>
+                <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    {({ isActive }) => isActive ? <HiFilm size={26} /> : <HiOutlineFilm size={26} />}
+                </NavLink>
+                <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    <img src={avatarUrl} alt="" className={`w-7 h-7 rounded-full object-cover border ${location.pathname.startsWith(`/profile/${user?._id}`) ? 'border-text-1' : 'border-transparent'}`} />
                 </NavLink>
             </nav>
 
