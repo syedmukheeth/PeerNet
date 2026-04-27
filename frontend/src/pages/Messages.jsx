@@ -437,31 +437,37 @@ export default function Messages() {
                             transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
                             className="zn-page-transition h-full flex flex-col"
                         >
-                            <header className="zn-chat-header border-b border-border bg-surface/80 backdrop-blur-xl z-20 px-6">
+                            <header className="zn-chat-header px-6 border-b border-white/5 bg-black/20 backdrop-blur-2xl z-30">
                                 <div className="flex items-center gap-4">
-                                    <div className="relative">
+                                    <div className="relative group cursor-pointer">
                                         <img 
                                             src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} 
-                                            className="w-8 h-8 rounded-full object-cover border border-border shadow-sm" 
+                                            className="w-10 h-10 rounded-2xl object-cover border border-white/5 shadow-2xl transition-transform group-hover:scale-105" 
                                             alt="" 
                                         />
-                                        {peer?.isOnline && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-success border-2 border-bg rounded-full" />}
+                                        {peer?.isOnline && (
+                                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-4 border-[#050505] rounded-full" />
+                                        )}
                                     </div>
                                     <div>
-                                        <h2 className="text-sm font-bold text-text-1 tracking-tight">{peer?.username || 'Chatting...'}</h2>
-                                        <p className="text-[11px] text-text-2">
-                                            {peer?.isOnline ? 'Active Now' : 'Offline'}
-                                        </p>
+                                        <h2 className="text-sm font-black text-white tracking-tight leading-none mb-1">{peer?.username || 'Chatting...'}</h2>
+                                        <div className="flex items-center gap-1.5">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${peer?.isOnline ? 'bg-green-500' : 'bg-zinc-600'}`} />
+                                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                                                {peer?.isOnline ? 'Online' : 'Offline'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
+                                
                                 <div className="flex items-center gap-2">
                                     <button 
                                         onClick={() => { setIsSearchingInChat(!isSearchingInChat); if (!isSearchingInChat) setChatSearchQuery('') }} 
-                                        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${isSearchingInChat ? 'bg-accent/10 text-accent' : 'text-text-2 hover:bg-hover'}`}
+                                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSearchingInChat ? 'bg-accent/10 text-accent' : 'text-zinc-400 hover:bg-white/5'}`}
                                     >
                                         <HiSearch size={20} />
                                     </button>
-                                    <button className="w-9 h-9 rounded-full text-text-2 hover:bg-hover flex items-center justify-center transition-all">
+                                    <button className="w-10 h-10 rounded-xl text-zinc-400 hover:bg-white/5 flex items-center justify-center transition-all">
                                         <HiDotsVertical size={20} />
                                     </button>
                                 </div>
@@ -551,66 +557,37 @@ export default function Messages() {
                                 </AnimatePresence>
                             </div>
 
-                            <footer className="zn-footer border-t border-white/5 bg-black/40 backdrop-blur-xl">
-                                <div className="max-w-4xl mx-auto px-6 py-5">
-                                    <AnimatePresence>
-                                        {replyingTo && (
-                                            <motion.div 
-                                                initial={{ y: 20, opacity: 0, scale: 0.98 }} 
-                                                animate={{ y: 0, opacity: 1, scale: 1 }} 
-                                                exit={{ y: 20, opacity: 0, scale: 0.98 }} 
-                                                className="zn-reply-preview bg-[#121214] border border-white/10 shadow-2xl ring-1 ring-zn-accent/20"
-                                            >
-                                                <div className="zn-reply-line bg-zn-accent shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-[10px] font-black text-zn-accent uppercase tracking-[0.15em] mb-0.5">Replying to {replyingTo.sender?.username || 'User'}</p>
-                                                    <p className="text-xs text-zinc-500 truncate font-bold leading-tight">{replyingTo.body}</p>
-                                                </div>
-                                                <button onClick={() => setReplyingTo(null)} className="w-8 h-8 rounded-xl hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-all">
-                                                    <HiX size={18} />
-                                                </button>
-                                            </motion.div>
+                            <footer className="zn-footer">
+                                <div className="zn-composer-pill">
+                                    <button className="zn-composer-action-btn">
+                                        <HiEmojiHappy size={22} />
+                                    </button>
+                                    <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
+                                        <HiPaperClip size={22} />
+                                    </button>
+                                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} hidden />
+                                    
+                                    <input 
+                                        value={inputText}
+                                        onChange={(e) => setInputText(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+                                        placeholder={`Message ${peer?.username || '...'}`}
+                                        className="zn-composer-input"
+                                    />
+                                    
+                                    <div className="flex items-center gap-1">
+                                        {!inputText.trim() && (
+                                            <button className="zn-composer-action-btn">
+                                                <HiMicrophone size={22} />
+                                            </button>
                                         )}
-                                    </AnimatePresence>
-
-                                    <div className="zn-composer-pill group shadow-2xl ring-1 ring-white/5 focus-within:ring-zn-accent/20 transition-all duration-300">
-                                        <div className="flex items-center gap-1.5 pl-2">
-                                            <button className="w-10 h-10 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/5 transition-all active:scale-90 flex items-center justify-center">
-                                                <HiEmojiHappy size={24} />
-                                            </button>
-                                            <button onClick={() => fileInputRef.current?.click()} className="w-10 h-10 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/5 transition-all active:scale-90 flex items-center justify-center">
-                                                <HiPaperClip size={24} />
-                                            </button>
-                                        </div>
-                                        
-                                        <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                                        
-                                        <input 
-                                            value={inputText}
-                                            onChange={(e) => setInputText(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                    e.preventDefault()
-                                                    handleSend()
-                                                }
-                                            }}
-                                            className="zn-composer-input py-4 text-[15px]" 
-                                            placeholder={`Message ${peer?.username || 'contact'}...`}
-                                            autoFocus
-                                        />
-                                        
-                                        <div className="flex items-center gap-2 pr-2.5">
-                                            <button className="w-10 h-10 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/5 transition-all active:scale-90 flex items-center justify-center">
-                                                <HiMicrophone size={24} />
-                                            </button>
-                                            <button 
-                                                onClick={handleSend} 
-                                                disabled={!inputText.trim() && !replyingTo}
-                                                className={`zn-send-btn ${inputText.trim() || replyingTo ? 'active scale-100 opacity-100 shadow-[0_0_20px_rgba(168,85,247,0.4)]' : 'opacity-20 scale-90 pointer-events-none'}`}
-                                            >
-                                                <HiArrowRight size={22} />
-                                            </button>
-                                        </div>
+                                        <button 
+                                            disabled={!inputText.trim() && !replyingTo}
+                                            onClick={handleSend}
+                                            className="zn-send-btn"
+                                        >
+                                            <HiArrowRight size={22} />
+                                        </button>
                                     </div>
                                 </div>
                             </footer>
