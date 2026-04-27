@@ -82,8 +82,8 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
     return (
         <motion.div 
             layout
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 400 }}
             className={`zn-row ${isSelf ? 'self' : 'peer'}`}
         >
@@ -245,16 +245,32 @@ export default function Messages() {
     }, [filteredMessages])
 
     // Handlers
-    const scrollToBottom = useCallback(() => {
+    const scrollToBottom = useCallback((instant = false) => {
         if (viewportRef.current) {
             viewportRef.current.scrollTo({
                 top: viewportRef.current.scrollHeight,
-                behavior: 'smooth'
+                behavior: instant ? 'instant' : 'smooth'
             })
         }
     }, [])
 
-    useEffect(() => { scrollToBottom() }, [messages, scrollToBottom])
+    // Scroll when messages change or loading completes
+    useEffect(() => { 
+        if (!loadingMsgs) {
+            scrollToBottom(messages.length <= (prevMsgCount.current || 0))
+            prevMsgCount.current = messages.length
+        }
+    }, [messages, loadingMsgs, scrollToBottom])
+
+    const prevMsgCount = useRef(messages.length)
+
+    // Scroll to bottom instantly when switching conversations
+    useEffect(() => {
+        if (convoId && !loadingMsgs) {
+            const timer = setTimeout(() => scrollToBottom(true), 100)
+            return () => clearTimeout(timer)
+        }
+    }, [convoId, loadingMsgs, scrollToBottom])
     
     // Draft Syncing: Load draft when conversation changes
     useEffect(() => {
