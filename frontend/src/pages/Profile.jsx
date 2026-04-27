@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Skeleton } from 'boneyard-js'
+import { Skeleton } from 'boneyard-js/react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'

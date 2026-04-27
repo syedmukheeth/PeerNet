@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
 import { HiSearch, HiBadgeCheck } from 'react-icons/hi'
 import toast from 'react-hot-toast'
-import { Skeleton } from 'boneyard-js'
+import { Skeleton } from 'boneyard-js/react'
 
 const pageVariants = { initial: { opacity: 0 }, animate: { opacity: 1, transition: { duration: 0.25 } } }
 

@@ -14,7 +14,7 @@ import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'
 import ShareModal from '../components/ShareModal'
-import { Skeleton } from 'boneyard-js'
+import { Skeleton } from 'boneyard-js/react'
 import { useQueryClient } from '@tanstack/react-query'
 
 export default function PostDetail() {

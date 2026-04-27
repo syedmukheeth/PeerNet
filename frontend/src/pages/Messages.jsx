@@ -8,7 +8,7 @@ import {
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { Skeleton } from 'boneyard-js'
+import { Skeleton } from 'boneyard-js/react'
 import { 
     useConvos, useMessages, useSendMessage, 
     useMessageActions, useConvoActions, useChatState 

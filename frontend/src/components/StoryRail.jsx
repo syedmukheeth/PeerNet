@@ -5,7 +5,7 @@ import { HiPlus, HiX, HiDotsVertical, HiPlay, HiPause, HiTrash } from 'react-ico
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import CreateStoryModal from './CreateStoryModal'
-import { Skeleton } from 'boneyard-js'
+import { Skeleton } from 'boneyard-js/react'
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
 // ── Animated Progress Bar ────────────────────────────────────

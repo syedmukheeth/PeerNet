@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Skeleton } from 'boneyard-js'
+import { Skeleton } from 'boneyard-js/react'
 import { 
     HiUsers, HiCollection, HiTrash, 
     HiRefresh,
@@ -131,11 +131,7 @@ const Sparkline = ({ data = [], color = '#00F0FF' }) => {
     )
 }
 
-// boneyard-js handles skeletons now
-        <div className="h-3 w-16 bg-white/5 rounded" />
-        <div className="h-8 w-24 bg-white/5 rounded-lg" />
-    </div>
-)
+
 
 const StatCard = ({ label, value, sub, icon, chartData, color = 'accent', accent }) => (
     <div className={`admin-stat-card group ${accent ? 'border-red-500/30 bg-red-500/5' : ''}`}>
