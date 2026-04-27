@@ -846,6 +846,14 @@ textarea:focus-visible {
   box-sizing: border-box;
 }
 
+.layout-container {
+  height: 100%;
+}
+
+.page-transition-wrapper {
+  height: 100%;
+}
+
 /* -- FEED LAYOUT - 2-col inside main col ---------------- */
 .feed-layout {
   display: flex;
@@ -6358,7 +6366,7 @@ textarea:focus-visible {
 
 .zn-messages-root {
   display: flex;
-  height: calc(100vh - 64px); /* Subtract Header */
+  height: 100%;
   background: #000;
   overflow: hidden;
   color: #fff;
