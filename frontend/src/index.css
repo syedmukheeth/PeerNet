@@ -6489,13 +6489,14 @@ textarea:focus-visible {
 }
 
 .zn-bubble {
-  padding: 8px 16px;
-  font-size: 14px;
-  line-height: 1.5;
-  border-radius: 22px;
+  padding: 10px 16px;
+  font-size: 14.5px;
+  line-height: 1.4;
+  border-radius: 20px;
   position: relative;
   transition: all 0.2s;
   max-width: 100%;
+  word-break: break-word;
 }
 
 .zn-row.self .zn-bubble {
@@ -6587,6 +6588,66 @@ textarea:focus-visible {
 /* -------------------------------------------------------------------------
    REPLY SYSTEM
    ------------------------------------------------------------------------- */
+.zn-bubble-actions {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s var(--ease-out);
+}
+
+.zn-bubble-container:hover .zn-bubble-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.zn-row.self .zn-bubble-actions { right: 100%; padding-right: 12px; }
+.zn-row.peer .zn-bubble-actions { left: 100%; padding-left: 12px; }
+
+.zn-action-bar {
+    display: flex;
+    align-items: center;
+    background: rgba(18, 18, 20, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 4px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.zn-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    transition: all 0.2s;
+}
+
+.zn-action-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-1);
+    transform: scale(1.1);
+}
+
+.zn-action-btn.delete:hover {
+    color: var(--error);
+    background: rgba(237, 73, 86, 0.1);
+}
+
+.zn-action-divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+}
+
 .zn-reply-preview {
     background: rgba(255, 255, 255, 0.03);
     border-top: 1px solid rgba(255, 255, 255, 0.05);

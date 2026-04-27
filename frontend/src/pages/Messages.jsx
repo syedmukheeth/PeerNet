@@ -14,7 +14,6 @@ import {
 } from '../hooks/useChat'
 import { timeago as formatTime } from '../utils/timeago'
 import toast from 'react-hot-toast'
-import bgImg from '../assets/elite_networking_bg.png'
 
 /**
  * CONVERSATION ITEM COMPONENT
@@ -135,29 +134,37 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
                     </AnimatePresence>
                 </div>
 
-                {/* Bubble Actions Menu */}
-                <div className={`absolute top-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all z-10 transform ${isSelf ? 'right-full mr-3 translate-x-2' : 'left-full ml-3 -translate-x-2'} group-hover:translate-x-0`}>
-                    <div className="flex bg-[#121214]/90 backdrop-blur-md border border-white/10 rounded-2xl p-1 shadow-2xl ring-1 ring-black/50">
-                        <button onClick={() => onReply(m)} className="w-8 h-8 rounded-xl hover:bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors" title="Reply">
+                {/* Bubble Actions Menu - Semantic & Premium */}
+                <div className="zn-bubble-actions">
+                    <div className="zn-action-bar">
+                        <button onClick={() => onReply(m)} className="zn-action-btn" title="Reply">
                             <HiReply size={16} />
                         </button>
-                        <button onClick={() => onForward(m)} className="w-8 h-8 rounded-xl hover:bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors" title="Forward">
+                        <button onClick={() => onForward(m)} className="zn-action-btn" title="Forward">
                             <HiArrowSmRight size={16} />
                         </button>
                         {isSelf && (
                             <>
-                                <button onClick={() => onEdit(m)} className="w-8 h-8 rounded-xl hover:bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors" title="Edit">
+                                <button onClick={() => onEdit(m)} className="zn-action-btn" title="Edit">
                                     <HiPencil size={16} />
                                 </button>
-                                <button onClick={() => onDelete(m._id)} className="w-8 h-8 rounded-xl hover:bg-white/5 flex items-center justify-center text-red-500/40 hover:text-red-500 transition-colors" title="Delete">
+                                <button onClick={() => onDelete(m._id)} className="zn-action-btn delete" title="Delete">
                                     <HiTrash size={16} />
                                 </button>
                             </>
                         )}
-                        <div className="w-[1px] h-4 bg-white/10 my-auto mx-1" />
-                        <div className="flex gap-0.5 pr-1">
+                        
+                        <div className="zn-action-divider" />
+                        
+                        <div className="flex items-center gap-0.5 px-1">
                             {quickEmojis.slice(0, 3).map(e => (
-                                <button key={e} onClick={() => onReact(e)} className="w-8 h-8 rounded-xl hover:bg-white/10 flex items-center justify-center text-sm transition-transform active:scale-125">{e}</button>
+                                <button 
+                                    key={e} 
+                                    onClick={() => onReact(e)} 
+                                    className="w-8 h-8 rounded-xl hover:bg-white/10 flex items-center justify-center text-sm transition-all hover:scale-125 active:scale-150"
+                                >
+                                    {e}
+                                </button>
                             ))}
                         </div>
                     </div>
@@ -570,8 +577,7 @@ export default function Messages() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="flex-1 flex flex-col items-center justify-center p-12 text-center relative overflow-hidden h-full bg-cover bg-center"
-                            style={{ backgroundImage: `linear-gradient(rgba(var(--surface-rgb), 0.7), rgba(var(--surface-rgb), 0.7)), url(${bgImg})` }}
+                            className="flex-1 flex flex-col items-center justify-center p-12 text-center relative overflow-hidden h-full bg-surface"
                         >
                             <motion.div 
                                 initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -579,7 +585,7 @@ export default function Messages() {
                                 transition={{ type: 'spring', delay: 0.1 }}
                                 className="relative z-10"
                             >
-                                <div className="w-24 h-24 rounded-full bg-surface border border-border flex items-center justify-center mb-8 mx-auto shadow-2xl">
+                                <div className="w-24 h-24 rounded-full bg-surface-1 border border-border flex items-center justify-center mb-8 mx-auto shadow-xl">
                                     <HiMail size={40} className="text-accent" />
                                 </div>
                                 <h2 className="text-3xl font-bold text-text-1 mb-3 tracking-tight">Your Messages</h2>
