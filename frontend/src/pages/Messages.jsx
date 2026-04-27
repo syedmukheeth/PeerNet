@@ -85,7 +85,7 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
             initial={{ opacity: 0, scale: 0.9, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-            className={`zn-row ${isSelf ? 'self' : 'peer'} pos-${pos} ${isNewGroup ? 'new-group' : ''}`}
+            className={`zn-row ${isSelf ? 'self' : 'peer'} pos-${pos} ${isNewGroup ? 'new-group' : ''} ${reactions.length > 0 ? 'has-reactions' : ''}`}
         >
             <div className="zn-bubble-container group">
                 {/* Reply Context */}

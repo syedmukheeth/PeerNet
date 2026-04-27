@@ -6507,6 +6507,11 @@ textarea:focus-visible {
 .zn-row.self { align-items: flex-end; }
 .zn-row.peer { align-items: flex-start; }
 
+.zn-row.has-reactions {
+  margin-bottom: 16px;
+  z-index: 20;
+}
+
 .zn-bubble-container {
   max-width: 75%;
   display: flex;
@@ -6802,7 +6807,7 @@ textarea:focus-visible {
    ------------------------------------------------------------------------- */
 .zn-reactions {
     position: absolute;
-    bottom: -12px;
+    bottom: -10px;
     display: flex;
     gap: 3px;
     z-index: 50;
