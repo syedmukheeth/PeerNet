@@ -6490,13 +6490,18 @@ textarea:focus-visible {
   flex: 1;
 }
 
-/* 3. Bubbles & Actions */
+/* 3. Bubbles & Actions: Premium Grouping Logic */
 .zn-row {
   display: flex;
   flex-direction: column;
-  margin-bottom: 6px; /* Tighter grouping */
+  margin-bottom: 2px; /* Tighter grouping for consecutive messages */
   width: 100%;
   position: relative;
+}
+
+/* Add margin when the user changes */
+.zn-row.new-group {
+  margin-top: 12px;
 }
 
 .zn-row.self { align-items: flex-end; }
@@ -6511,32 +6516,42 @@ textarea:focus-visible {
 }
 
 .zn-bubble {
-  padding: 12px 20px;
-  font-size: 15px;
+  padding: 10px 16px;
+  font-size: 14.5px;
   line-height: 1.5;
-  border-radius: 24px;
+  border-radius: 18px;
   position: relative;
   transition: all 0.2s var(--ease-out);
-  max-width: 100%;
+  max-width: fit-content;
   word-break: break-word;
-  min-width: 65px; /* Prevent tiny circles on short messages */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  min-width: 50px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
+/* Grouping Border Radius Physics */
 .zn-row.peer .zn-bubble {
-  background: #262626;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.05);
-  border-bottom-left-radius: 4px;
+  background: #1f1f22;
+  color: #efeff1;
+  border: 1px solid rgba(255,255,255,0.03);
+  border-top-left-radius: 18px;
+  border-bottom-left-radius: 18px;
 }
+.zn-row.peer.pos-top .zn-bubble { border-bottom-left-radius: 4px; }
+.zn-row.peer.pos-middle .zn-bubble { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+.zn-row.peer.pos-bottom .zn-bubble { border-top-left-radius: 4px; border-bottom-left-radius: 18px; }
+.zn-row.peer.pos-single .zn-bubble { border-bottom-left-radius: 4px; }
 
 .zn-row.self .zn-bubble {
-  background: var(--accent);
-  background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
-  color: #fff;
-  border-bottom-right-radius: 4px;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  color: #ffffff;
+  border-top-right-radius: 18px;
+  border-bottom-right-radius: 18px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
 }
+.zn-row.self.pos-top .zn-bubble { border-bottom-right-radius: 4px; }
+.zn-row.self.pos-middle .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+.zn-row.self.pos-bottom .zn-bubble { border-top-right-radius: 4px; border-bottom-right-radius: 18px; }
+.zn-row.self.pos-single .zn-bubble { border-bottom-right-radius: 4px; }
 
 .zn-day {
   display: flex;
@@ -6737,37 +6752,38 @@ textarea:focus-visible {
    ------------------------------------------------------------------------- */
 .zn-reactions {
     position: absolute;
-    bottom: -10px;
+    bottom: -12px;
     display: flex;
-    gap: 2px;
-    z-index: 5;
+    gap: 3px;
+    z-index: 50;
 }
 
-.zn-row.self .zn-reactions { right: 8px; }
-.zn-row.peer .zn-reactions { left: 8px; }
+.zn-row.self .zn-reactions { right: 12px; }
+.zn-row.peer .zn-reactions { left: 12px; }
 
 .zn-reaction-chip {
-    background: #18181b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 10px;
+    background: rgba(15, 15, 18, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
     display: flex;
     align-items: center;
     gap: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .zn-reaction-chip:hover {
     background: #27272a;
-    transform: scale(1.1);
+    transform: scale(1.1) translateY(-2px);
 }
 
 .zn-reaction-chip.active {
-    background: rgba(124, 58, 237, 0.2);
-    border-color: var(--zn-accent);
+    background: rgba(79, 70, 229, 0.2);
+    border-color: rgba(79, 70, 229, 0.5);
 }
 
 /* -------------------------------------------------------------------------

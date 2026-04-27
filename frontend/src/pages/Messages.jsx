@@ -4,7 +4,7 @@ import {
     HiDotsVertical, HiPaperClip, HiMicrophone, HiEmojiHappy, 
     HiReply, HiPencil, HiTrash, HiSearch, HiPencilAlt,
     HiX, HiChevronDown, HiArrowRight, HiVolumeUp, HiVolumeOff, 
-    HiBookmark, HiArchive, HiArrowSmRight, HiCheckCircle, HiMail
+    HiBookmark, HiArchive, HiArrowSmRight, HiCheckCircle, HiMail, HiLightningBolt
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -64,7 +64,7 @@ const ConvoItem = ({ c, isActive, user, onClick, onPin, onMute, onArchive, onMar
  * MESSAGE BUBBLE COMPONENT
  * Premium bubble with actions, reactions, and reply context
  */
-const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForward, searchQuery }) => {
+const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForward, searchQuery, pos, isNewGroup }) => {
     const reactions = m.reactions || []
     const quickEmojis = ['❤️', '😂', '🔥', '👍', '😢', '😮']
 
@@ -82,10 +82,10 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
     return (
         <motion.div 
             layout
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-            className={`zn-row ${isSelf ? 'self' : 'peer'}`}
+            className={`zn-row ${isSelf ? 'self' : 'peer'} pos-${pos} ${isNewGroup ? 'new-group' : ''}`}
         >
             <div className="zn-bubble-container group">
                 {/* Reply Context */}
@@ -229,17 +229,43 @@ export default function Messages() {
         return messages.filter(m => m.body?.toLowerCase().includes(chatSearchQuery.toLowerCase()))
     }, [messages, chatSearchQuery])
 
-    // Group messages by date
+    // Group messages by date and sequence
     const groupedMessages = useMemo(() => {
         const groups = []
         let lastDate = ''
-        filteredMessages.forEach(m => {
+        
+        filteredMessages.forEach((m, idx) => {
             const date = new Date(m.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
             if (date !== lastDate) {
                 groups.push({ type: 'date', value: date, id: `date-${date}` })
                 lastDate = date
             }
-            groups.push({ type: 'message', value: m, id: m._id })
+            
+            // Determine position in sequence for grouping UI
+            const prev = filteredMessages[idx - 1]
+            const next = filteredMessages[idx + 1]
+            const senderId = m.sender?._id || m.sender
+            
+            const isSameAsPrev = prev && (prev.sender?._id || prev.sender) === senderId
+            const isSameAsNext = next && (next.sender?._id || next.sender) === senderId
+            
+            // Also check time gap (e.g. if > 15 mins, start a new group)
+            const prevTime = prev ? new Date(prev.createdAt).getTime() : 0
+            const currTime = new Date(m.createdAt).getTime()
+            const isTimeGap = (currTime - prevTime) > 15 * 60 * 1000
+
+            let pos = 'single'
+            if (isSameAsPrev && isSameAsNext && !isTimeGap) pos = 'middle'
+            else if (isSameAsPrev && !isTimeGap) pos = 'bottom'
+            else if (isSameAsNext) pos = 'top'
+            
+            groups.push({ 
+                type: 'message', 
+                value: m, 
+                id: m._id, 
+                pos, 
+                isNewGroup: !isSameAsPrev || isTimeGap 
+            })
         })
         return groups
     }, [filteredMessages])
@@ -501,6 +527,8 @@ export default function Messages() {
                                                     m={item.value} 
                                                     searchQuery={chatSearchQuery}
                                                     isSelf={item.value.sender?._id === user?._id || item.value.sender === user?._id} 
+                                                    pos={item.pos}
+                                                    isNewGroup={item.isNewGroup}
                                                     onReply={setReplyingTo}
                                                     onForward={(msg) => toast.success('Forwarding system ready')}
                                                     onEdit={(msg) => { setEditingId(msg._id); setEditingText(msg.body) }}
