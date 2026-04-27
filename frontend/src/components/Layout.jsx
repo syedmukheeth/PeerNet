@@ -417,7 +417,7 @@ export default function Layout() {
                 >
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={location.pathname}
+                            key={location.pathname.split('/')[1] || 'root'}
                             initial={{ opacity: 0, y: 12, scale: 0.99 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -12, scale: 1.01 }}

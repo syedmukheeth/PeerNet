@@ -427,14 +427,14 @@ export default function Messages() {
 
             {/* 2. CHAT MAIN: The viewport of active connection */}
             <main className="zn-chat-main">
-                <AnimatePresence mode="wait">
+                <AnimatePresence>
                     {convoId ? (
                         <motion.div 
                             key={`chat-${convoId}`}
-                            initial={{ opacity: 0, x: 30, filter: 'blur(10px)' }}
-                            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                            exit={{ opacity: 0, x: -30, filter: 'blur(10px)' }}
-                            transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
                             className="zn-page-transition h-full flex flex-col"
                         >
                             <header className="zn-chat-header px-6 border-b border-white/5 bg-black/20 backdrop-blur-2xl z-30">
