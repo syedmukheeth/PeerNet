@@ -19,6 +19,7 @@ import CreatePostModal from './CreatePostModal'
 import FeedbackModal from './FeedbackModal'
 import AccountSwitcherModal from './AccountSwitcherModal'
 import { useQueryClient } from '@tanstack/react-query'
+import logoImg from '../assets/logo.png'
 
 const links = [
     { to: '/', icon: HiOutlineHome, activeIcon: HiHome, label: 'Home', exact: true },
