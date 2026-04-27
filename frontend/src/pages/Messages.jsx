@@ -100,16 +100,16 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
                     <div className="zn-bubble-text">{renderContent()}</div>
                     
                     {/* Timestamp & Status */}
-                    <div className={`flex items-center gap-1.5 mt-1.5 text-[9px] font-black uppercase tracking-tighter opacity-30 ${isSelf ? 'justify-end' : ''}`}>
-                        {formatTime(m.createdAt)}
+                    <div className={`zn-bubble-meta ${isSelf ? 'self' : 'peer'}`}>
+                        <span>{formatTime(m.createdAt)}</span>
                         {isSelf && (
                             m.isSeen ? (
-                                <div className="flex -space-x-1 text-zn-accent">
-                                    <HiCheckCircle size={10} />
-                                    <HiCheckCircle size={10} />
+                                <div className="flex -space-x-1 text-white">
+                                    <HiCheckCircle size={10} className="opacity-40" />
+                                    <HiCheckCircle size={10} className="opacity-80" />
                                 </div>
                             ) : (
-                                <HiCheckCircle size={10} />
+                                <HiCheckCircle size={10} className="opacity-40" />
                             )
                         )}
                         {m.isEdited && <span className="italic">(edited)</span>}

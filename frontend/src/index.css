@@ -6494,41 +6494,48 @@ textarea:focus-visible {
 .zn-row {
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;
+  margin-bottom: 6px; /* Tighter grouping */
   width: 100%;
+  position: relative;
 }
 
 .zn-row.self { align-items: flex-end; }
 .zn-row.peer { align-items: flex-start; }
 
 .zn-bubble-container {
-  max-width: 70%;
+  max-width: 75%;
   display: flex;
   flex-direction: column;
   position: relative;
+  z-index: 10;
 }
 
 .zn-bubble {
-  padding: 10px 16px;
-  font-size: 14.5px;
-  line-height: 1.4;
-  border-radius: 20px;
+  padding: 12px 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  border-radius: 24px;
   position: relative;
-  transition: all 0.2s;
+  transition: all 0.2s var(--ease-out);
   max-width: 100%;
   word-break: break-word;
+  min-width: 65px; /* Prevent tiny circles on short messages */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .zn-row.peer .zn-bubble {
-  background: var(--surface-1);
-  color: var(--text-1);
-  border: 1px solid var(--border-md);
+  background: #262626;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-bottom-left-radius: 4px;
 }
 
 .zn-row.self .zn-bubble {
   background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
 }
 
 .zn-day {
@@ -6622,6 +6629,20 @@ textarea:focus-visible {
 /* -------------------------------------------------------------------------
    REPLY SYSTEM
    ------------------------------------------------------------------------- */
+.zn-bubble-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.4;
+}
+
+.zn-row.self .zn-bubble-meta { justify-content: flex-end; }
+
 .zn-bubble-actions {
     position: absolute;
     top: 50%;
