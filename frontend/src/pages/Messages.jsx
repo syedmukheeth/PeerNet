@@ -320,12 +320,12 @@ export default function Messages() {
                             <HiPencilAlt size={20} />
                         </button>
                     </div>
-                    <div className="relative group">
-                        <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3 group-focus-within:text-accent transition-colors" size={16} />
+                    <div className="zn-sidebar-search-wrapper flex items-center gap-3 bg-surface-el border border-white/5 rounded-full px-4 py-2.5 group-focus-within:border-accent/30 transition-all">
+                        <HiSearch className="text-text-3 group-focus-within:text-accent transition-colors shrink-0" size={18} />
                         <input 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="zn-sidebar-search w-full bg-surface-el border border-transparent rounded-lg py-2 pl-10 pr-4 text-sm font-medium placeholder:text-text-3 outline-none focus:bg-transparent focus:border-border transition-all" 
+                            className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder:text-text-3 transition-all" 
                             placeholder="Search" 
                         />
                     </div>

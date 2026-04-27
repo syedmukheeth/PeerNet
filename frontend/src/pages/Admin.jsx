@@ -536,10 +536,10 @@ export default function Admin() {
                         {activeTab === 'users' && (
                             <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 <div className="flex flex-col md:flex-row justify-between items-stretch gap-6 mb-10">
-                                    <div className="relative flex-1">
-                                        <HiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-text-3 opacity-40" />
+                                    <div className="relative flex-1 flex items-center gap-3 bg-white/[0.02] border border-white/5 rounded-full px-6 py-3.5 focus-within:border-accent/40 transition-all">
+                                        <HiSearch className="text-text-3 opacity-40 shrink-0" size={18} />
                                         <input 
-                                            className="w-full bg-white/[0.02] border border-white/5 text-sm font-medium rounded-xl pl-16 pr-8 py-4 outline-none focus:border-accent transition-all placeholder-text-3" 
+                                            className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder-text-3" 
                                             placeholder="Search user accounts..." 
                                             value={search}
                                             onChange={(e) => {
