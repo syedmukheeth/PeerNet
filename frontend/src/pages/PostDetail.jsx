@@ -14,7 +14,7 @@ import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'
 import ShareModal from '../components/ShareModal'
-import { PostDetailSkeleton } from '../components/SkeletonLoader'
+import { Skeleton } from 'boneyard-js'
 import { useQueryClient } from '@tanstack/react-query'
 
 export default function PostDetail() {
@@ -288,7 +288,35 @@ export default function PostDetail() {
         }
     }, [replyingTo, fetchAISuggestions])
 
-    if (loading) return <PostDetailSkeleton />
+    if (loading) return (
+        <Skeleton key="post-detail-skeleton">
+            <div className="post-detail-card min-h-[600px]">
+                <div className="post-detail-media bg-white/5" />
+                <div className="post-detail-info p-6 space-y-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/10" />
+                        <div className="w-32 h-4 bg-white/10 rounded-full" />
+                    </div>
+                    <div className="space-y-3">
+                        <div className="w-full h-4 bg-white/10 rounded-full" />
+                        <div className="w-full h-4 bg-white/10 rounded-full" />
+                        <div className="w-2/3 h-4 bg-white/10 rounded-full" />
+                    </div>
+                    <div className="pt-8 space-y-6">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="flex gap-3">
+                                <div className="w-8 h-8 rounded-full bg-white/10" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="w-24 h-3 bg-white/10 rounded-full" />
+                                    <div className="w-full h-3 bg-white/10 rounded-full" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </Skeleton>
+    )
 
     if (notFound || !post) {
         return (

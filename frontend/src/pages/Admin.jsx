@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Skeleton } from 'boneyard-js'
 import { 
     HiUsers, HiCollection, HiTrash, 
     HiRefresh,
@@ -130,24 +131,7 @@ const Sparkline = ({ data = [], color = '#00F0FF' }) => {
     )
 }
 
-const StatSkeleton = () => (
-    <div className="admin-stat-card animate-pulse opacity-50">
-        <div className="flex justify-between items-center mb-4">
-            <div className="h-2 w-12 bg-white/5 rounded-full" />
-            <div className="h-4 w-4 bg-white/5 rounded-full" />
-        </div>
-        <div className="h-8 w-16 bg-white/10 rounded-lg mb-2" />
-        <div className="h-2 w-14 bg-white/5 rounded-full" />
-    </div>
-)
-
-const TableRowSkeleton = () => (
-    <div className="flex items-center gap-6 py-4 px-6 border-b border-white/5 opacity-30">
-        <div className="w-8 h-8 rounded-lg bg-white/5" />
-        <div className="flex-1 space-y-2">
-            <div className="h-3 w-32 bg-white/10 rounded" />
-            <div className="h-2 w-48 bg-white/5 rounded" />
-        </div>
+// boneyard-js handles skeletons now
         <div className="h-3 w-16 bg-white/5 rounded" />
         <div className="h-8 w-24 bg-white/5 rounded-lg" />
     </div>
@@ -378,12 +362,38 @@ export default function Admin() {
                     <div className="h-7 w-56 bg-white/10 rounded-lg" />
                 </header>
                 <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-12">
-                    {[...Array(7)].map((_, i) => <StatSkeleton key={i} />)}
+                {loading && (
+                    <Skeleton key="admin-stats">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                            {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                                <div key={i} className="admin-stat-card">
+                                    <div className="h-4 w-12 bg-white/10 rounded mb-4" />
+                                    <div className="h-8 w-20 bg-white/10 rounded mb-2" />
+                                    <div className="h-3 w-16 bg-white/10 rounded" />
+                                </div>
+                            ))}
+                        </div>
+                    </Skeleton>
+                )}
                 </div>
                 <div className="flex flex-col lg:flex-row gap-12">
                     <div className="w-56 h-80 bg-white/[0.015] rounded-xl hidden lg:block opacity-20" />
                     <div className="flex-1 space-y-2">
-                        {[...Array(6)].map((_, i) => <TableRowSkeleton key={i} />)}
+                        {loading && (
+                            <Skeleton key="admin-table">
+                                <div className="space-y-4">
+                                    {[1, 2, 3, 4, 5, 6].map(i => (
+                                        <div key={i} className="flex items-center gap-6 py-4 px-6 border-b border-white/5">
+                                            <div className="w-8 h-8 rounded-lg bg-white/10" />
+                                            <div className="flex-1 space-y-2">
+                                                <div className="h-3 w-32 bg-white/10 rounded" />
+                                                <div className="h-2 w-48 bg-white/10 rounded" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Skeleton>
+                        )}
                     </div>
                 </div>
             </div>
@@ -562,7 +572,23 @@ export default function Admin() {
                                         </thead>
                                         <tbody>
                                             {loading ? (
-                                                <tr><td colSpan="4" className="p-0">{[...Array(6)].map((_, i) => <TableRowSkeleton key={i} />)}</td></tr>
+                                                <tr>
+                                                    <td colSpan="4" className="p-0 border-none">
+                                                        <Skeleton key="admin-users-table">
+                                                            <div className="space-y-0">
+                                                                {[1, 2, 3, 4, 5, 6].map(i => (
+                                                                    <div key={i} className="flex items-center gap-6 py-4 px-6 border-b border-white/5">
+                                                                        <div className="w-8 h-8 rounded-lg bg-white/10" />
+                                                                        <div className="flex-1 space-y-2">
+                                                                            <div className="h-3 w-32 bg-white/10 rounded" />
+                                                                            <div className="h-2 w-48 bg-white/10 rounded" />
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </Skeleton>
+                                                    </td>
+                                                </tr>
                                             ) : users.map(u => (
                                                 <tr key={u._id} className="hover:bg-white/[0.01] transition-colors group">
                                                     <td>
@@ -807,7 +833,24 @@ export default function Admin() {
                                         </thead>
                                         <tbody>
                                             {loading ? (
-                                                <tr><td colSpan="4" className="p-0">{[...Array(8)].map((_, i) => <TableRowSkeleton key={i} />)}</td></tr>
+                                                <tr>
+                                                    <td colSpan="4" className="p-0 border-none">
+                                                        <Skeleton key="admin-security-table">
+                                                            <div className="space-y-0">
+                                                                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                                                                    <div key={i} className="flex items-center gap-6 py-4 px-6 border-b border-white/5">
+                                                                        <div className="w-6 h-6 rounded bg-white/10" />
+                                                                        <div className="flex-1 space-y-2">
+                                                                            <div className="h-3 w-24 bg-white/10 rounded" />
+                                                                            <div className="h-2 w-40 bg-white/10 rounded" />
+                                                                        </div>
+                                                                        <div className="w-24 h-3 bg-white/10 rounded" />
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </Skeleton>
+                                                    </td>
+                                                </tr>
                                             ) : logs.map(log => (
                                                 <tr key={log._id} className="hover:bg-white/[0.01]">
                                                     <td>

@@ -8,6 +8,7 @@ import {
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { Skeleton } from 'boneyard-js'
 import { 
     useConvos, useMessages, useSendMessage, 
     useMessageActions, useConvoActions, useChatState 
@@ -360,23 +361,19 @@ export default function Messages() {
                 <div className="zn-sidebar-scroll no-scrollbar">
                     <AnimatePresence mode="popLayout" initial={false}>
                         {loadingConvos ? (
-                            <motion.div 
-                                key="skeleton"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="p-4 space-y-4"
-                            >
-                                {[1,2,3,4,5,6].map(id => (
-                                    <div key={id} className="flex gap-4 items-center">
-                                        <div className="w-14 h-14 rounded-2xl zn-shimmer shrink-0" />
-                                        <div className="flex-1 space-y-2.5">
-                                            <div className="h-4 zn-shimmer w-32 rounded-full" />
-                                            <div className="h-2.5 zn-shimmer w-48 rounded-full opacity-40" />
+                            <Skeleton key="skeleton">
+                                <div className="p-4 space-y-4">
+                                    {[1,2,3,4,5,6].map(id => (
+                                        <div key={id} className="flex gap-4 items-center">
+                                            <div className="w-14 h-14 rounded-2xl bg-white/5 shrink-0" />
+                                            <div className="flex-1 space-y-2.5">
+                                                <div className="h-4 bg-white/5 w-32 rounded-full" />
+                                                <div className="h-2.5 bg-white/5 w-48 rounded-full opacity-40" />
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </motion.div>
+                                    ))}
+                                </div>
+                            </Skeleton>
                         ) : filteredConvos.length > 0 ? (
                             <motion.div 
                                 key="list"
@@ -501,20 +498,16 @@ export default function Messages() {
                             <div ref={viewportRef} className="zn-viewport no-scrollbar pb-12 pt-6">
                                 <AnimatePresence mode="popLayout" initial={false}>
                                     {loadingMsgs ? (
-                                        <motion.div 
-                                            key="chat-skeleton"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="space-y-8 px-6"
-                                        >
-                                            {[1,2,3,4].map(id => (
-                                                <div key={id} className={`flex flex-col ${id % 2 === 0 ? 'items-end' : 'items-start'}`}>
-                                                    <div className={`h-14 zn-shimmer rounded-[24px] mb-2 shadow-sm ${id % 2 === 0 ? 'w-56' : 'w-72'}`} />
-                                                    <div className="h-2.5 zn-shimmer w-16 rounded-full opacity-30" />
-                                                </div>
-                                            ))}
-                                        </motion.div>
+                                        <Skeleton key="chat-skeleton">
+                                            <div className="space-y-8 px-6">
+                                                {[1,2,3,4].map(id => (
+                                                    <div key={id} className={`flex flex-col ${id % 2 === 0 ? 'items-end' : 'items-start'}`}>
+                                                        <div className={`h-14 bg-white/5 rounded-[24px] mb-2 shadow-sm ${id % 2 === 0 ? 'w-56' : 'w-72'}`} />
+                                                        <div className="h-2.5 bg-white/5 w-16 rounded-full opacity-30" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </Skeleton>
                                     ) : groupedMessages.length > 0 ? (
                                         groupedMessages.map((item) => (
                                             item.type === 'date' ? (
@@ -558,36 +551,53 @@ export default function Messages() {
                             </div>
 
                             <footer className="zn-footer">
-                                <div className="zn-composer-pill">
-                                    <button className="zn-composer-action-btn">
-                                        <HiEmojiHappy size={22} />
-                                    </button>
-                                    <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
-                                        <HiPaperClip size={22} />
-                                    </button>
-                                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} hidden />
-                                    
-                                    <input 
-                                        value={inputText}
-                                        onChange={(e) => setInputText(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                                        placeholder={`Message ${peer?.username || '...'}`}
-                                        className="zn-composer-input"
-                                    />
-                                    
-                                    <div className="flex items-center gap-1">
-                                        {!inputText.trim() && (
-                                            <button className="zn-composer-action-btn">
-                                                <HiMicrophone size={22} />
-                                            </button>
-                                        )}
-                                        <button 
-                                            disabled={!inputText.trim() && !replyingTo}
-                                            onClick={handleSend}
-                                            className="zn-send-btn"
-                                        >
-                                            <HiArrowRight size={22} />
+                                <div className="zn-composer-wrapper">
+                                    <div className="zn-composer-pill">
+                                        <button className="zn-composer-action-btn">
+                                            <HiEmojiHappy size={22} />
                                         </button>
+                                        <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
+                                            <HiPaperClip size={22} />
+                                        </button>
+                                        <input type="file" ref={fileInputRef} onChange={handleFileUpload} hidden />
+                                        
+                                        <textarea 
+                                            rows="1"
+                                            value={inputText}
+                                            onChange={(e) => {
+                                                setInputText(e.target.value);
+                                                e.target.style.height = 'auto';
+                                                e.target.style.height = e.target.scrollHeight + 'px';
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault();
+                                                    handleSend();
+                                                    e.target.style.height = 'auto';
+                                                }
+                                            }}
+                                            placeholder={`Message ${peer?.username || '...'}`}
+                                            className="zn-composer-input resize-none max-h-40"
+                                        />
+                                        
+                                        <div className="flex items-center gap-1 self-end mb-1">
+                                            {!inputText.trim() && (
+                                                <button className="zn-composer-action-btn">
+                                                    <HiMicrophone size={22} />
+                                                </button>
+                                            )}
+                                            <button 
+                                                disabled={!inputText.trim() && !replyingTo}
+                                                onClick={() => {
+                                                    handleSend();
+                                                    const ta = document.querySelector('.zn-composer-input');
+                                                    if (ta) ta.style.height = 'auto';
+                                                }}
+                                                className="zn-send-btn"
+                                            >
+                                                <HiArrowRight size={22} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </footer>

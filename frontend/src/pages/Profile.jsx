@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Skeleton } from 'boneyard-js'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -111,9 +112,42 @@ export default function Profile() {
 
 
     if (loading) return (
-        <div className="flex justify-center items-center py-20">
-            <div className="spinner w-9 h-9" />
-        </div>
+        <Skeleton key="profile-skeleton">
+            <div className="profile-page-wrap">
+                <div className="profile-header">
+                    <div className="profile-avatar-col">
+                        <div className="w-[150px] h-[150px] rounded-full bg-white/10" />
+                    </div>
+                    <div className="profile-info-col space-y-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-48 h-8 bg-white/10 rounded-lg" />
+                            <div className="w-24 h-8 bg-white/10 rounded-lg" />
+                        </div>
+                        <div className="flex gap-8">
+                            <div className="w-16 h-4 bg-white/10 rounded-full" />
+                            <div className="w-16 h-4 bg-white/10 rounded-full" />
+                            <div className="w-16 h-4 bg-white/10 rounded-full" />
+                        </div>
+                        <div className="space-y-2">
+                            <div className="w-32 h-4 bg-white/10 rounded-full" />
+                            <div className="w-64 h-3 bg-white/10 rounded-full opacity-50" />
+                        </div>
+                    </div>
+                </div>
+                <div className="profile-tabs mt-12 border-t border-white/5 pt-4">
+                    <div className="flex justify-center gap-12">
+                        <div className="w-20 h-4 bg-white/10 rounded-full" />
+                        <div className="w-20 h-4 bg-white/10 rounded-full" />
+                        <div className="w-20 h-4 bg-white/10 rounded-full" />
+                    </div>
+                </div>
+                <div className="profile-grid mt-8">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
+                        <div key={i} className="aspect-square bg-white/5 rounded-sm" />
+                    ))}
+                </div>
+            </div>
+        </Skeleton>
     )
     if (!profile) return (
         <div className="empty-state-wrap">
@@ -268,9 +302,13 @@ export default function Profile() {
                 }
 
                 if (isLoading) return (
-                    <div className="flex justify-center p-14">
-                        <div className="spinner w-9 h-9" />
-                    </div>
+                    <Skeleton key="saved-posts-skeleton">
+                        <div className="profile-grid">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <div key={i} className="aspect-square bg-white/5 rounded-sm" />
+                            ))}
+                        </div>
+                    </Skeleton>
                 )
 
                 return (

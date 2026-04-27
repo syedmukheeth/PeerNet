@@ -842,7 +842,7 @@ textarea:focus-visible {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 24px 64px;
+  padding: 24px 24px 20px;
   box-sizing: border-box;
 }
 
@@ -4354,7 +4354,7 @@ textarea:focus-visible {
   }
 
   .content-wrap {
-    padding: 64px 0 72px;
+    padding: 64px 0 40px;
   }
 
   .mobile-header-spacer { display: block; height: 52px; flex-shrink: 0; }
@@ -6516,7 +6516,7 @@ textarea:focus-visible {
 .zn-row.peer { align-items: flex-start; }
 
 .zn-row.has-reactions {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   z-index: 20;
 }
 
@@ -6593,24 +6593,31 @@ textarea:focus-visible {
 
 /* 4. Footer & Composer: Senior Frontend Refinement */
 .zn-footer {
-  padding: 8px 16px 12px 16px;
-  background: transparent;
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 20px 20px 20px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(30px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 30;
+  position: relative;
+}
+
+.zn-composer-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .zn-composer-pill {
-  background: rgba(24, 24, 27, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 28px;
-  padding: 8px 12px;
+  background: rgba(30, 30, 35, 0.7);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 26px;
+  padding: 6px 8px;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 4px;
   transition: all 0.3s var(--ease-out);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .zn-composer-pill:focus-within {
@@ -6623,11 +6630,13 @@ textarea:focus-visible {
   flex: 1;
   background: transparent;
   border: none;
-  outline: none;
+  outline: none !important;
   color: #fff;
   font-size: 15px;
-  font-weight: 500;
-  padding: 8px 4px;
+  line-height: 1.4;
+  padding: 10px 12px;
+  min-height: 40px;
+  max-height: 160px;
 }
 
 .zn-composer-input::placeholder {
@@ -6918,23 +6927,7 @@ textarea:focus-visible {
     gap: 12px;
 }
 
-/* -------------------------------------------------------------------------
-   PREMIUM SHIMMER & ANIMATIONS
-   ------------------------------------------------------------------------- */
-@keyframes zn-shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
-.zn-shimmer {
-    background: linear-gradient(90deg, 
-        rgba(255,255,255,0.03) 25%, 
-        rgba(255,255,255,0.08) 50%, 
-        rgba(255,255,255,0.03) 75%
-    );
-    background-size: 200% 100%;
-    animation: zn-shimmer 2s infinite linear;
-}
+/* boneyard-js handles loading states now */
 
 .zn-page-transition {
     width: 100%;
