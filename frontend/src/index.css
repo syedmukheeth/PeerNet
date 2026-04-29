@@ -102,6 +102,16 @@
   --text-1-rgb: 250, 250, 250;
   --accent-rgb: 0, 149, 246;
   --border-rgb: 255, 255, 255;
+
+  /* Messaging Tokens */
+  --zn-footer-bg: rgba(0, 0, 0, 0.5);
+  --zn-composer-bg: rgba(30, 30, 35, 0.7);
+  --zn-composer-border: rgba(255, 255, 255, 0.1);
+  --zn-composer-text: #ffffff;
+  --zn-bubble-peer: #1f1f22;
+  --zn-bubble-peer-text: #efeff1;
+  --zn-action-bar-bg: rgba(18, 18, 20, 0.95);
+  --zn-search-bg: rgba(0, 0, 0, 0.4);
 }
 
 /* -- Light Mode --------------------------------------------- */
@@ -156,6 +166,16 @@
   --text-1-rgb: 38, 38, 38;
   --accent-rgb: 0, 149, 246;
   --border-rgb: 0, 0, 0;
+
+  /* Messaging Tokens - Light Mode Overrides */
+  --zn-footer-bg: rgba(255, 255, 255, 0.8);
+  --zn-composer-bg: #f4f4f5;
+  --zn-composer-border: rgba(0, 0, 0, 0.08);
+  --zn-composer-text: #262626;
+  --zn-bubble-peer: #efefef;
+  --zn-bubble-peer-text: #262626;
+  --zn-action-bar-bg: rgba(255, 255, 255, 0.98);
+  --zn-search-bg: rgba(0, 0, 0, 0.03);
 }
 
 /* Shared Aliases */
@@ -6578,9 +6598,9 @@ textarea:focus-visible {
 
 /* Grouping Border Radius Physics */
 .zn-row.peer .zn-bubble {
-  background: #1f1f22;
-  color: #efeff1;
-  border: 1px solid rgba(255,255,255,0.03);
+  background: var(--zn-bubble-peer);
+  color: var(--zn-bubble-peer-text);
+  border: 1px solid var(--border);
   border-top-left-radius: 18px;
   border-bottom-left-radius: 18px;
 }
@@ -6629,9 +6649,9 @@ textarea:focus-visible {
 /* 4. Footer & Composer: Senior Frontend Refinement */
 .zn-footer {
   padding: 12px 20px 20px 20px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--zn-footer-bg);
   backdrop-filter: blur(30px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border);
   z-index: 30;
   position: relative;
 }
@@ -6643,22 +6663,22 @@ textarea:focus-visible {
 }
 
 .zn-composer-pill {
-  background: rgba(30, 30, 35, 0.7);
+  background: var(--zn-composer-bg);
   backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--zn-composer-border);
   border-radius: 26px;
   padding: 6px 8px;
   display: flex;
   align-items: flex-end;
   gap: 4px;
   transition: all 0.3s var(--ease-out);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
 }
 
 .zn-composer-pill:focus-within {
-  border-color: rgba(79, 70, 229, 0.4);
-  background: rgba(24, 24, 27, 0.8);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 4px rgba(79, 70, 229, 0.1);
+  border-color: var(--accent);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-md), 0 0 0 4px var(--accent-low);
 }
 
 .zn-composer-input {
@@ -6666,7 +6686,7 @@ textarea:focus-visible {
   background: transparent;
   border: none;
   outline: none !important;
-  color: #fff;
+  color: var(--zn-composer-text);
   font-size: 15px;
   line-height: 1.4;
   padding: 10px 12px;
@@ -6676,7 +6696,7 @@ textarea:focus-visible {
 }
 
 .zn-composer-input::placeholder {
-  color: rgba(255,255,255,0.25);
+  color: var(--text-3);
   font-weight: 400;
 }
 
@@ -6791,12 +6811,12 @@ textarea:focus-visible {
 .zn-action-bar {
     display: flex;
     align-items: center;
-    background: rgba(18, 18, 20, 0.95);
+    background: var(--zn-action-bar-bg);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 4px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow: var(--shadow-lg);
 }
 
 .zn-action-btn {
@@ -6954,9 +6974,9 @@ textarea:focus-visible {
    SEARCH BOX REFINEMENT
    ------------------------------------------------------------------------- */
 .zn-search-inline {
-    background: rgba(0,0,0,0.4);
+    background: var(--zn-search-bg);
     backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border);
     padding: 12px 16px;
     display: flex;
     align-items: center;

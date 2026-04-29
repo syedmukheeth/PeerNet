@@ -141,12 +141,17 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
                         <button onClick={() => onReply(m)} className="zn-action-btn" title="Reply">
                             <HiReply size={16} />
                         </button>
-                        <button onClick={() => onForward(m)} className="zn-action-btn" title="Forward">
-                            <HiArrowSmRight size={16} />
-                        </button>
-                        <button onClick={() => onDelete(m._id)} className="zn-action-btn delete" title="Delete">
-                            <HiTrash size={16} />
-                        </button>
+                        {isSelf && (Date.now() - new Date(m.createdAt).getTime() < 15 * 60 * 1000) && (
+                            <button onClick={() => onEdit(m)} className="zn-action-btn" title="Edit">
+                                <HiPencil size={16} />
+                            </button>
+                        )}
+                        
+                        {(isSelf && (Date.now() - new Date(m.createdAt).getTime() < 15 * 60 * 1000)) && (
+                            <button onClick={() => onDelete(m._id)} className="zn-action-btn delete" title="Delete">
+                                <HiTrash size={16} />
+                            </button>
+                        )}
                         
                         <div className="zn-action-divider" />
                         
@@ -509,8 +514,8 @@ export default function Messages() {
                                             {[1,2,3,4].map(id => (
                                                 <div key={id} className={`zn-row ${id % 2 === 0 ? 'self' : 'peer'} flex flex-col`}>
                                                     <div className="zn-bubble-container flex flex-col">
-                                                        <div className={`skeleton h-14 rounded-[24px] mb-2 ${id % 2 === 0 ? 'w-56' : 'w-72'}`} />
-                                                        <div className="skeleton skeleton-text h-2.5 w-16 opacity-30 !mb-0" />
+                                                        <div className="skeleton h-14 rounded-[24px] mb-2 w-56 opacity-20" />
+                                                        <div className="skeleton skeleton-text h-2.5 w-16 opacity-10 !mb-0" />
                                                     </div>
                                                 </div>
                                             ))}

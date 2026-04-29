@@ -5,6 +5,8 @@ const Message = require('./Message');
 const ApiError = require('../../utils/ApiError');
 const { getRedisOptional } = require('../../config/redis');
 
+const EDIT_WINDOW = 15 * 60 * 1000; // 15 minutes in milliseconds
+
 /**
  * Get or create a 1-on-1 conversation
  */
@@ -173,6 +175,11 @@ const updateMessage = async (messageId, userId, body) => {
     const message = await Message.findOne({ _id: messageId, sender: userId });
     if (!message) throw new ApiError(403, 'Message not found or access denied');
 
+    const timeDiff = Date.now() - new Date(message.createdAt).getTime();
+    if (timeDiff > EDIT_WINDOW) {
+        throw new ApiError(400, 'Messages can only be edited within 15 minutes');
+    }
+
     message.body = body;
     message.isEdited = true;
     await message.save();
@@ -183,6 +190,11 @@ const deleteMessage = async (messageId, userId) => {
     const message = await Message.findOne({ _id: messageId, sender: userId });
     if (!message) throw new ApiError(403, 'Message not found or access denied');
     
+    const timeDiff = Date.now() - new Date(message.createdAt).getTime();
+    if (timeDiff > EDIT_WINDOW) {
+        throw new ApiError(400, 'Messages can only be deleted within 15 minutes');
+    }
+
     await Message.deleteOne({ _id: messageId });
     return message;
 };
