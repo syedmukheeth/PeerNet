@@ -205,6 +205,11 @@ export default function Messages() {
     const viewportRef = useRef(null)
     const markReadMutation = useMarkRead(convoId)
 
+
+
+    // Derived Data
+    const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
+
     // Mark messages as read when convo opens or new messages arrive
     useEffect(() => {
         if (convoId && messages.length > 0) {
@@ -214,9 +219,6 @@ export default function Messages() {
             }
         }
     }, [convoId, messages.length, activeConvo?.unreadCount, activeConvo?.isMarkedUnread])
-
-    // Derived Data
-    const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
     const peer = useMemo(() => activeConvo?.participants?.find(p => p._id !== user?._id), [activeConvo, user?._id])
     
     const filteredConvos = useMemo(() => {
