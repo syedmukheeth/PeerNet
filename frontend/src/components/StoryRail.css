@@ -60,6 +60,10 @@
     background: rgba(var(--text-1-rgb), 0.15);
 }
 
+.story-ring-vibrant.hidden-ring {
+    background: transparent;
+}
+
 /* Signature Instagram Gap */
 .story-avatar-inner {
     width: 100%;

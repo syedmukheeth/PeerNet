@@ -255,7 +255,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
 
 // ── Story Item Circle ─────────────────────────────────────────
-function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
+function StoryCircle({ label, avatar, seen, onClick, isAdd, index, hasStory }) {
     return (
         <motion.div
             className="story-item"
@@ -270,7 +270,7 @@ function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
             }}
         >
             <div className="story-avatar-container">
-                <div className={`story-ring-vibrant ${seen ? 'seen' : ''}`}>
+                <div className={`story-ring-vibrant ${seen ? 'seen' : ''} ${(!hasStory && !isAdd) || (isAdd && !hasStory) ? 'hidden-ring' : ''}`}>
                     <div className="story-avatar-inner">
                         <img src={avatar} alt={label} draggable={false} />
                     </div>
@@ -318,6 +318,9 @@ export default function StoryRail() {
 
     const userAvatar = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
 
+    const userGroupIdx = groups.findIndex(g => g.author._id === user?._id)
+    const hasUserStory = userGroupIdx !== -1
+
     return (
         <div className="story-rail-wrap">
             <div className="story-rail">
@@ -326,13 +329,18 @@ export default function StoryRail() {
                         label="Your story"
                         avatar={optimizeAvatarUrl(userAvatar)}
                         isAdd={true}
-                        seen={false}
+                        seen={hasUserStory ? groups[userGroupIdx].stories.every(s => s.viewedByMe) : false}
+                        hasStory={hasUserStory}
                         index={0}
-                        onClick={() => setShowCreate(true)}
+                        onClick={() => {
+                            if (hasUserStory) setViewerGroup({ groups, startIdx: userGroupIdx })
+                            else setShowCreate(true)
+                        }}
                     />
                 )}
 
                 {!loading && groups.map((g, i) => {
+                    if (g.author._id === user?._id) return null // Skip own story here as it's first
                     const rawAvatarUrl = g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`
                     return (
                         <StoryCircle
@@ -340,6 +348,7 @@ export default function StoryRail() {
                             label={g.author.username}
                             avatar={optimizeAvatarUrl(rawAvatarUrl)}
                             seen={g.stories.every(s => s.viewedByMe)}
+                            hasStory={true}
                             index={i + 1}
                             onClick={() => setViewerGroup({ groups, startIdx: i })}
                         />

@@ -31,6 +31,11 @@ const createStory = async (userId, file, data = {}) => {
         mediaUrl: secure_url,
         mediaPublicId: public_id,
         mediaType: isVideo ? 'video' : 'image',
+        content: data.content || '',
+        fontFamily: data.fontFamily || 'Modern',
+        textAlign: data.textAlign || 'center',
+        isBold: data.isBold === 'true' || data.isBold === true,
+        textColor: data.textColor || '#ffffff'
     });
 };
 
@@ -49,7 +54,11 @@ const getStoriesFromFollowing = async (userId) => {
         .sort({ createdAt: -1 })
         .lean();
 
-    return stories;
+    // Map viewedByMe based on the current user
+    return stories.map(s => ({
+        ...s,
+        viewedByMe: s.viewers?.some(v => v.toString() === userId.toString()) || false
+    }));
 };
 
 const deleteStory = async (storyId, userId) => {
