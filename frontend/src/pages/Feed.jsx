@@ -123,14 +123,10 @@ function RightPanel() {
                 <nav className="sp-footer-links">
                     <Link to="/legal" className="sp-footer-link">About</Link>
                     <Link to="/legal" className="sp-footer-link">Help</Link>
-                    <Link to="/legal" className="sp-footer-link">Press</Link>
-                    <Link to="/legal" className="sp-footer-link">API</Link>
-                    <Link to="/legal" className="sp-footer-link">Jobs</Link>
                     <Link to="/legal" className="sp-footer-link">Privacy</Link>
                     <Link to="/legal" className="sp-footer-link">Terms</Link>
                     <Link to="/legal" className="sp-footer-link">Locations</Link>
                     <Link to="/legal" className="sp-footer-link">Language</Link>
-                    <Link to="/legal" className="sp-footer-link">Verified</Link>
                 </nav>
                 
                 <div className="flex flex-col gap-2 opacity-50">
