@@ -9,6 +9,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './index.css'
 
+// --- Smart Chunk Recovery ---
+// Handles "Failed to fetch dynamically imported module" errors during deployments
+window.addEventListener('error', (e) => {
+  if (e.message?.includes('Failed to fetch dynamically imported module') || 
+      e.message?.includes('Importing a module script failed')) {
+    console.warn('[RECOVERY] Chunk load failed. Force refreshing...');
+    window.location.reload();
+  }
+}, true);
+
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
 const queryClient = new QueryClient({
