@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 // Ensure models are registered for dynamic refPath population
 require('../post/Post');
 require('../comment/Comment');
-require('../dscroll/Dscroll');
+require('../shorts/Short');
 
 const notificationSchema = new mongoose.Schema(
     {
@@ -17,7 +17,7 @@ const notificationSchema = new mongoose.Schema(
             required: true,
         },
         entityId: { type: mongoose.Schema.Types.ObjectId, refPath: 'entityModel', default: null },
-        entityModel: { type: String, enum: ['Post', 'Comment', 'Dscroll', 'Message', null], default: null },
+        entityModel: { type: String, enum: ['Post', 'Comment', 'Short', 'Message', null], default: null },
         isRead: { type: Boolean, default: false },
         message: { type: String, default: '' },
     },

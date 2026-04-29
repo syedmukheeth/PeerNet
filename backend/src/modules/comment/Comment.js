@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const commentSchema = new mongoose.Schema(
     {
         post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: false, index: true },
-        dscroll: { type: mongoose.Schema.Types.ObjectId, ref: 'Dscroll', required: false, index: true },
+        short: { type: mongoose.Schema.Types.ObjectId, ref: 'Short', required: false, index: true },
         author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         body: { type: String, required: true, maxlength: 300 },
         likesCount: { type: Number, default: 0, min: 0 },
@@ -17,7 +17,7 @@ const commentSchema = new mongoose.Schema(
 );
 
 commentSchema.index({ post: 1, createdAt: -1 });
-commentSchema.index({ dscroll: 1, createdAt: -1 });
+commentSchema.index({ short: 1, createdAt: -1 });
 commentSchema.index({ parentComment: 1 });
 
 module.exports = mongoose.model('Comment', commentSchema);

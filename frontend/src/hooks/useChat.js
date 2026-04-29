@@ -191,3 +191,16 @@ export const useConvoActions = () => {
 
     return { pin, mute, archive }
 }
+
+/**
+ * Hook for marking messages as read
+ */
+export const useMarkRead = (convoId) => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: () => chatApi.patch(`/${convoId}/messages/read`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        }
+    })
+}

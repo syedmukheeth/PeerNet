@@ -1,7 +1,7 @@
 'use strict';
 
 const Post = require('./Post');
-const Dscroll = require('../dscroll/Dscroll');
+const Short = require('../shorts/Short');
 const User = require('../user/User');
 const Like = require('./Like');
 const SavedPost = require('./SavedPost');
@@ -80,15 +80,15 @@ const getPost = async (postId, userId) => {
         // Try Post first
         post = await Post.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
         
-        // If not found, try Dscroll
+        // If not found, try Short
         if (!post) {
-            const dscroll = await Dscroll.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
-            if (dscroll) {
+            const short = await Short.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
+            if (short) {
                 post = {
-                    ...dscroll,
-                    mediaUrl: dscroll.videoUrl,
+                    ...short,
+                    mediaUrl: short.videoUrl,
                     mediaType: 'video',
-                    isDscroll: true
+                    isShort: true
                 };
             }
         }
@@ -100,7 +100,7 @@ const getPost = async (postId, userId) => {
     let isLiked = false;
     let isSaved = false;
     if (userId) {
-        const targetModel = post.isDscroll ? 'Dscroll' : 'Post';
+        const targetModel = post.isShort ? 'Short' : 'Post';
         const [like, saved] = await Promise.all([
             Like.findOne({ user: userId, targetId: postId, targetModel }),
             SavedPost.findOne({ user: userId, post: postId }),

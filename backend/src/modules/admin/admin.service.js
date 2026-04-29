@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const User = require('../user/User');
 const Post = require('../post/Post');
 const Story = require('../story/Story');
-const Dscroll = require('../dscroll/Dscroll');
+const Short = require('../shorts/Short');
 const Feedback = require('../feedback/Feedback');
 const Comment = require('../comment/Comment');
 const Notification = require('../notification/Notification');
@@ -190,15 +190,15 @@ const deleteStory = async (storyId) => {
 };
 
 const getPlatformStats = async () => {
-    const [userCount, postCount, storyCount, dscrollCount, feedbackCount] = await Promise.all([
+    const [userCount, postCount, storyCount, shortsCount, feedbackCount] = await Promise.all([
         User.countDocuments(),
         Post.countDocuments({ mediaType: { $ne: 'video' } }),
         Story.countDocuments(),
-        Dscroll.countDocuments() || Post.countDocuments({ mediaType: 'video' }),
+        Short.countDocuments() || Post.countDocuments({ mediaType: 'video' }),
         Feedback.countDocuments({ status: 'open' })
     ]);
     
-    const calculatedBandwidth = (userCount * 0.15) + (postCount * 1.2) + (dscrollCount * 8.5) + (storyCount * 3.2);
+    const calculatedBandwidth = (userCount * 0.15) + (postCount * 1.2) + (shortsCount * 8.5) + (storyCount * 3.2);
     const bandwidthUsage = calculatedBandwidth > 1024 
         ? (calculatedBandwidth / 1024).toFixed(2) + ' TB' 
         : calculatedBandwidth.toFixed(2) + ' GB';
@@ -207,7 +207,7 @@ const getPlatformStats = async () => {
         userCount, 
         postCount, 
         storyCount, 
-        dscrollCount,
+        shortsCount,
         openFeedback: feedbackCount,
         bandwidthUsage
     };
@@ -398,20 +398,16 @@ const nukeUsers = async (requestingAdminId) => {
 const nukeContent = async () => {
     logger.warn('NUKE: Content purge initiated');
     
-    // For a senior implementation, we'd ideally fetch all public IDs and delete them from Cloudinary.
-    // However, since we might have thousands, we perform database purge first for instant effect.
-    // Deep cleanup can be handled by a scheduled "Orphan Cleanup" job if necessary.
-    
-    const [posts, dscrolls, stories, comments] = await Promise.all([
+    const [posts, shorts, stories, comments] = await Promise.all([
         Post.deleteMany({}),
-        Dscroll.deleteMany({}),
+        Short.deleteMany({}),
         Story.deleteMany({}),
         Comment.deleteMany({})
     ]);
 
     return {
         posts: posts.deletedCount,
-        dscrolls: dscrolls.deletedCount,
+        shorts: shorts.deletedCount,
         stories: stories.deletedCount,
         comments: comments.deletedCount
     };

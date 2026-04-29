@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext'
 
 import { 
     useConvos, useMessages, useSendMessage, 
-    useMessageActions, useConvoActions, useChatState 
+    useMessageActions, useConvoActions, useChatState, useMarkRead 
 } from '../hooks/useChat'
 import { timeago as formatTime } from '../utils/timeago'
 import toast from 'react-hot-toast'
@@ -203,6 +203,17 @@ export default function Messages() {
     const [editingId, setEditingId] = useState(null)
     const [editingText, setEditingText] = useState('')
     const viewportRef = useRef(null)
+    const markReadMutation = useMarkRead(convoId)
+
+    // Mark messages as read when convo opens or new messages arrive
+    useEffect(() => {
+        if (convoId && messages.length > 0) {
+            const hasUnread = activeConvo?.unreadCount > 0 || activeConvo?.isMarkedUnread
+            if (hasUnread) {
+                markReadMutation.mutate()
+            }
+        }
+    }, [convoId, messages.length, activeConvo?.unreadCount, activeConvo?.isMarkedUnread])
 
     // Derived Data
     const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])

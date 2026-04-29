@@ -6,7 +6,7 @@ const likeSchema = new mongoose.Schema(
     {
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         targetId: { type: mongoose.Schema.Types.ObjectId, required: true },
-        targetModel: { type: String, enum: ['Post', 'Comment', 'Dscroll'], required: true },
+        targetModel: { type: String, enum: ['Post', 'Comment', 'Short'], required: true },
     },
     { timestamps: true },
 );

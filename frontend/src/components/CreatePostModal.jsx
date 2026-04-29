@@ -137,7 +137,7 @@ export default function CreatePostModal({ onClose }) {
                 const config = { headers: { 'Content-Type': 'multipart/form-data' } }
 
                 if (isVideoUpload) {
-                    await api.post('/dscrolls', fd, config)
+                    await api.post('/shorts', fd, config)
                     toast.success('🎬 Video shared!')
                     await queryClient.invalidateQueries({ queryKey: ['shorts'] })
                     await queryClient.invalidateQueries({ queryKey: ['feed'] })

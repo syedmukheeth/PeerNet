@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 const fetchShorts = async ({ pageParam = null }) => {
     const params = { limit: 10, _t: Date.now() }
     if (pageParam) params.cursor = pageParam
-    const { data } = await api.get('/dscrolls', { params })
+    const { data } = await api.get('/shorts', { params })
     return data
 }
 
@@ -103,7 +103,7 @@ function ShortsItem({ short, isActive }) {
                     localCount.current = nextCount
                     setLiked(true); setLikesCount(nextCount)
                     pendingLike.current = true
-                    api.post(`/posts/${short._id}/like`)
+                    api.post(`/shorts/${short._id}/like`)
                         .catch(() => {
                             localLiked.current = false
                             localCount.current = likesCount
@@ -139,7 +139,7 @@ function ShortsItem({ short, isActive }) {
         setLiked(next)
         setLikesCount(nextCount)
         pendingLike.current = true
-        ;(next ? api.post : api.delete)(`/posts/${short._id}/like`)
+        ;(next ? api.post : api.delete)(`/shorts/${short._id}/like`)
             .catch(() => {
                 localLiked.current = !next
                 localCount.current = likesCount

@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 
-const dscrollSchema = new mongoose.Schema(
+const shortSchema = new mongoose.Schema(
     {
         author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
         videoUrl: { type: String, required: true },
@@ -17,7 +17,7 @@ const dscrollSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
-dscrollSchema.index({ author: 1, createdAt: -1 });
-dscrollSchema.index({ createdAt: -1 });
+shortSchema.index({ author: 1, createdAt: -1 });
+shortSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('Dscroll', dscrollSchema);
+module.exports = mongoose.model('Short', shortSchema);
