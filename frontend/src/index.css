@@ -2072,9 +2072,9 @@ textarea:focus-visible {
 .profile-header {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  gap: 56px;
-  padding: 24px 0 28px;
+  align-items: center;
+  gap: 80px;
+  padding: 32px 0 44px;
 }
 
 .profile-avatar-col {
@@ -2086,8 +2086,8 @@ textarea:focus-visible {
 
 .profile-avatar-ring {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   padding: 3px;
   background: var(--story-ring);
@@ -2113,12 +2113,12 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 20px;
 }
 
 .profile-username-row h1 {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 300;
   font-family: var(--font-sans);
   letter-spacing: 0;
   margin: 0;
@@ -2180,7 +2180,8 @@ textarea:focus-visible {
 .profile-tabs {
   display: flex;
   border-top: 1px solid var(--border-md);
-  gap: 0;
+  gap: 60px;
+  justify-content: center;
 }
 
 .profile-tab-btn {
@@ -2188,8 +2189,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  flex: 1;
-  padding: 14px 8px;
+  padding: 14px 0;
   border: none;
   background: none;
   cursor: pointer;
@@ -2213,8 +2213,8 @@ textarea:focus-visible {
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
-  margin-top: 4px;
+  gap: 4px;
+  margin-top: 0px;
 }
 
 .profile-grid-item {

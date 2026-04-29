@@ -175,7 +175,7 @@ export default function Profile() {
                             <img
                                 src={avatar}
                                 alt={profile.username}
-                                className={`${hasStory ? 'w-[100px] h-[100px]' : ''} rounded-full object-cover block`}
+                                className={`${hasStory ? 'w-[150px] h-[150px]' : 'w-[150px] h-[150px]'} rounded-full object-cover block`}
                             />
                         </div>
                     </div>
@@ -313,21 +313,20 @@ export default function Profile() {
                             {displayPosts.map((p, i) => (
                                 <motion.div
                                     key={p._id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    className="profile-grid-item"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ 
-                                        type: "spring", 
-                                        stiffness: 300, 
-                                        damping: 25,
+                                        duration: 0.3,
                                         delay: Math.min(i * 0.03, 0.3) 
                                     }}
                                 >
-                                    <Link to={`/posts/${p._id}`} className="profile-grid-item m-0 h-full">
+                                    <Link to={`/posts/${p._id}`} className="w-full h-full block relative">
                                         {p.mediaType === 'video'
                                             ? <video 
                                                 src={p.mediaUrl} 
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                className="w-full h-full object-cover"
                                                 muted 
                                                 playsInline
                                             />
@@ -339,10 +338,10 @@ export default function Profile() {
                                             />
                                         }
                                         <div className="profile-grid-overlay">
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span className="flex items-center gap-2">
                                                 <HiHeart /> {p.likesCount || 0}
                                             </span>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span className="flex items-center gap-2">
                                                 <HiChat /> {p.commentsCount || 0}
                                             </span>
                                         </div>
