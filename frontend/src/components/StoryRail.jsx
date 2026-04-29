@@ -6,6 +6,9 @@ import api from '../api/axios'
 import toast from 'react-hot-toast'
 import CreateStoryModal from './CreateStoryModal'
 
+// Import new Instagram styles
+import './StoryRail.css'
+
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
 // ── Animated Progress Bar ────────────────────────────────────
@@ -121,11 +124,11 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                             }
 
                             return (
-                                <div className="story-text-container" style={{ background: story.backgroundColor || '#000' }}>
+                                <div className="flex items-center justify-center w-full h-full p-8" style={{ background: story.backgroundColor || '#000' }}>
                                     <h1 className={fontClass} style={{
                                         fontSize: calcFontSize(story.content),
                                         textAlign: story.textAlign || 'center',
-                                        fontWeight: story.isBold ? 900 : 400,
+                                        fontWeight: 900,
                                         color: story.textColor || '#fff',
                                         lineHeight: 1.25,
                                         margin: 0,
@@ -136,11 +139,10 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                                 </div>
                             )
                         })() : (
-                            <div className="relative w-full h-full bg-black">
+                            <div className="relative w-full h-full bg-black flex items-center justify-center">
                                 {story.mediaType === 'video' ? (
                                     <video src={optimizeCloudinaryVideo(story.mediaUrl)} 
                                         className="story-media"
-                                        style={{ boxShadow: 'var(--shadow-specular)', filter: paused ? 'brightness(0.8)' : 'none' }}
                                         autoPlay muted loop playsInline
                                         ref={el => {
                                             if (el) {
@@ -149,32 +151,34 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                                             }
                                         }} />
                                 ) : (
-                                    <img src={optimizeCloudinaryUrl(story.mediaUrl, 1000)} alt=""
-                                        className="story-media"
-                                        style={{ boxShadow: 'var(--shadow-specular)' }} />
+                                    <img src={optimizeCloudinaryUrl(story.mediaUrl, 1200)} alt=""
+                                        className="story-media" />
                                 )}
 
-                                {/* Hybrid Text Overlay */}
+                                {/* Hybrid Text Overlay - FIXED Z-INDEX & VISIBILITY */}
                                 {story.content && (
-                                    <div className="absolute inset-0 z-10 flex items-center justify-center p-12 pointer-events-none">
-                                        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+                                    <div className="absolute inset-0 z-[150] flex items-center justify-center p-12 pointer-events-none">
+                                        {/* Bottom Scrim for text depth */}
+                                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent z-[-1]" />
+                                        
                                         <motion.h1 
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
                                             className={(() => {
                                                 const fontClasses = { Modern: 'font-modern', Classic: 'font-classic', Neon: 'font-neon', Strong: 'font-strong' }
                                                 return fontClasses[story.fontFamily] || 'font-modern'
                                             })()}
                                             style={{
-                                                fontSize: story.content.length < 50 ? '32px' : '20px',
+                                                fontSize: story.content.length < 40 ? '36px' : '22px',
                                                 textAlign: story.textAlign || 'center',
-                                                fontWeight: story.isBold ? 900 : 400,
+                                                fontWeight: 900,
                                                 color: story.textColor || '#fff',
-                                                lineHeight: 1.2,
-                                                textShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                                                zIndex: 20,
+                                                lineHeight: 1.1,
+                                                textShadow: '0 8px 30px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.5)',
+                                                zIndex: 160,
                                                 margin: 0,
-                                                wordBreak: 'break-word'
+                                                wordBreak: 'break-word',
+                                                maxWidth: '90%'
                                             }}
                                         >
                                             {story.content}
@@ -186,11 +190,8 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Overlays */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%)', pointerEvents: 'none', zIndex: 15 }} />
-
-                {/* Top bar */}
-                <div className="story-top-bar" style={{ zIndex: 30 }}>
+                {/* Top bar (voter over everything) */}
+                <div className="story-top-bar" style={{ zIndex: 200 }}>
                     <ViewerProgressBar
                         total={group.stories.length}
                         current={storyIdx}
@@ -202,8 +203,8 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                         <div className="story-author">
                             <img src={authorAvatar} className="story-author-avatar" alt="" />
                             <div className="story-author-info">
-                                <p className="t-h3 m-0" style={{ color: '#fff' }}>{group.author.username}</p>
-                                <p className="t-caption m-0" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                                <p className="t-h3 m-0" style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{group.author.username}</p>
+                                <p className="t-caption m-0" style={{ color: 'rgba(255,255,255,0.8)', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                                     {story.expiresAt ? `${Math.max(0, Math.ceil((new Date(story.expiresAt) - Date.now()) / 3600000))}h left` : 'Story'}
                                 </p>
                             </div>
@@ -211,13 +212,13 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
                         <div className="story-controls">
                             <button onClick={togglePause} className="story-control-btn">
-                                {paused ? <HiPlay size={18} color="#fff" /> : <HiPause size={18} color="#fff" />}
+                                {paused ? <HiPlay size={20} color="#fff" /> : <HiPause size={20} color="#fff" />}
                             </button>
                             <button onClick={() => setMenuOpen(o => !o)} className="story-control-btn">
-                                <HiDotsVertical size={18} color="#fff" />
+                                <HiDotsVertical size={20} color="#fff" />
                             </button>
                             <button onClick={onClose} className="story-control-btn">
-                                <HiX size={18} color="#fff" />
+                                <HiX size={20} color="#fff" />
                             </button>
                         </div>
                     </div>
@@ -228,7 +229,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                     {menuOpen && (
                         <motion.div
                             className="story-action-sheet"
-                            style={{ zIndex: 40 }}
+                            style={{ zIndex: 300 }}
                             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                             transition={{ type: 'spring', stiffness: 380, damping: 36 }}>
                             <div className="story-sheet-handle" />
@@ -245,8 +246,8 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                 </AnimatePresence>
 
                 {/* Tap zones */}
-                <button onClick={prevStory} className="story-tap-zone story-tap-left" style={{ zIndex: 25 }} />
-                <button onClick={nextStory} className="story-tap-zone story-tap-right" style={{ zIndex: 25 }} />
+                <button onClick={prevStory} className="story-tap-zone story-tap-left" style={{ zIndex: 100 }} />
+                <button onClick={nextStory} className="story-tap-zone story-tap-right" style={{ zIndex: 100 }} />
             </motion.div>
         </motion.div>
     )
@@ -259,31 +260,29 @@ function StoryCircle({ label, avatar, seen, onClick, isAdd, index }) {
         <motion.div
             className="story-item"
             onClick={onClick}
-            initial={{ opacity: 0, scale: 0.8, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ 
                 type: "spring",
-                stiffness: 300,
-                damping: 20,
-                delay: index * 0.04 
+                stiffness: 400,
+                damping: 30,
+                delay: index * 0.05 
             }}
-            whileHover={{ y: -4, scale: 1.05 }}
-            whileTap={{ scale: 0.92 }}
         >
-            <div className="story-avatar-wrap">
-                <div className={`story-ring${seen ? ' story-ring--seen' : ''}`}>
-                    <div className="story-inner">
-                        <img src={avatar} alt={label} loading="lazy" />
+            <div className="story-avatar-container">
+                <div className={`story-ring-vibrant ${seen ? 'seen' : ''}`}>
+                    <div className="story-avatar-inner">
+                        <img src={avatar} alt={label} draggable={false} />
                     </div>
                 </div>
                 {isAdd && (
-                    <div className="story-add-badge">
-                        <HiPlus size={12} color="#fff" />
+                    <div className="story-add-button-ig">
+                        <HiPlus size={14} />
                     </div>
                 )}
             </div>
-            <span className={`story-name${seen ? ' story-name--seen' : ''}`}>
-                {label}
+            <span className={`story-label-ig ${seen ? 'seen' : ''}`}>
+                {isAdd ? 'Your story' : label}
             </span>
         </motion.div>
     )
@@ -322,42 +321,30 @@ export default function StoryRail() {
     return (
         <div className="story-rail-wrap">
             <div className="story-rail">
-                {loading && (
-                    <div key="story-rail-skeleton" className="flex gap-5 px-1">
-                        {[1,2,3,4,5,6].map(i => (
-                            <div key={i} className="flex flex-col items-center gap-3 shrink-0">
-                                <div className="skeleton skeleton-avatar w-[72px] h-[72px]" />
-                                <div className="skeleton skeleton-text w-14 h-2 opacity-40 !mb-0" />
-                            </div>
-                        ))}
-                    </div>
-                )}
                 {!loading && (
-                    <>
-                        <StoryCircle
-                            label="Your story"
-                            avatar={optimizeAvatarUrl(userAvatar)}
-                            isAdd={true}
-                            seen={false}
-                            index={0}
-                            onClick={() => setShowCreate(true)}
-                        />
-
-                        {groups.map((g, i) => {
-                            const rawAvatarUrl = g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`
-                            return (
-                                <StoryCircle
-                                    key={g.author._id}
-                                    label={g.author.username}
-                                    avatar={optimizeAvatarUrl(rawAvatarUrl)}
-                                    seen={g.stories.every(s => s.viewedByMe)}
-                                    index={i + 1}
-                                    onClick={() => setViewerGroup({ groups, startIdx: i })}
-                                />
-                            )
-                        })}
-                    </>
+                    <StoryCircle
+                        label="Your story"
+                        avatar={optimizeAvatarUrl(userAvatar)}
+                        isAdd={true}
+                        seen={false}
+                        index={0}
+                        onClick={() => setShowCreate(true)}
+                    />
                 )}
+
+                {!loading && groups.map((g, i) => {
+                    const rawAvatarUrl = g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`
+                    return (
+                        <StoryCircle
+                            key={g.author._id}
+                            label={g.author.username}
+                            avatar={optimizeAvatarUrl(rawAvatarUrl)}
+                            seen={g.stories.every(s => s.viewedByMe)}
+                            index={i + 1}
+                            onClick={() => setViewerGroup({ groups, startIdx: i })}
+                        />
+                    )
+                })}
             </div>
 
             <div className="divider mt-4 opacity-10" />
