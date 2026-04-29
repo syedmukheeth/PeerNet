@@ -135,8 +135,9 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                                     </h1>
                                 </div>
                             )
-                        })()
-                                 : story.mediaType === 'video' ? (
+                        })() : (
+                            <div className="relative w-full h-full bg-black">
+                                {story.mediaType === 'video' ? (
                                     <video src={optimizeCloudinaryVideo(story.mediaUrl)} 
                                         className="story-media"
                                         style={{ boxShadow: 'var(--shadow-specular)', filter: paused ? 'brightness(0.8)' : 'none' }}
@@ -152,14 +153,44 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                                         className="story-media"
                                         style={{ boxShadow: 'var(--shadow-specular)' }} />
                                 )}
+
+                                {/* Hybrid Text Overlay */}
+                                {story.content && (
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center p-12 pointer-events-none">
+                                        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+                                        <motion.h1 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className={(() => {
+                                                const fontClasses = { Modern: 'font-modern', Classic: 'font-classic', Neon: 'font-neon', Strong: 'font-strong' }
+                                                return fontClasses[story.fontFamily] || 'font-modern'
+                                            })()}
+                                            style={{
+                                                fontSize: story.content.length < 50 ? '32px' : '20px',
+                                                textAlign: story.textAlign || 'center',
+                                                fontWeight: story.isBold ? 900 : 400,
+                                                color: story.textColor || '#fff',
+                                                lineHeight: 1.2,
+                                                textShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                                                zIndex: 20,
+                                                margin: 0,
+                                                wordBreak: 'break-word'
+                                            }}
+                                        >
+                                            {story.content}
+                                        </motion.h1>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </motion.div>
                 </AnimatePresence>
 
                 {/* Overlays */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%)', pointerEvents: 'none', zIndex: 15 }} />
 
                 {/* Top bar */}
-                <div className="story-top-bar">
+                <div className="story-top-bar" style={{ zIndex: 30 }}>
                     <ViewerProgressBar
                         total={group.stories.length}
                         current={storyIdx}
@@ -197,6 +228,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                     {menuOpen && (
                         <motion.div
                             className="story-action-sheet"
+                            style={{ zIndex: 40 }}
                             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                             transition={{ type: 'spring', stiffness: 380, damping: 36 }}>
                             <div className="story-sheet-handle" />
@@ -213,8 +245,8 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                 </AnimatePresence>
 
                 {/* Tap zones */}
-                <button onClick={prevStory} className="story-tap-zone story-tap-left" />
-                <button onClick={nextStory} className="story-tap-zone story-tap-right" />
+                <button onClick={prevStory} className="story-tap-zone story-tap-left" style={{ zIndex: 25 }} />
+                <button onClick={nextStory} className="story-tap-zone story-tap-right" style={{ zIndex: 25 }} />
             </motion.div>
         </motion.div>
     )

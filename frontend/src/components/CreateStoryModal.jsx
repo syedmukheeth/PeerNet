@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiX, HiEmojiHappy, HiSparkles } from 'react-icons/hi'
-import { FiAlignLeft, FiAlignCenter, FiAlignRight } from 'react-icons/fi'
+import { HiX, HiEmojiHappy, HiSparkles, HiCamera, HiTrash } from 'react-icons/hi'
+import { FiAlignLeft, FiAlignCenter, FiAlignRight, FiVideo } from 'react-icons/fi'
 import EmojiPicker from 'emoji-picker-react'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -33,9 +33,13 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
     const [showEmoji, setShowEmoji] = useState(false)
     const [loading, setLoading] = useState(false)
     const [generatingAI, setGeneratingAI] = useState(false)
+    const [mediaFile, setMediaFile] = useState(null)
+    const [mediaPreview, setMediaPreview] = useState(null)
+    const [mediaType, setMediaType] = useState('text') // 'text', 'image', 'video'
 
     const textareaRef = useRef(null)
     const emojiRef = useRef(null)
+    const fileInputRef = useRef(null)
 
     // Auto-grow textarea
     useEffect(() => {
@@ -70,6 +74,37 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
         setShowEmoji(false)
     }
 
+    const handleMediaSelect = (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        // 10MB limit for demo, adjust as needed
+        if (file.size > 10 * 1024 * 1024) {
+            return toast.error('File too large (Max 10MB)')
+        }
+
+        const isVideo = file.type.startsWith('video/')
+        const isImage = file.type.startsWith('image/')
+
+        if (!isVideo && !isImage) {
+            return toast.error('Please select an image or video')
+        }
+
+        setMediaFile(file)
+        setMediaType(isVideo ? 'video' : 'image')
+        setMediaPreview(URL.createObjectURL(file))
+        
+        // If it's media, clear the background preset if it's just a solid color
+        // but maybe keep the content if they want an overlay
+    }
+
+    const removeMedia = () => {
+        setMediaFile(null)
+        setMediaType('text')
+        setMediaPreview(null)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+
     const optimizeWithAI = async () => {
         if (!content.trim()) return
         setGeneratingAI(true)
@@ -87,23 +122,35 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
     }
 
     const handleSubmit = async () => {
-        if (!content.trim()) return toast.error('Status cannot be empty')
+        if (!content.trim() && !mediaFile) return toast.error('Story cannot be empty')
         setLoading(true)
         try {
-            await api.post('/stories', {
-                mediaType: 'text',
-                content: content.trim(),
-                backgroundColor,
-                fontFamily: FONT_FAMILIES[fontIdx].name,
-                textAlign,
-                textColor,
-                isBold: true
+            const formData = new FormData()
+            
+            if (mediaFile) {
+                formData.append('media', mediaFile)
+                formData.append('mediaType', mediaType)
+                if (content.trim()) formData.append('content', content.trim())
+            } else {
+                formData.append('mediaType', 'text')
+                formData.append('content', content.trim())
+                formData.append('backgroundColor', backgroundColor)
+            }
+
+            formData.append('fontFamily', FONT_FAMILIES[fontIdx].name)
+            formData.append('textAlign', textAlign)
+            formData.append('textColor', textColor)
+            formData.append('isBold', 'true')
+
+            await api.post('/stories', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             })
-            toast.success('Status shared! ✨')
+
+            toast.success('Story shared! ✨')
             onSuccess?.()
             onClose()
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to share status')
+            toast.error(err.response?.data?.message || 'Failed to share story')
         } finally {
             setLoading(false)
         }
@@ -129,7 +176,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                 >
                     {/* --- Header: Simple & Unobtrusive --- */}
                     <header className="status-modal-header">
-                        <span className="status-modal-title">Create Status</span>
+                        <span className="status-modal-title">Create Story</span>
                         <button className="status-modal-close" onClick={onClose}>
                             <HiX size={20} />
                         </button>
@@ -139,20 +186,50 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                     <div className="status-canvas-wrap">
                         <div 
                             className="status-preview-canvas"
-                            style={{ background: backgroundColor }}
+                            style={{ background: mediaPreview ? '#000' : backgroundColor }}
                         >
+                            {/* Media Layer */}
+                            {mediaPreview && (
+                                <div className="absolute inset-0 z-0">
+                                    {mediaType === 'video' ? (
+                                        <video 
+                                            src={mediaPreview} 
+                                            className="w-full h-full object-cover"
+                                            autoPlay 
+                                            loop 
+                                            muted 
+                                            playsInline
+                                        />
+                                    ) : (
+                                        <img 
+                                            src={mediaPreview} 
+                                            className="w-full h-full object-cover" 
+                                            alt="Preview" 
+                                        />
+                                    )}
+                                    <div className="absolute inset-0 bg-black/30" /> {/* Scrim for text readability */}
+                                    
+                                    <button 
+                                        className="absolute top-4 right-4 w-10 h-10 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors z-10"
+                                        onClick={removeMedia}
+                                    >
+                                        <HiTrash size={20} />
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Inner Glows */}
                             <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-white/10 pointer-events-none" />
                             
                             <textarea 
                                 ref={textareaRef}
-                                className={`status-main-textarea ${FONT_FAMILIES[fontIdx].class}`}
-                                placeholder="Type a status..."
+                                className={`status-main-textarea ${FONT_FAMILIES[fontIdx].class} z-10`}
+                                placeholder={mediaFile ? 'Add a caption...' : 'Type a status...'}
                                 value={content}
                                 onChange={e => setContent(e.target.value)}
                                 autoFocus
                                 style={{ 
-                                    fontSize: calcFontSize(),
+                                    fontSize: mediaFile ? '24px' : calcFontSize(),
                                     textAlign: textAlign,
                                     color: textColor,
                                     fontWeight: 700
@@ -162,7 +239,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                             {/* Floating AI Assistant */}
                             {content.length > 5 && (
                                 <motion.button
-                                    className="status-ai-btn"
+                                    className="status-ai-btn z-10"
                                     onClick={optimizeWithAI}
                                     disabled={generatingAI}
                                     initial={{ opacity: 0, x: 10 }}
@@ -179,6 +256,18 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                     <div className="status-controls-panel">
                         <div className="status-toolbar">
                             <div className="status-toolbar-group">
+                                <button className="status-tool-btn media-btn" onClick={() => fileInputRef.current.click()}>
+                                    <HiCamera size={20} className="mr-2" />
+                                    <span className="tool-label">Media</span>
+                                </button>
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    className="hidden" 
+                                    accept="image/*,video/*"
+                                    onChange={handleMediaSelect}
+                                />
+                                <div className="tool-divider" />
                                 <button className="status-tool-btn font-selector" onClick={cycleFont}>
                                     <span className="tool-label">Font</span>
                                     <span className="tool-value">{FONT_FAMILIES[fontIdx].name}</span>
@@ -258,9 +347,9 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                             <button 
                                 className={`btn btn-primary px-8 ${loading ? 'btn-loading' : ''}`} 
                                 onClick={handleSubmit}
-                                disabled={loading || !content.trim()}
+                                disabled={loading || (!content.trim() && !mediaFile)}
                             >
-                                {loading ? 'Sharing...' : 'Share Status'}
+                                {loading ? 'Sharing...' : 'Share Story'}
                             </button>
                         </div>
                     </div>
