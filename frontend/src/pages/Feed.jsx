@@ -273,7 +273,7 @@ export default function Feed() {
                             </div>
                             <h2 className="t-h2 mb-2 font-bold">Your feed is just beginning</h2>
                             <p className="t-body text-muted mb-8 max-w-sm mx-auto">
-                                Follow creators and join communities to see the best of PeerNet right here.
+                                Follow peers and join communities to see the best of PeerNet right here.
                             </p>
                             <Link to="/search" className="btn btn-primary px-8 py-3 no-underline inline-flex items-center gap-2">
                                 Discover People ↗

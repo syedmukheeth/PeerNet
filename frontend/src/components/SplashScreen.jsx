@@ -59,7 +59,7 @@ export default function SplashScreen({ onDone }) {
                         transition={{ delay: 0.7, duration: 0.4 }}
                         style={{ letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7 }}
                     >
-                        Professional Network for Creators
+                        The Ultimate Professional Peer Network
                     </motion.p>
 
                     {/* Bottom Meta logo (Instagram-style) */}
