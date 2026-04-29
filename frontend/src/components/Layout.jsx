@@ -413,7 +413,7 @@ export default function Layout() {
                 </header>
 
                 <div 
-                    className={`layout-container ${(!['/messages', '/shorts'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
+                    className={`layout-container ${location.pathname.startsWith('/messages') ? 'h-full' : ''} ${(!['/messages', '/shorts'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -427,7 +427,7 @@ export default function Layout() {
                                 damping: 30,
                                 opacity: { duration: 0.2 } 
                             }}
-                            className="page-transition-wrapper"
+                            className={`page-transition-wrapper ${location.pathname.startsWith('/messages') ? 'h-full' : ''}`}
                         >
                             <Outlet />
                         </motion.div>

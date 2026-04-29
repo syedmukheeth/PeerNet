@@ -4,7 +4,7 @@ import {
     HiDotsVertical, HiPaperClip, HiMicrophone, HiEmojiHappy, 
     HiReply, HiPencil, HiTrash, HiSearch, HiPencilAlt,
     HiX, HiChevronDown, HiArrowRight, HiVolumeUp, HiVolumeOff, 
-    HiBookmark, HiArchive, HiArrowSmRight, HiCheckCircle, HiMail, HiLightningBolt
+    HiBookmark, HiArchive, HiArrowSmRight, HiCheckCircle, HiMail, HiLightningBolt, HiArrowLeft
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -339,7 +339,7 @@ export default function Messages() {
     return (
         <div className="zn-messages-root">
             {/* 1. SIDEBAR: The conversation navigator */}
-            <aside className="zn-messages-sidebar">
+            <aside className={`zn-messages-sidebar ${convoId ? 'hidden-mobile' : ''}`}>
                 <div className="zn-sidebar-header">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-xl font-bold tracking-tight text-text-1">Messages</h1>
@@ -434,6 +434,12 @@ export default function Messages() {
                         >
                             <header className="zn-chat-header px-6 border-b border-white/5 bg-black/20 backdrop-blur-2xl z-30">
                                 <div className="flex items-center gap-4">
+                                    <button 
+                                        onClick={() => navigate('/messages')}
+                                        className="lg:hidden p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors text-white"
+                                    >
+                                        <HiArrowLeft size={20} />
+                                    </button>
                                     <div className="relative group cursor-pointer">
                                         <img 
                                             src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} 
@@ -493,7 +499,7 @@ export default function Messages() {
                                 )}
                             </AnimatePresence>
 
-                            <div ref={viewportRef} className="zn-viewport no-scrollbar pb-12 pt-6">
+                            <div ref={viewportRef} className="zn-viewport scroll-gpu">
                                 <AnimatePresence mode="popLayout" initial={false}>
                                     {loadingMsgs ? (
                                         <div key="chat-skeleton" className="space-y-8 px-6">
