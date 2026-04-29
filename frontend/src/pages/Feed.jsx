@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import PostCard from '../components/PostCard'
 import StoryRail from '../components/StoryRail'
-import { Skeleton } from 'boneyard-js/react'
+
 import { optimizeAvatarUrl } from '../utils/cloudinary'
 import { useAuth } from '../context/AuthContext'
 import { HiBadgeCheck } from 'react-icons/hi'
@@ -239,27 +239,26 @@ export default function Feed() {
                     </div>
 
                     {loading && (
-                        <Skeleton key="feed-skeleton">
-                            <div className="l-stack l-stack-lg pt-4">
-                                {[1, 2].map(id => (
-                                    <div key={id} className="bg-zinc-900/50 rounded-2xl p-4 space-y-4 border border-white/5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-white/10" />
-                                            <div className="space-y-2">
-                                                <div className="w-32 h-4 bg-white/10 rounded-full" />
-                                                <div className="w-20 h-3 bg-white/10 rounded-full opacity-50" />
-                                            </div>
-                                        </div>
-                                        <div className="w-full aspect-[4/5] bg-white/10 rounded-xl" />
-                                        <div className="space-y-2.5">
-                                            <div className="w-full h-4 bg-white/10 rounded-full" />
-                                            <div className="w-2/3 h-4 bg-white/10 rounded-full" />
+                        <div key="feed-skeleton" className="l-stack l-stack-lg pt-4">
+                            {[1, 2].map(id => (
+                                <div key={id} className="bg-zinc-900/50 rounded-2xl p-4 space-y-4 border border-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="skeleton skeleton-avatar w-10 h-10" />
+                                        <div className="space-y-2">
+                                            <div className="skeleton skeleton-text w-32 h-4 !mb-0" />
+                                            <div className="skeleton skeleton-text w-20 h-3 opacity-50 !mb-0" />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        </Skeleton>
+                                    <div className="skeleton w-full aspect-[4/5] rounded-xl" />
+                                    <div className="space-y-2.5">
+                                        <div className="skeleton skeleton-text w-full h-4 !mb-0" />
+                                        <div className="skeleton skeleton-text w-2/3 h-4 !mb-0" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
+
 
                     {!loading && posts.length === 0 && (
                         <motion.div 

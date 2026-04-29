@@ -8,7 +8,7 @@ import {
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { Skeleton } from 'boneyard-js/react'
+
 import { 
     useConvos, useMessages, useSendMessage, 
     useMessageActions, useConvoActions, useChatState 
@@ -359,21 +359,19 @@ export default function Messages() {
                 </div>
 
                 <div className="zn-sidebar-scroll no-scrollbar">
-                    <AnimatePresence mode="popLayout" initial={false}>
+                    <AnimatePresence mode="popLayout">
                         {loadingConvos ? (
-                            <Skeleton key="skeleton">
-                                <div className="p-4 space-y-4">
-                                    {[1,2,3,4,5,6].map(id => (
-                                        <div key={id} className="flex gap-4 items-center">
-                                            <div className="w-14 h-14 rounded-2xl bg-white/5 shrink-0" />
-                                            <div className="flex-1 space-y-2.5">
-                                                <div className="h-4 bg-white/5 w-32 rounded-full" />
-                                                <div className="h-2.5 bg-white/5 w-48 rounded-full opacity-40" />
-                                            </div>
+                            <div key="skeleton" className="p-4 space-y-4">
+                                {[1,2,3,4,5,6].map(id => (
+                                    <div key={id} className="flex gap-4 items-center">
+                                        <div className="skeleton w-14 h-14 rounded-2xl shrink-0" />
+                                        <div className="flex-1 space-y-2.5">
+                                            <div className="skeleton skeleton-text h-4 w-32 !mb-0" />
+                                            <div className="skeleton skeleton-text h-2.5 w-48 opacity-40 !mb-0" />
                                         </div>
-                                    ))}
-                                </div>
-                            </Skeleton>
+                                    </div>
+                                ))}
+                            </div>
                         ) : filteredConvos.length > 0 ? (
                             <motion.div 
                                 key="list"
@@ -498,16 +496,14 @@ export default function Messages() {
                             <div ref={viewportRef} className="zn-viewport no-scrollbar pb-12 pt-6">
                                 <AnimatePresence mode="popLayout" initial={false}>
                                     {loadingMsgs ? (
-                                        <Skeleton key="chat-skeleton">
-                                            <div className="space-y-8 px-6">
-                                                {[1,2,3,4].map(id => (
-                                                    <div key={id} className={`flex flex-col ${id % 2 === 0 ? 'items-end' : 'items-start'}`}>
-                                                        <div className={`h-14 bg-white/5 rounded-[24px] mb-2 shadow-sm ${id % 2 === 0 ? 'w-56' : 'w-72'}`} />
-                                                        <div className="h-2.5 bg-white/5 w-16 rounded-full opacity-30" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </Skeleton>
+                                        <div key="chat-skeleton" className="space-y-8 px-6">
+                                            {[1,2,3,4].map(id => (
+                                                <div key={id} className={`flex flex-col ${id % 2 === 0 ? 'items-end' : 'items-start'}`}>
+                                                    <div className={`skeleton h-14 rounded-[24px] mb-2 ${id % 2 === 0 ? 'w-56' : 'w-72'}`} />
+                                                    <div className="skeleton skeleton-text h-2.5 w-16 opacity-30 !mb-0" />
+                                                </div>
+                                            ))}
+                                        </div>
                                     ) : groupedMessages.length > 0 ? (
                                         groupedMessages.map((item) => (
                                             item.type === 'date' ? (

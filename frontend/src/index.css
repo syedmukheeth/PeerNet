@@ -6931,7 +6931,31 @@ textarea:focus-visible {
     gap: 12px;
 }
 
-/* boneyard-js handles loading states now */
+/* --- Skeleton Loading (Digital Obsidian) --- */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 37%,
+    rgba(255, 255, 255, 0.03) 63%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 2s infinite ease-in-out;
+  border-radius: 8px;
+  display: block;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-text { height: 12px; width: 100%; margin-bottom: 8px; }
+.skeleton-avatar { border-radius: 50% !important; flex-shrink: 0; }
+.skeleton-circle { border-radius: 50% !important; }
+
 
 .zn-page-transition {
     width: 100%;

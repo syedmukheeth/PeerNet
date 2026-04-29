@@ -18,6 +18,7 @@ import { useMultiAccount } from '../context/MultiAccountContext'
 import CreatePostModal from './CreatePostModal'
 import FeedbackModal from './FeedbackModal'
 import AccountSwitcherModal from './AccountSwitcherModal'
+import { FaLinkedin } from 'react-icons/fa'
 import { useQueryClient } from '@tanstack/react-query'
 import logoImg from '../assets/logo.png'
 
@@ -394,7 +395,7 @@ export default function Layout() {
 
             </aside>
 
-            <main className="main-col" ref={mainRef}>
+            <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''}`} ref={mainRef}>
 
                 <header className="mobile-top-header px-4">
                     <Link to="/" className="flex items-center gap-2 no-underline">
@@ -436,14 +437,36 @@ export default function Layout() {
                     {!['/', '/messages', '/shorts', '/admin'].some(p => location.pathname === p || (p !== '/' && location.pathname.startsWith(p))) && (
                         <footer className="site-footer">
                             <div className="site-footer__inner">
+                                <div className="site-footer__brand-section">
+                                    <Link to="/" className="site-footer__brand">
+                                        <img src={logoImg} alt="PeerNet" className="site-footer__logo" />
+                                        <span className="peernetLogo text-base">PeerNet</span>
+                                    </Link>
+                                    <p className="site-footer__tagline">
+                                        Professional network for the next generation.
+                                    </p>
+                                </div>
+                                
                                 <div className="site-footer__links">
                                     <Link to="/about" className="site-footer__link">About</Link>
                                     <Link to="/legal/privacy" className="site-footer__link">Privacy</Link>
                                     <Link to="/legal/terms" className="site-footer__link">Terms</Link>
                                     <Link to="/help" className="site-footer__link">Help</Link>
-                                    <Link to="/api" className="site-footer__link">API</Link>
                                     <button onClick={() => setShowFeedback(true)} className="site-footer__link">Report Bug</button>
                                 </div>
+
+                                <div className="site-footer__creator-section">
+                                    <a
+                                        href="https://www.linkedin.com/in/syedmukheeth"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="site-footer__creator-pill"
+                                    >
+                                        <FaLinkedin size={16} />
+                                        <span>Syed Mukheeth</span>
+                                    </a>
+                                </div>
+
                                 <div className="site-footer__text">
                                     <span>© 2026 PEERNET FROM INDIA</span>
                                 </div>

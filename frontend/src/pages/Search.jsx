@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
 import { HiSearch, HiBadgeCheck } from 'react-icons/hi'
 import toast from 'react-hot-toast'
-import { Skeleton } from 'boneyard-js/react'
+
 
 const pageVariants = { initial: { opacity: 0 }, animate: { opacity: 1, transition: { duration: 0.25 } } }
 
@@ -50,20 +50,18 @@ export default function Search() {
             </div>
 
             {loading && q.length >= 2 && (
-                <Skeleton key="search-skeleton">
-                    <div className="space-y-4">
-                        {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5">
-                                <div className="w-12 h-12 rounded-full bg-white/10 shrink-0" />
-                                <div className="flex-1 space-y-2">
-                                    <div className="w-32 h-4 bg-white/10 rounded-full" />
-                                    <div className="w-20 h-3 bg-white/10 rounded-full opacity-50" />
-                                </div>
-                                <div className="w-20 h-8 bg-white/10 rounded-xl" />
+                <div key="search-skeleton" className="space-y-4">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                            <div className="skeleton skeleton-avatar w-12 h-12 shrink-0" />
+                            <div className="flex-1 space-y-2">
+                                <div className="skeleton skeleton-text w-32 h-4 !mb-0" />
+                                <div className="skeleton skeleton-text w-20 h-3 opacity-50 !mb-0" />
                             </div>
-                        ))}
-                    </div>
-                </Skeleton>
+                            <div className="skeleton w-20 h-8 rounded-xl" />
+                        </div>
+                    ))}
+                </div>
             )}
 
             <AnimatePresence>

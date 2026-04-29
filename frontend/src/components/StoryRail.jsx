@@ -5,7 +5,7 @@ import { HiPlus, HiX, HiDotsVertical, HiPlay, HiPause, HiTrash } from 'react-ico
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import CreateStoryModal from './CreateStoryModal'
-import { Skeleton } from 'boneyard-js/react'
+
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
 // ── Animated Progress Bar ────────────────────────────────────
@@ -291,16 +291,14 @@ export default function StoryRail() {
         <div className="story-rail-wrap">
             <div className="story-rail">
                 {loading && (
-                    <Skeleton key="story-rail-skeleton">
-                        <div className="flex gap-5 px-1">
-                            {[1,2,3,4,5,6].map(i => (
-                                <div key={i} className="flex flex-col items-center gap-3 shrink-0">
-                                    <div className="w-[72px] h-[72px] rounded-full bg-white/5 border-2 border-white/5" />
-                                    <div className="w-14 h-2 bg-white/5 rounded-full opacity-40" />
-                                </div>
-                            ))}
-                        </div>
-                    </Skeleton>
+                    <div key="story-rail-skeleton" className="flex gap-5 px-1">
+                        {[1,2,3,4,5,6].map(i => (
+                            <div key={i} className="flex flex-col items-center gap-3 shrink-0">
+                                <div className="skeleton skeleton-avatar w-[72px] h-[72px]" />
+                                <div className="skeleton skeleton-text w-14 h-2 opacity-40 !mb-0" />
+                            </div>
+                        ))}
+                    </div>
                 )}
                 {!loading && (
                     <>
