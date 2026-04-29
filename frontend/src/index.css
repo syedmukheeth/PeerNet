@@ -6661,6 +6661,7 @@ textarea:focus-visible {
   padding: 10px 12px;
   min-height: 40px;
   max-height: 160px;
+  resize: none !important;
 }
 
 .zn-composer-input::placeholder {

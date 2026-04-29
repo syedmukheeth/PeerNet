@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { 
-    HiDotsVertical, HiPaperClip, HiMicrophone, HiEmojiHappy, 
-    HiReply, HiPencil, HiTrash, HiSearch, HiPencilAlt,
+    HiDotsVertical, HiPaperClip, HiEmojiHappy, 
+    HiReply, HiPencil, HiTrash, HiSearch,
     HiX, HiChevronDown, HiArrowRight, HiVolumeUp, HiVolumeOff, 
     HiBookmark, HiArchive, HiArrowSmRight, HiCheckCircle, HiMail, HiLightningBolt, HiArrowLeft
 } from 'react-icons/hi'
@@ -144,16 +144,9 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
                         <button onClick={() => onForward(m)} className="zn-action-btn" title="Forward">
                             <HiArrowSmRight size={16} />
                         </button>
-                        {isSelf && (
-                            <>
-                                <button onClick={() => onEdit(m)} className="zn-action-btn" title="Edit">
-                                    <HiPencil size={16} />
-                                </button>
-                                <button onClick={() => onDelete(m._id)} className="zn-action-btn delete" title="Delete">
-                                    <HiTrash size={16} />
-                                </button>
-                            </>
-                        )}
+                        <button onClick={() => onDelete(m._id)} className="zn-action-btn delete" title="Delete">
+                            <HiTrash size={16} />
+                        </button>
                         
                         <div className="zn-action-divider" />
                         
@@ -343,9 +336,6 @@ export default function Messages() {
                 <div className="zn-sidebar-header">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-xl font-bold tracking-tight text-text-1">Messages</h1>
-                        <button className="w-8 h-8 rounded-full hover:bg-hover flex items-center justify-center text-text-1 transition-all">
-                            <HiPencilAlt size={20} />
-                        </button>
                     </div>
                     <div className="zn-sidebar-search-wrapper flex items-center gap-3 bg-surface-el border border-white/5 rounded-full px-4 py-2.5 group-focus-within:border-accent/30 transition-all">
                         <HiSearch className="text-text-3 group-focus-within:text-accent transition-colors shrink-0" size={18} />
@@ -583,11 +573,7 @@ export default function Messages() {
                                         />
                                         
                                         <div className="flex items-center gap-1 self-end mb-1">
-                                            {!inputText.trim() && (
-                                                <button className="zn-composer-action-btn">
-                                                    <HiMicrophone size={22} />
-                                                </button>
-                                            )}
+
                                             <button 
                                                 disabled={!inputText.trim() && !replyingTo}
                                                 onClick={() => {
