@@ -507,9 +507,11 @@ export default function Messages() {
                                     {loadingMsgs ? (
                                         <div key="chat-skeleton" className="space-y-8 px-6">
                                             {[1,2,3,4].map(id => (
-                                                <div key={id} className={`flex flex-col ${id % 2 === 0 ? 'items-end' : 'items-start'}`}>
-                                                    <div className={`skeleton h-14 rounded-[24px] mb-2 ${id % 2 === 0 ? 'w-56' : 'w-72'}`} />
-                                                    <div className="skeleton skeleton-text h-2.5 w-16 opacity-30 !mb-0" />
+                                                <div key={id} className={`zn-row ${id % 2 === 0 ? 'self' : 'peer'} flex flex-col`}>
+                                                    <div className="zn-bubble-container flex flex-col">
+                                                        <div className={`skeleton h-14 rounded-[24px] mb-2 ${id % 2 === 0 ? 'w-56' : 'w-72'}`} />
+                                                        <div className="skeleton skeleton-text h-2.5 w-16 opacity-30 !mb-0" />
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -530,7 +532,11 @@ export default function Messages() {
                                                     key={item.id} 
                                                     m={item.value} 
                                                     searchQuery={chatSearchQuery}
-                                                    isSelf={item.value.sender?._id === user?._id || item.value.sender === user?._id} 
+                                                    isSelf={
+                                                        item.value.sender === 'me' || 
+                                                        item.value.sender?._id === user?._id || 
+                                                        item.value.sender === user?._id
+                                                    } 
                                                     pos={item.pos}
                                                     isNewGroup={item.isNewGroup}
                                                     onReply={setReplyingTo}

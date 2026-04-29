@@ -6544,8 +6544,11 @@ textarea:focus-visible {
   margin-top: 12px;
 }
 
-.zn-row.self { align-items: flex-end; }
-.zn-row.peer { align-items: flex-start; }
+.zn-row.self { align-items: flex-end; text-align: right; }
+.zn-row.peer { align-items: flex-start; text-align: left; }
+
+.zn-row.self .zn-bubble-container { align-items: flex-end; }
+.zn-row.peer .zn-bubble-container { align-items: flex-start; }
 
 .zn-row.has-reactions {
   margin-bottom: 24px;
