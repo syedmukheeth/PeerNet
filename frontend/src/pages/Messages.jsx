@@ -652,49 +652,62 @@ export default function Messages() {
                         initial={{ opacity: 0 }} 
                         animate={{ opacity: 1 }} 
                         exit={{ opacity: 0 }} 
-                        className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-6"
+                        className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[999] flex items-center justify-center p-6"
                     >
                         <motion.div 
-                            initial={{ scale: 0.9, y: 40, rotateX: -10 }} 
-                            animate={{ scale: 1, y: 0, rotateX: 0 }} 
+                            initial={{ scale: 0.9, y: 40, opacity: 0 }} 
+                            animate={{ scale: 1, y: 0, opacity: 1 }} 
                             exit={{ scale: 0.9, y: 40, opacity: 0 }}
-                            className="w-full max-w-xl bg-[#0a0a0b] border border-white/10 rounded-[40px] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] ring-1 ring-white/5"
+                            className="w-full max-w-xl bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[48px] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative overflow-hidden"
                         >
-                            <div className="flex justify-between items-center mb-8">
-                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Edit Message</h3>
-                                <button onClick={() => setEditingId(null)} className="w-10 h-10 rounded-2xl hover:bg-white/5 flex items-center justify-center text-zinc-500 transition-colors">
-                                    <HiX size={24} />
-                                </button>
-                            </div>
+                            {/* Decorative Background Glow */}
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-accent/20 blur-[120px] pointer-events-none" />
                             
-                            <textarea 
-                                value={editingText}
-                                onChange={(e) => setEditingText(e.target.value)}
-                                className="w-full bg-white/5 border border-white/5 rounded-[32px] p-8 text-white text-lg font-medium outline-none focus:border-zn-accent/40 focus:ring-4 focus:ring-zn-accent/5 min-h-[200px] mb-10 transition-all placeholder:text-zinc-800"
-                                placeholder="Edit your message..."
-                                autoFocus
-                            />
-                            
-                            <div className="flex justify-end gap-4">
-                                <button 
-                                    onClick={() => setEditingId(null)} 
-                                    className="px-8 py-4 rounded-2xl font-black text-zinc-500 hover:text-white transition-colors"
-                                >
-                                    Discard Changes
-                                </button>
-                                <button 
-                                    onClick={async () => {
-                                        if (!editingText.trim()) return
-                                        try {
-                                            await editMutation.mutateAsync({ messageId: editingId, text: editingText })
-                                            setEditingId(null)
-                                            toast.success('Message updated')
-                                        } catch { toast.error('Update failed') }
-                                    }}
-                                    className="px-10 py-4 bg-zn-accent rounded-2xl font-black text-white shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all hover:shadow-[0_0_40px_rgba(168,85,247,0.6)] active:scale-95"
-                                >
-                                    Save Changes
-                                </button>
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-8">
+                                    <div>
+                                        <h3 className="text-2xl font-black text-white tracking-tight uppercase font-display leading-none mb-2">Edit Message</h3>
+                                        <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Updating your thoughts</p>
+                                    </div>
+                                    <button onClick={() => setEditingId(null)} className="w-10 h-10 rounded-2xl hover:bg-white/10 flex items-center justify-center text-zinc-400 transition-all hover:scale-110 active:scale-90">
+                                        <HiX size={24} />
+                                    </button>
+                                </div>
+                                
+                                <div className="relative mb-8 group">
+                                    <textarea 
+                                        value={editingText}
+                                        onChange={(e) => setEditingText(e.target.value)}
+                                        className="w-full bg-white/[0.03] border border-white/10 rounded-[32px] p-8 text-white text-lg font-medium outline-none focus:border-accent/40 focus:ring-8 focus:ring-accent/5 min-h-[220px] transition-all placeholder:text-zinc-800"
+                                        placeholder="Type your message..."
+                                        autoFocus
+                                    />
+                                    <div className="absolute bottom-6 right-8 text-[10px] font-black uppercase tracking-widest text-zinc-600 select-none">
+                                        Editing Mode
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center justify-end gap-4">
+                                    <button 
+                                        onClick={() => setEditingId(null)} 
+                                        className="px-8 py-4 rounded-2xl font-black text-zinc-500 hover:text-white transition-all hover:bg-white/5 active:scale-95"
+                                    >
+                                        Discard
+                                    </button>
+                                    <button 
+                                        onClick={async () => {
+                                            if (!editingText.trim()) return
+                                            try {
+                                                await editMutation.mutateAsync({ messageId: editingId, text: editingText })
+                                                setEditingId(null)
+                                                toast.success('Message updated')
+                                            } catch { toast.error('Update failed') }
+                                        }}
+                                        className="px-10 py-4 bg-accent rounded-2xl font-black text-white shadow-2xl transition-all hover:scale-105 active:scale-95 hover:shadow-accent/40"
+                                    >
+                                        Save Changes
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>
