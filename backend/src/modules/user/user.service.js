@@ -139,7 +139,7 @@ const getFollowing = async (userId, { limit = 20, skip = 0 }) => {
 };
 
 const searchUsers = async (q, { limit = 20, skip = 0 }) => {
-    if (!q || q.trim().length < 2) throw new ApiError(400, 'Query must be at least 2 characters');
+    if (!q || q.trim().length < 1) throw new ApiError(400, 'Query must be at least 1 character');
     return User.find(
         { $text: { $search: q } },
         { score: { $meta: 'textScore' } },
