@@ -36,17 +36,30 @@ function SectionHeader({ label }) {
     )
 }
 
-function NotifRow({ n, index, onAction, onNavigate }) {
+function NotifRow({ n, index, onNavigate }) {
     const cfg = typeConfig[n.type] || typeConfig.like
     const avatar = n.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${n.sender?.username}&background=6366F1&color=fff`
-    const [isFollowed, setIsFollowed] = useState(false)
+    const [isFollowed, setIsFollowed] = useState(n.sender?.isFollowing || false)
+    const [actionLoading, setActionLoading] = useState(false)
 
     const handleAction = async (e) => {
         e.preventDefault(); e.stopPropagation()
-        if (n.type === 'follow') {
-            setIsFollowed(true)
-            try { await api.post(`/users/${n.sender?._id}/follow`); onAction?.() }
-            catch { setIsFollowed(false) }
+        if (n.type !== 'follow' || actionLoading) return
+        
+        const originalState = isFollowed
+        setIsFollowed(!originalState)
+        setActionLoading(true)
+        
+        try {
+            if (originalState) {
+                await api.delete(`/users/${n.sender?._id}/follow`)
+            } else {
+                await api.post(`/users/${n.sender?._id}/follow`)
+            }
+        } catch (err) {
+            setIsFollowed(originalState)
+        } finally {
+            setActionLoading(false)
         }
     }
 
@@ -58,53 +71,62 @@ function NotifRow({ n, index, onAction, onNavigate }) {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.03 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.02, ease: "easeOut" }}
             className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}
             onClick={() => onNavigate(navTarget)}
         >
             {/* Left: Avatar */}
             <div className="relative shrink-0">
-                <img 
-                    src={avatar} 
-                    alt="" 
-                    className="w-11 h-11 rounded-full object-cover border border-white/5"
-                    onClick={(e) => { e.stopPropagation(); window.location.href = `/profile/${n.sender?._id}` }}
-                />
+                <div className="w-[44px] h-[44px] rounded-full overflow-hidden border border-white/10 p-[1px]">
+                    <img 
+                        src={avatar} 
+                        alt="" 
+                        className="w-full h-full rounded-full object-cover"
+                        onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}
+                    />
+                </div>
                 {!n.isRead && (
-                    <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 unread-dot" />
+                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-accent rounded-full border-2 border-black" />
                 )}
             </div>
 
             {/* Middle: Content */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <div className="text-[14px] leading-[1.4]">
-                    <span className="font-bold hover:underline cursor-pointer" onClick={(e) => { e.stopPropagation(); window.location.href = `/profile/${n.sender?._id}` }}>
+            <div className="flex-1 min-w-0 flex flex-col justify-center py-1">
+                <div className="text-[14px] leading-[1.3] tracking-tight">
+                    <span className="font-bold hover:opacity-70 transition-opacity cursor-pointer" onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}>
                         {n.sender?.username}
                     </span>
                     {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-1 text-accent align-middle" size={14} />}
-                    <span className="ml-1 opacity-80"> {actionText}</span>
-                    <span className="ml-1.5 opacity-40 whitespace-nowrap">{formatTime(n.createdAt)}</span>
+                    <span className="ml-1 text-[var(--text-2)] font-medium"> {actionText}</span>
+                    <span className="ml-1 text-[var(--text-3)] text-[13px]">{formatTime(n.createdAt)}</span>
                 </div>
             </div>
 
             {/* Right: Interaction */}
-            <div className="shrink-0 ml-2">
+            <div className="shrink-0 ml-3">
                 {n.type === 'follow' ? (
                     <button 
                         onClick={handleAction}
-                        className={`h-8 px-4 rounded-lg text-[13px] font-bold transition-all ${isFollowed ? 'bg-[var(--surface-2)] text-[var(--text-2)]' : 'bg-accent text-white hover:brightness-110'}`}
+                        disabled={actionLoading}
+                        className={`h-[32px] px-5 rounded-lg text-[13px] font-bold transition-all duration-200 ${
+                            isFollowed 
+                            ? 'bg-[#262626] text-white hover:bg-[#363636]' 
+                            : 'bg-[#0095F6] text-white hover:bg-[#1877F2]'
+                        } ${actionLoading ? 'opacity-50 cursor-wait' : ''}`}
                     >
                         {isFollowed ? 'Following' : 'Follow'}
                     </button>
                 ) : n.thumbnail ? (
-                    <img 
-                        src={n.thumbnail} 
-                        alt="" 
-                        className="notif-thumbnail"
-                        onError={(e) => e.target.style.display = 'none'}
-                    />
+                    <div className="w-[44px] h-[44px] rounded-[4px] overflow-hidden border border-white/10">
+                        <img 
+                            src={n.thumbnail} 
+                            alt="" 
+                            className="w-full h-full object-cover"
+                            onError={(e) => e.target.style.display = 'none'}
+                        />
+                    </div>
                 ) : null}
             </div>
         </motion.div>

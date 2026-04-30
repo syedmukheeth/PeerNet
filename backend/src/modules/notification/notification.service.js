@@ -256,6 +256,22 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
         return formatNotification(n, hydrated);
     });
 
+    // Stage 4.5: Attach Following Status to Senders
+    const senderIds = [...new Set(formattedResults.map(n => n.sender?._id).filter(Boolean))];
+    if (senderIds.length > 0) {
+        const relations = await Follower.find({
+            follower: userId,
+            following: { $in: senderIds }
+        }).select('following');
+        const followingSet = new Set(relations.map(r => r.following.toString()));
+        
+        formattedResults.forEach(n => {
+            if (n.sender) {
+                n.sender.isFollowing = followingSet.has(n.sender._id.toString());
+            }
+        });
+    }
+
     // Stage 5: Self-Healing Garbage Collector
     const validResults = [];
     const ghosts = [];
