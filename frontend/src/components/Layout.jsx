@@ -433,42 +433,37 @@ export default function Layout() {
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* Hide Footer on Messages, Shorts, and Admin pages for app-screen style */}
+                    {/* Aesthetic Site Footer */}
                     {!['/', '/messages', '/shorts', '/admin'].some(p => location.pathname === p || (p !== '/' && location.pathname.startsWith(p))) && (
                         <footer className="site-footer">
                             <div className="site-footer__inner">
-                                <div className="site-footer__brand-section">
-                                    <Link to="/" className="site-footer__brand">
-                                        <img src={logoImg} alt="PeerNet" className="site-footer__logo" />
-                                        <span className="peernetLogo text-base">PeerNet</span>
-                                    </Link>
-                                    <p className="site-footer__tagline">
-                                        Professional network for the next generation.
-                                    </p>
-                                </div>
-                                
                                 <div className="site-footer__links">
                                     <Link to="/about" className="site-footer__link">About</Link>
-                                    <Link to="/legal/privacy" className="site-footer__link">Privacy</Link>
-                                    <Link to="/legal/terms" className="site-footer__link">Terms</Link>
+                                    <span className="footer-dot" />
                                     <Link to="/help" className="site-footer__link">Help</Link>
+                                    <span className="footer-dot" />
+                                    <Link to="/legal/privacy" className="site-footer__link">Privacy</Link>
+                                    <span className="footer-dot" />
+                                    <Link to="/legal/terms" className="site-footer__link">Terms</Link>
+                                    <span className="footer-dot" />
                                     <button onClick={() => setShowFeedback(true)} className="site-footer__link">Report Bug</button>
                                 </div>
-
-                                <div className="site-footer__creator-section">
+                                
+                                <div className="site-footer__developer">
+                                    <span className="dev-text">Developed by</span>
                                     <a
                                         href="https://www.linkedin.com/in/syedmukheeth"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="site-footer__creator-pill"
+                                        className="dev-link"
                                     >
                                         <FaLinkedin size={16} />
                                         <span>Syed Mukheeth</span>
                                     </a>
                                 </div>
 
-                                <div className="site-footer__text">
-                                    <span>© 2026 PEERNET FROM INDIA</span>
+                                <div className="site-footer__copyright">
+                                    © 2026 PEERNET FROM INDIA
                                 </div>
                             </div>
                         </footer>
