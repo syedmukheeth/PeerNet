@@ -5,6 +5,7 @@ const Post = require('../post/Post');
 const Comment = require('../comment/Comment');
 const Short = require('../shorts/Short');
 const User = require('../user/User');
+const Follower = require('../user/Follower');
 const { getRedisOptional } = require('../../config/redis');
 
 /**
