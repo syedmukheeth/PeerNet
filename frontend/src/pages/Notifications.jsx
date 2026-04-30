@@ -136,20 +136,39 @@ function NotifRow({ n, index, onNavigate }) {
 export default function Notifications() {
     const { user } = useAuth()
     const navigate = useNavigate()
-    const [notifs, setNotifs] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
+    const [hasMore, setHasMore] = useState(true)
+    const [skip, setSkip] = useState(0)
+    const LIMIT = 50
     const socket = useSocket(user)
 
-    const loadNotifs = async () => {
+    const loadNotifs = async (isMore = false) => {
+        if (isMore) setLoadingMore(true)
+        else setLoading(true)
+        
         try {
-            const { data } = await api.get('/notifications')
-            setNotifs(data.data || [])
-            if (data.data?.some(n => !n.isRead)) {
-                await api.patch('/notifications/read')
-                window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+            const currentSkip = isMore ? skip + LIMIT : 0
+            const { data } = await api.get(`/notifications?limit=${LIMIT}&skip=${currentSkip}`)
+            const newNotifs = data.data || []
+            
+            if (newNotifs.length < LIMIT) setHasMore(false)
+            
+            if (isMore) {
+                setNotifs(prev => [...prev, ...newNotifs])
+                setSkip(currentSkip)
+            } else {
+                setNotifs(newNotifs)
+                setSkip(0)
+                if (newNotifs.some(n => !n.isRead)) {
+                    await api.patch('/notifications/read')
+                    window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+                }
             }
         } catch (err) { console.error("Notification load failed", err) }
-        finally { setLoading(false) }
+        finally { 
+            setLoading(false)
+            setLoadingMore(false)
+        }
     }
 
     useEffect(() => { loadNotifs() }, [])
@@ -233,6 +252,18 @@ export default function Notifications() {
                                 {categorized.earlier.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {hasMore && notifs.length > 0 && (
+                    <div className="flex justify-center py-8">
+                        <button 
+                            onClick={() => loadNotifs(true)}
+                            disabled={loadingMore}
+                            className="text-[13px] font-bold text-accent hover:opacity-80 transition-opacity disabled:opacity-50"
+                        >
+                            {loadingMore ? 'Loading...' : 'Load older notifications'}
+                        </button>
                     </div>
                 )}
             </div>
