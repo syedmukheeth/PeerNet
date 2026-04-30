@@ -19,6 +19,8 @@ const Settings = lazy(() => import('./pages/Settings'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Terms = lazy(() => import('./pages/Terms'))
 const Admin = lazy(() => import('./pages/Admin'))
+const About = lazy(() => import('./pages/About'))
+const Help = lazy(() => import('./pages/Help'))
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -87,12 +89,16 @@ export default function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="privacy" element={<Privacy />} />
               <Route path="terms" element={<Terms />} />
+              <Route path="about" element={<About />} />
+              <Route path="help" element={<Help />} />
               <Route path="admin" element={<AdminRoute><Admin /></AdminRoute>} />
             </Route>
             
             {/* Public/Shared routes (can be viewed without login) */}
             <Route element={<Layout />}>
               <Route path="/posts/:id" element={<PostDetail />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/help" element={<Help />} />
               <Route path="/legal/privacy" element={<Privacy />} />
               <Route path="/legal/terms" element={<Terms />} />
             </Route>

@@ -132,15 +132,6 @@ function RightPanel() {
 
             {/* ── Aesthetic Sidebar Footer ──────────────── */}
             <div className="sp-footer">
-                <nav className="sp-footer-links">
-                    <Link to="/legal" className="sp-footer-link">About</Link>
-                    <Link to="/legal" className="sp-footer-link">Help</Link>
-                    <Link to="/legal" className="sp-footer-link">Privacy</Link>
-                    <Link to="/legal" className="sp-footer-link">Terms</Link>
-                    <Link to="/legal" className="sp-footer-link">Locations</Link>
-                    <Link to="/legal" className="sp-footer-link">Language</Link>
-                </nav>
-                
                 <div className="flex flex-col gap-3">
                     <a 
                         href="https://www.linkedin.com/in/syedmukheeth" 

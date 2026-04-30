@@ -1,41 +1,58 @@
 import { motion } from 'framer-motion'
+import { Helmet } from 'react-helmet-async'
 
 export default function Terms() {
     return (
-        <div className="legal-page fade-in">
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 className="t-display" style={{ marginBottom: 32 }}>Terms of Service</h1>
-                
-                <div className="legal-section">
-                    <p className="t-small" style={{ marginBottom: 24 }}>Last updated: April 12, 2026</p>
-                    <p>By accessing PeerNet, you agree to be bound by these terms of service and all applicable laws and regulations.</p>
-                </div>
+        <motion.div 
+            className="max-w-3xl mx-auto py-12 px-6"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+        >
+            <Helmet>
+                <title>Terms of Service | PeerNet</title>
+            </Helmet>
 
-                <div className="legal-section">
-                    <h2>1. Use License</h2>
-                    <p>Permission is granted to temporarily use the PeerNet platform for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title.</p>
-                </div>
+            <h1 className="t-h1 mb-2">Terms of Service</h1>
+            <p className="text-muted text-sm mb-12">Last updated: April 12, 2026</p>
+            
+            <div className="space-y-10">
+                <section className="l-card-premium p-8 border border-white/5 bg-white/[0.01]">
+                    <h2 className="t-h2 mb-4 font-bold">Agreement to Terms</h2>
+                    <p className="text-secondary leading-relaxed">
+                        By accessing PeerNet, you agree to be bound by these terms. If you do not agree with any part of these terms, you are prohibited from using the platform.
+                    </p>
+                </section>
 
-                <div className="legal-section">
-                    <h2>2. Disclaimer</h2>
-                    <p>The materials on PeerNet are provided on an &apos;as is&apos; basis. PeerNet makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties of merchantability.</p>
-                </div>
+                <section className="space-y-8">
+                    <div>
+                        <h3 className="t-h3 mb-3 font-bold">1. User Conduct</h3>
+                        <p className="text-muted leading-relaxed">
+                            Users are responsible for their own content and behavior. PeerNet prohibits any illegal activity, harassment, or the distribution of harmful content. We reserve the right to terminate accounts that violate these community standards.
+                        </p>
+                    </div>
 
-                <div className="legal-section">
-                    <h2>3. Limitations</h2>
-                    <p>In no event shall PeerNet or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit) arising out of the use or inability to use PeerNet.</p>
-                </div>
+                    <div>
+                        <h3 className="t-h3 mb-3 font-bold">2. Intellectual Property</h3>
+                        <p className="text-muted leading-relaxed">
+                            You retain all rights to the content you post on PeerNet. By posting, you grant us a worldwide, non-exclusive license to host and display your content to provide our services.
+                        </p>
+                    </div>
 
-                <div className="legal-section">
-                    <h2>4. Accuracy of Materials</h2>
-                    <p>The materials appearing on PeerNet could include technical, typographical, or photographic errors. PeerNet does not warrant that any of the materials on its website are accurate, complete or current.</p>
-                </div>
+                    <div>
+                        <h3 className="t-h3 mb-3 font-bold">3. Platform Availability</h3>
+                        <p className="text-muted leading-relaxed">
+                            While we strive for 100% uptime, PeerNet is provided "as is" without warranties of any kind. We reserve the right to modify or discontinue features at any time without notice.
+                        </p>
+                    </div>
 
-                <div className="legal-section">
-                    <h2>5. Governing Law</h2>
-                    <p>These terms and conditions are governed by and construed in accordance with the laws of the digital jurisdiction and you irrevocably submit to the exclusive jurisdiction of the courts in that location.</p>
-                </div>
-            </motion.div>
-        </div>
+                    <div>
+                        <h3 className="t-h3 mb-3 font-bold">4. Limitation of Liability</h3>
+                        <p className="text-muted leading-relaxed">
+                            PeerNet shall not be held liable for any damages arising from your use of the platform, including data loss, service interruptions, or content posted by other users.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </motion.div>
     )
 }
