@@ -88,7 +88,7 @@ function NotifRow({ n, index, onNavigate }) {
                     />
                 </div>
                 {!n.isRead && (
-                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-accent rounded-full border-2 border-black" />
+                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#0095F6] rounded-full border-2 border-black" />
                 )}
             </div>
 
@@ -98,9 +98,9 @@ function NotifRow({ n, index, onNavigate }) {
                     <span className="font-bold hover:opacity-70 transition-opacity cursor-pointer" onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}>
                         {n.sender?.username}
                     </span>
-                    {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-1 text-accent align-middle" size={14} />}
-                    <span className="ml-1 text-[var(--text-2)] font-medium"> {actionText}</span>
-                    <span className="ml-1 text-[var(--text-3)] text-[13px]">{formatTime(n.createdAt)}</span>
+                    {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-1 text-[#0095F6] align-middle" size={14} />}
+                    <span className="ml-1 text-[#a8a8a8] font-medium"> {actionText}</span>
+                    <span className="ml-1 text-[#737373] text-[13px]">{formatTime(n.createdAt)}</span>
                 </div>
             </div>
 
@@ -136,6 +136,8 @@ function NotifRow({ n, index, onNavigate }) {
 export default function Notifications() {
     const { user } = useAuth()
     const navigate = useNavigate()
+    const [notifs, setNotifs] = useState([])
+    const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
     const [skip, setSkip] = useState(0)
@@ -216,24 +218,28 @@ export default function Notifications() {
     )
 
     return (
-        <div className="min-h-dvh pb-20">
-            {/* Header */}
-            <div className="l-main-col mt-4 mb-2 flex items-center justify-between px-4">
-                <h1 className="text-[24px] font-black tracking-tight">Notifications</h1>
-                <button className="btn btn-ghost btn-icon-sm">
-                    <HiDotsHorizontal size={20} />
-                </button>
+        <div className="min-h-dvh pb-20 bg-black">
+            {/* Header - Sticky */}
+            <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-bottom border-white/5 py-4">
+                <div className="l-main-col flex items-center justify-between px-4">
+                    <h1 className="text-[24px] font-bold tracking-tight">Notifications</h1>
+                    <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                        <HiDotsHorizontal size={20} />
+                    </button>
+                </div>
             </div>
 
-            <div className="l-main-col max-w-[680px]">
+            <div className="l-main-col max-w-[680px] mt-2">
                 {notifs.length === 0 ? (
-                    <div className="empty-state mt-24">
-                        <div className="text-5xl mb-4 opacity-20">🔔</div>
-                        <p className="t-h2 opacity-40">No notifications yet</p>
-                        <p className="t-body opacity-30">Activity from your network will appear here.</p>
+                    <div className="flex flex-col items-center justify-center mt-32 text-center px-4">
+                        <div className="w-24 h-24 rounded-full border-2 border-white/20 flex items-center justify-center mb-6">
+                            <HiHeart size={48} className="opacity-20" />
+                        </div>
+                        <h2 className="text-xl font-bold mb-2">No notifications yet</h2>
+                        <p className="text-[#a8a8a8] max-w-xs">When someone likes or comments on one of your posts, you'll see it here.</p>
                     </div>
                 ) : (
-                    <div className="l-stack l-stack-sm">
+                    <div className="pb-10">
                         {categorized.today.length > 0 && (
                             <div>
                                 <SectionHeader label="Today" />
@@ -256,13 +262,13 @@ export default function Notifications() {
                 )}
 
                 {hasMore && notifs.length > 0 && (
-                    <div className="flex justify-center py-8">
+                    <div className="flex justify-center py-12 border-t border-white/5">
                         <button 
                             onClick={() => loadNotifs(true)}
                             disabled={loadingMore}
-                            className="text-[13px] font-bold text-accent hover:opacity-80 transition-opacity disabled:opacity-50"
+                            className="text-[14px] font-bold text-[#0095F6] hover:text-[#1877F2] transition-colors disabled:opacity-50"
                         >
-                            {loadingMore ? 'Loading...' : 'Load older notifications'}
+                            {loadingMore ? 'Loading...' : 'See older notifications'}
                         </button>
                     </div>
                 )}
