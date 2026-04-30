@@ -434,7 +434,7 @@ export default function Layout() {
                     </AnimatePresence>
 
                     {/* Aesthetic Site Footer */}
-                    {!['/', '/messages', '/shorts', '/admin'].some(p => location.pathname === p || (p !== '/' && location.pathname.startsWith(p))) && (
+                    {!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p)) && (
                         <footer className="site-footer">
                             <div className="site-footer__inner">
                                 <div className="site-footer__links">

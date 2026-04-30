@@ -370,12 +370,12 @@ export default function Messages() {
                     <AnimatePresence mode="popLayout">
                         {loadingConvos ? (
                             <div key="skeleton" className="p-4 space-y-4">
-                                {[1,2,3,4,5,6].map(id => (
-                                    <div key={id} className="flex gap-4 items-center">
-                                        <div className="skeleton w-14 h-14 rounded-2xl shrink-0" />
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="flex gap-4 items-center">
+                                        <div className="skeleton skeleton-avatar" />
                                         <div className="flex-1 space-y-2.5">
-                                            <div className="skeleton skeleton-text h-4 w-32 !mb-0" />
-                                            <div className="skeleton skeleton-text h-2.5 w-48 opacity-40 !mb-0" />
+                                            <div className="skeleton skeleton-text m" />
+                                            <div className="skeleton skeleton-text s opacity-40" />
                                         </div>
                                     </div>
                                 ))}
@@ -510,12 +510,12 @@ export default function Messages() {
                             <div ref={viewportRef} className="zn-viewport scroll-gpu">
                                 <AnimatePresence mode="popLayout" initial={false}>
                                     {loadingMsgs ? (
-                                        <div key="chat-skeleton" className="space-y-8 px-6">
-                                            {[1,2,3,4].map(id => (
-                                                <div key={id} className={`zn-row ${id % 2 === 0 ? 'self' : 'peer'} flex flex-col`}>
+                                        <div key="chat-skeleton" className="space-y-8 px-6 pt-6">
+                                            {[...Array(4)].map((_, i) => (
+                                                <div key={i} className={`zn-row ${i % 2 === 0 ? 'self' : 'peer'} flex flex-col`}>
                                                     <div className="zn-bubble-container flex flex-col">
                                                         <div className="skeleton h-14 rounded-[24px] mb-2 w-56 opacity-20" />
-                                                        <div className="skeleton skeleton-text h-2.5 w-16 opacity-10 !mb-0" />
+                                                        <div className="skeleton skeleton-text s opacity-10" />
                                                     </div>
                                                 </div>
                                             ))}

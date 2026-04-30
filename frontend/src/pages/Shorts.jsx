@@ -304,7 +304,17 @@ export default function Shorts() {
 
     if (status === 'pending') return (
         <div className="shorts-viewer-overlay">
-            <div className="spinner" style={{ width: 44, height: 44, borderColor: 'rgba(255,255,255,0.2)', borderTopColor: '#fff' }} />
+            <div className="shorts-phone-wrapper skeleton">
+                <div className="absolute bottom-10 left-4 right-16 space-y-4">
+                    <div className="skeleton skeleton-text m h-6" />
+                    <div className="skeleton skeleton-text l h-4" />
+                </div>
+                <div className="absolute right-4 bottom-24 space-y-8">
+                    <div className="skeleton skeleton-circle w-12 h-12" />
+                    <div className="skeleton skeleton-circle w-12 h-12" />
+                    <div className="skeleton skeleton-circle w-12 h-12" />
+                </div>
+            </div>
         </div>
     )
 

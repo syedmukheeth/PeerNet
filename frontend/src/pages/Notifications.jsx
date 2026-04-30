@@ -179,8 +179,20 @@ export default function Notifications() {
     }, [notifs])
 
     if (loading) return (
-        <div className="l-main-col py-10 flex justify-center">
-            <span className="spinner-sm" />
+        <div className="l-main-col pt-10">
+            <h1 className="text-[24px] font-black tracking-tight px-4 mb-4">Notifications</h1>
+            <div className="l-stack l-stack-sm">
+                {[...Array(8)].map((_, i) => (
+                    <div key={i} className="notif-row opacity-50">
+                        <div className="skeleton skeleton-avatar" />
+                        <div className="flex-1 space-y-2 py-1">
+                            <div className="skeleton skeleton-text m" />
+                            <div className="skeleton skeleton-text s" />
+                        </div>
+                        <div className="skeleton w-[80px] h-[32px] rounded-lg" />
+                    </div>
+                ))}
+            </div>
         </div>
     )
 

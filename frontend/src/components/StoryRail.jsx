@@ -324,7 +324,14 @@ export default function StoryRail() {
     return (
         <div className="story-rail-wrap">
             <div className="story-rail">
-                {!loading && (
+                {loading ? (
+                    [...Array(6)].map((_, i) => (
+                        <div key={i} className="story-item px-2">
+                            <div className="skeleton skeleton-circle w-[66px] h-[66px]" />
+                            <div className="skeleton skeleton-text s w-12 h-2.5 mt-2" />
+                        </div>
+                    ))
+                ) : (
                     <StoryCircle
                         label="Your story"
                         avatar={optimizeAvatarUrl(userAvatar)}

@@ -22,15 +22,18 @@ function RightPanel() {
     const navigate = useNavigate()
     const [suggestions, setSuggestions] = useState([])
     const [followed, setFollowed] = useState({})
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if (!user) return
+        setLoading(true)
         api.get('/users/search', { params: { q: 'a', limit: 6 } })
             .then(({ data }) => {
                 const others = (data.data || []).filter(u => u._id !== user._id)
                 setSuggestions(others.slice(0, 5))
             })
             .catch(() => { })
+            .finally(() => setLoading(false))
     }, [user])
 
     const handleFollow = async (u) => {
@@ -69,56 +72,65 @@ function RightPanel() {
             </div>
 
             {/* ── Suggestions Section ─────────── */}
-            {suggestions.length > 0 && (
-                <div className="mt-2">
-                    <div className="sp-section-header">
-                        <span className="sp-section-title">Suggested for you</span>
-                        <Link to="/search" className="sp-action-link sp-action-link--muted">See All</Link>
-                    </div>
-
-                    <div className="flex flex-col">
-                        {suggestions.map((u, idx) => {
-                            const av = optimizeAvatarUrl(u.avatarUrl ||
-                                `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`)
-                            const isFollowed = followed[u._id]
-                            return (
-                                <motion.div 
-                                    key={u._id} 
-                                    initial={{ opacity: 0, x: 10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.05 * idx }}
-                                    className="sp-suggestion-row"
-                                >
-                                    <img 
-                                        src={av} 
-                                        className="sp-suggestion-avatar" 
-                                        alt="" 
-                                        onClick={() => navigate(`/profile/${u._id}`)}
-                                    />
-                                    <div className="sp-suggestion-info">
-                                        <div 
-                                            className="sp-suggestion-username"
-                                            onClick={() => navigate(`/profile/${u._id}`)}
-                                        >
-                                            {u.username}
-                                            {u.isVerified && <HiBadgeCheck className="text-accent" />}
-                                        </div>
-                                        <div className="sp-suggestion-subtext">Followed by PeerNet</div>
-                                    </div>
-                                    <button 
-                                        onClick={() => handleFollow(u)} 
-                                        className={`sp-btn-follow ${isFollowed ? 'active' : ''}`}
-                                    >
-                                        {isFollowed ? 'Following' : 'Follow'}
-                                    </button>
-                                </motion.div>
-                            )
-                        })}
-                    </div>
+            <div className="mt-2">
+                <div className="sp-section-header">
+                    <span className="sp-section-title">Suggested for you</span>
+                    <Link to="/search" className="sp-action-link sp-action-link--muted">See All</Link>
                 </div>
-            )}
 
-            {/* ── Refined Footer ──────────────── */}
+                <div className="flex flex-col">
+                    {loading ? (
+                        [...Array(5)].map((_, i) => (
+                            <div key={i} className="sp-suggestion-row opacity-50">
+                                <div className="skeleton skeleton-circle w-8 h-8" />
+                                <div className="sp-suggestion-info">
+                                    <div className="skeleton skeleton-text m h-3" />
+                                    <div className="skeleton skeleton-text s h-2 opacity-50" />
+                                </div>
+                                <div className="skeleton w-12 h-6 rounded-md" />
+                            </div>
+                        ))
+                    ) : suggestions.map((u, idx) => {
+                        const av = optimizeAvatarUrl(u.avatarUrl ||
+                            `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`)
+                        const isFollowed = followed[u._id]
+                        return (
+                            <motion.div 
+                                key={u._id} 
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.05 * idx }}
+                                className="sp-suggestion-row"
+                            >
+                                <img 
+                                    src={av} 
+                                    className="sp-suggestion-avatar" 
+                                    alt="" 
+                                    onClick={() => navigate(`/profile/${u._id}`)}
+                                />
+                                <div className="sp-suggestion-info">
+                                    <div 
+                                        className="sp-suggestion-username"
+                                        onClick={() => navigate(`/profile/${u._id}`)}
+                                    >
+                                        {u.username}
+                                        {u.isVerified && <HiBadgeCheck className="text-accent" />}
+                                    </div>
+                                    <div className="sp-suggestion-subtext">Followed by PeerNet</div>
+                                </div>
+                                <button 
+                                    onClick={() => handleFollow(u)} 
+                                    className={`sp-btn-follow ${isFollowed ? 'active' : ''}`}
+                                >
+                                    {isFollowed ? 'Following' : 'Follow'}
+                                </button>
+                            </motion.div>
+                        )
+                    })}
+                </div>
+            </div>
+
+            {/* ── Aesthetic Sidebar Footer ──────────────── */}
             <div className="sp-footer">
                 <nav className="sp-footer-links">
                     <Link to="/legal" className="sp-footer-link">About</Link>
@@ -129,16 +141,15 @@ function RightPanel() {
                     <Link to="/legal" className="sp-footer-link">Language</Link>
                 </nav>
                 
-                <div className="flex flex-col gap-2 opacity-50">
+                <div className="flex flex-col gap-3">
                     <a 
                         href="https://www.linkedin.com/in/syedmukheeth" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="sp-footer-link flex items-center gap-1.5"
-                        style={{ opacity: 1 }}
+                        className="sp-developer-link"
                     >
-                        <FaLinkedin size={12} className="text-[#0A66C2]" />
-                        Syed Mukheeth
+                        <FaLinkedin size={14} className="text-[#0A66C2]" />
+                        <span>Developed by Syed Mukheeth</span>
                     </a>
                     <span className="sp-footer-copyright">
                         © 2026 PEERNET FROM INDIA
@@ -235,20 +246,20 @@ export default function Feed() {
                     </div>
 
                     {loading && (
-                        <div key="feed-skeleton" className="l-stack l-stack-lg pt-4">
+                        <div key="feed-skeleton" className="l-stack l-stack-lg pt-4 px-2">
                             {[1, 2].map(id => (
-                                <div key={id} className="bg-zinc-900/50 rounded-2xl p-4 space-y-4 border border-white/5">
+                                <div key={id} className="l-card-premium p-4 space-y-4 border border-white/5 overflow-hidden">
                                     <div className="flex items-center gap-3">
-                                        <div className="skeleton skeleton-avatar w-10 h-10" />
-                                        <div className="space-y-2">
-                                            <div className="skeleton skeleton-text w-32 h-4 !mb-0" />
-                                            <div className="skeleton skeleton-text w-20 h-3 opacity-50 !mb-0" />
+                                        <div className="skeleton size-10 rounded-full" />
+                                        <div className="space-y-2 flex-1">
+                                            <div className="skeleton h-4 w-32" />
+                                            <div className="skeleton h-3 w-24 opacity-50" />
                                         </div>
                                     </div>
                                     <div className="skeleton w-full aspect-[4/5] rounded-xl" />
                                     <div className="space-y-2.5">
-                                        <div className="skeleton skeleton-text w-full h-4 !mb-0" />
-                                        <div className="skeleton skeleton-text w-2/3 h-4 !mb-0" />
+                                        <div className="skeleton skeleton-text l" />
+                                        <div className="skeleton skeleton-text m" />
                                     </div>
                                 </div>
                             ))}

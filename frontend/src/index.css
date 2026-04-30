@@ -1870,12 +1870,7 @@ textarea:focus-visible {
   display: inline-block;
 }
 
-.skeleton-item {
-  background: linear-gradient(90deg, var(--hover) 25%, var(--border-md) 50%, var(--hover) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--r-sm);
-}
+/* Skeleton styles moved to unified section at bottom */
 
 /* ========================================================================================================================================================================================================================================
    THEME TOGGLE
@@ -2782,7 +2777,7 @@ textarea:focus-visible {
 
 /* Messages Modal */
 
-/* Skeletons */
+/* Skeletons moved to bottom */
 
 
 
@@ -5521,13 +5516,6 @@ textarea:focus-visible {
   .lg\:hidden { display: none; }
 }
 
-.skeleton-item {
-  background: linear-gradient(90deg, var(--surface-1) 25%, var(--hover) 50%, var(--surface-1) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s infinite linear;
-}
-@keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -5858,29 +5846,48 @@ textarea:focus-visible {
   100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
 }
 
-/* Premium UX utilities */
-.skeleton-item,
-.skeleton-avatar,
-.skeleton-text {
-  background: linear-gradient(110deg, rgba(255,255,255,0.04) 8%, rgba(255,255,255,0.11) 18%, rgba(255,255,255,0.04) 33%);
+/* ========================================================================================================================================================================================================================================
+   SKELETON LOADING SYSTEM - "Digital Obsidian"
+   ======================================================================================================================================================================================================================================== */
+.skeleton,
+.skeleton-item {
+  background: var(--surface-2);
+  background-image: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    transparent 100%
+  );
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.25s linear infinite;
+  animation: peernet-skeleton 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-radius: var(--r-sm);
+  position: relative;
+  overflow: hidden;
 }
 
-.skeleton-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+[data-theme="light"] .skeleton {
+  background: #f0f0f0;
+  background-image: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(0, 0, 0, 0.03) 50%, 
+    transparent 100%
+  );
 }
 
-.skeleton-text {
-  height: 10px;
-  border-radius: 999px;
+@keyframes peernet-skeleton {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
-.skeleton-text.short {
-  width: 45%;
-}
+.skeleton-circle { border-radius: 50%; }
+.skeleton-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
+.skeleton-text   { height: 12px; width: 100%; border-radius: var(--r-full); }
+.skeleton-text.s { width: 30%; }
+.skeleton-text.m { width: 60%; }
+.skeleton-text.l { width: 100%; }
+
+/* Legacy support handled above */
 
 .react-hot-toast > div {
   border-radius: 14px !important;
@@ -5981,6 +5988,162 @@ textarea:focus-visible {
 .pl-4 { padding-left: 16px; }
 .pl-16 { padding-left: 64px; }
 .pr-8 { padding-right: 32px; }
+
+/* ========================================================================================================================================================================================================================================
+   FOOTER SYSTEMS - Sidebar & Global
+   ======================================================================================================================================================================================================================================== */
+
+/* Sidebar Panel Footer (Instagram Style) */
+.sp-footer {
+  margin-top: 2.5rem;
+  padding: 0 0.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sp-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  row-gap: 0.25rem;
+}
+
+.sp-footer-link {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color var(--trans-fast);
+  cursor: pointer;
+}
+
+.sp-footer-link:hover {
+  text-decoration: underline;
+  color: var(--text-2);
+}
+
+.sp-developer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-1);
+  text-decoration: none;
+  transition: all var(--trans-fast);
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+
+.sp-developer-link:hover {
+  background: var(--hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sp-footer-copyright {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Global Site Footer (Traditional Layout) */
+.site-footer {
+  width: 100%;
+  padding: 3rem 1.5rem 4rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border-md);
+  background: var(--bg);
+}
+
+.site-footer__inner {
+  max-width: 1012px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.site-footer__link {
+  font-size: 13px;
+  color: var(--text-2);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--trans-fast);
+}
+
+.site-footer__link:hover {
+  color: var(--text-1);
+}
+
+.footer-dot {
+  width: 2px;
+  height: 2px;
+  background: var(--text-3);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.site-footer__developer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.dev-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-1);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  transition: all var(--trans-fast);
+}
+
+.dev-link:hover {
+  border-color: #0A66C2; /* LinkedIn Blue */
+  transform: translateY(-1px);
+  background: var(--surface-2);
+}
+
+.site-footer__copyright {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 768px) {
+  .site-footer {
+    display: none; /* Hide global footer on mobile as nav is there */
+  }
+}
 
 .m-0 { margin: 0; }
 .mx-2 { margin-left: 8px; margin-right: 8px; }
