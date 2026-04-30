@@ -201,7 +201,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     // Stage 2: Entity ID collection
     const grouped = { Post: [], Comment: [], Short: [] };
     rawResults.forEach(n => {
-        if (n.entityId && grouped[n.entityModel]) {
+        if (n.entityId && n.entityModel && grouped[n.entityModel]) {
             grouped[n.entityModel].push(n.entityId);
         }
     });
