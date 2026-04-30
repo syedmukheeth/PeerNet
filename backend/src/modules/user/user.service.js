@@ -81,7 +81,7 @@ const follow = async (followerId, followingId) => {
     if (!target) throw new ApiError(404, 'User not found');
 
     const existing = await Follower.findOne({ follower: followerId, following: followingId });
-    if (existing) throw new ApiError(409, 'Already following this user');
+    if (existing) return { success: true, message: 'Already following' };
 
     await Follower.create({ follower: followerId, following: followingId });
 
@@ -107,7 +107,7 @@ const follow = async (followerId, followingId) => {
 
 const unfollow = async (followerId, followingId) => {
     const relation = await Follower.findOneAndDelete({ follower: followerId, following: followingId });
-    if (!relation) throw new ApiError(404, 'You are not following this user');
+    if (!relation) return { success: true, message: 'Already unfollowed' };
 
     await Promise.all([
         User.findByIdAndUpdate(followerId, { $inc: { followingCount: -1 } }),
@@ -150,4 +150,12 @@ const searchUsers = async (q, { limit = 20, skip = 0 }) => {
         .skip(skip);
 };
 
-module.exports = { getProfile, updateProfile, follow, unfollow, getFollowers, getFollowing, searchUsers };
+module.exports = { 
+    getProfile, 
+    updateProfile, 
+    follow, 
+    unfollow, 
+    getFollowers, 
+    getFollowing, 
+    searchUsers 
+};

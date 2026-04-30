@@ -277,9 +277,12 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const ghosts = [];
 
     formattedResults.forEach(n => {
-        // GHOST DETECTION: If thumbnail is missing and it is a media-reliant type, the target was deleted.
-        // Exempt 'follow' (no thumb) and 'mention' (might be user mention without post context in some cases)
-        const isGhost = (n.type === 'like' || n.type === 'comment' || n.type === 'reply') && !n.thumbnail;
+        // GHOST DETECTION: A notification is a ghost only if its target entity (Post/Comment/Short) 
+        // was once there (entityId exists) but is no longer in our database (hydrated entity missing).
+        const hasEntity = n.entityId;
+        const entityFound = n.entityId && entitiesMap.has(n.entityId.toString());
+        
+        const isGhost = hasEntity && !entityFound && (n.type === 'like' || n.type === 'comment' || n.type === 'reply');
         
         if (isGhost) {
             ghosts.push(n._id);
