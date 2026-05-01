@@ -14,17 +14,19 @@
    6) Responsive
 */
 
-:root {
+ :root {
   --v4-nav-w: 76px;
   --v4-convo-w: 360px;
   --v4-accent: linear-gradient(135deg, #8b5cf6, #6366f1);
   --v4-accent-solid: #8b5cf6;
-  --v4-bg: #000000;
-  --v4-card: #0a0a0c;
-  --v4-border: #1a1a1e;
-  --v4-hover: #141418;
-  --v4-text-p: #ffffff;
-  --v4-text-s: #a1a1aa;
+  
+  /* These will be overridden by themes */
+  --v4-bg: var(--bg);
+  --v4-card: var(--surface-el);
+  --v4-border: var(--border);
+  --v4-hover: var(--hover);
+  --v4-text-p: var(--text-1);
+  --v4-text-s: var(--text-2);
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -52,15 +54,15 @@
 /* -- Dark Mode ---------------------------------------------- */
 :root,
 [data-theme="dark"] {
-  --bg:       #000000; 
-  --surface:  #000000;
-  --card:     #000000;
+  --bg:       #050505; 
+  --surface:  #0a0a0a;
+  --card:     #0a0a0a;
   --surface-el: #121212; 
-  --hover:    #1a1a1a;
+  --hover:    #181818;
 
-  --border:    rgba(255,255,255,0.1);
-  --border-md: rgba(255,255,255,0.15);
-  --border-lg: rgba(255,255,255,0.2);
+  --border:    rgba(255,255,255,0.06);
+  --border-md: rgba(255,255,255,0.1);
+  --border-lg: rgba(255,255,255,0.15);
 
   --text-1: #fafafa;
   --text-2: #a8a8a8;
@@ -5873,58 +5875,74 @@ textarea:focus-visible {
 .admin-surface-el {
   position: relative;
   background: var(--surface-el);
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-xl);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: var(--shadow-lg);
-}
-
-[data-theme="dark"] .admin-surface-el {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%),
-    var(--surface-el);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px -4px rgba(0,0,0,0.1);
+  transition: transform var(--trans-smooth), box-shadow var(--trans-smooth), border-color var(--trans-smooth);
 }
 
 .admin-surface-el:hover {
-  border-color: var(--border-lg);
-  box-shadow: var(--shadow-xl);
+  border-color: var(--border-md);
+  box-shadow: 0 12px 48px -8px rgba(0,0,0,0.15);
+}
+
+[data-theme="dark"] .admin-surface-el {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%), var(--surface-el);
+  box-shadow: 0 4px 24px -1px rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .admin-surface-el::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .admin-stat-card {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background: var(--surface-el);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  transition: all var(--trans-smooth);
   position: relative;
   overflow: hidden;
-  background: var(--surface-1);
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .admin-stat-card {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)),
-    var(--surface-1);
+.admin-stat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 20px 40px -12px var(--accent-subtle);
 }
 
-.admin-stat-card::before {
-  content: "";
+.admin-stat-card .chart-bg {
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  opacity: 0.1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--accent));
 }
 
 .admin-table-container {
+  width: 100%;
   background: var(--surface-el);
-  border: 1px solid var(--border-md);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  overflow: hidden;
   box-shadow: var(--shadow-md);
-}
-
-[data-theme="dark"] .admin-table-container {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
-    var(--surface-el);
 }
 
 .admin-table th {

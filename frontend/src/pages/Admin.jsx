@@ -85,16 +85,27 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
                 ))}
             </div>
 
-            <div className="hidden lg:block mt-2 p-4 rounded-xl border border-border bg-surface-subtle relative overflow-hidden group/status">
-                <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover/status:opacity-100 transition-opacity" />
-                <div className="relative">
-                    <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-[9px] font-black text-primary uppercase tracking-widest opacity-40">System</h4>
-                        <div className="status-dot-pulse" />
+            <div className="hidden lg:block mt-8 p-5 rounded-[24px] border border-border bg-surface-subtle relative overflow-hidden group/status shadow-sm">
+                <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover/status:opacity-100 transition-all duration-500" />
+                <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_var(--success)]" />
+                            <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] opacity-40">System</h4>
+                        </div>
+                        <span className="text-[8px] font-bold text-muted opacity-30">v1.0.2</span>
                     </div>
-                    <div className="flex flex-col">
-                        <span className="text-[11px] font-black text-primary uppercase tracking-tight">Active Pulse</span>
-                        <span className="text-[9px] font-medium text-muted opacity-30 uppercase tracking-tighter">Global Infra</span>
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[12px] font-black text-primary uppercase tracking-tight">Infrastructure</span>
+                        <span className="text-[9px] font-medium text-muted opacity-40 uppercase tracking-widest">Global Pulse</span>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
+                        <span className="text-[9px] font-bold text-success uppercase tracking-widest">Active</span>
+                        <div className="flex -space-x-1">
+                            {[1,2,3].map(i => (
+                                <div key={i} className="w-4 h-4 rounded-full border-2 border-surface-subtle bg-surface-2" />
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -134,24 +145,32 @@ const Sparkline = ({ data = [], color = '#00F0FF' }) => {
 
 
 const StatCard = ({ label, value, sub, icon, chartData, color = 'accent', accent }) => (
-    <div className={`admin-stat-card group ${accent ? 'border-error/30 bg-error/5' : ''}`}>
-        <div className="flex items-center justify-between mb-3">
-            <span className="admin-stat-label">{label}</span>
-            <div className={`text-muted group-hover:text-${color === 'accent' ? 'accent' : 'success'} transition-colors opacity-40`}>
-                {icon}
-            </div>
-        </div>
-        <div className="flex items-end justify-between gap-2">
-            <div>
-                <span className="admin-stat-value">{value}</span>
-                <span className="text-[9px] font-bold text-muted opacity-30 uppercase tracking-tighter block mt-0.5">{sub}</span>
-            </div>
-            {chartData && (
-                <div className="w-12 mb-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
-                    <Sparkline data={chartData} color={color === 'accent' ? '#00F0FF' : color === 'success' ? '#10B981' : '#8B5CF6'} />
+    <div className={`admin-stat-card group relative overflow-hidden ${accent ? 'ring-1 ring-error/20 border-error/20' : ''}`}>
+        <div className="chart-bg" />
+        <div className="relative z-10 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-50">{label}</span>
+                <div className={`p-2.5 rounded-2xl bg-surface-subtle text-muted group-hover:text-accent transition-all duration-500 shadow-inner`}>
+                    {icon}
                 </div>
-            )}
+            </div>
+            <div className="mt-auto space-y-1">
+                <div className="text-3xl font-black text-primary tracking-tighter tabular-nums leading-none">
+                    {value}
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-bold text-muted opacity-40 uppercase tracking-widest">{sub}</span>
+                    {chartData && (
+                        <div className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_10px_var(--accent)]" />
+                    )}
+                </div>
+            </div>
         </div>
+        {chartData && (
+            <div className="absolute bottom-0 left-0 right-0 h-12 opacity-10 group-hover:opacity-30 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
+                <Sparkline data={chartData} color="var(--accent)" />
+            </div>
+        )}
     </div>
 )
 
@@ -390,21 +409,34 @@ export default function Admin() {
         <div className="admin-page min-h-screen px-4 py-8 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
             
             {/* --- DASHBOARD HEADER --- */}
-            <header className="mb-10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <div className="flex items-center gap-3 mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted opacity-50">
-                            <span className="text-accent">System Infrastructure</span>
-                            <span className="w-1 h-1 rounded-full bg-border" />
-                            <span>v1.0.0-STABLE</span>
+            <header className="mb-14">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black text-accent uppercase tracking-[0.2em]">
+                                Infra v1.0.2
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-muted opacity-40 uppercase tracking-widest">
+                                <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                                Operational
+                            </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-primary uppercase tracking-tighter mb-2">Administrative Governance</h1>
-                        <p className="text-muted font-medium text-xs uppercase tracking-widest opacity-40">System-wide monitoring & policy enforcement</p>
+                        <div>
+                            <h1 className="text-4xl md:text-5xl font-black text-primary uppercase tracking-tighter leading-none mb-3">
+                                Governance
+                            </h1>
+                            <p className="text-muted font-medium text-[13px] md:text-[14px] max-w-xl leading-relaxed">
+                                System-wide monitoring, security protocols, and policy enforcement modules for the PeerNet infrastructure.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <button onClick={init} className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-surface-subtle hover:bg-hover transition-all text-[10px] font-black uppercase tracking-widest">
-                            <HiRefresh size={14} className={loading ? 'animate-spin' : ''} /> 
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={init} 
+                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-primary text-bg hover:scale-105 active:scale-95 transition-all text-[11px] font-black uppercase tracking-widest shadow-xl shadow-primary/10"
+                        >
+                            <HiRefresh className={loading ? 'animate-spin' : ''} /> 
                             Manual Sync
                         </button>
                     </div>
@@ -472,18 +504,22 @@ export default function Admin() {
                                                 <HiGlobe className="text-accent" /> Platform Velocity
                                             </h3>
                                         </div>
-                                        <div className="flex flex-col gap-2">
+                                        <div className="flex flex-col gap-3">
                                             {feedback.slice(0, 5).map(f => (
-                                                <div key={f._id} className="flex items-center justify-between p-4 rounded-xl bg-surface-subtle border border-border hover:bg-hover transition-all group">
-                                                    <div className="flex items-center gap-4 flex-1">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(0,240,255,0.4)] shrink-0" />
+                                                <div key={f._id} className="flex items-center justify-between p-5 rounded-[20px] bg-surface-subtle border border-border/50 hover:border-accent/30 hover:bg-hover transition-all group/item cursor-pointer">
+                                                    <div className="flex items-center gap-5 flex-1">
+                                                        <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)] shrink-0" />
                                                         <div className="flex flex-col min-w-0">
-                                                            <p className="text-[13px] text-primary font-medium truncate mb-0.5">{f.content}</p>
-                                                            <span className="text-[9px] font-bold text-muted uppercase tracking-widest opacity-40">@{f.userId?.username || 'SYSTEM INTEGRITY'} • SIGNAL AUDIT</span>
+                                                            <p className="text-[14px] text-primary font-bold tracking-tight truncate mb-1">{f.content}</p>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em] opacity-40">SIGNAL AUDIT</span>
+                                                                <span className="w-1 h-1 rounded-full bg-border" />
+                                                                <span className="text-[9px] font-bold text-accent uppercase tracking-widest">@{f.userId?.username || 'SYSTEM'}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-4 pl-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <HiArrowRight className="text-muted" size={12} />
+                                                    <div className="flex items-center gap-4 pl-4 opacity-0 group-hover/item:opacity-100 group-hover/item:translate-x-1 transition-all duration-300">
+                                                        <HiArrowRight className="text-accent" size={14} />
                                                     </div>
                                                 </div>
                                             ))}
@@ -495,23 +531,23 @@ export default function Admin() {
                                     <div className="admin-surface-el p-6 md:p-8 flex flex-col justify-between">
                                         <div>
                                             <h3 className="text-lg font-bold text-primary uppercase tracking-tight mb-10">Integrity Indices</h3>
-                                            <div className="space-y-8">
+                                            <div className="space-y-10">
                                                 <div>
-                                                    <div className="flex justify-between text-[10px] font-bold text-muted uppercase tracking-[0.2em] mb-3 opacity-40">
-                                                        <span>Network Synchronicity</span>
-                                                        <span className="text-success">{stats?.health?.synchronicity || 0}%</span>
+                                                    <div className="flex justify-between items-center text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 opacity-50">
+                                                        <span>Synchronicity</span>
+                                                        <span className="px-2 py-0.5 rounded-md bg-success/10 text-success">{stats?.health?.synchronicity || 0}%</span>
                                                     </div>
-                                                    <div className="h-0.5 w-full bg-border rounded-full overflow-hidden">
-                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.health?.synchronicity || 0}%` }} className="h-full bg-success opacity-60" />
+                                                    <div className="h-1 w-full bg-border rounded-full overflow-hidden">
+                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.health?.synchronicity || 0}%` }} className="h-full bg-success shadow-[0_0_12px_var(--success)]" />
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <div className="flex justify-between text-[10px] font-bold text-muted uppercase tracking-[0.2em] mb-3 opacity-40">
-                                                        <span>Allocation Quota</span>
-                                                        <span className="text-accent">{stats?.storage?.percentage || 0}%</span>
+                                                    <div className="flex justify-between items-center text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 opacity-50">
+                                                        <span>Allocation</span>
+                                                        <span className="px-2 py-0.5 rounded-md bg-accent/10 text-accent">{stats?.storage?.percentage || 0}%</span>
                                                     </div>
-                                                    <div className="h-0.5 w-full bg-border rounded-full overflow-hidden">
-                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.storage?.percentage || 0}%` }} className="h-full bg-accent opacity-60" />
+                                                    <div className="h-1 w-full bg-border rounded-full overflow-hidden">
+                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.storage?.percentage || 0}%` }} className="h-full bg-accent shadow-[0_0_12px_var(--accent)]" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -532,11 +568,11 @@ export default function Admin() {
                         {activeTab === 'users' && (
                             <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                 <div className="flex flex-col md:flex-row justify-between items-stretch gap-6 mb-10">
-                                    <div className="relative flex-1 flex items-center gap-3 bg-surface-subtle border border-border rounded-full px-6 py-3.5 focus-within:border-accent/40 transition-all">
-                                        <HiSearch className="text-muted opacity-40 shrink-0" size={18} />
+                                    <div className="relative flex-1 flex items-center gap-4 bg-surface-subtle border border-border/50 rounded-[20px] px-8 py-4 focus-within:border-accent/50 focus-within:ring-4 ring-accent/5 transition-all shadow-sm">
+                                        <HiSearch className="text-muted opacity-40 shrink-0" size={20} />
                                         <input 
-                                            className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder-muted" 
-                                            placeholder="Search user accounts..." 
+                                            className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:text-muted/40 text-primary uppercase tracking-tight" 
+                                            placeholder="Search unique identifiers..." 
                                             value={search}
                                             onChange={(e) => {
                                                 setSearch(e.target.value)
