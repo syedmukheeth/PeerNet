@@ -181,14 +181,26 @@ export default function Notifications() {
         const oneDay = 24 * 60 * 60 * 1000
         const oneWeek = 7 * oneDay
 
-        return {
-            today: notifs.filter(n => (now - new Date(n.createdAt)) < oneDay),
-            thisWeek: notifs.filter(n => {
-                const diff = now - new Date(n.createdAt)
-                return diff >= oneDay && diff < oneWeek
-            }),
-            earlier: notifs.filter(n => (now - new Date(n.createdAt)) >= oneWeek)
+        const groups = {
+            today: [],
+            thisWeek: [],
+            earlier: []
         }
+
+        notifs.forEach(n => {
+            const d = new Date(n.createdAt)
+            const diff = now - d
+            
+            if (isNaN(diff) || diff < oneDay) {
+                groups.today.push(n)
+            } else if (diff < oneWeek) {
+                groups.thisWeek.push(n)
+            } else {
+                groups.earlier.push(n)
+            }
+        })
+
+        return groups
     }, [notifs])
 
     if (loading) return (
@@ -221,7 +233,7 @@ export default function Notifications() {
                 </div>
             </div>
 
-            <div className="l-main-col max-w-[680px] mt-2">
+            <div className="l-main-col mx-auto max-w-[680px] mt-2">
                 {notifs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center mt-32 text-center px-4">
                         <div className="w-24 h-24 rounded-full border-2 border-white/20 flex items-center justify-center mb-6">
