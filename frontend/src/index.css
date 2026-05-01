@@ -128,9 +128,9 @@
   --border-md: rgba(0,0,0,0.15);
   --border-lg: rgba(0,0,0,0.2);
 
-  --text-1: #262626;
-  --text-2: #737373;
-  --text-3: #8e8e8e;
+  --text-1: #1a1a1a;
+  --text-2: #525252;
+  --text-3: #71717a;
 
   --accent:              #0095f6;
   --accent-2:            #00376b;
@@ -172,12 +172,12 @@
   --border-rgb: 0, 0, 0;
 
   /* Messaging Tokens - Light Mode Overrides */
-  --zn-footer-bg: rgba(255, 255, 255, 0.9);
-  --zn-composer-bg: #f0f0f4;
+  --zn-footer-bg: rgba(255, 255, 255, 0.95);
+  --zn-composer-bg: #f4f4f6;
   --zn-composer-border: rgba(0, 0, 0, 0.1);
   --zn-composer-text: #1a1a1a;
-  --zn-bubble-peer: #ebebed;
-  --zn-bubble-peer-text: #262626;
+  --zn-bubble-peer: #f0f0f2;
+  --zn-bubble-peer-text: #1a1a1a;
   --zn-action-bar-bg: rgba(255, 255, 255, 0.98);
   --zn-search-bg: rgba(0, 0, 0, 0.05);
 }
@@ -5872,44 +5872,59 @@ textarea:focus-visible {
 /* Admin hardening */
 .admin-surface-el {
   position: relative;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%),
-    var(--surface-el);
+  background: var(--surface-el);
   border: 1px solid var(--border-md);
   border-radius: var(--r-xl);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.24);
+  box-shadow: var(--shadow-lg);
 }
+
+[data-theme="dark"] .admin-surface-el {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%),
+    var(--surface-el);
+}
+
 .admin-surface-el:hover {
   border-color: var(--border-lg);
-  box-shadow: 0 18px 44px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-xl);
 }
 
 .admin-stat-card {
   position: relative;
   overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .admin-stat-card {
   background:
     linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)),
     var(--surface-1);
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-lg);
 }
+
 .admin-stat-card::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(124,58,237,0.65), transparent);
-  opacity: 0.9;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.5;
 }
 
 .admin-table-container {
+  background: var(--surface-el);
+  border: 1px solid var(--border-md);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .admin-table-container {
   background:
     linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
     var(--surface-el);
-  border: 1px solid var(--border-md);
-  box-shadow: 0 14px 38px rgba(0,0,0,0.2);
 }
 
 .admin-table th {
@@ -6916,7 +6931,7 @@ textarea:focus-visible {
   position: absolute;
   left: 0; right: 0; top: 50%;
   height: 1px;
-  background: rgba(255,255,255,0.05);
+  background: var(--border);
 }
 
 .zn-day span {
@@ -6989,14 +7004,14 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-2);
   transition: all 0.2s;
   cursor: pointer;
 }
 
 .zn-composer-action-btn:hover {
-  background: rgba(255,255,255,0.05);
-  color: #fff;
+  background: var(--surface-subtle);
+  color: var(--text-1);
 }
 
 .zn-send-btn {
@@ -7126,7 +7141,7 @@ textarea:focus-visible {
 .zn-action-divider {
     width: 1px;
     height: 16px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--border);
     margin: 0 4px;
 }
 
@@ -7189,7 +7204,7 @@ textarea:focus-visible {
 }
 
 .zn-reaction-chip:hover {
-    background: #27272a;
+    background: var(--hover);
     transform: scale(1.1) translateY(-2px);
 }
 

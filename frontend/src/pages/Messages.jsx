@@ -42,10 +42,10 @@ const ConvoItem = ({ c, isActive, user, onClick, onPin, onMute, onArchive, onMar
             <div className="flex-1 min-w-0 pr-2">
                 <div className="flex justify-between items-center mb-0.5">
                     <span className={`zn-convo-name truncate ${isUnread ? 'font-bold' : 'font-medium'}`}>{peer?.username || 'Unknown User'}</span>
-                    <span className="text-[11px] text-text-3">{formatTime(c.updatedAt)}</span>
+                    <span className="text-[11px] text-muted">{formatTime(c.updatedAt)}</span>
                 </div>
                 <div className="zn-convo-msg-row">
-                    <p className={`zn-convo-msg truncate ${isUnread ? 'text-text-1 font-semibold' : 'text-text-2'}`}>
+                    <p className={`zn-convo-msg truncate ${isUnread ? 'text-primary font-semibold' : 'text-secondary'}`}>
                         {lastMsg?.sender === user?._id ? 'You: ' : ''}
                         {lastMsg?.body || 'Started a conversation'}
                     </p>
@@ -105,7 +105,7 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
                         <span>{formatTime(m.createdAt)}</span>
                         {isSelf && (
                             m.isSeen ? (
-                                <div className="flex -space-x-1 text-white">
+                                <div className="flex -space-x-1 text-text-1">
                                     <HiCheckCircle size={10} className="opacity-40" />
                                     <HiCheckCircle size={10} className="opacity-80" />
                                 </div>
@@ -160,7 +160,7 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onForwar
                                 <button 
                                     key={e} 
                                     onClick={() => onReact(e)} 
-                                    className="w-8 h-8 rounded-xl hover:bg-white/10 flex items-center justify-center text-sm transition-all hover:scale-125 active:scale-150"
+                                    className="w-8 h-8 rounded-xl hover:bg-surface-subtle flex items-center justify-center text-sm transition-all hover:scale-125 active:scale-150"
                                 >
                                     {e}
                                 </button>
@@ -350,17 +350,17 @@ export default function Messages() {
     return (
         <div className="zn-messages-root">
             {/* 1. SIDEBAR: The conversation navigator */}
-            <aside className={`zn-messages-sidebar ${convoId ? 'hidden-mobile' : ''}`}>
+            <aside className={`zn-messages-sidebar w-[380px] flex-shrink-0 border-r border-border bg-surface-1 z-40 transition-all duration-300 ${convoId ? 'hidden-mobile' : ''}`}>
                 <div className="zn-sidebar-header">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-xl font-bold tracking-tight text-text-1">Messages</h1>
+                        <h1 className="text-xl font-bold tracking-tight text-primary">Messages</h1>
                     </div>
                     <div className="zn-sidebar-search-wrapper flex items-center gap-3 bg-surface-2 border border-border rounded-full px-4 py-2.5 group-focus-within:border-accent/30 transition-all">
-                        <HiSearch className="text-text-3 group-focus-within:text-accent transition-colors shrink-0" size={18} />
+                        <HiSearch className="text-muted group-focus-within:text-accent transition-colors shrink-0" size={18} />
                         <input 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder:text-text-3 transition-all" 
+                            className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder:text-muted transition-all" 
                             placeholder="Search" 
                         />
                     </div>
@@ -417,11 +417,11 @@ export default function Messages() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="p-16 text-center"
                             >
-                                <div className="w-20 h-20 rounded-[32px] bg-white/5 flex items-center justify-center mx-auto mb-6 opacity-20 ring-1 ring-white/10 shadow-2xl">
-                                    <HiMail size={40} className="text-zinc-500" />
+                                <div className="w-20 h-20 rounded-[32px] bg-surface-2 flex items-center justify-center mx-auto mb-6 opacity-40 ring-1 ring-border shadow-2xl">
+                                    <HiMail size={40} className="text-muted" />
                                 </div>
-                                <p className="text-zinc-500 font-black text-sm tracking-tight uppercase">No chats found</p>
-                                <p className="text-zinc-700 text-xs mt-2 font-bold px-4">Try searching for a user or start a new conversation.</p>
+                                <p className="text-primary font-black text-sm tracking-tight uppercase">No chats found</p>
+                                <p className="text-secondary text-xs mt-2 font-bold px-4">Try searching for a user or start a new conversation.</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -440,18 +440,18 @@ export default function Messages() {
                             transition={{ duration: 0.15, ease: "easeOut" }}
                             className="zn-page-transition h-full flex flex-col"
                         >
-                            <header className="zn-chat-header px-6 border-b border-border bg-surface/20 backdrop-blur-2xl z-30">
+                            <header className="zn-chat-header px-6 border-b border-border bg-surface/40 backdrop-blur-3xl z-30">
                                 <div className="flex items-center gap-4">
                                     <button 
                                         onClick={() => navigate('/messages')}
-                                        className="lg:hidden p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors text-white"
+                                        className="lg:hidden p-2 -ml-2 rounded-full hover:bg-surface-subtle transition-colors text-primary"
                                     >
                                         <HiArrowLeft size={20} />
                                     </button>
                                     <div className="relative group cursor-pointer">
                                         <img 
                                             src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} 
-                                            className="w-10 h-10 rounded-2xl object-cover border border-white/5 shadow-2xl transition-transform group-hover:scale-105" 
+                                            className="w-10 h-10 rounded-2xl object-cover border border-border shadow-2xl transition-transform group-hover:scale-105" 
                                             alt="" 
                                         />
                                         {peer?.isOnline && (
@@ -459,10 +459,10 @@ export default function Messages() {
                                         )}
                                     </div>
                                     <div>
-                                        <h2 className="text-sm font-black text-white tracking-tight leading-none mb-1">{peer?.username || 'Chatting...'}</h2>
+                                        <h2 className="text-sm font-black text-primary tracking-tight leading-none mb-1">{peer?.username || 'Chatting...'}</h2>
                                         <div className="flex items-center gap-1.5">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${peer?.isOnline ? 'bg-green-500' : 'bg-text-3'}`} />
-                                            <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${peer?.isOnline ? 'bg-green-500' : 'bg-muted'}`} />
+                                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest">
                                                 {peer?.isOnline ? 'Online' : 'Offline'}
                                             </p>
                                         </div>
@@ -472,11 +472,11 @@ export default function Messages() {
                                 <div className="flex items-center gap-2">
                                     <button 
                                         onClick={() => { setIsSearchingInChat(!isSearchingInChat); if (!isSearchingInChat) setChatSearchQuery('') }} 
-                                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSearchingInChat ? 'bg-accent/10 text-accent' : 'text-zinc-400 hover:bg-white/5'}`}
+                                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSearchingInChat ? 'bg-accent/10 text-accent' : 'text-muted hover:bg-surface-subtle'}`}
                                     >
                                         <HiSearch size={20} />
                                     </button>
-                                    <button className="w-10 h-10 rounded-xl text-zinc-400 hover:bg-white/5 flex items-center justify-center transition-all">
+                                    <button className="w-10 h-10 rounded-xl text-muted hover:bg-surface-subtle flex items-center justify-center transition-all">
                                         <HiDotsVertical size={20} />
                                     </button>
                                 </div>
@@ -491,15 +491,15 @@ export default function Messages() {
                                         className="zn-search-inline bg-surface/50 backdrop-blur-md border-b border-border"
                                     >
                                         <div className="flex items-center gap-3 px-6 py-3">
-                                            <HiSearch className="text-zinc-500" size={18} />
+                                            <HiSearch className="text-muted" size={18} />
                                             <input 
                                                 autoFocus 
                                                 value={chatSearchQuery} 
                                                 onChange={(e) => setChatSearchQuery(e.target.value)} 
                                                 placeholder="Search in conversation..." 
-                                                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-text-1 placeholder:text-text-3" 
+                                                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-primary placeholder:text-muted" 
                                             />
-                                            <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
+                                            <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="w-8 h-8 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-muted hover:text-primary transition-colors">
                                                 <HiX size={18} />
                                             </button>
                                         </div>
@@ -528,7 +528,7 @@ export default function Messages() {
                                                     layout
                                                     className="flex justify-center my-8"
                                                 >
-                                                    <span className="px-5 py-1.5 rounded-full bg-surface-2 border border-border text-[9px] font-black uppercase tracking-[0.2em] text-text-3 shadow-sm">
+                                                    <span className="px-5 py-1.5 rounded-full bg-surface-2 border border-border text-[9px] font-black uppercase tracking-[0.2em] text-muted shadow-sm">
                                                         {item.value}
                                                     </span>
                                                 </motion.div>
@@ -553,12 +553,12 @@ export default function Messages() {
                                             )
                                         ))
                                     ) : chatSearchQuery ? (
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-zinc-600 font-black text-sm uppercase tracking-widest min-h-[300px]">
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-muted font-black text-sm uppercase tracking-widest min-h-[300px]">
                                             <HiSearch size={40} className="mb-4 opacity-10" />
                                             No matches found
                                         </motion.div>
                                     ) : (
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-zinc-700 text-xs font-bold py-20 px-12 text-center leading-relaxed">
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-muted text-xs font-bold py-20 px-12 text-center leading-relaxed">
                                             <HiMail size={32} className="mb-4 opacity-20" />
                                             Beginning of a legendary conversation with {peer?.username || 'your contact'}.
                                         </motion.div>
@@ -631,8 +631,8 @@ export default function Messages() {
                                 <div className="w-24 h-24 rounded-full bg-surface-2 border border-border flex items-center justify-center mb-8 mx-auto shadow-xl">
                                     <HiMail size={40} className="text-accent" />
                                 </div>
-                                <h2 className="text-3xl font-bold text-text-1 mb-3 tracking-tight">Your Messages</h2>
-                                <p className="text-text-2 font-medium max-w-xs mx-auto leading-relaxed text-sm">
+                                <h2 className="text-3xl font-bold text-primary mb-3 tracking-tight">Your Messages</h2>
+                                <p className="text-secondary font-medium max-w-xs mx-auto leading-relaxed text-sm">
                                     Send private photos and messages to a friend or group.
                                 </p>
                                 
@@ -658,7 +658,7 @@ export default function Messages() {
                             initial={{ scale: 0.9, y: 40, opacity: 0 }} 
                             animate={{ scale: 1, y: 0, opacity: 1 }} 
                             exit={{ scale: 0.9, y: 40, opacity: 0 }}
-                            className="w-full max-w-xl bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[48px] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative overflow-hidden"
+                            className="w-full max-w-xl bg-surface-1 backdrop-blur-2xl border border-border rounded-[48px] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative overflow-hidden"
                         >
                             {/* Decorative Background Glow */}
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-accent/20 blur-[120px] pointer-events-none" />
@@ -666,10 +666,10 @@ export default function Messages() {
                             <div className="relative z-10">
                                 <div className="flex justify-between items-start mb-8">
                                     <div>
-                                        <h3 className="text-2xl font-black text-white tracking-tight uppercase font-display leading-none mb-2">Edit Message</h3>
-                                        <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Updating your thoughts</p>
+                                        <h3 className="text-2xl font-black text-primary tracking-tight uppercase font-display leading-none mb-2">Edit Message</h3>
+                                        <p className="text-muted text-xs font-medium uppercase tracking-widest">Updating your thoughts</p>
                                     </div>
-                                    <button onClick={() => setEditingId(null)} className="w-10 h-10 rounded-2xl hover:bg-white/10 flex items-center justify-center text-zinc-400 transition-all hover:scale-110 active:scale-90">
+                                    <button onClick={() => setEditingId(null)} className="w-10 h-10 rounded-2xl hover:bg-surface-subtle flex items-center justify-center text-text-3 transition-all hover:scale-110 active:scale-90">
                                         <HiX size={24} />
                                     </button>
                                 </div>
@@ -678,11 +678,11 @@ export default function Messages() {
                                     <textarea 
                                         value={editingText}
                                         onChange={(e) => setEditingText(e.target.value)}
-                                        className="w-full bg-white/[0.03] border border-white/10 rounded-[32px] p-8 text-white text-lg font-medium outline-none focus:border-accent/40 focus:ring-8 focus:ring-accent/5 min-h-[220px] transition-all placeholder:text-zinc-800"
+                                        className="w-full bg-surface-2 border border-border rounded-[32px] p-8 text-primary text-lg font-medium outline-none focus:border-accent/40 focus:ring-8 focus:ring-accent/5 min-h-[220px] transition-all placeholder:text-muted"
                                         placeholder="Type your message..."
                                         autoFocus
                                     />
-                                    <div className="absolute bottom-6 right-8 text-[10px] font-black uppercase tracking-widest text-zinc-600 select-none">
+                                    <div className="absolute bottom-6 right-8 text-[10px] font-black uppercase tracking-widest text-muted select-none">
                                         Editing Mode
                                     </div>
                                 </div>
@@ -690,7 +690,7 @@ export default function Messages() {
                                 <div className="flex items-center justify-end gap-4">
                                     <button 
                                         onClick={() => setEditingId(null)} 
-                                        className="px-8 py-4 rounded-2xl font-black text-zinc-500 hover:text-white transition-all hover:bg-white/5 active:scale-95"
+                                        className="px-8 py-4 rounded-2xl font-black text-secondary hover:text-primary transition-all hover:bg-surface-subtle active:scale-95"
                                     >
                                         Discard
                                     </button>
