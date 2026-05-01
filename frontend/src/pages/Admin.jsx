@@ -50,7 +50,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="w-full lg:w-80 flex flex-col gap-12 sticky top-32 h-[calc(100vh-160px)] overflow-y-auto pr-4 scrollbar-hide">
+        <aside className="w-full lg:w-80 flex flex-col gap-12 sticky top-12 lg:top-24 h-auto lg:h-[calc(100vh-120px)] overflow-y-auto pr-6 scrollbar-hide">
             <div className="flex flex-col gap-12">
                 {navGroups.map((group) => (
                     <div key={group.title} className="space-y-6">
@@ -65,8 +65,8 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
                                     onClick={() => setActiveTab(item.id)} 
                                     className={`w-full group relative flex items-center gap-5 px-6 py-4 rounded-[22px] transition-all duration-500 ${
                                         activeTab === item.id 
-                                        ? 'bg-accent text-white shadow-2xl shadow-accent/40 scale-105 z-10' 
-                                        : 'text-muted hover:bg-surface-subtle hover:text-primary hover:translate-x-2'
+                                        ? 'text-white scale-105 z-10' 
+                                        : 'text-muted hover:bg-white/[0.03] hover:text-white hover:translate-x-2'
                                     }`}
                                 >
                                     <item.icon size={20} className={`transition-all duration-500 ${activeTab === item.id ? 'scale-110 text-white' : 'group-hover:scale-110 group-hover:text-primary'}`} />
@@ -600,20 +600,27 @@ const AuditModule = ({ logs, loading }) => (
         </div>
         <div className="overflow-x-auto">
             <table className="admin-table">
+        <div className="overflow-x-auto">
+            <table className="admin-table">
                 <thead>
                     <tr>
-                        <th scope="col">Administrator</th>
-                        <th scope="col">Operational Action</th>
-                        <th scope="col">Cluster Target</th>
-                        <th scope="col" className="text-right">Temporal Epoch</th>
+                        <th scope="col">Event Timestamp</th>
+                        <th scope="col">Auth Actor</th>
+                        <th scope="col">Operation Node</th>
+                        <th scope="col" className="text-right">System Context</th>
                     </tr>
                 </thead>
                 <tbody>
                     {logs.map(log => (
-                        <tr key={log._id}>
+                        <tr key={log._id} className="group hover:bg-white/[0.01] transition-all">
+                            <td>
+                                <span className="text-[10px] font-black text-muted uppercase tracking-widest tabular-nums opacity-60">
+                                    {new Date(log.createdAt).toLocaleTimeString()}
+                                </span>
+                            </td>
                             <td>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-md overflow-hidden bg-accent/20 flex items-center justify-center text-accent text-[10px] font-black">
+                                    <div className="w-7 h-7 rounded-lg overflow-hidden bg-accent/10 flex items-center justify-center text-accent text-[10px] font-black border border-accent/20">
                                         {log.adminId?.username?.charAt(0).toUpperCase() || 'S'}
                                     </div>
                                     <span className="text-[11px] font-black text-primary tracking-tight lowercase">@{log.adminId?.username || 'system'}</span>
@@ -621,15 +628,12 @@ const AuditModule = ({ logs, loading }) => (
                             </td>
                             <td>
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
-                                    <span className="text-[9px] text-muted opacity-40 truncate max-w-[200px] font-medium">{log.details}</span>
+                                    <span className="text-[11px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
+                                    <span className="text-[9px] text-muted opacity-40 truncate max-w-[180px] font-bold uppercase">{log.details}</span>
                                 </div>
                             </td>
-                            <td>
-                                <span className="px-2 py-0.5 rounded-md bg-surface-subtle border border-border text-[9px] font-black text-muted uppercase tracking-widest">{log.targetType}</span>
-                            </td>
                             <td className="text-right">
-                                <span className="text-[10px] font-bold text-muted opacity-30 uppercase">{new Date(log.createdAt).toLocaleTimeString()}</span>
+                                <span className="px-2.5 py-1 rounded-lg bg-surface-subtle border border-border text-[9px] font-black text-muted uppercase tracking-[0.2em]">{log.targetType}</span>
                             </td>
                         </tr>
                     ))}
@@ -670,7 +674,7 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
                 />
             </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
             {posts.map(post => (
                 <div key={post._id} className="admin-surface-el group overflow-hidden">
                     <div className="aspect-video bg-surface-subtle relative overflow-hidden">
@@ -1088,19 +1092,19 @@ export default function Admin() {
                                     <span className="text-[9px] font-black text-success uppercase tracking-[0.4em]">Operational</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-6">
-                                <h1 className="text-6xl md:text-8xl font-black text-primary tracking-tighter uppercase leading-none drop-shadow-2xl">
-                                    Governance
-                                </h1>
-                                <motion.button 
-                                    whileHover={{ rotate: 180 }}
-                                    onClick={init}
-                                    disabled={loading}
-                                    className={`w-14 h-14 rounded-[22px] bg-surface-subtle border border-border/50 flex items-center justify-center text-muted hover:text-accent transition-all shadow-xl shadow-black/20 ${loading ? 'animate-spin' : ''}`}
-                                >
-                                    <HiRefresh size={28} />
-                                </motion.button>
-                            </div>
+                        <div className="flex items-center gap-8">
+                            <h1 className="text-6xl md:text-8xl font-black text-primary tracking-tighter uppercase leading-[0.85] drop-shadow-sm">
+                                Admin<br/><span className="text-muted/10">Console</span>
+                            </h1>
+                            <div className="h-20 w-px bg-border/40 hidden md:block" />
+                            <button 
+                                onClick={init}
+                                disabled={loading}
+                                className={`group w-16 h-16 rounded-[24px] bg-surface-subtle border border-border/50 flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-all shadow-lg active:scale-90 ${loading ? 'animate-spin text-accent' : ''}`}
+                            >
+                                <HiRefresh size={28} className="group-hover:rotate-180 transition-transform duration-700" />
+                            </button>
+                        </div>
                             <nav className="flex items-center gap-4 mt-8 text-[11px] font-black uppercase tracking-[0.4em]">
                                 <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
                                 <HiChevronRight className="text-muted/10" />
