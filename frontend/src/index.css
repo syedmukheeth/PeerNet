@@ -2452,40 +2452,131 @@ textarea:focus-visible {
 
 
 
-/* ========================================================================================================================================================================================================================================
-   NOTIFICATIONS
-   ======================================================================================================================================================================================================================================== */
+/* --- Notifications (Standardized) --- */
 .notif-row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  transition: all 0.2s ease;
+  transition: all 0.2s var(--ease-out);
   cursor: pointer;
+  border-radius: var(--r-md);
+  margin: 2px 4px;
+}
+
+.notif-row:hover {
+  background: var(--hover);
+}
+
+.notif-unread {
+  background: var(--accent-low);
+}
+
+.notif-unread:hover {
+  background: var(--accent-subtle);
+}
+
+.notif-avatar-wrap {
+  width: 44px;
+  height: 44px;
   position: relative;
+  flex-shrink: 0;
 }
 
-.notif-row:hover { background: rgba(255,255,255,0.04); }
-
-.notif-unread { 
-  background: rgba(0, 149, 246, 0.03); 
+.notif-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
 }
 
-.unread-dot {
+.notif-unread-dot {
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  transform: translateY(-50%);
   width: 8px;
   height: 8px;
-  background: #0095F6;
+  background: var(--accent);
   border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 0 10px rgba(0, 149, 246, 0.5);
+  box-shadow: 0 0 10px var(--accent-ring);
 }
 
-.notif-thumbnail {
+.notif-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.notif-text {
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--text-1);
+}
+
+.notif-username {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notif-username:hover {
+  opacity: 0.8;
+}
+
+.notif-action {
+  color: var(--text-2);
+  margin-left: 4px;
+}
+
+.notif-time {
+  color: var(--text-3);
+  font-size: 13px;
+  margin-left: 6px;
+}
+
+.notif-action-btn {
+  height: 32px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s var(--ease-out);
+}
+
+.notif-btn-follow {
+  background: var(--accent);
+  color: #fff;
+}
+
+.notif-btn-follow:hover {
+  background: var(--accent-hover);
+}
+
+.notif-btn-following {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.notif-btn-following:hover {
+  background: var(--hover);
+}
+
+.notif-thumbnail-wrap {
   width: 44px;
   height: 44px;
   border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.notif-thumbnail {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 1px solid rgba(255,255,255,0.1);
 }
 
 /* ========================================================================================================================================================================================================================================
@@ -7207,48 +7298,17 @@ textarea:focus-visible {
    INSTAGRAM-STYLE NOTIFICATIONS (Digital Obsidian)
    ========================================================================== */
 
-.notif-row {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    gap: 12px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    border-radius: 8px;
-    margin: 2px 8px;
-}
-
-.notif-row:hover {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.notif-unread {
-    background: rgba(0, 149, 246, 0.05);
-}
-
-.notif-unread:hover {
-    background: rgba(0, 149, 246, 0.08);
-}
-
-/* Animation for the blue dot */
-@keyframes notif-pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-.notif-unread .bg-accent {
-    box-shadow: 0 0 8px var(--accent);
-    animation: notif-pulse 2s infinite ease-in-out;
-}
-
-/* Skeleton refinements for notifications */
+/* Skeletons */
 .notif-row .skeleton-avatar {
     width: 44px;
     height: 44px;
+    border-radius: 50%;
+    background: var(--surface-2);
 }
 
-.notif-row .skeleton-text.m { width: 60%; height: 14px; }
-.notif-row .skeleton-text.s { width: 30%; height: 10px; }
+.notif-row .skeleton-text {
+    background: var(--surface-2);
+    border-radius: 4px;
+}
 
 

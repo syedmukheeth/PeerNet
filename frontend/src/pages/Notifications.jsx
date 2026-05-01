@@ -30,8 +30,8 @@ const typeConfig = {
 
 function SectionHeader({ label }) {
     return (
-        <div className="px-4 py-4 mt-2">
-            <span className="text-[15px] font-bold opacity-90">{label}</span>
+        <div className="px-4 pt-6 pb-2">
+            <span className="text-[16px] font-bold tracking-tight text-white/90">{label}</span>
         </div>
     )
 }
@@ -78,53 +78,45 @@ function NotifRow({ n, index, onNavigate }) {
             onClick={() => onNavigate(navTarget)}
         >
             {/* Left: Avatar */}
-            <div className="relative shrink-0">
-                <div className="w-[44px] h-[44px] rounded-full overflow-hidden border border-white/10 p-[1px]">
-                    <img 
-                        src={avatar} 
-                        alt="" 
-                        className="w-full h-full rounded-full object-cover"
-                        onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}
-                    />
-                </div>
-                {!n.isRead && (
-                    <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#0095F6] rounded-full border-2 border-black" />
-                )}
+            <div className="notif-avatar-wrap">
+                <img 
+                    src={avatar} 
+                    alt="" 
+                    className="notif-avatar"
+                    onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}
+                />
+                {!n.isRead && <div className="notif-unread-dot" />}
             </div>
 
             {/* Middle: Content */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center py-1">
-                <div className="text-[14px] leading-[1.3] tracking-tight">
-                    <span className="font-bold hover:opacity-70 transition-opacity cursor-pointer" onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}>
+            <div className="notif-content">
+                <div className="notif-text">
+                    <span className="notif-username" onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}>
                         {n.sender?.username}
                     </span>
                     {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-1 text-[#0095F6] align-middle" size={14} />}
-                    <span className="ml-1 text-[#a8a8a8] font-medium"> {actionText}</span>
-                    <span className="ml-1 text-[#737373] text-[13px]">{formatTime(n.createdAt)}</span>
+                    <span className="notif-action"> {actionText}</span>
+                    <span className="notif-time">{formatTime(n.createdAt)}</span>
                 </div>
             </div>
 
             {/* Right: Interaction */}
-            <div className="shrink-0 ml-3">
+            <div className="shrink-0 ml-auto">
                 {n.type === 'follow' ? (
                     <button 
                         onClick={handleAction}
                         disabled={actionLoading}
-                        className={`h-[32px] px-5 rounded-lg text-[13px] font-bold transition-all duration-200 ${
-                            isFollowed 
-                            ? 'bg-[#262626] text-white hover:bg-[#363636]' 
-                            : 'bg-[#0095F6] text-white hover:bg-[#1877F2]'
-                        } ${actionLoading ? 'opacity-50 cursor-wait' : ''}`}
+                        className={`notif-action-btn ${isFollowed ? 'notif-btn-following' : 'notif-btn-follow'} ${actionLoading ? 'opacity-50 cursor-wait' : ''}`}
                     >
                         {isFollowed ? 'Following' : 'Follow'}
                     </button>
                 ) : n.thumbnail ? (
-                    <div className="w-[44px] h-[44px] rounded-[4px] overflow-hidden border border-white/10">
+                    <div className="notif-thumbnail-wrap">
                         <img 
                             src={n.thumbnail} 
                             alt="" 
-                            className="w-full h-full object-cover"
-                            onError={(e) => e.target.style.display = 'none'}
+                            className="notif-thumbnail"
+                            onError={(e) => e.target.parentElement.style.display = 'none'}
                         />
                     </div>
                 ) : null}
