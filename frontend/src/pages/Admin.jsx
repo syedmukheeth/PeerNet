@@ -48,7 +48,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-8 sticky top-6 lg:top-16 h-auto lg:h-[calc(100vh-100px)] overflow-y-auto scrollbar-hide">
+        <aside className="w-64 flex-shrink-0 flex flex-col gap-6 sticky top-6 h-[calc(100vh-80px)] overflow-y-auto pr-4 scrollbar-hide">
             <div className="flex flex-col gap-12">
                 {navGroups.map((group) => (
                     <div key={group.title} className="space-y-6">
@@ -1124,7 +1124,7 @@ export default function Admin() {
                     <StatCard label="Pending Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Need review" icon={<HiFlag size={14} />} />
                 </section>
 
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                <div className="flex flex-row gap-6 items-start">
                     <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} reports={reports} />
                     <main className="flex-1 min-w-0 min-h-[800px]">
                         <AnimatePresence mode="wait">
