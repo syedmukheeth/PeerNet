@@ -63,40 +63,33 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
                                 <button 
                                     key={item.id} 
                                     onClick={() => setActiveTab(item.id)} 
-                                    className={`w-full group relative flex items-center gap-5 px-6 py-4 rounded-[22px] transition-all duration-500 ${
+                                    className={`w-full group relative flex items-center gap-5 px-6 py-4 rounded-[22px] transition-all duration-300 ${
                                         activeTab === item.id 
-                                        ? 'text-white scale-105 z-10' 
-                                        : 'text-muted hover:bg-white/[0.03] hover:text-white hover:translate-x-2'
+                                        ? 'bg-accent text-white shadow-2xl shadow-accent/30 z-10' 
+                                        : 'text-muted hover:bg-white/[0.04] hover:text-white'
                                     }`}
                                 >
-                                    <item.icon size={20} className={`transition-all duration-500 ${activeTab === item.id ? 'scale-110 text-white' : 'group-hover:scale-110 group-hover:text-primary'}`} />
-                                    <span className="text-[11px] font-black uppercase tracking-[0.25em]">{item.label}</span>
+                                    <item.icon size={18} className={`relative z-10 flex-shrink-0 transition-all duration-300 ${activeTab === item.id ? 'text-white' : 'group-hover:text-white'}`} />
+                                    <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.25em] truncate">{item.label}</span>
                                     
                                     {item.badge && (
-                                        <div className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg bg-error text-white text-[9px] font-black shadow-lg shadow-error/30 animate-pulse border border-white/10">
+                                        <div className="ml-auto relative z-10 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg bg-error text-white text-[9px] font-black shadow-lg shadow-error/30 animate-pulse border border-white/10">
                                             {item.badge}
                                         </div>
                                     )}
                                     
                                     {item.id === 'infrastructure' && pulse?.activeUsers > 0 && activeTab !== item.id && (
-                                        <div className="ml-auto flex items-center gap-2 px-2.5 py-1 rounded-lg bg-success/10 text-success text-[8px] font-black border border-success/20">
+                                        <div className="ml-auto relative z-10 flex items-center gap-2 px-2.5 py-1 rounded-lg bg-success/10 text-success text-[8px] font-black border border-success/20">
                                             <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse" />
                                             {pulse.activeUsers}
                                         </div>
                                     )}
-                                    
-                                    {activeTab === item.id && (
-                                        <motion.div 
-                                            layoutId="sidebar-active-pill"
-                                            className="absolute inset-0 bg-accent rounded-[22px] -z-10 shadow-[0_0_20px_rgba(var(--accent-rgb),0.5)]"
-                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                        />
-                                    )}
+
                                     {activeTab === item.id && (
                                         <motion.div 
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" 
+                                            className="ml-auto relative z-10 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" 
                                         />
                                     )}
                                 </button>
