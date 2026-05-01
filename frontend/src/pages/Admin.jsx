@@ -16,7 +16,7 @@ import { useSocket } from '../hooks/useSocket'
 
 // --- SaaS Components ---
 
-const AdminSidebar = ({ activeTab, setActiveTab, pulse }) => {
+const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats }) => {
     const navGroups = [
         {
             title: 'Insights',
@@ -50,7 +50,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse }) => {
     ]
 
     return (
-        <aside className="w-full lg:w-64 flex flex-col gap-10 sticky top-24 h-fit hidden lg:flex">
+        <aside className="w-full lg:w-72 flex flex-col gap-10 sticky top-24 h-fit">
             <div className="space-y-8">
                 {navGroups.map((group) => (
                     <div key={group.title} className="space-y-3">
@@ -64,6 +64,16 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse }) => {
                                 >
                                     <item.icon size={18} className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110 text-accent' : 'group-hover:scale-110'}`} />
                                     <span className="text-[13px] font-bold uppercase tracking-tight">{item.label}</span>
+                                    {item.id === 'reports' && stats?.pendingReports > 0 && (
+                                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-error text-white text-[8px] font-black animate-pulse">
+                                            {stats.pendingReports}
+                                        </span>
+                                    )}
+                                    {item.id === 'infrastructure' && pulse?.activeUsers > 0 && (
+                                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-success/10 text-success text-[8px] font-black border border-success/20">
+                                            {pulse.activeUsers} LIVE
+                                        </span>
+                                    )}
                                     {activeTab === item.id && (
                                         <motion.div 
                                             layoutId="active-nav-glow"
@@ -345,9 +355,15 @@ const StorageModule = ({ stats }) => {
 const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
         <div className="p-8 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Identity Registry</h3>
-                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">{users.length} authenticated entities</p>
+            <div className="flex items-center gap-6">
+                <div>
+                    <h3 className="text-xl font-black text-primary uppercase tracking-tight">Identity Registry</h3>
+                    <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">{users.length} authenticated entities</p>
+                </div>
+                <button className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-accent text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all shadow-lg shadow-accent/20">
+                    <HiShieldCheck size={14} />
+                    Register Entity
+                </button>
             </div>
             <div className="relative group">
                 <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
@@ -482,9 +498,15 @@ const AuditModule = ({ logs, loading }) => (
                 <h3 className="text-xl font-black text-primary uppercase tracking-tight">Infrastructure Audit</h3>
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Irrevocable platform logs</p>
             </div>
-            <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                <span className="text-[10px] font-black text-success uppercase tracking-widest">Live Registry</span>
+            <div className="flex items-center gap-4">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-subtle border border-border text-[10px] font-black uppercase tracking-widest text-muted hover:text-primary transition-all">
+                    <HiTerminal size={14} />
+                    Export Epoch
+                </button>
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <span className="text-[10px] font-black text-success uppercase tracking-widest">Live Registry</span>
+                </div>
             </div>
         </div>
         <div className="overflow-x-auto">
@@ -528,18 +550,30 @@ const AuditModule = ({ logs, loading }) => (
     </motion.div>
 )
 
-const PostModule = ({ posts, onDelete, contentType, setContentType }) => (
+const PostModule = ({ posts, onDelete, contentType, setContentType, search, setSearch }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div className="flex items-center justify-between bg-surface-subtle p-2 rounded-2xl border border-border/50">
-            {['all', 'image', 'video', 'text'].map(type => (
-                <button 
-                    key={type}
-                    onClick={() => setContentType(type)}
-                    className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-bg text-accent shadow-sm' : 'text-muted hover:text-primary'}`}
-                >
-                    {type}
-                </button>
-            ))}
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="flex-1 flex items-center justify-between bg-surface-subtle p-1.5 rounded-2xl border border-border/50 w-full">
+                {['all', 'image', 'video', 'text'].map(type => (
+                    <button 
+                        key={type}
+                        onClick={() => setContentType(type)}
+                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-bg text-accent shadow-sm' : 'text-muted hover:text-primary'}`}
+                    >
+                        {type}
+                    </button>
+                ))}
+            </div>
+            <div className="relative group w-full md:w-80">
+                <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
+                <input 
+                    type="text" 
+                    placeholder="Search posts..." 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="bg-surface-subtle border border-border rounded-2xl pl-12 pr-6 py-2.5 text-[12px] font-bold text-primary focus:border-accent outline-none transition-all w-full"
+                />
+            </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {posts.map(post => (
@@ -962,7 +996,7 @@ export default function Admin() {
                 </section>
 
                 <div className="flex flex-col lg:flex-row gap-12 items-start">
-                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} />
+                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} />
                     <main className="flex-1 min-h-[600px]">
                         <AnimatePresence mode="wait">
                             {activeTab === 'dashboard' && <AnalyticsModule stats={stats} analytics={analytics} key="dashboard" />}
@@ -980,10 +1014,12 @@ export default function Admin() {
                             {activeTab === 'posts' && (
                                 <PostModule 
                                     key="posts"
-                                    posts={posts} 
+                                    posts={posts.filter(p => p.content.toLowerCase().includes(search.toLowerCase()) || p.author?.username.toLowerCase().includes(search.toLowerCase()))} 
                                     onDelete={handleDeletePost} 
                                     contentType={contentType} 
                                     setContentType={setContentType}
+                                    search={search}
+                                    setSearch={setSearch}
                                 />
                             )}
                             {activeTab === 'comments' && (
