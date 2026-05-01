@@ -12,9 +12,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { useSocket } from '../hooks/useSocket'
 
-// --- SaaS Components ---
 
-// --- SaaS Components ---
 
 const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
     const navGroups = [
@@ -593,8 +591,6 @@ const AuditModule = ({ logs, loading }) => (
         </div>
         <div className="overflow-x-auto">
             <table className="admin-table">
-        <div className="overflow-x-auto">
-            <table className="admin-table">
                 <thead>
                     <tr>
                         <th scope="col">Event Timestamp</th>
@@ -1075,16 +1071,16 @@ export default function Admin() {
                 <header className="mb-16 lg:mb-24 relative">
                     <div className="absolute -left-12 top-0 bottom-0 w-1 bg-accent/20 rounded-full blur-[2px] hidden xl:block opacity-20" />
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-                        <div>
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 flex items-center gap-2">
-                                    <span className="text-[8px] font-black text-accent uppercase tracking-[0.3em]">Infra v2.1.0</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                                    <span className="text-[9px] font-black text-success uppercase tracking-[0.4em]">Operational</span>
-                                </div>
+                    <div>
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 flex items-center gap-2">
+                                <span className="text-[8px] font-black text-accent uppercase tracking-[0.3em]">Infra v2.1.0</span>
                             </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                                <span className="text-[9px] font-black text-success uppercase tracking-[0.4em]">Operational</span>
+                            </div>
+                        </div>
                         <div className="flex items-center gap-8">
                             <h1 className="text-6xl md:text-8xl font-black text-primary tracking-tighter uppercase leading-[0.85] drop-shadow-sm">
                                 Admin<br/><span className="text-muted/10">Console</span>
@@ -1098,24 +1094,24 @@ export default function Admin() {
                                 <HiRefresh size={28} className="group-hover:rotate-180 transition-transform duration-700" />
                             </button>
                         </div>
-                            <nav className="flex items-center gap-4 mt-8 text-[11px] font-black uppercase tracking-[0.4em]">
-                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
-                                <HiChevronRight className="text-muted/10" />
-                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
-                                <HiChevronRight className="text-muted/10" />
-                                <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10">{activeTab}</span>
-                            </nav>
+                        <nav className="flex items-center gap-4 mt-8 text-[11px] font-black uppercase tracking-[0.4em]">
+                            <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
+                            <HiChevronRight className="text-muted/10" />
+                            <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
+                            <HiChevronRight className="text-muted/10" />
+                            <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10">{activeTab}</span>
+                        </nav>
+                    </div>
+
+                    <div className="flex items-center gap-4 p-4 bg-surface-subtle rounded-[24px] border border-border/50">
+                        <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
+                            <HiShieldCheck size={20} />
                         </div>
-                        
-                        <div className="flex items-center gap-4 p-4 bg-surface-subtle rounded-[24px] border border-border/50">
-                            <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
-                                <HiShieldCheck size={20} />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
-                                <span className="text-[9px] font-bold text-muted uppercase">Secure Environment</span>
-                            </div>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
+                            <span className="text-[9px] font-bold text-muted uppercase">Secure Environment</span>
                         </div>
+                    </div>
                     </div>
                 </header>
 
@@ -1155,8 +1151,8 @@ export default function Admin() {
                                     <PostModule 
                                         key="posts"
                                         posts={posts.filter(p => 
-                                            p.content.toLowerCase().includes(search.toLowerCase()) || 
-                                            p.author?.username.toLowerCase().includes(search.toLowerCase())
+                                            (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
+                                            (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
                                         )} 
                                         onDelete={handleDeletePost} 
                                         contentType={contentType} 
@@ -1169,8 +1165,8 @@ export default function Admin() {
                                     <CommentModule 
                                         key="comments"
                                         comments={comments.filter(c => 
-                                            c.content.toLowerCase().includes(search.toLowerCase()) ||
-                                            c.author?.username.toLowerCase().includes(search.toLowerCase())
+                                            (c.content || c.body || '').toLowerCase().includes(search.toLowerCase()) ||
+                                            (c.author?.username || '').toLowerCase().includes(search.toLowerCase())
                                         )} 
                                         onDelete={handleDeleteComment} 
                                         search={search} 
