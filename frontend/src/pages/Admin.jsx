@@ -50,34 +50,40 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats }) => {
     ]
 
     return (
-        <aside className="w-full lg:w-72 flex flex-col gap-10 sticky top-24 h-fit">
-            <div className="space-y-8">
+        <aside className="w-full lg:w-72 flex flex-col gap-12 sticky top-24 h-fit">
+            <div className="space-y-10">
                 {navGroups.map((group) => (
-                    <div key={group.title} className="space-y-3">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted/30 ml-4">{group.title}</span>
-                        <div className="space-y-1">
+                    <div key={group.title} className="space-y-4">
+                        <div className="flex items-center gap-2 px-4">
+                            <div className="w-1 h-1 rounded-full bg-accent/40" />
+                            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-muted/30">{group.title}</span>
+                        </div>
+                        <div className="space-y-1.5">
                             {group.items.map(item => (
                                 <button 
                                     key={item.id} 
                                     onClick={() => setActiveTab(item.id)} 
-                                    className={`w-full relative group flex items-center gap-3 px-4 py-3 rounded-[18px] transition-all duration-300 ${activeTab === item.id ? 'bg-surface-subtle text-primary shadow-sm' : 'text-muted hover:bg-surface-subtle/50 hover:text-primary'}`}
+                                    className={`w-full relative group flex items-center gap-4 px-5 py-4 rounded-[22px] transition-all duration-500 ${activeTab === item.id ? 'bg-surface-subtle text-primary shadow-xl shadow-black/5 ring-1 ring-white/5' : 'text-muted hover:bg-surface-subtle/40 hover:text-primary'}`}
                                 >
-                                    <item.icon size={18} className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110 text-accent' : 'group-hover:scale-110'}`} />
-                                    <span className="text-[13px] font-bold uppercase tracking-tight">{item.label}</span>
+                                    <item.icon size={18} className={`transition-all duration-500 ${activeTab === item.id ? 'scale-110 text-accent filter drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.5)]' : 'group-hover:scale-110 group-hover:text-primary'}`} />
+                                    <span className="text-[12px] font-black uppercase tracking-tight">{item.label}</span>
+                                    
                                     {item.id === 'reports' && stats?.pendingReports > 0 && (
-                                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-error text-white text-[8px] font-black animate-pulse">
+                                        <div className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-error text-white text-[9px] font-black shadow-lg shadow-error/20 animate-pulse">
                                             {stats.pendingReports}
-                                        </span>
+                                        </div>
                                     )}
                                     {item.id === 'infrastructure' && pulse?.activeUsers > 0 && (
-                                        <span className="ml-auto px-1.5 py-0.5 rounded-md bg-success/10 text-success text-[8px] font-black border border-success/20">
-                                            {pulse.activeUsers} LIVE
-                                        </span>
+                                        <div className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded-full bg-success/10 text-success text-[8px] font-black border border-success/20">
+                                            <div className="w-1 h-1 rounded-full bg-success animate-ping" />
+                                            {pulse.activeUsers}
+                                        </div>
                                     )}
+                                    
                                     {activeTab === item.id && (
                                         <motion.div 
-                                            layoutId="active-nav-glow"
-                                            className="absolute left-0 w-1 h-5 bg-accent rounded-full"
+                                            layoutId="active-indicator"
+                                            className="absolute left-1 w-1.5 h-6 bg-accent rounded-full shadow-[0_0_15px_rgba(var(--accent-rgb),0.6)]"
                                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                         />
                                     )}
@@ -105,33 +111,44 @@ const InfrastructurePulse = ({ pulse }) => {
     }, [pulse])
 
     return (
-        <div className="mt-6 p-6 rounded-[24px] bg-surface-subtle/50 border border-border/50 space-y-6">
-            <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black text-muted uppercase tracking-widest">System Load</span>
-                <span className="text-[10px] font-bold text-primary tabular-nums">{load.toFixed(1)}%</span>
-            </div>
-            <div className="h-1 bg-border rounded-full overflow-hidden">
-                <motion.div 
-                    animate={{ width: `${load}%` }}
-                    className={`h-full rounded-full ${load > 70 ? 'bg-error' : load > 40 ? 'bg-warning' : 'bg-success'}`}
-                />
+        <div className="mt-6 p-6 rounded-[32px] bg-surface-subtle/40 border border-border/40 space-y-6 backdrop-blur-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-100 transition-opacity">
+                <HiTerminal className="text-accent" size={12} />
             </div>
             
-            <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-muted uppercase tracking-widest">Latency</span>
-                    <span className="text-[10px] font-bold text-primary mt-1">{latency.toFixed(0)}ms</span>
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black text-muted uppercase tracking-[0.2em] opacity-50">System Load</span>
+                    <span className="text-[11px] font-black text-primary tabular-nums tracking-tighter">{load.toFixed(1)}%</span>
                 </div>
-                <div className="flex gap-1 h-4 items-end">
-                    {[1,2,3,4,5].map(i => (
-                        <motion.div 
-                            key={i}
-                            animate={{ height: `${20 + Math.random() * 80}%` }}
-                            transition={{ repeat: Infinity, duration: 1, repeatType: 'reverse' }}
-                            className="w-1 bg-accent/40 rounded-full"
-                        />
-                    ))}
+                <div className="h-1.5 bg-border/30 rounded-full overflow-hidden p-[1px]">
+                    <motion.div 
+                        animate={{ width: `${load}%` }}
+                        className={`h-full rounded-full ${load > 70 ? 'bg-error shadow-[0_0_10px_rgba(239,68,68,0.5)]' : load > 40 ? 'bg-warning shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-success shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`}
+                    />
                 </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="p-4 rounded-2xl bg-black/20 border border-white/5">
+                    <span className="text-[8px] font-black text-muted uppercase tracking-widest block mb-1">Latency</span>
+                    <span className="text-[12px] font-black text-primary tabular-nums tracking-tighter">{latency.toFixed(0)}ms</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-black/20 border border-white/5">
+                    <span className="text-[8px] font-black text-muted uppercase tracking-widest block mb-1">Users</span>
+                    <span className="text-[12px] font-black text-primary tabular-nums tracking-tighter">{pulse?.activeUsers || 0}</span>
+                </div>
+            </div>
+
+            <div className="flex gap-1 h-8 items-end justify-between px-1">
+                {Array.from({ length: 12 }).map((_, i) => (
+                    <motion.div 
+                        key={i}
+                        animate={{ height: `${20 + Math.random() * 80}%`, opacity: [0.2, 0.5, 0.2] }}
+                        transition={{ repeat: Infinity, duration: 1.5 + Math.random(), repeatType: 'reverse' }}
+                        className="w-1.5 bg-accent/20 rounded-full"
+                    />
+                ))}
             </div>
         </div>
     )
@@ -195,11 +212,14 @@ const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
                 )}
             </div>
             <div className="space-y-1">
-                <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-40">{label}</h4>
-                <div className="text-3xl font-black text-primary tracking-tighter tabular-nums">
+                <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-60">{label}</h4>
+                <div className="text-4xl font-black text-primary tracking-tighter tabular-nums drop-shadow-sm">
                     {value}
                 </div>
-                <p className="text-[9px] font-bold text-muted opacity-30 uppercase tracking-widest">{sub}</p>
+                <div className="flex items-center gap-2">
+                    <div className={`w-1 h-1 rounded-full ${accent ? 'bg-error' : 'bg-success'}`} />
+                    <p className="text-[9px] font-black text-muted opacity-40 uppercase tracking-widest leading-none">{sub}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -220,19 +240,22 @@ const AnalyticsModule = ({ stats, analytics }) => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 <div className="xl:col-span-2 admin-surface-el p-10">
-                    <div className="flex items-center justify-between mb-12">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
                         <div>
-                            <h3 className="text-xl font-black text-primary uppercase tracking-tight">Network Velocity</h3>
-                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Real-time platform throughput</p>
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-accent" />
-                                <span className="text-[9px] font-black text-muted uppercase tracking-widest">Active Sessions</span>
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-2 h-2 rounded-full bg-accent animate-ping" />
+                                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Network Velocity</h3>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-success" />
-                                <span className="text-[9px] font-black text-muted uppercase tracking-widest">Success Rate</span>
+                            <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-40">Live Platform Throughput & Growth</p>
+                        </div>
+                        <div className="flex gap-6">
+                            <div className="flex flex-col items-end">
+                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40">Load State</span>
+                                <span className="text-[12px] font-black text-success uppercase">Optimal</span>
+                            </div>
+                            <div className="flex flex-col items-end border-l border-border/50 pl-6">
+                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40">Uptime</span>
+                                <span className="text-[12px] font-black text-primary uppercase tabular-nums">99.9%</span>
                             </div>
                         </div>
                     </div>
@@ -267,35 +290,36 @@ const AnalyticsModule = ({ stats, analytics }) => {
                     </div>
                 </div>
 
-                <div className="admin-surface-el p-10 flex flex-col justify-between">
+                <div className="admin-surface-el p-10 flex flex-col justify-between bg-gradient-to-br from-surface-subtle/20 to-transparent">
                     <div>
-                        <h3 className="text-xl font-black text-primary uppercase tracking-tight">Geographical</h3>
-                        <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Traffic Distribution</p>
+                        <h3 className="text-xl font-black text-primary uppercase tracking-tighter">Geographical</h3>
+                        <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mt-1 opacity-40">Traffic Distribution</p>
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-8 py-10">
                         {[
                             { label: 'North America', value: 42, color: 'bg-accent' },
                             { label: 'Europe', value: 28, color: 'bg-success' },
                             { label: 'Asia Pacific', value: 18, color: 'bg-warning' },
-                            { label: 'Other', value: 12, color: 'bg-muted' }
+                            { label: 'Others', value: 12, color: 'bg-muted' }
                         ].map(region => (
-                            <div key={region.label} className="space-y-2">
-                                <div className="flex justify-between text-[11px] font-bold uppercase tracking-tight text-primary">
+                            <div key={region.label} className="group cursor-default">
+                                <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-primary mb-3">
                                     <span>{region.label}</span>
-                                    <span className="text-muted opacity-60">{region.value}%</span>
+                                    <span className="text-accent drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.3)]">{region.value}%</span>
                                 </div>
-                                <div className="h-1.5 w-full bg-surface-subtle rounded-full overflow-hidden">
+                                <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden p-[1.5px] border border-white/5 shadow-inner">
                                     <motion.div 
                                         initial={{ width: 0 }}
                                         animate={{ width: `${region.value}%` }}
-                                        className={`h-full rounded-full ${region.color}`}
+                                        transition={{ duration: 1.5, ease: "circOut" }}
+                                        className={`h-full rounded-full ${region.color} shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]`}
                                     />
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <button className="w-full py-4 bg-surface-subtle border border-border text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-accent hover:text-white transition-all">
-                        Full Topology
+                    <button className="w-full py-5 bg-accent/5 border border-accent/20 text-[11px] font-black uppercase tracking-[0.3em] rounded-[20px] text-accent hover:bg-accent hover:text-white transition-all shadow-xl shadow-accent/5">
+                        Full Topology View
                     </button>
                 </div>
             </div>
@@ -308,7 +332,7 @@ const StorageModule = ({ stats }) => {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard label="Object Count" value={(stats?.totalPosts || 0 + stats?.totalStories || 0).toLocaleString()} sub="TOTAL BUCKET ASSETS" icon={<HiDatabase />} />
+                <StatCard label="Object Count" value={((stats?.totalPosts || 0) + (stats?.totalStories || 0)).toLocaleString()} sub="TOTAL BUCKET ASSETS" icon={<HiDatabase />} />
                 <StatCard label="Bandwidth" value={stats?.bandwidthUsage || '0 GB'} sub="TOTAL CONSUMPTION" icon={<HiTrendingUp />} />
                 <StatCard label="Disk Usage" value={`${(storage.usedMB / 1024).toFixed(1)} GB`} sub={`${storage.percentage}% CAPACITY`} icon={<HiHardDrive />} />
                 <StatCard label="Synchronicity" value={`${stats?.health?.synchronicity || '100'}%`} sub="SYSTEM HEALTH" icon={<HiShieldCheck />} />
@@ -355,26 +379,26 @@ const StorageModule = ({ stats }) => {
 const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
         <div className="p-8 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-6">
-                <div>
-                    <h3 className="text-xl font-black text-primary uppercase tracking-tight">Identity Registry</h3>
-                    <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">{users.length} authenticated entities</p>
+                <div className="flex items-center gap-8">
+                    <div>
+                        <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Identity Registry</h3>
+                        <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mt-1 opacity-40">{users.length} authenticated entities</p>
+                    </div>
+                    <button className="hidden md:flex items-center gap-3 px-6 py-3 rounded-[20px] bg-accent text-white text-[11px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all shadow-[0_8px_20px_rgba(var(--accent-rgb),0.25)] ring-1 ring-white/20">
+                        <HiShieldCheck size={16} />
+                        Register Entity
+                    </button>
                 </div>
-                <button className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-accent text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all shadow-lg shadow-accent/20">
-                    <HiShieldCheck size={14} />
-                    Register Entity
-                </button>
-            </div>
-            <div className="relative group">
-                <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
-                <input 
-                    type="text" 
-                    placeholder="Search identity cluster..." 
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="bg-surface-subtle border border-border rounded-2xl pl-12 pr-6 py-3.5 text-[13px] font-bold text-primary focus:border-accent outline-none transition-all w-full md:w-80"
-                />
-            </div>
+                <div className="relative group w-full md:w-96">
+                    <HiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-all" />
+                    <input 
+                        type="text" 
+                        placeholder="Search Identity Cluster..." 
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="bg-black/20 border border-border/40 rounded-[22px] pl-14 pr-8 py-4 text-[13px] font-black text-primary placeholder:text-muted/40 focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none transition-all w-full backdrop-blur-md"
+                    />
+                </div>
         </div>
         <div className="overflow-x-auto">
             <table className="admin-table">
@@ -944,34 +968,39 @@ export default function Admin() {
         <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 p-4 lg:p-10 font-sans">
             <div className="max-w-[1600px] mx-auto">
                 {/* SYSTEM HEADER */}
-                <header className="mb-12 lg:mb-20">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <header className="mb-16 lg:mb-24 relative">
+                    <div className="absolute -left-12 top-0 bottom-0 w-1 bg-accent/20 rounded-full blur-[2px] hidden xl:block opacity-20" />
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                         <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent">Infra V1.0.2</span>
-                                <div className="w-1 h-1 rounded-full bg-muted/30" />
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 flex items-center gap-2">
+                                    <span className="text-[8px] font-black text-accent uppercase tracking-[0.3em]">Infra v2.1.0</span>
+                                </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-success">Operational</span>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                                    <span className="text-[9px] font-black text-success uppercase tracking-[0.4em]">Operational</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-primary leading-none">Governance</h1>
-                                <button 
+                            <div className="flex items-center gap-6">
+                                <h1 className="text-6xl md:text-8xl font-black text-primary tracking-tighter uppercase leading-none drop-shadow-2xl">
+                                    Governance
+                                </h1>
+                                <motion.button 
+                                    whileHover={{ rotate: 180 }}
                                     onClick={init}
                                     disabled={loading}
-                                    className={`p-3 rounded-full bg-surface-subtle border border-border/50 text-muted hover:text-primary transition-all ${loading ? 'animate-spin' : 'hover:rotate-180 duration-500'}`}
+                                    className={`w-14 h-14 rounded-[22px] bg-surface-subtle border border-border/50 flex items-center justify-center text-muted hover:text-accent transition-all shadow-xl shadow-black/20 ${loading ? 'animate-spin' : ''}`}
                                 >
-                                    <HiRefresh size={24} />
-                                </button>
+                                    <HiRefresh size={28} />
+                                </motion.button>
                             </div>
-                            <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-muted/40 uppercase tracking-widest">
-                                <span>System</span>
-                                <HiChevronRight />
-                                <span>Core</span>
-                                <HiChevronRight />
-                                <span className="text-accent">{activeTab}</span>
-                            </div>
+                            <nav className="flex items-center gap-4 mt-6 text-[11px] font-black uppercase tracking-[0.4em]">
+                                <span className="text-muted/30">System</span>
+                                <HiChevronRight className="text-muted/10" />
+                                <span className="text-muted/30">Core</span>
+                                <HiChevronRight className="text-muted/10" />
+                                <span className="text-accent drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">{activeTab}</span>
+                            </nav>
                         </div>
                         
                         <div className="flex items-center gap-4 p-4 bg-surface-subtle rounded-[24px] border border-border/50">
@@ -986,89 +1015,97 @@ export default function Admin() {
                     </div>
                 </header>
 
-                <section className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-12">
-                    <StatCard label="Active Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="NETWORK CAPACITY" icon={<HiUsers size={12} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
-                    <StatCard label="Signups" value={stats?.signupsToday || 0} sub="24H GROWTH" icon={<HiTrendingUp size={12} />} />
-                    <StatCard label="Active" value={stats?.activeToday || 0} sub="SESSIONS" icon={<HiGlobe size={12} />} />
-                    <StatCard label="Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="TOTAL VOID" icon={<HiCollection size={12} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
-                    <StatCard label="Comments" value={stats?.commentsToday || 0} sub="DAILY ECHO" icon={<HiChatAlt2 size={12} />} />
-                    <StatCard label="Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="PENDING" icon={<HiFlag size={12} />} />
+                <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-16">
+                    <StatCard label="Network Entities" value={(stats?.totalUsers || 0).toLocaleString()} sub="AUTHENTICATED NODES" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
+                    <StatCard label="24h Delta" value={stats?.signupsToday || 0} sub="NEW SIGNUPS" icon={<HiTrendingUp size={14} />} />
+                    <StatCard label="Concurrent" value={pulse?.activeUsers || stats?.activeToday || 0} sub="LIVE SESSIONS" icon={<HiGlobe size={14} />} accent />
+                    <StatCard label="Data Objects" value={(stats?.totalPosts || 0).toLocaleString()} sub="VOID CONTENT" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
+                    <StatCard label="Echo Pulse" value={stats?.commentsToday || 0} sub="DAILY COMMENTS" icon={<HiChatAlt2 size={14} />} />
+                    <StatCard label="Moderation" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="PENDING REVIEWS" icon={<HiFlag size={14} />} />
                 </section>
 
                 <div className="flex flex-col lg:flex-row gap-12 items-start">
                     <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} />
-                    <main className="flex-1 min-h-[600px]">
+                    <main className="flex-1 min-h-[800px]">
                         <AnimatePresence mode="wait">
-                            {activeTab === 'dashboard' && <AnalyticsModule stats={stats} analytics={analytics} key="dashboard" />}
-                            {activeTab === 'users' && (
-                                <UserModule 
-                                    key="users"
-                                    users={users} 
-                                    search={search} 
-                                    setSearch={setSearch} 
-                                    onVerify={handleToggleVerify} 
-                                    onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
-                                    loading={loading}
-                                />
-                            )}
-                            {activeTab === 'posts' && (
-                                <PostModule 
-                                    key="posts"
-                                    posts={posts.filter(p => p.content.toLowerCase().includes(search.toLowerCase()) || p.author?.username.toLowerCase().includes(search.toLowerCase()))} 
-                                    onDelete={handleDeletePost} 
-                                    contentType={contentType} 
-                                    setContentType={setContentType}
-                                    search={search}
-                                    setSearch={setSearch}
-                                />
-                            )}
-                            {activeTab === 'comments' && (
-                                <CommentModule 
-                                    key="comments"
-                                    comments={comments} 
-                                    onDelete={handleDeleteComment} 
-                                    search={search} 
-                                    setSearch={setSearch} 
-                                />
-                            )}
-                            {activeTab === 'reports' && (
-                                <ReportModule 
-                                    key="reports"
-                                    reports={reports} 
-                                    onResolve={handleModerationAction} 
-                                />
-                            )}
-                            {activeTab === 'infrastructure' && (
-                                <div key="infra" className="space-y-10">
-                                    <InfrastructurePulse pulse={pulse} />
-                                    <StorageModule stats={stats} />
-                                </div>
-                            )}
-                            {activeTab === 'audit' && (
-                                <AuditModule key="audit" logs={logs} loading={loading} />
-                            )}
-                            {activeTab === 'settings' && (
-                                <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="admin-surface-el p-10">
-                                            <h3 className="text-xl font-black text-primary uppercase tracking-tight mb-8">Platform Identity</h3>
-                                            <div className="space-y-6">
-                                                <div className="flex items-center justify-between p-4 bg-surface-subtle rounded-2xl border border-border">
-                                                    <span className="text-[12px] font-bold text-muted uppercase">Environment</span>
-                                                    <span className="text-[11px] font-black text-accent uppercase tracking-widest">Production</span>
-                                                </div>
-                                                <div className="flex items-center justify-between p-4 bg-surface-subtle rounded-2xl border border-border">
-                                                    <span className="text-[12px] font-bold text-muted uppercase">Registry Lock</span>
-                                                    <div className="w-10 h-5 bg-success/20 rounded-full relative"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full" /></div>
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, x: 20, filter: 'blur(12px)' }}
+                                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, x: -20, filter: 'blur(12px)' }}
+                                transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+                            >
+                                {activeTab === 'dashboard' && <AnalyticsModule stats={stats} analytics={analytics} key="dashboard" />}
+                                {activeTab === 'users' && (
+                                    <UserModule 
+                                        key="users"
+                                        users={users} 
+                                        search={search} 
+                                        setSearch={setSearch} 
+                                        onVerify={handleToggleVerify} 
+                                        onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
+                                        loading={loading}
+                                    />
+                                )}
+                                {activeTab === 'posts' && (
+                                    <PostModule 
+                                        key="posts"
+                                        posts={posts.filter(p => p.content.toLowerCase().includes(search.toLowerCase()) || p.author?.username.toLowerCase().includes(search.toLowerCase()))} 
+                                        onDelete={handleDeletePost} 
+                                        contentType={contentType} 
+                                        setContentType={setContentType}
+                                        search={search}
+                                        setSearch={setSearch}
+                                    />
+                                )}
+                                {activeTab === 'comments' && (
+                                    <CommentModule 
+                                        key="comments"
+                                        comments={comments.filter(c => c.content.toLowerCase().includes(search.toLowerCase()))} 
+                                        onDelete={handleDeleteComment} 
+                                        search={search} 
+                                        setSearch={setSearch} 
+                                    />
+                                )}
+                                {activeTab === 'reports' && (
+                                    <ReportModule 
+                                        key="reports"
+                                        reports={reports} 
+                                        onResolve={handleResolveReport} 
+                                        onAction={handleModerationAction}
+                                    />
+                                )}
+                                {activeTab === 'infrastructure' && (
+                                    <div key="infra" className="space-y-12">
+                                        <InfrastructurePulse pulse={pulse} />
+                                        <StorageModule stats={stats} />
+                                    </div>
+                                )}
+                                {activeTab === 'audit' && (
+                                    <AuditModule key="audit" logs={logs} loading={loading} />
+                                )}
+                                {activeTab === 'settings' && (
+                                    <div className="space-y-12">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="admin-surface-el p-10 bg-gradient-to-br from-surface-subtle/20 to-transparent">
+                                                <h3 className="text-xl font-black text-primary uppercase tracking-tighter mb-8">Platform Identity</h3>
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
+                                                        <span className="text-[11px] font-black text-muted uppercase tracking-widest">Environment</span>
+                                                        <span className="text-[11px] font-black text-accent uppercase tracking-widest px-3 py-1 rounded-full bg-accent/10 border border-accent/20">Production</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
+                                                        <span className="text-[11px] font-black text-muted uppercase tracking-widest">Registry Lock</span>
+                                                        <div className="w-10 h-5 bg-success/20 rounded-full relative shadow-inner"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" /></div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="admin-surface-el p-10 border-dashed border-error/20">
-                                            <h3 className="text-xl font-black text-error uppercase tracking-tight mb-8">Danger Zone</h3>
-                                            <p className="text-[11px] text-muted font-medium mb-8 opacity-50">These actions are irreversible and will be logged to the permanent audit trail.</p>
-                                            <div className="space-y-4">
-                                                <button 
-                                                    onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
+                                            <div className="admin-surface-el p-10 border-dashed border-error/20 bg-error/[0.02]">
+                                                <h3 className="text-xl font-black text-error uppercase tracking-tighter mb-8">Danger Zone</h3>
+                                                <p className="text-[12px] text-muted font-medium mb-10 opacity-50 leading-relaxed">Irreversible administrative actions. All events are logged to the permanent system audit trail.</p>
+                                                <div className="space-y-4">
+                                                    <button 
+                                                        onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
                                                     className="w-full py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
                                                 >
                                                     Purge User Database
