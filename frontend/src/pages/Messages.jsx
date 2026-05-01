@@ -42,7 +42,7 @@ const ConvoItem = ({ c, isActive, user, onClick, onPin, onMute, onArchive, onMar
             <div className="flex-1 min-w-0 pr-2">
                 <div className="flex justify-between items-center mb-0.5">
                     <span className={`zn-convo-name truncate ${isUnread ? 'font-bold' : 'font-medium'}`}>{peer?.username || 'Unknown User'}</span>
-                    <span className="text-[11px] text-zinc-500">{formatTime(c.updatedAt)}</span>
+                    <span className="text-[11px] text-text-3">{formatTime(c.updatedAt)}</span>
                 </div>
                 <div className="zn-convo-msg-row">
                     <p className={`zn-convo-msg truncate ${isUnread ? 'text-text-1 font-semibold' : 'text-text-2'}`}>
@@ -355,7 +355,7 @@ export default function Messages() {
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-xl font-bold tracking-tight text-text-1">Messages</h1>
                     </div>
-                    <div className="zn-sidebar-search-wrapper flex items-center gap-3 bg-surface-el border border-white/5 rounded-full px-4 py-2.5 group-focus-within:border-accent/30 transition-all">
+                    <div className="zn-sidebar-search-wrapper flex items-center gap-3 bg-surface-2 border border-border rounded-full px-4 py-2.5 group-focus-within:border-accent/30 transition-all">
                         <HiSearch className="text-text-3 group-focus-within:text-accent transition-colors shrink-0" size={18} />
                         <input 
                             value={searchQuery}
@@ -440,7 +440,7 @@ export default function Messages() {
                             transition={{ duration: 0.15, ease: "easeOut" }}
                             className="zn-page-transition h-full flex flex-col"
                         >
-                            <header className="zn-chat-header px-6 border-b border-white/5 bg-black/20 backdrop-blur-2xl z-30">
+                            <header className="zn-chat-header px-6 border-b border-border bg-surface/20 backdrop-blur-2xl z-30">
                                 <div className="flex items-center gap-4">
                                     <button 
                                         onClick={() => navigate('/messages')}
@@ -455,14 +455,14 @@ export default function Messages() {
                                             alt="" 
                                         />
                                         {peer?.isOnline && (
-                                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-4 border-[#050505] rounded-full" />
+                                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-4 border-bg rounded-full" />
                                         )}
                                     </div>
                                     <div>
                                         <h2 className="text-sm font-black text-white tracking-tight leading-none mb-1">{peer?.username || 'Chatting...'}</h2>
                                         <div className="flex items-center gap-1.5">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${peer?.isOnline ? 'bg-green-500' : 'bg-zinc-600'}`} />
-                                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${peer?.isOnline ? 'bg-green-500' : 'bg-text-3'}`} />
+                                            <p className="text-[10px] font-bold text-text-3 uppercase tracking-widest">
                                                 {peer?.isOnline ? 'Online' : 'Offline'}
                                             </p>
                                         </div>
@@ -488,7 +488,7 @@ export default function Messages() {
                                         initial={{ height: 0, opacity: 0, y: -20 }} 
                                         animate={{ height: 'auto', opacity: 1, y: 0 }} 
                                         exit={{ height: 0, opacity: 0, y: -20 }} 
-                                        className="zn-search-inline bg-zinc-900/50 backdrop-blur-md border-b border-white/5"
+                                        className="zn-search-inline bg-surface/50 backdrop-blur-md border-b border-border"
                                     >
                                         <div className="flex items-center gap-3 px-6 py-3">
                                             <HiSearch className="text-zinc-500" size={18} />
@@ -497,7 +497,7 @@ export default function Messages() {
                                                 value={chatSearchQuery} 
                                                 onChange={(e) => setChatSearchQuery(e.target.value)} 
                                                 placeholder="Search in conversation..." 
-                                                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-white placeholder:text-zinc-700" 
+                                                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-text-1 placeholder:text-text-3" 
                                             />
                                             <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
                                                 <HiX size={18} />
@@ -528,7 +528,7 @@ export default function Messages() {
                                                     layout
                                                     className="flex justify-center my-8"
                                                 >
-                                                    <span className="px-5 py-1.5 rounded-full bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 shadow-sm">
+                                                    <span className="px-5 py-1.5 rounded-full bg-surface-2 border border-border text-[9px] font-black uppercase tracking-[0.2em] text-text-3 shadow-sm">
                                                         {item.value}
                                                     </span>
                                                 </motion.div>
@@ -559,7 +559,7 @@ export default function Messages() {
                                         </motion.div>
                                     ) : (
                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-zinc-700 text-xs font-bold py-20 px-12 text-center leading-relaxed">
-                                            <HiMail size={32} className="mb-4 opacity-10" />
+                                            <HiMail size={32} className="mb-4 opacity-20" />
                                             Beginning of a legendary conversation with {peer?.username || 'your contact'}.
                                         </motion.div>
                                     )}
@@ -628,7 +628,7 @@ export default function Messages() {
                                 transition={{ type: 'spring', delay: 0.1 }}
                                 className="relative z-10"
                             >
-                                <div className="w-24 h-24 rounded-full bg-surface-1 border border-border flex items-center justify-center mb-8 mx-auto shadow-xl">
+                                <div className="w-24 h-24 rounded-full bg-surface-2 border border-border flex items-center justify-center mb-8 mx-auto shadow-xl">
                                     <HiMail size={40} className="text-accent" />
                                 </div>
                                 <h2 className="text-3xl font-bold text-text-1 mb-3 tracking-tight">Your Messages</h2>
