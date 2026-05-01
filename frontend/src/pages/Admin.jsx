@@ -780,13 +780,13 @@ export default function Admin() {
                                                     </td>
                                                     <td className="max-w-[300px]">
                                                         <p className="text-[12px] text-primary font-medium line-clamp-2 opacity-80 leading-relaxed italic">
-                                                            &ldquo;{c.content}&rdquo;
+                                                            &ldquo;{c.body}&rdquo;
                                                         </p>
                                                     </td>
                                                     <td>
                                                         <div className="flex flex-col">
                                                             <span className="text-[10px] font-bold text-accent uppercase tracking-widest opacity-60">Source Link</span>
-                                                            <span className="text-[9px] text-muted truncate max-w-[150px]">{c.postId?.caption || 'Infrastructure Artifact'}</span>
+                                                            <span className="text-[9px] text-muted truncate max-w-[150px]">{c.post?.caption || 'Infrastructure Artifact'}</span>
                                                         </div>
                                                     </td>
                                                     <td className="text-right">
@@ -838,7 +838,7 @@ export default function Admin() {
                                                     )
                                                 ) : report.targetType === 'Comment' ? (
                                                     <div className="p-4 text-[10px] text-muted font-medium line-clamp-4 italic leading-relaxed opacity-60">
-                                                        &ldquo;{report.targetId?.content}&rdquo;
+                                                        &ldquo;{report.targetId?.body}&rdquo;
                                                     </div>
                                                 ) : (
                                                     <div className="h-full flex items-center justify-center text-muted/10 uppercase font-black tracking-tighter text-[10px]">Registry Alert</div>
