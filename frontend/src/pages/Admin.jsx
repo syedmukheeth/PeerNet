@@ -16,7 +16,7 @@ import { useSocket } from '../hooks/useSocket'
 
 // --- SaaS Components ---
 
-const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats }) => {
+const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
     const navGroups = [
         {
             title: 'Insights',
@@ -31,7 +31,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats }) => {
                 { id: 'users', label: 'Users', icon: HiUsers },
                 { id: 'posts', label: 'Posts', icon: HiCollection },
                 { id: 'comments', label: 'Comments', icon: HiChatAlt2 },
-                { id: 'reports', label: 'Reports', icon: HiFlag }
+                { id: 'reports', label: 'Reports', icon: HiFlag, badge: reports.length > 0 ? reports.length : null }
             ]
         },
         {
@@ -68,15 +68,15 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats }) => {
                                     <item.icon size={18} className={`transition-all duration-500 ${activeTab === item.id ? 'scale-110 text-accent filter drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.5)]' : 'group-hover:scale-110 group-hover:text-primary'}`} />
                                     <span className="text-[12px] font-black uppercase tracking-tight">{item.label}</span>
                                     
-                                    {item.id === 'reports' && stats?.pendingReports > 0 && (
-                                        <div className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-error text-white text-[9px] font-black shadow-lg shadow-error/20 animate-pulse">
-                                            {stats.pendingReports}
+                                    {item.badge && (
+                                        <div className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg bg-error text-white text-[9px] font-black shadow-lg shadow-error/30 animate-pulse border border-white/10">
+                                            {item.badge}
                                         </div>
                                     )}
                                     {item.id === 'infrastructure' && pulse?.activeUsers > 0 && (
-                                        <div className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded-full bg-success/10 text-success text-[8px] font-black border border-success/20">
-                                            <div className="w-1 h-1 rounded-full bg-success animate-ping" />
-                                            {pulse.activeUsers}
+                                        <div className="ml-auto flex items-center gap-2 px-2.5 py-1 rounded-lg bg-success/10 text-success text-[8px] font-black border border-success/20 shadow-sm shadow-success/10">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse" />
+                                            {pulse.activeUsers} LIVE
                                         </div>
                                     )}
                                     
@@ -411,7 +411,10 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map(user => (
+                    {users.filter(u => 
+                        u.username.toLowerCase().includes(search.toLowerCase()) || 
+                        u.email.toLowerCase().includes(search.toLowerCase())
+                    ).map(user => (
                         <tr key={user._id}>
                             <td>
                                 <div className="flex items-center gap-4">
@@ -451,6 +454,12 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
                     ))}
                 </tbody>
             </table>
+            {users.filter(u => u.username.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+                <div className="p-20 text-center space-y-4">
+                    <div className="text-muted/20 flex justify-center"><HiUsers size={48} /></div>
+                    <p className="text-[11px] font-black text-muted uppercase tracking-widest">No matching entities in cluster</p>
+                </div>
+            )}
         </div>
     </motion.div>
 )
@@ -487,30 +496,36 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
                     {comments.map(comment => (
                         <tr key={comment._id} className="group">
                             <td>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-surface-subtle">
-                                        <img src={comment.author?.avatarUrl} className="w-full h-full object-cover" alt="" />
+                                <div className="flex items-center gap-4">
+                                    <div className="w-9 h-9 rounded-xl overflow-hidden bg-surface-subtle border border-white/5">
+                                        <img src={comment.author?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.author?.username}&background=random`} className="w-full h-full object-cover" alt="" />
                                     </div>
-                                    <span className="text-[11px] font-black text-primary tracking-tight">@{comment.author?.username}</span>
+                                    <span className="text-[11px] font-black text-primary tracking-tight lowercase">@{comment.author?.username}</span>
                                 </div>
                             </td>
                             <td>
                                 <p className="text-[12px] font-medium text-muted leading-relaxed line-clamp-1 max-w-sm group-hover:text-primary transition-colors">
-                                    {comment.body}
+                                    {comment.content || comment.body}
                                 </p>
                             </td>
                             <td>
-                                <span className="text-[10px] font-bold text-muted/40 uppercase tracking-tighter">POST::{comment.post?._id?.slice(-8)}</span>
+                                <span className="text-[10px] font-black text-muted/30 uppercase tracking-widest tabular-nums">ID::{comment.post?._id?.slice(-6) || 'N/A'}</span>
                             </td>
                             <td className="text-right">
-                                <button onClick={() => onDelete(comment._id)} className="p-2.5 rounded-xl bg-error/5 text-error opacity-40 group-hover:opacity-100 transition-all border border-error/10 hover:bg-error hover:text-white">
-                                    <HiTrash size={16} />
+                                <button onClick={() => onDelete(comment._id)} className="p-3 rounded-2xl bg-error/5 text-error opacity-0 group-hover:opacity-100 transition-all border border-error/10 hover:bg-error hover:text-white transform translate-x-2 group-hover:translate-x-0">
+                                    <HiTrash size={18} />
                                 </button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+            {comments.length === 0 && (
+                <div className="p-20 text-center space-y-4">
+                    <div className="text-muted/10 flex justify-center"><HiTerminal size={40} /></div>
+                    <p className="text-[11px] font-black text-muted uppercase tracking-widest opacity-30">No communications found in cluster</p>
+                </div>
+            )}
         </div>
     </motion.div>
 )
@@ -523,7 +538,18 @@ const AuditModule = ({ logs, loading }) => (
                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Irrevocable platform logs</p>
             </div>
             <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-subtle border border-border text-[10px] font-black uppercase tracking-widest text-muted hover:text-primary transition-all">
+                <button 
+                    onClick={() => {
+                        const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `peernet-audit-${new Date().toISOString()}.json`
+                        a.click()
+                        toast.success('Audit trail exported successfully')
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-subtle border border-border text-[10px] font-black uppercase tracking-widest text-muted hover:text-primary transition-all shadow-sm"
+                >
                     <HiTerminal size={14} />
                     Export Epoch
                 </button>
@@ -570,6 +596,12 @@ const AuditModule = ({ logs, loading }) => (
                     ))}
                 </tbody>
             </table>
+            {logs.length === 0 && (
+                <div className="p-20 text-center space-y-4">
+                    <div className="text-muted/10 flex justify-center"><HiTerminal size={40} /></div>
+                    <p className="text-[11px] font-black text-muted uppercase tracking-widest opacity-30">No operational records found in audit trail</p>
+                </div>
+            )}
         </div>
     </motion.div>
 )
@@ -601,40 +633,51 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {posts.map(post => (
-                <div key={post._id} className="admin-surface-el group">
+                <div key={post._id} className="admin-surface-el group overflow-hidden">
                     <div className="aspect-video bg-surface-subtle relative overflow-hidden">
                         {post.mediaUrl ? (
                             <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted/20">
+                            <div className="w-full h-full flex items-center justify-center text-muted/10 bg-black/40">
                                 <HiCollection size={48} />
                             </div>
                         )}
-                        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                            <button onClick={() => onDelete(post._id)} className="p-3 rounded-xl bg-error text-white shadow-xl shadow-error/20 hover:scale-110 transition-all">
-                                <HiTrash size={18} />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                            <button onClick={() => onDelete(post._id)} className="p-4 rounded-2xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 transition-all transform translate-y-4 group-hover:translate-y-0 duration-300">
+                                <HiTrash size={22} />
                             </button>
                         </div>
                     </div>
                     <div className="p-6">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-6 h-6 rounded-full overflow-hidden bg-surface-subtle">
-                                <img src={post.author?.avatarUrl} className="w-full h-full object-cover" alt="" />
+                            <div className="w-6 h-6 rounded-lg overflow-hidden bg-surface-subtle border border-white/5">
+                                <img src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} className="w-full h-full object-cover" alt="" />
                             </div>
-                            <span className="text-[11px] font-bold text-primary">@{post.author?.username}</span>
+                            <span className="text-[11px] font-black text-primary tracking-tight lowercase">@{post.author?.username}</span>
                         </div>
-                        <p className="text-[13px] text-muted line-clamp-2 leading-relaxed mb-4">{post.content}</p>
-                        <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                            <span className="text-[9px] font-black text-muted uppercase tracking-widest">{post.type} • {new Date(post.createdAt).toLocaleDateString()}</span>
+                        <p className="text-[13px] text-muted line-clamp-2 leading-relaxed mb-6 font-medium opacity-70">{post.content}</p>
+                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                            <span className="text-[9px] font-black text-muted uppercase tracking-[0.2em] opacity-40">{post.type} • {new Date(post.createdAt).toLocaleDateString()}</span>
                             <div className="flex items-center gap-2 text-accent">
-                                <HiTrendingUp size={14} />
-                                <span className="text-[10px] font-black">{post.likes?.length || 0}</span>
+                                <HiTrendingUp size={14} className="opacity-50" />
+                                <span className="text-[10px] font-black tracking-widest">{post.likes?.length || 0}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             ))}
         </div>
+        {posts.length === 0 && (
+            <div className="admin-surface-el p-32 flex flex-col items-center justify-center text-center space-y-6">
+                <div className="w-20 h-20 rounded-full bg-accent/5 flex items-center justify-center text-accent/20 animate-pulse">
+                    <HiCollection size={40} />
+                </div>
+                <div className="space-y-2">
+                    <h4 className="text-sm font-black text-primary uppercase tracking-widest">No Content Found</h4>
+                    <p className="text-[11px] font-bold text-muted uppercase tracking-[0.2em] opacity-30">Archive cluster is empty or search returned zero nodes</p>
+                </div>
+            </div>
+        )}
     </motion.div>
 )
 
@@ -699,7 +742,7 @@ export default function Admin() {
     const [activeTab, setActiveTab] = useState('dashboard')
     const [stats, setStats] = useState(null)
     const [analytics, setAnalytics] = useState(null)
-    const [pulse, setPulse] = useState(null)
+    const [pulse, setPulse] = useState({ load: 0.12, latency: 42, activeUsers: 0 })
     const [users, setUsers] = useState([])
     const [posts, setPosts] = useState([])
     const [comments, setComments] = useState([])
@@ -908,6 +951,7 @@ export default function Admin() {
             await api.patch(`/admin/users/${userId}/verify`)
             toast.success('Validation status updated')
             fetchUsers(search)
+            fetchStats()
         } catch {
             toast.error('Validation update failed')
         }
@@ -1025,7 +1069,7 @@ export default function Admin() {
                 </section>
 
                 <div className="flex flex-col lg:flex-row gap-12 items-start">
-                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} />
+                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} reports={reports} />
                     <main className="flex-1 min-h-[800px]">
                         <AnimatePresence mode="wait">
                             <motion.div
@@ -1050,7 +1094,10 @@ export default function Admin() {
                                 {activeTab === 'posts' && (
                                     <PostModule 
                                         key="posts"
-                                        posts={posts.filter(p => p.content.toLowerCase().includes(search.toLowerCase()) || p.author?.username.toLowerCase().includes(search.toLowerCase()))} 
+                                        posts={posts.filter(p => 
+                                            p.content.toLowerCase().includes(search.toLowerCase()) || 
+                                            p.author?.username.toLowerCase().includes(search.toLowerCase())
+                                        )} 
                                         onDelete={handleDeletePost} 
                                         contentType={contentType} 
                                         setContentType={setContentType}
@@ -1061,7 +1108,10 @@ export default function Admin() {
                                 {activeTab === 'comments' && (
                                     <CommentModule 
                                         key="comments"
-                                        comments={comments.filter(c => c.content.toLowerCase().includes(search.toLowerCase()))} 
+                                        comments={comments.filter(c => 
+                                            c.content.toLowerCase().includes(search.toLowerCase()) ||
+                                            c.author?.username.toLowerCase().includes(search.toLowerCase())
+                                        )} 
                                         onDelete={handleDeleteComment} 
                                         search={search} 
                                         setSearch={setSearch} 
