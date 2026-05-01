@@ -73,11 +73,10 @@ function NotifRow({ n, index, onNavigate }) {
         <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.02, ease: "easeOut" }}
+            transition={{ delay: index * 0.01, ease: "easeOut" }}
             className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}
             onClick={() => onNavigate(navTarget)}
         >
-            {/* Left: Avatar */}
             <div className="notif-avatar-wrap">
                 <img 
                     src={avatar} 
@@ -88,11 +87,10 @@ function NotifRow({ n, index, onNavigate }) {
                 {!n.isRead && <div className="notif-unread-dot" />}
             </div>
 
-            {/* Middle: Content */}
             <div className="notif-content">
                 <div className="notif-text">
                     <span className="notif-username" onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}>
-                        {n.sender?.username}
+                        {n.sender?.username || 'User'}
                     </span>
                     {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-1 text-[#0095F6] align-middle" size={14} />}
                     <span className="notif-action"> {actionText}</span>
@@ -100,24 +98,18 @@ function NotifRow({ n, index, onNavigate }) {
                 </div>
             </div>
 
-            {/* Right: Interaction */}
-            <div className="shrink-0 ml-auto">
+            <div className="shrink-0 ml-4">
                 {n.type === 'follow' ? (
                     <button 
                         onClick={handleAction}
                         disabled={actionLoading}
-                        className={`notif-action-btn ${isFollowed ? 'notif-btn-following' : 'notif-btn-follow'} ${actionLoading ? 'opacity-50 cursor-wait' : ''}`}
+                        className={`notif-action-btn ${isFollowed ? 'notif-btn-following' : 'notif-btn-follow'} ${actionLoading ? 'opacity-50' : ''}`}
                     >
                         {isFollowed ? 'Following' : 'Follow'}
                     </button>
                 ) : n.thumbnail ? (
                     <div className="notif-thumbnail-wrap">
-                        <img 
-                            src={n.thumbnail} 
-                            alt="" 
-                            className="notif-thumbnail"
-                            onError={(e) => e.target.parentElement.style.display = 'none'}
-                        />
+                        <img src={n.thumbnail} alt="" className="notif-thumbnail" />
                     </div>
                 ) : null}
             </div>
@@ -224,8 +216,8 @@ export default function Notifications() {
     return (
         <div className="min-h-dvh pb-20 bg-black">
             {/* Header - Sticky */}
-            <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-bottom border-white/5 py-4">
-                <div className="l-main-col flex items-center justify-between px-4">
+            <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+                <div className="l-main-col flex items-center justify-between px-4 py-4">
                     <h1 className="text-[24px] font-bold tracking-tight">Notifications</h1>
                     <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
                         <HiDotsHorizontal size={20} />
@@ -233,7 +225,7 @@ export default function Notifications() {
                 </div>
             </div>
 
-            <div className="l-main-col mx-auto max-w-[680px] mt-2">
+            <div className="l-main-col">
                 {notifs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center mt-32 text-center px-4">
                         <div className="w-24 h-24 rounded-full border-2 border-white/20 flex items-center justify-center mb-6">
@@ -245,19 +237,19 @@ export default function Notifications() {
                 ) : (
                     <div className="pb-10">
                         {categorized.today.length > 0 && (
-                            <div>
+                            <div className="mb-2">
                                 <SectionHeader label="Today" />
                                 {categorized.today.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
                             </div>
                         )}
                         {categorized.thisWeek.length > 0 && (
-                            <div>
+                            <div className="mb-2">
                                 <SectionHeader label="This Week" />
                                 {categorized.thisWeek.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
                             </div>
                         )}
                         {categorized.earlier.length > 0 && (
-                            <div>
+                            <div className="mb-2">
                                 <SectionHeader label="Earlier" />
                                 {categorized.earlier.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
                             </div>

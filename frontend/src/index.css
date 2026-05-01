@@ -2461,7 +2461,7 @@ textarea:focus-visible {
   transition: all 0.2s var(--ease-out);
   cursor: pointer;
   border-radius: var(--r-md);
-  margin: 2px 4px;
+  margin: 0;
 }
 
 .notif-row:hover {
@@ -2494,7 +2494,7 @@ textarea:focus-visible {
 .notif-unread-dot {
   position: absolute;
   top: 50%;
-  left: -8px;
+  left: -10px;
   transform: translateY(-50%);
   width: 8px;
   height: 8px;
