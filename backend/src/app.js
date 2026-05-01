@@ -80,8 +80,13 @@ const createApp = () => {
     // SPA Fallback: handle all navigation routes by serving index.html
     if (process.env.NODE_ENV === 'production') {
         app.get('*', (req, res, next) => {
-            // Skip fallback if request is specifically for API or Has File Extension
-            if (req.path.startsWith('/api/v1') || path.extname(req.path)) {
+            // Skip API routes, Swagger docs, health check, and file requests
+            if (
+                req.path.startsWith('/api/v1') ||
+                req.path.startsWith('/api-docs') ||
+                req.path.startsWith('/health') ||
+                path.extname(req.path)
+            ) {
                 return next();
             }
             res.sendFile(path.join(__dirname, '../public/index.html'));
