@@ -48,47 +48,33 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="w-64 flex-shrink-0 flex flex-col gap-6 sticky top-6 h-[calc(100vh-80px)] overflow-y-auto pr-4 scrollbar-hide">
-            <div className="flex flex-col gap-12">
+        <aside className="w-56 flex-shrink-0 flex flex-col gap-0 sticky top-6 h-[calc(100vh-80px)] overflow-y-auto scrollbar-hide border-r border-border/20 pr-6">
+            <div className="flex flex-col gap-1">
                 {navGroups.map((group) => (
-                    <div key={group.title} className="space-y-6">
-                        <div className="flex items-center gap-3 px-6">
-                            <div className="w-1 h-1 rounded-full bg-accent/40 shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted opacity-30">{group.title}</span>
-                        </div>
-                        <div className="space-y-2">
+                    <div key={group.title} className="mb-6">
+                        <p className="text-[9px] font-bold text-muted/30 uppercase tracking-[0.35em] px-3 mb-2">{group.title}</p>
+                        <div className="space-y-0.5">
                             {group.items.map(item => (
                                 <button 
                                     key={item.id} 
                                     onClick={() => setActiveTab(item.id)} 
-                                    className={`w-full group relative flex items-center gap-5 px-6 py-4 rounded-[22px] transition-all duration-300 ${
+                                    className={`w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                                         activeTab === item.id 
-                                        ? 'bg-accent text-white shadow-2xl shadow-accent/30 z-10' 
-                                        : 'text-muted hover:bg-white/[0.04] hover:text-white'
+                                        ? 'bg-accent text-white shadow-lg shadow-accent/20' 
+                                        : 'text-muted/60 hover:bg-white/[0.04] hover:text-white'
                                     }`}
                                 >
-                                    <item.icon size={18} className={`relative z-10 flex-shrink-0 transition-all duration-300 ${activeTab === item.id ? 'text-white' : 'group-hover:text-white'}`} />
-                                    <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.25em] truncate">{item.label}</span>
-                                    
+                                    <item.icon size={15} className="flex-shrink-0" />
+                                    <span className="text-[11px] font-semibold tracking-wide truncate flex-1 text-left">{item.label}</span>
                                     {item.badge && (
-                                        <div className="ml-auto relative z-10 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg bg-error text-white text-[9px] font-black shadow-lg shadow-error/30 animate-pulse border border-white/10">
+                                        <span className="ml-auto text-[9px] font-black bg-error text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center animate-pulse">
                                             {item.badge}
-                                        </div>
+                                        </span>
                                     )}
-                                    
                                     {item.id === 'infrastructure' && pulse?.activeUsers > 0 && activeTab !== item.id && (
-                                        <div className="ml-auto relative z-10 flex items-center gap-2 px-2.5 py-1 rounded-lg bg-success/10 text-success text-[8px] font-black border border-success/20">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse" />
+                                        <span className="ml-auto text-[9px] font-black text-success bg-success/10 border border-success/20 rounded-full px-1.5 py-0.5">
                                             {pulse.activeUsers}
-                                        </div>
-                                    )}
-
-                                    {activeTab === item.id && (
-                                        <motion.div 
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className="ml-auto relative z-10 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" 
-                                        />
+                                        </span>
                                     )}
                                 </button>
                             ))}
@@ -97,8 +83,20 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
                 ))}
             </div>
 
-            <div className="mt-auto pt-12 border-t border-border/30">
-                <InfrastructurePulse pulse={pulse} />
+            <div className="mt-auto pt-4 border-t border-border/20 space-y-3">
+                <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                        <span className="text-[9px] font-semibold text-success uppercase tracking-wider">System OK</span>
+                    </div>
+                    <span className="text-[9px] text-muted/40 font-mono tabular-nums">{pulse?.latency || 12}ms</span>
+                </div>
+                <div className="h-1 bg-border/20 rounded-full overflow-hidden">
+                    <motion.div
+                        animate={{ width: `${pulse?.load || 0.1}%` }}
+                        className="h-full bg-success/60 rounded-full"
+                    />
+                </div>
             </div>
         </aside>
     )
@@ -206,29 +204,32 @@ const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
     <div 
         role="article"
         aria-label={`${label}: ${value}`}
-        className={`admin-stat-card group relative overflow-hidden transition-all duration-500 hover:-translate-y-1.5 ${accent ? 'border-error/20 ring-1 ring-error/5' : 'hover:border-accent/50'}`}
+        className={`relative group overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+            accent 
+            ? 'bg-error/5 border-error/20 hover:border-error/40 hover:shadow-error/10'
+            : 'bg-surface-subtle border-border/50 hover:border-accent/30 hover:shadow-accent/5'
+        }`}
     >
-        <div className="chart-bg opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-        <div className="relative z-10 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-8">
-                <div className={`p-3 rounded-[18px] bg-surface-subtle text-muted group-hover:text-accent group-hover:scale-110 transition-all duration-500 shadow-inner border border-white/5`}>
-                    {React.cloneElement(icon, { size: 18 })}
+        {/* Top accent line */}
+        <div className={`absolute top-0 inset-x-0 h-[2px] ${accent ? 'bg-error/60' : 'bg-accent/60'} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+        
+        <div className="p-5">
+            <div className="flex items-start justify-between mb-5">
+                <div className={`p-2 rounded-xl ${ accent ? 'bg-error/10 text-error' : 'bg-accent/10 text-accent' } transition-transform duration-300 group-hover:scale-110`}>
+                    {React.cloneElement(icon, { size: 15 })}
                 </div>
                 {chartData && chartData.length > 0 && (
-                    <div className="w-20 h-10 opacity-30 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-110">
+                    <div className="w-16 h-7 opacity-20 group-hover:opacity-70 transition-all duration-500">
                         <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
                     </div>
                 )}
             </div>
-            <div className="space-y-1 mt-auto">
-                <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.25em] opacity-50 group-hover:opacity-80 transition-opacity">{label}</h4>
-                <div className="text-4xl font-black text-primary tracking-tighter tabular-nums drop-shadow-2xl mb-2">
-                    {value}
-                </div>
-                <div className="flex items-center gap-2.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${accent ? 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.6)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)]'} animate-pulse`} />
-                    <p className="text-[9px] font-black text-muted opacity-40 uppercase tracking-[0.15em] leading-none">{sub}</p>
-                </div>
+
+            <p className="text-[9px] font-semibold text-muted/50 uppercase tracking-widest mb-1">{label}</p>
+            <p className="text-3xl font-black text-primary tabular-nums tracking-tight leading-none mb-3">{value}</p>
+            <div className="flex items-center gap-1.5">
+                <div className={`w-1 h-1 rounded-full flex-shrink-0 ${ accent ? 'bg-error' : 'bg-success' } animate-pulse`} />
+                <p className="text-[9px] text-muted/40 uppercase tracking-widest leading-none">{sub}</p>
             </div>
         </div>
     </div>
