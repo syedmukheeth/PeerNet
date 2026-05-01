@@ -2933,6 +2933,22 @@ textarea:focus-visible {
 .post-detail-img { width: 100%; height: 100%; object-fit: contain; }
 .post-detail-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
 
+.post-detail-media--text {
+  background: var(--surface-el);
+  color: var(--text-1);
+}
+.post-detail-card--text-only {
+  /* Give text posts a narrower, more balanced look instead of taking up 60% of width */
+  max-width: 800px;
+  margin: 0 auto;
+}
+.post-detail-card--text-only .post-detail-media {
+  flex: 0 0 50%;
+}
+.post-detail-card--text-only .post-detail-info {
+  flex: 1;
+}
+
 .post-detail-info {
   flex: 0 0 450px;
   display: flex;
@@ -5907,35 +5923,6 @@ textarea:focus-visible {
   pointer-events: none;
 }
 
-.admin-stat-card {
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-  background: var(--surface-el);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  transition: all var(--trans-smooth);
-  position: relative;
-  overflow: hidden;
-}
-
-.admin-stat-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent);
-  box-shadow: 0 20px 40px -12px var(--accent-subtle);
-}
-
-.admin-stat-card .chart-bg {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  opacity: 0.1;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent, var(--accent));
-}
-
 .admin-table-container {
   width: 100%;
   background: var(--surface-el);
@@ -6028,11 +6015,15 @@ textarea:focus-visible {
 }
 
 .admin-stat-card {
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
   border-radius: 24px;
   background: var(--surface-1);
   border: 1px solid var(--border);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 [data-theme="dark"] .admin-stat-card {

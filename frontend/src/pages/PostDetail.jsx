@@ -342,15 +342,33 @@ export default function PostDetail() {
             </div>
 
             {/* Instagram split-view card */}
-            <div className="post-detail-card">
+            <div className={`post-detail-card ${!post.mediaUrl ? 'post-detail-card--text-only' : ''}`}>
 
                 {/* ── LEFT: media ──────────────────────────── */}
-                <div className="post-detail-media">
-                    {post.mediaType === 'video'
-                        ? <video src={post.mediaUrl} controls className="post-detail-video" />
-                        : <img src={post.mediaUrl} alt={post.caption} className="post-detail-img" />
-                    }
-                </div>
+                {post.mediaUrl ? (
+                    <div className="post-detail-media">
+                        {post.mediaType === 'video'
+                            ? <video src={post.mediaUrl} controls className="post-detail-video" />
+                            : <img src={post.mediaUrl} alt={post.caption} className="post-detail-img" />
+                        }
+                    </div>
+                ) : (
+                    <div className="post-detail-media post-detail-media--text">
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '40px', textAlign: 'center' }}>
+                            <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, flexShrink: 0 }}>
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            {post.caption && (
+                                <p style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.6, color: 'var(--text-1)', maxWidth: 380, wordWrap: 'break-word', margin: 0 }}>
+                                    &ldquo;{post.caption}&rdquo;
+                                </p>
+                            )}
+                            <div style={{ marginTop: 20, fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700 }}>Text Post</div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── RIGHT: info + comments ───────────────── */}
                 <div className="post-detail-info">
