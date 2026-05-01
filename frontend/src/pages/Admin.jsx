@@ -17,38 +17,38 @@ import { useSocket } from '../hooks/useSocket'
 const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
     const navGroups = [
         {
-            title: 'Control Matrix',
+            title: 'Overview',
             items: [
                 { id: 'dashboard', label: 'Dashboard', icon: HiGlobe },
                 { id: 'analytics', label: 'Analytics', icon: HiTrendingUp }
             ]
         },
         {
-            title: 'Operations',
+            title: 'Manage',
             items: [
-                { id: 'users', label: 'Network', icon: HiUsers },
-                { id: 'posts', label: 'Objects', icon: HiCollection },
-                { id: 'comments', label: 'Echoes', icon: HiChatAlt2 },
+                { id: 'users', label: 'Users', icon: HiUsers },
+                { id: 'posts', label: 'Posts', icon: HiCollection },
+                { id: 'comments', label: 'Comments', icon: HiChatAlt2 },
                 { id: 'reports', label: 'Reports', icon: HiFlag, badge: reports.length > 0 ? reports.length : null }
             ]
         },
         {
-            title: 'Infrastructure',
+            title: 'System',
             items: [
-                { id: 'infrastructure', label: 'Terminal', icon: HiDatabase },
-                { id: 'audit', label: 'Security', icon: HiShieldCheck }
+                { id: 'infrastructure', label: 'Health', icon: HiDatabase },
+                { id: 'audit', label: 'Audit Log', icon: HiShieldCheck }
             ]
         },
         {
-            title: 'Configuration',
+            title: 'Admin',
             items: [
-                { id: 'settings', label: 'Core', icon: HiCog }
+                { id: 'settings', label: 'Settings', icon: HiCog }
             ]
         }
     ]
 
     return (
-        <aside className="w-full lg:w-80 flex flex-col gap-12 sticky top-12 lg:top-24 h-auto lg:h-[calc(100vh-120px)] overflow-y-auto pr-6 scrollbar-hide">
+        <aside className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-8 sticky top-6 lg:top-16 h-auto lg:h-[calc(100vh-100px)] overflow-y-auto scrollbar-hide">
             <div className="flex flex-col gap-12">
                 {navGroups.map((group) => (
                     <div key={group.title} className="space-y-6">
@@ -396,15 +396,15 @@ const StorageModule = ({ stats }) => {
 
 const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-8 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-8">
+        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-6">
                     <div>
-                        <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Identity Registry</h3>
-                        <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mt-1 opacity-40">{users.length} authenticated entities</p>
+                        <h3 className="text-xl font-black text-primary uppercase tracking-tighter">Users</h3>
+                        <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mt-1 opacity-40">{users.length} registered accounts</p>
                     </div>
-                    <button className="hidden md:flex items-center gap-3 px-6 py-3 rounded-[20px] bg-accent text-white text-[11px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all shadow-[0_8px_20px_rgba(var(--accent-rgb),0.25)] ring-1 ring-white/20">
-                        <HiShieldCheck size={16} />
-                        Register Entity
+                    <button className="hidden md:flex items-center gap-3 px-5 py-2.5 rounded-[20px] bg-accent text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all shadow-[0_8px_20px_rgba(var(--accent-rgb),0.25)] ring-1 ring-white/20">
+                        <HiShieldCheck size={14} />
+                        Add User
                     </button>
                 </div>
                 <div className="relative group w-full md:w-96">
@@ -492,10 +492,10 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
 
 const CommentModule = ({ comments, onDelete, search, setSearch }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-8 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Communication Logs</h3>
-                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Moderation of community interactions</p>
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Comments</h3>
+                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Review and remove comments</p>
             </div>
             <div className="relative group">
                 <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
@@ -562,10 +562,10 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
 
 const AuditModule = ({ logs, loading }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-8 border-b border-border flex items-center justify-between">
+        <div className="p-6 border-b border-border flex items-center justify-between">
             <div>
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Infrastructure Audit</h3>
-                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Irrevocable platform logs</p>
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Audit Log</h3>
+                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Permanent record of all admin actions</p>
             </div>
             <div className="flex items-center gap-4">
                 <button 
@@ -720,12 +720,12 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
 
 const ReportModule = ({ reports, onResolve }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-8 border-b border-border flex items-center justify-between bg-error/[0.02]">
+        <div className="p-6 border-b border-border flex items-center justify-between bg-error/[0.02]">
             <div>
                 <h3 className="text-xl font-black text-primary uppercase tracking-tight flex items-center gap-3">
-                    <HiFlag className="text-error" /> Moderation Queue
+                    <HiFlag className="text-error" /> Reports
                 </h3>
-                <p className="text-[10px] font-bold text-error uppercase tracking-widest mt-1 opacity-60">{reports.length} critical violations pending</p>
+                <p className="text-[10px] font-bold text-error uppercase tracking-widest mt-1 opacity-60">{reports.length} pending reports</p>
             </div>
             <HiShieldCheck className="text-error/20" size={32} />
         </div>
@@ -1115,18 +1115,18 @@ export default function Admin() {
                     </div>
                 </header>
 
-                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-6 mb-16 lg:mb-24">
-                    <StatCard label="Network Entities" value={(stats?.totalUsers || 0).toLocaleString()} sub="AUTHENTICATED NODES" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
-                    <StatCard label="24h Delta" value={stats?.signupsToday || 0} sub="NEW SIGNUPS" icon={<HiTrendingUp size={14} />} />
-                    <StatCard label="Concurrent" value={pulse?.activeUsers || stats?.activeToday || 0} sub="LIVE SESSIONS" icon={<HiGlobe size={14} />} accent />
-                    <StatCard label="Data Objects" value={(stats?.totalPosts || 0).toLocaleString()} sub="VOID CONTENT" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
-                    <StatCard label="Echo Pulse" value={stats?.commentsToday || 0} sub="DAILY COMMENTS" icon={<HiChatAlt2 size={14} />} />
-                    <StatCard label="Moderation" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="PENDING REVIEWS" icon={<HiFlag size={14} />} />
+                <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-12 lg:mb-16">
+                    <StatCard label="Total Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="Registered accounts" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
+                    <StatCard label="New Today" value={stats?.signupsToday || 0} sub="Joined today" icon={<HiTrendingUp size={14} />} />
+                    <StatCard label="Active Now" value={pulse?.activeUsers || stats?.activeToday || 0} sub="Online users" icon={<HiGlobe size={14} />} accent />
+                    <StatCard label="Total Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="All content" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
+                    <StatCard label="Comments Today" value={stats?.commentsToday || 0} sub="Daily comments" icon={<HiChatAlt2 size={14} />} />
+                    <StatCard label="Pending Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Need review" icon={<HiFlag size={14} />} />
                 </section>
 
-                <div className="flex flex-col lg:flex-row gap-12 items-start">
+                <div className="flex flex-col lg:flex-row gap-8 items-start">
                     <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} reports={reports} />
-                    <main className="flex-1 min-h-[800px]">
+                    <main className="flex-1 min-w-0 min-h-[800px]">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeTab}
