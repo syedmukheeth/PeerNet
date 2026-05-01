@@ -16,6 +16,7 @@ router.post('/users/:userId/warn', ...guard, adminController.warnUser);
 
 // Content
 router.get('/posts', ...guard, adminController.getPosts);
+router.get('/comments', ...guard, adminController.getComments);
 router.delete('/posts/:postId', ...guard, adminController.deletePost);
 router.delete('/stories/:storyId', ...guard, adminController.deleteStory);
 router.delete('/comments/:commentId', ...guard, adminController.deleteComment);

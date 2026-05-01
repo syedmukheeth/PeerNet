@@ -49,6 +49,16 @@ const getPosts = catchAsync(async (req, res) => {
     res.json({ success: true, ...data });
 });
 
+const getComments = catchAsync(async (req, res) => {
+    const { limit, skip, search } = req.query;
+    const data = await adminService.getComments({ 
+        limit: parseInt(limit) || 20, 
+        skip: parseInt(skip) || 0, 
+        search
+    });
+    res.json({ success: true, ...data });
+});
+
 const updatePostVisibility = catchAsync(async (req, res) => {
     const { isHidden, reason } = req.body;
     await adminService.updatePostVisibility(req.user.id, req.params.postId, isHidden, reason);
@@ -166,6 +176,7 @@ module.exports = {
     deletePost,
     deleteStory,
     getStats,
+    getComments,
     getAnalytics,
     verifyUser,
     nukeInfrastructure,

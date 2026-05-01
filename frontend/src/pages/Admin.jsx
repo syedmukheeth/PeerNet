@@ -180,6 +180,7 @@ export default function Admin() {
     const [stats, setStats] = useState(null)
     const [users, setUsers] = useState([])
     const [posts, setPosts] = useState([])
+    const [comments, setComments] = useState([])
     const [feedback, setFeedback] = useState([])
     const [reports, setReports] = useState([])
     const [logs, setLogs] = useState([])
@@ -221,6 +222,15 @@ export default function Admin() {
             if (data.success) setPosts(data.posts)
         } catch {
             toast.error('Failed to load moderation feed')
+        }
+    }, [])
+
+    const fetchComments = useCallback(async (q = '') => {
+        try {
+            const { data } = await api.get(`/admin/comments?search=${q}`)
+            if (data.success) setComments(data.comments)
+        } catch {
+            toast.error('Failed to load comment database')
         }
     }, [])
 
@@ -291,9 +301,17 @@ export default function Admin() {
 
     const init = useCallback(async () => {
         setLoading(true)
-        await Promise.all([fetchStats(), fetchUsers(), fetchPosts(contentType), fetchFeedback(), fetchReports(), fetchLogs()])
+        await Promise.all([
+            fetchStats(), 
+            fetchUsers(), 
+            fetchPosts(contentType), 
+            fetchComments(),
+            fetchFeedback(), 
+            fetchReports(), 
+            fetchLogs()
+        ])
         setLoading(false)
-    }, [fetchStats, fetchUsers, fetchPosts, fetchFeedback, fetchReports, fetchLogs, contentType])
+    }, [fetchStats, fetchUsers, fetchPosts, fetchComments, fetchFeedback, fetchReports, fetchLogs, contentType])
 
     useEffect(() => {
         init()
@@ -325,6 +343,18 @@ export default function Admin() {
             fetchUsers()
         } catch {
             toast.error('Removal failed')
+        }
+    }
+
+    const handleDeleteComment = async (commentId) => {
+        try {
+            await api.delete(`/admin/comments/${commentId}`)
+            toast.success('Comment purged')
+            fetchComments(search)
+            fetchReports()
+            fetchStats()
+        } catch {
+            toast.error('Purge operation failed')
         }
     }
 
@@ -702,12 +732,82 @@ export default function Admin() {
                             </motion.div>
                         )}
 
-                        {/* COMMENTS MODULE (STUB) */}
+                        {/* COMMENTS MODULE */}
                         {activeTab === 'comments' && (
                             <motion.div key="comments" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="admin-surface-el p-20 text-center opacity-20">
-                                    <HiChatAlt2 size={40} className="mx-auto mb-4" />
-                                    <p className="text-sm font-bold uppercase tracking-widest">Comment Management Under Development</p>
+                                <div className="flex flex-col md:flex-row justify-between items-stretch gap-6 mb-10">
+                                    <div className="relative flex-1 flex items-center gap-4 bg-surface-subtle border border-border/50 rounded-[20px] px-8 py-4 focus-within:border-accent/50 focus-within:ring-4 ring-accent/5 transition-all shadow-sm">
+                                        <HiSearch className="text-muted opacity-40 shrink-0" size={20} />
+                                        <input 
+                                            className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:text-muted/40 text-primary uppercase tracking-tight" 
+                                            placeholder="Search comment registry..." 
+                                            value={search}
+                                            onChange={(e) => {
+                                                setSearch(e.target.value)
+                                                fetchComments(e.target.value)
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="admin-table-container">
+                                    <table className="admin-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Identity & Context</th>
+                                                <th>Signal (Content)</th>
+                                                <th>Reference (Post)</th>
+                                                <th className="text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {loading ? (
+                                                <tr>
+                                                    <td colSpan="4" className="py-20 text-center opacity-20 text-[10px] font-black uppercase tracking-widest">Synchronizing Registry...</td>
+                                                </tr>
+                                            ) : comments.map(c => (
+                                                <tr key={c._id} className="hover:bg-surface-subtle transition-colors group">
+                                                    <td>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-lg overflow-hidden border border-border bg-surface-subtle shrink-0">
+                                                                <img src={c.author?.avatarUrl || `https://ui-avatars.com/api/?name=${c.author?.username}&background=0A0A0A&color=fff`} className="w-full h-full object-cover" alt="" />
+                                                            </div>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="font-black text-primary text-[12px] tracking-tight lowercase truncate">@{c.author?.username}</span>
+                                                                <span className="text-[8px] text-muted font-bold uppercase opacity-30">{new Date(c.createdAt).toLocaleDateString()}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="max-w-[300px]">
+                                                        <p className="text-[12px] text-primary font-medium line-clamp-2 opacity-80 leading-relaxed italic">
+                                                            &ldquo;{c.content}&rdquo;
+                                                        </p>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-bold text-accent uppercase tracking-widest opacity-60">Source Link</span>
+                                                            <span className="text-[9px] text-muted truncate max-w-[150px]">{c.postId?.caption || 'Infrastructure Artifact'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="text-right">
+                                                        <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                                                            <button 
+                                                                onClick={() => handleDeleteComment(c._id)}
+                                                                className="p-2 border border-border rounded-lg hover:bg-error/10 hover:text-error hover:border-error/20 transition-all text-muted"
+                                                            >
+                                                                <HiTrash size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {comments.length === 0 && !loading && (
+                                                <tr>
+                                                    <td colSpan="4" className="py-32 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em]">Signal Repository Empty</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </motion.div>
                         )}

@@ -58,6 +58,24 @@ const getPosts = async ({ limit = 20, skip = 0, type = 'all', status = '', searc
     return { posts, total };
 };
 
+const getComments = async ({ limit = 20, skip = 0, search = '' }) => {
+    let query = {};
+    if (search) {
+        query.content = { $regex: search, $options: 'i' };
+    }
+    
+    const [comments, total] = await Promise.all([
+        Comment.find(query)
+            .populate('author', 'username avatarUrl')
+            .populate('postId', 'caption')
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .skip(skip),
+        Comment.countDocuments(query),
+    ]);
+    return { comments, total };
+};
+
 const getFeedback = async ({ limit = 20, skip = 0 }) => {
     const [items, total] = await Promise.all([
         Feedback.find().populate('userId', 'username email').sort({ createdAt: -1 }).limit(limit).skip(skip),
@@ -432,6 +450,7 @@ module.exports = {
     getFeedback,
     getReports,
     getAuditLogs,
+    getComments,
     deleteUser, 
     updateUserStatus,
     resetUserPassword,
