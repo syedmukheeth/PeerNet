@@ -19,72 +19,84 @@ import { useSocket } from '../hooks/useSocket'
 const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
     const navGroups = [
         {
-            title: 'Insights',
+            title: 'Control Matrix',
             items: [
                 { id: 'dashboard', label: 'Dashboard', icon: HiGlobe },
                 { id: 'analytics', label: 'Analytics', icon: HiTrendingUp }
             ]
         },
         {
-            title: 'Management',
+            title: 'Operations',
             items: [
-                { id: 'users', label: 'Users', icon: HiUsers },
-                { id: 'posts', label: 'Posts', icon: HiCollection },
-                { id: 'comments', label: 'Comments', icon: HiChatAlt2 },
+                { id: 'users', label: 'Network', icon: HiUsers },
+                { id: 'posts', label: 'Objects', icon: HiCollection },
+                { id: 'comments', label: 'Echoes', icon: HiChatAlt2 },
                 { id: 'reports', label: 'Reports', icon: HiFlag, badge: reports.length > 0 ? reports.length : null }
             ]
         },
         {
             title: 'Infrastructure',
             items: [
-                { id: 'infrastructure', label: 'Infrastructure', icon: HiDatabase },
-                { id: 'audit', label: 'Security Logs', icon: HiShieldCheck }
+                { id: 'infrastructure', label: 'Terminal', icon: HiDatabase },
+                { id: 'audit', label: 'Security', icon: HiShieldCheck }
             ]
         },
         {
-            title: 'Platform',
+            title: 'Configuration',
             items: [
-                { id: 'settings', label: 'Settings', icon: HiCog }
+                { id: 'settings', label: 'Core', icon: HiCog }
             ]
         }
     ]
 
     return (
-        <aside className="w-full lg:w-72 flex flex-col gap-12 sticky top-24 h-fit">
-            <div className="space-y-10">
+        <aside className="w-full lg:w-80 flex flex-col gap-12 sticky top-32 h-[calc(100vh-160px)] overflow-y-auto pr-4 scrollbar-hide">
+            <div className="flex flex-col gap-12">
                 {navGroups.map((group) => (
-                    <div key={group.title} className="space-y-4">
-                        <div className="flex items-center gap-2 px-4">
-                            <div className="w-1 h-1 rounded-full bg-accent/40" />
-                            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-muted/30">{group.title}</span>
+                    <div key={group.title} className="space-y-6">
+                        <div className="flex items-center gap-3 px-6">
+                            <div className="w-1 h-1 rounded-full bg-accent/40 shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted opacity-30">{group.title}</span>
                         </div>
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                             {group.items.map(item => (
                                 <button 
                                     key={item.id} 
                                     onClick={() => setActiveTab(item.id)} 
-                                    className={`w-full relative group flex items-center gap-4 px-5 py-4 rounded-[22px] transition-all duration-500 ${activeTab === item.id ? 'bg-surface-subtle text-primary shadow-xl shadow-black/5 ring-1 ring-white/5' : 'text-muted hover:bg-surface-subtle/40 hover:text-primary'}`}
+                                    className={`w-full group relative flex items-center gap-5 px-6 py-4 rounded-[22px] transition-all duration-500 ${
+                                        activeTab === item.id 
+                                        ? 'bg-accent text-white shadow-2xl shadow-accent/40 scale-105 z-10' 
+                                        : 'text-muted hover:bg-surface-subtle hover:text-primary hover:translate-x-2'
+                                    }`}
                                 >
-                                    <item.icon size={18} className={`transition-all duration-500 ${activeTab === item.id ? 'scale-110 text-accent filter drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.5)]' : 'group-hover:scale-110 group-hover:text-primary'}`} />
-                                    <span className="text-[12px] font-black uppercase tracking-tight">{item.label}</span>
+                                    <item.icon size={20} className={`transition-all duration-500 ${activeTab === item.id ? 'scale-110 text-white' : 'group-hover:scale-110 group-hover:text-primary'}`} />
+                                    <span className="text-[11px] font-black uppercase tracking-[0.25em]">{item.label}</span>
                                     
                                     {item.badge && (
                                         <div className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg bg-error text-white text-[9px] font-black shadow-lg shadow-error/30 animate-pulse border border-white/10">
                                             {item.badge}
                                         </div>
                                     )}
-                                    {item.id === 'infrastructure' && pulse?.activeUsers > 0 && (
-                                        <div className="ml-auto flex items-center gap-2 px-2.5 py-1 rounded-lg bg-success/10 text-success text-[8px] font-black border border-success/20 shadow-sm shadow-success/10">
+                                    
+                                    {item.id === 'infrastructure' && pulse?.activeUsers > 0 && activeTab !== item.id && (
+                                        <div className="ml-auto flex items-center gap-2 px-2.5 py-1 rounded-lg bg-success/10 text-success text-[8px] font-black border border-success/20">
                                             <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse" />
-                                            {pulse.activeUsers} LIVE
+                                            {pulse.activeUsers}
                                         </div>
                                     )}
                                     
                                     {activeTab === item.id && (
                                         <motion.div 
-                                            layoutId="active-indicator"
-                                            className="absolute left-1 w-1.5 h-6 bg-accent rounded-full shadow-[0_0_15px_rgba(var(--accent-rgb),0.6)]"
-                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            layoutId="sidebar-active-pill"
+                                            className="absolute inset-0 bg-accent rounded-[22px] -z-10 shadow-[0_0_20px_rgba(var(--accent-rgb),0.5)]"
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    {activeTab === item.id && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" 
                                         />
                                     )}
                                 </button>
@@ -94,7 +106,9 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
                 ))}
             </div>
 
-            <InfrastructurePulse pulse={pulse} />
+            <div className="mt-auto pt-12 border-t border-border/30">
+                <InfrastructurePulse pulse={pulse} />
+            </div>
         </aside>
     )
 }
@@ -198,27 +212,31 @@ const Sparkline = ({ data = [], color = 'var(--accent)' }) => {
 }
 
 const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
-    <div className={`admin-stat-card group ${accent ? 'border-error/20' : ''}`}>
-        <div className="chart-bg" />
-        <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-                <div className={`p-2.5 rounded-2xl bg-surface-subtle text-muted group-hover:text-accent transition-all duration-500`}>
-                    {icon}
+    <div 
+        role="article"
+        aria-label={`${label}: ${value}`}
+        className={`admin-stat-card group relative overflow-hidden transition-all duration-500 hover:-translate-y-1.5 ${accent ? 'border-error/20 ring-1 ring-error/5' : 'hover:border-accent/50'}`}
+    >
+        <div className="chart-bg opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="relative z-10 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-8">
+                <div className={`p-3 rounded-[18px] bg-surface-subtle text-muted group-hover:text-accent group-hover:scale-110 transition-all duration-500 shadow-inner border border-white/5`}>
+                    {React.cloneElement(icon, { size: 18 })}
                 </div>
-                {chartData && (
-                    <div className="w-16 h-8 opacity-40 group-hover:opacity-100 transition-opacity">
-                        <Sparkline data={chartData} />
+                {chartData && chartData.length > 0 && (
+                    <div className="w-20 h-10 opacity-30 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-110">
+                        <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
                     </div>
                 )}
             </div>
-            <div className="space-y-1">
-                <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-60">{label}</h4>
-                <div className="text-4xl font-black text-primary tracking-tighter tabular-nums drop-shadow-sm">
+            <div className="space-y-1 mt-auto">
+                <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.25em] opacity-50 group-hover:opacity-80 transition-opacity">{label}</h4>
+                <div className="text-4xl font-black text-primary tracking-tighter tabular-nums drop-shadow-2xl mb-2">
                     {value}
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className={`w-1 h-1 rounded-full ${accent ? 'bg-error' : 'bg-success'}`} />
-                    <p className="text-[9px] font-black text-muted opacity-40 uppercase tracking-widest leading-none">{sub}</p>
+                <div className="flex items-center gap-2.5">
+                    <div className={`w-1.5 h-1.5 rounded-full ${accent ? 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.6)]' : 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)]'} animate-pulse`} />
+                    <p className="text-[9px] font-black text-muted opacity-40 uppercase tracking-[0.15em] leading-none">{sub}</p>
                 </div>
             </div>
         </div>
@@ -236,51 +254,60 @@ const AnalyticsModule = ({ stats, analytics }) => {
 
     const svgPath = chartData.length > 0 ? `M ${pathData}` : `M ${pathData}`
     const areaPath = chartData.length > 0 ? `${svgPath} V 300 H 0 Z` : `${pathData} V 300 H 0 Z`
+    
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                <div className="xl:col-span-2 admin-surface-el p-10">
+            <div className="grid grid-cols-1 2xl:grid-cols-3 gap-8">
+                <div className="2xl:col-span-2 admin-surface-el p-8 md:p-12">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-accent animate-ping" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)]" />
                                 <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Network Velocity</h3>
                             </div>
                             <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-40">Live Platform Throughput & Growth</p>
                         </div>
-                        <div className="flex gap-6">
+                        <div className="flex gap-8">
                             <div className="flex flex-col items-end">
-                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40">Load State</span>
-                                <span className="text-[12px] font-black text-success uppercase">Optimal</span>
+                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40 mb-1">Load State</span>
+                                <span className="text-[12px] font-black text-success uppercase flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                                    Optimal
+                                </span>
                             </div>
-                            <div className="flex flex-col items-end border-l border-border/50 pl-6">
-                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40">Uptime</span>
-                                <span className="text-[12px] font-black text-primary uppercase tabular-nums">99.9%</span>
+                            <div className="flex flex-col items-end border-l border-border/50 pl-8">
+                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40 mb-1">Uptime</span>
+                                <span className="text-[12px] font-black text-primary uppercase tabular-nums">99.99%</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div className="h-[300px] w-full relative">
-                        <svg viewBox="0 0 1000 300" className="w-full h-full overflow-visible">
+                    <div className="h-[340px] w-full relative">
+                        <svg viewBox="0 0 1000 300" className="w-full h-full overflow-visible preserve-3d">
                             <defs>
                                 <linearGradient id="velocityGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.15" />
+                                    <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.2" />
                                     <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
                                 </linearGradient>
+                                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="6" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
                             </defs>
                             {/* Grid Lines */}
                             {[0, 1, 2, 3].map(i => (
-                                <line key={i} x1="0" y1={i * 100} x2="1000" y2={i * 100} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4 4" />
+                                <line key={i} x1="0" y1={i * 100} x2="1000" y2={i * 100} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="8 8" opacity="0.3" />
                             ))}
                              <motion.path
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: 1 }}
+                                initial={{ pathLength: 0, opacity: 0 }}
+                                animate={{ pathLength: 1, opacity: 1 }}
                                 transition={{ duration: 2.5, ease: "easeInOut" }}
                                 d={svgPath}
                                 fill="none"
                                 stroke="var(--accent)"
                                 strokeWidth="4"
                                 strokeLinecap="round"
+                                filter="url(#glow)"
                             />
                             <path
                                 d={areaPath}
@@ -290,12 +317,12 @@ const AnalyticsModule = ({ stats, analytics }) => {
                     </div>
                 </div>
 
-                <div className="admin-surface-el p-10 flex flex-col justify-between bg-gradient-to-br from-surface-subtle/20 to-transparent">
+                <div className="admin-surface-el p-8 md:p-12 flex flex-col justify-between bg-gradient-to-br from-surface-subtle/20 to-transparent">
                     <div>
                         <h3 className="text-xl font-black text-primary uppercase tracking-tighter">Geographical</h3>
                         <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mt-1 opacity-40">Traffic Distribution</p>
                     </div>
-                    <div className="space-y-8 py-10">
+                    <div className="space-y-8 py-12">
                         {[
                             { label: 'North America', value: 42, color: 'bg-accent' },
                             { label: 'Europe', value: 28, color: 'bg-success' },
@@ -304,8 +331,8 @@ const AnalyticsModule = ({ stats, analytics }) => {
                         ].map(region => (
                             <div key={region.label} className="group cursor-default">
                                 <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-primary mb-3">
-                                    <span>{region.label}</span>
-                                    <span className="text-accent drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.3)]">{region.value}%</span>
+                                    <span className="opacity-60 group-hover:opacity-100 transition-opacity">{region.label}</span>
+                                    <span className="text-accent drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.3)] tabular-nums">{region.value}%</span>
                                 </div>
                                 <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden p-[1.5px] border border-white/5 shadow-inner">
                                     <motion.div 
@@ -318,7 +345,7 @@ const AnalyticsModule = ({ stats, analytics }) => {
                             </div>
                         ))}
                     </div>
-                    <button className="w-full py-5 bg-accent/5 border border-accent/20 text-[11px] font-black uppercase tracking-[0.3em] rounded-[20px] text-accent hover:bg-accent hover:text-white transition-all shadow-xl shadow-accent/5">
+                    <button className="w-full py-5 bg-accent/5 border border-accent/20 text-[11px] font-black uppercase tracking-[0.3em] rounded-[22px] text-accent hover:bg-accent hover:text-white transition-all shadow-xl shadow-accent/5 active:scale-95">
                         Full Topology View
                     </button>
                 </div>
@@ -404,10 +431,10 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th>Identity</th>
-                        <th>Status</th>
-                        <th>Credentials</th>
-                        <th className="text-right">Actions</th>
+                        <th scope="col">Identity Cluster</th>
+                        <th scope="col">Auth Status</th>
+                        <th scope="col">Privilege</th>
+                        <th scope="col" className="text-right">Access Control</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -442,11 +469,19 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
                             </td>
                             <td className="text-right">
                                 <div className="flex items-center justify-end gap-2">
-                                    <button onClick={() => onVerify(user._id)} className="p-2 rounded-xl bg-surface-subtle text-muted hover:text-success hover:bg-success/10 transition-all border border-transparent hover:border-success/20">
-                                        <HiShieldCheck size={18} />
+                                    <button 
+                                        onClick={() => onVerify(user._id)} 
+                                        aria-label={`Verify ${user.username}`}
+                                        className="p-2.5 rounded-xl bg-surface-subtle text-muted hover:text-success hover:bg-success/10 transition-all border border-transparent hover:border-success/20 group/btn"
+                                    >
+                                        <HiShieldCheck size={18} className="group-hover/btn:scale-110 transition-transform" />
                                     </button>
-                                    <button onClick={() => onDelete(user._id)} className="p-2 rounded-xl bg-surface-subtle text-muted hover:text-error hover:bg-error/10 transition-all border border-transparent hover:border-error/20">
-                                        <HiTrash size={18} />
+                                    <button 
+                                        onClick={() => onDelete(user._id)} 
+                                        aria-label={`Delete ${user.username}`}
+                                        className="p-2.5 rounded-xl bg-surface-subtle text-muted hover:text-error hover:bg-error/10 transition-all border border-transparent hover:border-error/20 group/btn"
+                                    >
+                                        <HiTrash size={18} className="group-hover/btn:scale-110 transition-transform" />
                                     </button>
                                 </div>
                             </td>
@@ -486,10 +521,10 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th>Operator</th>
-                        <th>Transmission</th>
-                        <th>Target Node</th>
-                        <th className="text-right">Purge</th>
+                        <th scope="col">Operator Node</th>
+                        <th scope="col">Transmission Payload</th>
+                        <th scope="col">Target Reference</th>
+                        <th scope="col" className="text-right">Purge Protocol</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -512,8 +547,12 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
                                 <span className="text-[10px] font-black text-muted/30 uppercase tracking-widest tabular-nums">ID::{comment.post?._id?.slice(-6) || 'N/A'}</span>
                             </td>
                             <td className="text-right">
-                                <button onClick={() => onDelete(comment._id)} className="p-3 rounded-2xl bg-error/5 text-error opacity-0 group-hover:opacity-100 transition-all border border-error/10 hover:bg-error hover:text-white transform translate-x-2 group-hover:translate-x-0">
-                                    <HiTrash size={18} />
+                                <button 
+                                    onClick={() => onDelete(comment._id)} 
+                                    aria-label={`Purge comment by ${comment.author?.username}`}
+                                    className="p-3 rounded-2xl bg-error/5 text-error opacity-0 group-hover:opacity-100 transition-all border border-error/10 hover:bg-error hover:text-white transform translate-x-2 group-hover:translate-x-0 group/btn"
+                                >
+                                    <HiTrash size={18} className="group-hover/btn:scale-110 transition-transform" />
                                 </button>
                             </td>
                         </tr>
@@ -563,10 +602,10 @@ const AuditModule = ({ logs, loading }) => (
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th>Administrator</th>
-                        <th>Operation</th>
-                        <th>Cluster Target</th>
-                        <th className="text-right">Epoch</th>
+                        <th scope="col">Administrator</th>
+                        <th scope="col">Operational Action</th>
+                        <th scope="col">Cluster Target</th>
+                        <th scope="col" className="text-right">Temporal Epoch</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -642,9 +681,14 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
                                 <HiCollection size={48} />
                             </div>
                         )}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                            <button onClick={() => onDelete(post._id)} className="p-4 rounded-2xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 transition-all transform translate-y-4 group-hover:translate-y-0 duration-300">
-                                <HiTrash size={22} />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
+                            <button 
+                                onClick={() => onDelete(post._id)} 
+                                aria-label={`Purge object ${post._id}`}
+                                className="p-4 rounded-[22px] bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 flex items-center gap-2 group/btn"
+                            >
+                                <HiTrash size={22} className="group-hover/btn:rotate-12 transition-transform" />
+                                <span className="text-[10px] font-black uppercase tracking-widest pr-2">Execute Purge</span>
                             </button>
                         </div>
                     </div>
@@ -696,10 +740,10 @@ const ReportModule = ({ reports, onResolve }) => (
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th>Reporter</th>
-                        <th>Violation Type</th>
-                        <th>Target Content</th>
-                        <th className="text-right">Action</th>
+                        <th scope="col">Origin Node</th>
+                        <th scope="col">Violation Classification</th>
+                        <th scope="col">Target Artifact</th>
+                        <th scope="col" className="text-right">Moderation protocol</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -719,9 +763,21 @@ const ReportModule = ({ reports, onResolve }) => (
                                 </div>
                             </td>
                             <td className="text-right">
-                                <div className="flex justify-end gap-2">
-                                    <button onClick={() => onResolve(report._id, 'dismissed')} className="px-4 py-2 rounded-lg bg-surface-subtle text-[9px] font-black uppercase tracking-widest hover:bg-border transition-all">Dismiss</button>
-                                    <button onClick={() => onResolve(report._id, 'resolved')} className="px-4 py-2 rounded-lg bg-error text-white text-[9px] font-black uppercase tracking-widest shadow-lg shadow-error/10 hover:scale-[1.02] transition-all">Resolve</button>
+                                <div className="flex justify-end gap-3">
+                                    <button 
+                                        onClick={() => onResolve(report._id, 'dismissed')} 
+                                        aria-label="Dismiss violation report"
+                                        className="px-5 py-2.5 rounded-xl bg-surface-subtle text-[9px] font-black uppercase tracking-[0.2em] hover:bg-border transition-all border border-white/5"
+                                    >
+                                        Dismiss
+                                    </button>
+                                    <button 
+                                        onClick={() => onResolve(report._id, 'resolved')} 
+                                        aria-label="Resolve violation report"
+                                        className="px-5 py-2.5 rounded-xl bg-error text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 hover:scale-[1.05] active:scale-95 transition-all border border-white/10"
+                                    >
+                                        Resolve
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -1009,8 +1065,15 @@ export default function Admin() {
     }
 
     return (
-        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 p-4 lg:p-10 font-sans">
-            <div className="max-w-[1600px] mx-auto">
+        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 p-4 md:p-8 lg:p-12 xl:p-16 font-sans relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+                <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+            </div>
+
+            <div className="max-w-[1700px] mx-auto relative">
                 {/* SYSTEM HEADER */}
                 <header className="mb-16 lg:mb-24 relative">
                     <div className="absolute -left-12 top-0 bottom-0 w-1 bg-accent/20 rounded-full blur-[2px] hidden xl:block opacity-20" />
@@ -1038,12 +1101,12 @@ export default function Admin() {
                                     <HiRefresh size={28} />
                                 </motion.button>
                             </div>
-                            <nav className="flex items-center gap-4 mt-6 text-[11px] font-black uppercase tracking-[0.4em]">
-                                <span className="text-muted/30">System</span>
+                            <nav className="flex items-center gap-4 mt-8 text-[11px] font-black uppercase tracking-[0.4em]">
+                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
                                 <HiChevronRight className="text-muted/10" />
-                                <span className="text-muted/30">Core</span>
+                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
                                 <HiChevronRight className="text-muted/10" />
-                                <span className="text-accent drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.4)]">{activeTab}</span>
+                                <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10">{activeTab}</span>
                             </nav>
                         </div>
                         
@@ -1059,7 +1122,7 @@ export default function Admin() {
                     </div>
                 </header>
 
-                <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-16">
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-6 mb-16 lg:mb-24">
                     <StatCard label="Network Entities" value={(stats?.totalUsers || 0).toLocaleString()} sub="AUTHENTICATED NODES" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
                     <StatCard label="24h Delta" value={stats?.signupsToday || 0} sub="NEW SIGNUPS" icon={<HiTrendingUp size={14} />} />
                     <StatCard label="Concurrent" value={pulse?.activeUsers || stats?.activeToday || 0} sub="LIVE SESSIONS" icon={<HiGlobe size={14} />} accent />

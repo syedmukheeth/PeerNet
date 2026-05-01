@@ -5890,26 +5890,28 @@ textarea:focus-visible {
 /* Admin hardening */
 .admin-surface-el {
   position: relative;
-  background: var(--surface-el);
+  background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 32px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 8px 32px -4px rgba(0,0,0,0.1);
-  transition: transform var(--trans-smooth), box-shadow var(--trans-smooth), border-color var(--trans-smooth);
 }
 
 .admin-surface-el:hover {
-  border-color: var(--border-md);
-  box-shadow: 0 12px 48px -8px rgba(0,0,0,0.15);
+  border-color: var(--accent);
+  box-shadow: 0 20px 48px -12px rgba(0,0,0,0.25);
+  transform: translateY(-2px);
 }
 
 [data-theme="dark"] .admin-surface-el {
-  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%), var(--surface-el);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%), rgba(13, 13, 15, 0.6);
   box-shadow: 0 4px 24px -1px rgba(0,0,0,0.4);
 }
 
-[data-theme="dark"] .admin-surface-el::before {
+.admin-surface-el::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -5921,6 +5923,7 @@ textarea:focus-visible {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+  opacity: 0.5;
 }
 
 .admin-table-container {
@@ -5993,24 +5996,9 @@ textarea:focus-visible {
 
 /* --- Premium Admin Surface Tokens --- */
 
-.admin-surface-el {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-[data-theme="dark"] .admin-surface-el {
-  background: rgba(13, 13, 15, 0.4);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
 [data-theme="light"] .admin-surface-el {
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
