@@ -1154,27 +1154,27 @@ export default function Admin() {
                                                 <h3 className="text-xl font-black text-error uppercase tracking-tighter mb-8">Danger Zone</h3>
                                                 <p className="text-[12px] text-muted font-medium mb-10 opacity-50 leading-relaxed">Irreversible administrative actions. All events are logged to the permanent system audit trail.</p>
                                                 <div className="space-y-4">
-                                                    <button 
+                                                    <button
                                                         onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
-                                                    className="w-full py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
-                                                >
-                                                    Purge User Database
-                                                </button>
-                                                <button 
-                                                    onClick={() => { setSystemActionType('full'); setShowSystemModal(true); }}
-                                                    className="w-full py-4 bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
-                                                >
-                                                    Full Factory Reset
-                                                </button>
+                                                        className="w-full py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
+                                                    >
+                                                        Purge User Database
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { setSystemActionType('full'); setShowSystemModal(true); }}
+                                                        className="w-full py-4 bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                                    >
+                                                        Full Factory Reset
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </motion.div>
-                            )}
+                                )}
+                            </motion.div>
                         </AnimatePresence>
-
-                </main>
-            </div>
+                    </main>
+                </div>
 
             {/* --- CORE MODALS --- */}
             
