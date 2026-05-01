@@ -1,126 +1,140 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-
 import { 
-    HiUsers, HiCollection, HiTrash, 
-    HiRefresh,
-    HiArrowRight,
-    HiKey, HiDatabase, HiGlobe, HiSearch,
-    HiChatAlt2, HiFlag, HiTrendingUp, HiCog, HiShieldCheck,
-    HiCheck, HiBan, HiSpeakerphone
+    HiUsers, HiCollection, HiTrash, HiRefresh, HiArrowRight,
+    HiKey, HiDatabase, HiGlobe, HiSearch, HiChatAlt2, HiFlag, 
+    HiTrendingUp, HiCog, HiShieldCheck, HiCheck, HiBan, HiSpeakerphone,
+    HiCubeTransparent, HiServer, HiLightningBolt, HiFingerPrint,
+    HiClock, HiDotsVertical, HiX, HiAdjustments, HiChevronRight, HiTerminal, HiDatabase as HiHardDrive
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
+import { useSocket } from '../hooks/useSocket'
 
 // --- SaaS Components ---
 
-const AdminSidebar = ({ activeTab, setActiveTab }) => {
+// --- SaaS Components ---
+
+const AdminSidebar = ({ activeTab, setActiveTab, pulse }) => {
     const navGroups = [
         {
             title: 'Insights',
             items: [
-                { id: 'dashboard', label: 'Dashboard', icon: <HiGlobe /> },
-                { id: 'analytics', label: 'Analytics', icon: <HiTrendingUp /> }
+                { id: 'dashboard', label: 'Dashboard', icon: HiGlobe },
+                { id: 'analytics', label: 'Analytics', icon: HiTrendingUp }
             ]
         },
         {
             title: 'Management',
             items: [
-                { id: 'users', label: 'Users', icon: <HiUsers /> },
-                { id: 'posts', label: 'Posts', icon: <HiCollection /> },
-                { id: 'comments', label: 'Comments', icon: <HiChatAlt2 /> },
-                { id: 'reports', label: 'Reports', icon: <HiFlag /> }
+                { id: 'users', label: 'Users', icon: HiUsers },
+                { id: 'posts', label: 'Posts', icon: HiCollection },
+                { id: 'comments', label: 'Comments', icon: HiChatAlt2 },
+                { id: 'reports', label: 'Reports', icon: HiFlag }
             ]
         },
         {
             title: 'Infrastructure',
             items: [
-                { id: 'storage', label: 'Storage', icon: <HiDatabase /> },
-                { id: 'security', label: 'Security Logs', icon: <HiShieldCheck /> }
+                { id: 'infrastructure', label: 'Infrastructure', icon: HiDatabase },
+                { id: 'audit', label: 'Security Logs', icon: HiShieldCheck }
             ]
         },
         {
             title: 'Platform',
             items: [
-                { id: 'settings', label: 'Settings', icon: <HiCog /> }
+                { id: 'settings', label: 'Settings', icon: HiCog }
             ]
         }
     ]
 
     return (
-        <aside className="w-full lg:w-56 flex flex-row lg:flex-col gap-6 lg:gap-10 sticky top-16 lg:top-24 h-fit overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide border-b lg:border-none border-border bg-bg lg:bg-transparent z-10 -mx-4 px-4 lg:mx-0 lg:px-0">
-            <div className="flex flex-row lg:flex-col gap-8 flex-nowrap">
-                {navGroups.map(group => (
-                    <div key={group.title} className="flex flex-row lg:flex-col gap-3 items-center lg:items-start flex-nowrap whitespace-nowrap">
-                        <h5 className="hidden lg:block px-4 text-[9px] font-bold text-muted uppercase tracking-[0.2em] opacity-30">
-                            {group.title}
-                        </h5>
-                        <nav className="flex flex-row lg:flex-col gap-1 flex-nowrap">
+        <aside className="w-full lg:w-64 flex flex-col gap-10 sticky top-24 h-fit hidden lg:flex">
+            <div className="space-y-8">
+                {navGroups.map((group) => (
+                    <div key={group.title} className="space-y-3">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted/30 ml-4">{group.title}</span>
+                        <div className="space-y-1">
                             {group.items.map(item => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => setActiveTab(item.id)}
-                                    className={`relative flex items-center gap-3 px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg text-[11px] lg:text-[12px] font-bold transition-all group shrink-0 ${
-                                        activeTab === item.id 
-                                        ? 'text-primary bg-surface-subtle shadow-sm shadow-black/5' 
-                                        : 'text-muted hover:text-primary hover:bg-surface-subtle'
-                                    }`}
+                                <button 
+                                    key={item.id} 
+                                    onClick={() => setActiveTab(item.id)} 
+                                    className={`w-full relative group flex items-center gap-3 px-4 py-3 rounded-[18px] transition-all duration-300 ${activeTab === item.id ? 'bg-surface-subtle text-primary shadow-sm' : 'text-muted hover:bg-surface-subtle/50 hover:text-primary'}`}
                                 >
+                                    <item.icon size={18} className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110 text-accent' : 'group-hover:scale-110'}`} />
+                                    <span className="text-[13px] font-bold uppercase tracking-tight">{item.label}</span>
                                     {activeTab === item.id && (
                                         <motion.div 
-                                            layoutId="active-nav-bar"
-                                            className="absolute left-0 bottom-0 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 w-full h-[2px] lg:w-[2px] lg:h-3 bg-accent rounded-full"
+                                            layoutId="active-nav-glow"
+                                            className="absolute left-0 w-1 h-5 bg-accent rounded-full"
+                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                         />
                                     )}
-                                    <span className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110 text-accent' : 'group-hover:scale-110 opacity-40 group-hover:opacity-100'}`}>
-                                        {item.icon}
-                                    </span>
-                                    <span className="tracking-tight">{item.label}</span>
                                 </button>
                             ))}
-                        </nav>
-                        <div className="lg:hidden w-px h-4 bg-border mx-2" />
+                        </div>
                     </div>
                 ))}
             </div>
 
-            <div className="hidden lg:block mt-8 p-5 rounded-[24px] border border-border bg-surface-subtle relative overflow-hidden group/status shadow-sm">
-                <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover/status:opacity-100 transition-all duration-500" />
-                <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_var(--success)]" />
-                            <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] opacity-40">System</h4>
-                        </div>
-                        <span className="text-[8px] font-bold text-muted opacity-30">v1.0.2</span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <span className="text-[12px] font-black text-primary uppercase tracking-tight">Infrastructure</span>
-                        <span className="text-[9px] font-medium text-muted opacity-40 uppercase tracking-widest">Global Pulse</span>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-success uppercase tracking-widest">Active</span>
-                        <div className="flex -space-x-1">
-                            {[1,2,3].map(i => (
-                                <div key={i} className="w-4 h-4 rounded-full border-2 border-surface-subtle bg-surface-2" />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <InfrastructurePulse pulse={pulse} />
         </aside>
     )
 }
 
-const Sparkline = ({ data = [], color = '#00F0FF' }) => {
-    if (!data || data.length < 2) return <div className="h-4" />
+const InfrastructurePulse = ({ pulse }) => {
+    const [load, setLoad] = useState(pulse?.load || 24)
+    const [latency, setLatency] = useState(pulse?.latency || 12)
+
+    useEffect(() => {
+        if (pulse) {
+            setLoad(pulse.load || load)
+            setLatency(pulse.latency || latency)
+        }
+    }, [pulse])
+
+    return (
+        <div className="mt-6 p-6 rounded-[24px] bg-surface-subtle/50 border border-border/50 space-y-6">
+            <div className="flex items-center justify-between">
+                <span className="text-[9px] font-black text-muted uppercase tracking-widest">System Load</span>
+                <span className="text-[10px] font-bold text-primary tabular-nums">{load.toFixed(1)}%</span>
+            </div>
+            <div className="h-1 bg-border rounded-full overflow-hidden">
+                <motion.div 
+                    animate={{ width: `${load}%` }}
+                    className={`h-full rounded-full ${load > 70 ? 'bg-error' : load > 40 ? 'bg-warning' : 'bg-success'}`}
+                />
+            </div>
+            
+            <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-muted uppercase tracking-widest">Latency</span>
+                    <span className="text-[10px] font-bold text-primary mt-1">{latency.toFixed(0)}ms</span>
+                </div>
+                <div className="flex gap-1 h-4 items-end">
+                    {[1,2,3,4,5].map(i => (
+                        <motion.div 
+                            key={i}
+                            animate={{ height: `${20 + Math.random() * 80}%` }}
+                            transition={{ repeat: Infinity, duration: 1, repeatType: 'reverse' }}
+                            className="w-1 bg-accent/40 rounded-full"
+                        />
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const Sparkline = ({ data = [], color = 'var(--accent)' }) => {
+    if (!data || data.length < 2) return null
     
     const min = Math.min(...data)
     const max = Math.max(...data)
     const range = max - min || 1
     const width = 100
-    const height = 30
+    const height = 40
     
     const points = data.map((val, i) => {
         const x = (i / (data.length - 1)) * width
@@ -129,55 +143,505 @@ const Sparkline = ({ data = [], color = '#00F0FF' }) => {
     }).join(' ')
 
     return (
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-8 opacity-50 overflow-visible">
-            <polyline
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible preserve-3d">
+            <defs>
+                <linearGradient id="sparkGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                    <stop offset="100%" stopColor={color} stopOpacity="0" />
+                </linearGradient>
+            </defs>
+            <motion.polyline
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 2, ease: "easeInOut" }}
                 fill="none"
                 stroke={color}
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 points={points}
+            />
+            <path
+                d={`M 0 ${height} L ${points} L ${width} ${height} Z`}
+                fill="url(#sparkGradient)"
+                stroke="none"
             />
         </svg>
     )
 }
 
-
-
-const StatCard = ({ label, value, sub, icon, chartData, color = 'accent', accent }) => (
-    <div className={`admin-stat-card group relative overflow-hidden ${accent ? 'ring-1 ring-error/20 border-error/20' : ''}`}>
+const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
+    <div className={`admin-stat-card group ${accent ? 'border-error/20' : ''}`}>
         <div className="chart-bg" />
-        <div className="relative z-10 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-50">{label}</span>
-                <div className={`p-2.5 rounded-2xl bg-surface-subtle text-muted group-hover:text-accent transition-all duration-500 shadow-inner`}>
+        <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+                <div className={`p-2.5 rounded-2xl bg-surface-subtle text-muted group-hover:text-accent transition-all duration-500`}>
                     {icon}
                 </div>
+                {chartData && (
+                    <div className="w-16 h-8 opacity-40 group-hover:opacity-100 transition-opacity">
+                        <Sparkline data={chartData} />
+                    </div>
+                )}
             </div>
-            <div className="mt-auto space-y-1">
-                <div className="text-3xl font-black text-primary tracking-tighter tabular-nums leading-none">
+            <div className="space-y-1">
+                <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-40">{label}</h4>
+                <div className="text-3xl font-black text-primary tracking-tighter tabular-nums">
                     {value}
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-bold text-muted opacity-40 uppercase tracking-widest">{sub}</span>
-                    {chartData && (
-                        <div className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_10px_var(--accent)]" />
-                    )}
-                </div>
+                <p className="text-[9px] font-bold text-muted opacity-30 uppercase tracking-widest">{sub}</p>
             </div>
         </div>
-        {chartData && (
-            <div className="absolute bottom-0 left-0 right-0 h-12 opacity-10 group-hover:opacity-30 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
-                <Sparkline data={chartData} color="var(--accent)" />
-            </div>
-        )}
     </div>
 )
 
+
+// --- High-Fidelity Modules ---
+
+const AnalyticsModule = ({ stats, analytics }) => {
+    const chartData = stats?.charts?.userGrowth || []
+    const pathData = chartData.length > 0 
+        ? chartData.map((d, i) => `${(i / (chartData.length - 1)) * 1000},${300 - (d.count * 10)}`).join(' L ')
+        : "0,250 Q100,220 200,240 T400,180 T600,120 T800,150 T1000,80"
+
+    const svgPath = chartData.length > 0 ? `M ${pathData}` : `M ${pathData}`
+    const areaPath = chartData.length > 0 ? `${svgPath} V 300 H 0 Z` : `${pathData} V 300 H 0 Z`
+    return (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <div className="xl:col-span-2 admin-surface-el p-10">
+                    <div className="flex items-center justify-between mb-12">
+                        <div>
+                            <h3 className="text-xl font-black text-primary uppercase tracking-tight">Network Velocity</h3>
+                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Real-time platform throughput</p>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-accent" />
+                                <span className="text-[9px] font-black text-muted uppercase tracking-widest">Active Sessions</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-success" />
+                                <span className="text-[9px] font-black text-muted uppercase tracking-widest">Success Rate</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="h-[300px] w-full relative">
+                        <svg viewBox="0 0 1000 300" className="w-full h-full overflow-visible">
+                            <defs>
+                                <linearGradient id="velocityGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.15" />
+                                    <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                            {/* Grid Lines */}
+                            {[0, 1, 2, 3].map(i => (
+                                <line key={i} x1="0" y1={i * 100} x2="1000" y2={i * 100} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4 4" />
+                            ))}
+                             <motion.path
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: 1 }}
+                                transition={{ duration: 2.5, ease: "easeInOut" }}
+                                d={svgPath}
+                                fill="none"
+                                stroke="var(--accent)"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                            />
+                            <path
+                                d={areaPath}
+                                fill="url(#velocityGradient)"
+                            />
+                        </svg>
+                    </div>
+                </div>
+
+                <div className="admin-surface-el p-10 flex flex-col justify-between">
+                    <div>
+                        <h3 className="text-xl font-black text-primary uppercase tracking-tight">Geographical</h3>
+                        <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Traffic Distribution</p>
+                    </div>
+                    <div className="space-y-6">
+                        {[
+                            { label: 'North America', value: 42, color: 'bg-accent' },
+                            { label: 'Europe', value: 28, color: 'bg-success' },
+                            { label: 'Asia Pacific', value: 18, color: 'bg-warning' },
+                            { label: 'Other', value: 12, color: 'bg-muted' }
+                        ].map(region => (
+                            <div key={region.label} className="space-y-2">
+                                <div className="flex justify-between text-[11px] font-bold uppercase tracking-tight text-primary">
+                                    <span>{region.label}</span>
+                                    <span className="text-muted opacity-60">{region.value}%</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-surface-subtle rounded-full overflow-hidden">
+                                    <motion.div 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${region.value}%` }}
+                                        className={`h-full rounded-full ${region.color}`}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <button className="w-full py-4 bg-surface-subtle border border-border text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-accent hover:text-white transition-all">
+                        Full Topology
+                    </button>
+                </div>
+            </div>
+        </motion.div>
+    )
+}
+
+const StorageModule = ({ stats }) => {
+    const storage = stats?.storage || { usedMB: 2400, maxMB: 10240, percentage: 24 }
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard label="Object Count" value={(stats?.totalPosts || 0 + stats?.totalStories || 0).toLocaleString()} sub="TOTAL BUCKET ASSETS" icon={<HiDatabase />} />
+                <StatCard label="Bandwidth" value={stats?.bandwidthUsage || '0 GB'} sub="TOTAL CONSUMPTION" icon={<HiTrendingUp />} />
+                <StatCard label="Disk Usage" value={`${(storage.usedMB / 1024).toFixed(1)} GB`} sub={`${storage.percentage}% CAPACITY`} icon={<HiHardDrive />} />
+                <StatCard label="Synchronicity" value={`${stats?.health?.synchronicity || '100'}%`} sub="SYSTEM HEALTH" icon={<HiShieldCheck />} />
+            </div>
+
+            <div className="admin-surface-el p-10">
+                <div className="flex items-center justify-between mb-10">
+                    <h3 className="text-xl font-black text-primary uppercase tracking-tight">Cloud Buckets</h3>
+                    <div className="flex gap-2">
+                        <span className="px-3 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase tracking-widest border border-success/20">Optimized</span>
+                    </div>
+                </div>
+                
+                <div className="space-y-10">
+                    {[
+                        { name: 'Media Storage (Production)', type: 'S3 Standard', size: `${(storage.usedMB * 0.7).toFixed(0)} MB`, usage: storage.percentage, color: 'var(--accent)' },
+                        { name: 'Static Assets (CDN)', type: 'CloudFront Edge', size: '120 MB', usage: 15, color: 'var(--success)' },
+                        { name: 'Database Backups', type: 'Glacier Deep Archive', size: `${(storage.usedMB * 0.3).toFixed(0)} MB`, usage: Math.min(100, storage.percentage + 10), color: 'var(--warning)' }
+                    ].map(bucket => (
+                        <div key={bucket.name} className="group cursor-pointer">
+                            <div className="flex justify-between items-end mb-4">
+                                <div>
+                                    <h4 className="text-sm font-black text-primary uppercase tracking-tight group-hover:text-accent transition-colors">{bucket.name}</h4>
+                                    <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">{bucket.type} • {bucket.size}</p>
+                                </div>
+                                <span className="text-[13px] font-black text-primary tabular-nums">{bucket.usage}%</span>
+                            </div>
+                            <div className="h-2 w-full bg-surface-subtle rounded-full overflow-hidden border border-border/50">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${bucket.usage}%` }}
+                                    style={{ background: bucket.color }}
+                                    className="h-full rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)]"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </motion.div>
+    )
+}
+
+const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
+        <div className="p-8 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Identity Registry</h3>
+                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">{users.length} authenticated entities</p>
+            </div>
+            <div className="relative group">
+                <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
+                <input 
+                    type="text" 
+                    placeholder="Search identity cluster..." 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="bg-surface-subtle border border-border rounded-2xl pl-12 pr-6 py-3.5 text-[13px] font-bold text-primary focus:border-accent outline-none transition-all w-full md:w-80"
+                />
+            </div>
+        </div>
+        <div className="overflow-x-auto">
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th>Status</th>
+                        <th>Credentials</th>
+                        <th className="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {users.map(user => (
+                        <tr key={user._id}>
+                            <td>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-surface-subtle shadow-lg">
+                                        <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random`} className="w-full h-full object-cover" alt="" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-black text-primary tracking-tight">@{user.username}</div>
+                                        <div className="text-[10px] font-bold text-muted uppercase opacity-40">{user.email}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${user.isVerified ? 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-muted opacity-30'}`} />
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${user.isVerified ? 'text-success' : 'text-muted opacity-40'}`}>
+                                        {user.isVerified ? 'Verified' : 'Pending'}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${user.role === 'admin' ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-surface-subtle border-border text-muted'}`}>
+                                    {user.role}
+                                </span>
+                            </td>
+                            <td className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                    <button onClick={() => onVerify(user._id)} className="p-2 rounded-xl bg-surface-subtle text-muted hover:text-success hover:bg-success/10 transition-all border border-transparent hover:border-success/20">
+                                        <HiShieldCheck size={18} />
+                                    </button>
+                                    <button onClick={() => onDelete(user._id)} className="p-2 rounded-xl bg-surface-subtle text-muted hover:text-error hover:bg-error/10 transition-all border border-transparent hover:border-error/20">
+                                        <HiTrash size={18} />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </motion.div>
+)
+
+const CommentModule = ({ comments, onDelete, search, setSearch }) => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
+        <div className="p-8 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Communication Logs</h3>
+                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Moderation of community interactions</p>
+            </div>
+            <div className="relative group">
+                <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
+                <input 
+                    type="text" 
+                    placeholder="Filter comments..." 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="bg-surface-subtle border border-border rounded-2xl pl-12 pr-6 py-3.5 text-[13px] font-bold text-primary focus:border-accent outline-none transition-all w-full md:w-80"
+                />
+            </div>
+        </div>
+        <div className="overflow-x-auto">
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Transmission</th>
+                        <th>Target Node</th>
+                        <th className="text-right">Purge</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {comments.map(comment => (
+                        <tr key={comment._id} className="group">
+                            <td>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-surface-subtle">
+                                        <img src={comment.author?.avatarUrl} className="w-full h-full object-cover" alt="" />
+                                    </div>
+                                    <span className="text-[11px] font-black text-primary tracking-tight">@{comment.author?.username}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <p className="text-[12px] font-medium text-muted leading-relaxed line-clamp-1 max-w-sm group-hover:text-primary transition-colors">
+                                    {comment.body}
+                                </p>
+                            </td>
+                            <td>
+                                <span className="text-[10px] font-bold text-muted/40 uppercase tracking-tighter">POST::{comment.post?._id?.slice(-8)}</span>
+                            </td>
+                            <td className="text-right">
+                                <button onClick={() => onDelete(comment._id)} className="p-2.5 rounded-xl bg-error/5 text-error opacity-40 group-hover:opacity-100 transition-all border border-error/10 hover:bg-error hover:text-white">
+                                    <HiTrash size={16} />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </motion.div>
+)
+
+const AuditModule = ({ logs, loading }) => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
+        <div className="p-8 border-b border-border flex items-center justify-between">
+            <div>
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Infrastructure Audit</h3>
+                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Irrevocable platform logs</p>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                <span className="text-[10px] font-black text-success uppercase tracking-widest">Live Registry</span>
+            </div>
+        </div>
+        <div className="overflow-x-auto">
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        <th>Administrator</th>
+                        <th>Operation</th>
+                        <th>Cluster Target</th>
+                        <th className="text-right">Epoch</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {logs.map(log => (
+                        <tr key={log._id}>
+                            <td>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded-md overflow-hidden bg-accent/20 flex items-center justify-center text-accent text-[10px] font-black">
+                                        {log.adminId?.username?.charAt(0).toUpperCase() || 'S'}
+                                    </div>
+                                    <span className="text-[11px] font-black text-primary tracking-tight lowercase">@{log.adminId?.username || 'system'}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
+                                    <span className="text-[9px] text-muted opacity-40 truncate max-w-[200px] font-medium">{log.details}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span className="px-2 py-0.5 rounded-md bg-surface-subtle border border-border text-[9px] font-black text-muted uppercase tracking-widest">{log.targetType}</span>
+                            </td>
+                            <td className="text-right">
+                                <span className="text-[10px] font-bold text-muted opacity-30 uppercase">{new Date(log.createdAt).toLocaleTimeString()}</span>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </motion.div>
+)
+
+const PostModule = ({ posts, onDelete, contentType, setContentType }) => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+        <div className="flex items-center justify-between bg-surface-subtle p-2 rounded-2xl border border-border/50">
+            {['all', 'image', 'video', 'text'].map(type => (
+                <button 
+                    key={type}
+                    onClick={() => setContentType(type)}
+                    className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-bg text-accent shadow-sm' : 'text-muted hover:text-primary'}`}
+                >
+                    {type}
+                </button>
+            ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {posts.map(post => (
+                <div key={post._id} className="admin-surface-el group">
+                    <div className="aspect-video bg-surface-subtle relative overflow-hidden">
+                        {post.mediaUrl ? (
+                            <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted/20">
+                                <HiCollection size={48} />
+                            </div>
+                        )}
+                        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                            <button onClick={() => onDelete(post._id)} className="p-3 rounded-xl bg-error text-white shadow-xl shadow-error/20 hover:scale-110 transition-all">
+                                <HiTrash size={18} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-6 h-6 rounded-full overflow-hidden bg-surface-subtle">
+                                <img src={post.author?.avatarUrl} className="w-full h-full object-cover" alt="" />
+                            </div>
+                            <span className="text-[11px] font-bold text-primary">@{post.author?.username}</span>
+                        </div>
+                        <p className="text-[13px] text-muted line-clamp-2 leading-relaxed mb-4">{post.content}</p>
+                        <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                            <span className="text-[9px] font-black text-muted uppercase tracking-widest">{post.type} • {new Date(post.createdAt).toLocaleDateString()}</span>
+                            <div className="flex items-center gap-2 text-accent">
+                                <HiTrendingUp size={14} />
+                                <span className="text-[10px] font-black">{post.likes?.length || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </motion.div>
+)
+
+const ReportModule = ({ reports, onResolve }) => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
+        <div className="p-8 border-b border-border flex items-center justify-between bg-error/[0.02]">
+            <div>
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight flex items-center gap-3">
+                    <HiFlag className="text-error" /> Moderation Queue
+                </h3>
+                <p className="text-[10px] font-bold text-error uppercase tracking-widest mt-1 opacity-60">{reports.length} critical violations pending</p>
+            </div>
+            <HiShieldCheck className="text-error/20" size={32} />
+        </div>
+        <div className="overflow-x-auto">
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        <th>Reporter</th>
+                        <th>Violation Type</th>
+                        <th>Target Content</th>
+                        <th className="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {reports.map(report => (
+                        <tr key={report._id} className="bg-error/[0.01]">
+                            <td>
+                                <span className="text-[11px] font-black text-primary">@{report.reporterId?.username}</span>
+                            </td>
+                            <td>
+                                <span className="px-2.5 py-1 rounded-lg bg-error/10 border border-error/20 text-error text-[9px] font-black uppercase tracking-widest">
+                                    {report.reason}
+                                </span>
+                            </td>
+                            <td>
+                                <div className="text-[11px] font-medium text-muted line-clamp-1 max-w-xs">
+                                    {report.targetId?.content || report.targetId?.body || 'Content Unavailable'}
+                                </div>
+                            </td>
+                            <td className="text-right">
+                                <div className="flex justify-end gap-2">
+                                    <button onClick={() => onResolve(report._id, 'dismissed')} className="px-4 py-2 rounded-lg bg-surface-subtle text-[9px] font-black uppercase tracking-widest hover:bg-border transition-all">Dismiss</button>
+                                    <button onClick={() => onResolve(report._id, 'resolved')} className="px-4 py-2 rounded-lg bg-error text-white text-[9px] font-black uppercase tracking-widest shadow-lg shadow-error/10 hover:scale-[1.02] transition-all">Resolve</button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                    {reports.length === 0 && (
+                        <tr>
+                            <td colSpan="4" className="py-20 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em]">Queue Cleared</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
+    </motion.div>
+)
+
 export default function Admin() {
-    const { user } = useAuth()
+
     const [activeTab, setActiveTab] = useState('dashboard')
     const [stats, setStats] = useState(null)
+    const [analytics, setAnalytics] = useState(null)
+    const [pulse, setPulse] = useState(null)
     const [users, setUsers] = useState([])
     const [posts, setPosts] = useState([])
     const [comments, setComments] = useState([])
@@ -188,7 +652,20 @@ export default function Admin() {
     const [search, setSearch] = useState('')
     const [contentType, setContentType] = useState('all')
 
-    // System Protection State
+    const { user } = useAuth()
+    const socket = useSocket(user)
+
+    useEffect(() => {
+        if (socket) {
+            socket.on('infrastructure_pulse', (data) => {
+                setPulse(data)
+                // Optionally update stats with latest user count etc.
+                setStats(prev => prev ? { ...prev, ...data } : data)
+            })
+            return () => socket.off('infrastructure_pulse')
+        }
+    }, [socket])
+
     const [showSystemModal, setShowSystemModal] = useState(false)
     const [systemActionType, setSystemActionType] = useState('')
     const [systemConfirmCode, setSystemConfirmCode] = useState('')
@@ -271,6 +748,8 @@ export default function Admin() {
         }
     }
 
+
+
     const handleModerationAction = async (report, action) => {
         const targetId = report.targetId?._id || report.targetId
         const userId = report.targetId?.author?._id || report.targetId?._id
@@ -299,10 +778,20 @@ export default function Admin() {
         }
     }
 
+    const fetchAnalytics = useCallback(async () => {
+        try {
+            const { data } = await api.get('/admin/analytics')
+            if (data.success) setAnalytics(data.data)
+        } catch {
+            console.error('Failed to load advanced analytics')
+        }
+    }, [])
+
     const init = useCallback(async () => {
         setLoading(true)
         await Promise.all([
             fetchStats(), 
+            fetchAnalytics(),
             fetchUsers(), 
             fetchPosts(contentType), 
             fetchComments(),
@@ -311,13 +800,11 @@ export default function Admin() {
             fetchLogs()
         ])
         setLoading(false)
-    }, [fetchStats, fetchUsers, fetchPosts, fetchComments, fetchFeedback, fetchReports, fetchLogs, contentType])
+    }, [fetchStats, fetchAnalytics, fetchUsers, fetchPosts, fetchComments, fetchFeedback, fetchReports, fetchLogs, contentType])
 
     useEffect(() => {
         init()
     }, [init])
-
-    // --- Core Actions ---
 
     const handleDeleteUser = async () => {
         if (!targetUserId) return
@@ -415,703 +902,154 @@ export default function Admin() {
                         </div>
                     ))}
                 </div>
-                <div className="flex flex-col lg:flex-row gap-12">
-                    <div className="w-56 h-80 bg-surface-subtle rounded-xl hidden lg:block opacity-20" />
-                    <div className="flex-1 space-y-2">
-                        <div className="space-y-4">
-                            {[1, 2, 3, 4, 5, 6].map(i => (
-                                <div key={i} className="flex items-center gap-6 py-4 px-6 border-b border-border">
-                                    <div className="skeleton w-8 h-8 rounded-lg" />
-                                    <div className="flex-1 space-y-2">
-                                        <div className="skeleton skeleton-text h-3 w-32 !mb-0" />
-                                        <div className="skeleton skeleton-text h-2 w-48 !mb-0" />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
             </div>
         )
     }
 
     return (
-        <div className="admin-page min-h-screen px-4 py-8 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
-            
-            {/* --- DASHBOARD HEADER --- */}
-            <header className="mb-14">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <div className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black text-accent uppercase tracking-[0.2em]">
-                                Infra v1.0.2
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-muted opacity-40 uppercase tracking-widest">
-                                <span className="w-1.5 h-1.5 rounded-full bg-success" />
-                                Operational
-                            </div>
-                        </div>
+        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 p-4 lg:p-10 font-sans">
+            <div className="max-w-[1600px] mx-auto">
+                {/* SYSTEM HEADER */}
+                <header className="mb-12 lg:mb-20">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
-                            <h1 className="text-4xl md:text-5xl font-black text-primary uppercase tracking-tighter leading-none mb-3">
-                                Governance
-                            </h1>
-                            <p className="text-muted font-medium text-[13px] md:text-[14px] max-w-xl leading-relaxed">
-                                System-wide monitoring, security protocols, and policy enforcement modules for the PeerNet infrastructure.
-                            </p>
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent">Infra V1.0.2</span>
+                                <div className="w-1 h-1 rounded-full bg-muted/30" />
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-success">Operational</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-primary leading-none">Governance</h1>
+                                <button 
+                                    onClick={init}
+                                    disabled={loading}
+                                    className={`p-3 rounded-full bg-surface-subtle border border-border/50 text-muted hover:text-primary transition-all ${loading ? 'animate-spin' : 'hover:rotate-180 duration-500'}`}
+                                >
+                                    <HiRefresh size={24} />
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-muted/40 uppercase tracking-widest">
+                                <span>System</span>
+                                <HiChevronRight />
+                                <span>Core</span>
+                                <HiChevronRight />
+                                <span className="text-accent">{activeTab}</span>
+                            </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 p-4 bg-surface-subtle rounded-[24px] border border-border/50">
+                            <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
+                                <HiShieldCheck size={20} />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
+                                <span className="text-[9px] font-bold text-muted uppercase">Secure Environment</span>
+                            </div>
                         </div>
                     </div>
+                </header>
 
-                    <div className="flex items-center gap-3">
-                        <button 
-                            onClick={init} 
-                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-primary text-bg hover:scale-105 active:scale-95 transition-all text-[11px] font-black uppercase tracking-widest shadow-xl shadow-primary/10"
-                        >
-                            <HiRefresh className={loading ? 'animate-spin' : ''} /> 
-                            Manual Sync
-                        </button>
-                    </div>
-                </div>
-            </header>
+                <section className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-12">
+                    <StatCard label="Active Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="NETWORK CAPACITY" icon={<HiUsers size={12} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
+                    <StatCard label="Signups" value={stats?.signupsToday || 0} sub="24H GROWTH" icon={<HiTrendingUp size={12} />} />
+                    <StatCard label="Active" value={stats?.activeToday || 0} sub="SESSIONS" icon={<HiGlobe size={12} />} />
+                    <StatCard label="Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="TOTAL VOID" icon={<HiCollection size={12} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
+                    <StatCard label="Comments" value={stats?.commentsToday || 0} sub="DAILY ECHO" icon={<HiChatAlt2 size={12} />} />
+                    <StatCard label="Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="PENDING" icon={<HiFlag size={12} />} />
+                </section>
 
-            {/* --- CORE METRICS HUB --- */}
-            <section className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-12">
-                <StatCard 
-                    label="Active Users" 
-                    value={(stats?.totalUsers || 0).toLocaleString()} 
-                    sub="NETWORK CAPACITY" 
-                    icon={<HiUsers size={12} />} 
-                    chartData={stats?.charts?.userGrowth?.map(d => d.count)}
-                />
-                <StatCard 
-                    label="Signups" 
-                    value={stats?.signupsToday || 0} 
-                    sub="24H GROWTH" 
-                    icon={<HiTrendingUp size={12} />} 
-                    color="success"
-                />
-                <StatCard 
-                    label="Active" 
-                    value={stats?.activeToday || 0} 
-                    sub="SESSIONS" 
-                    icon={<HiGlobe size={12} />} 
-                />
-                <StatCard 
-                    label="Posts" 
-                    value={(stats?.totalPosts || 0).toLocaleString()} 
-                    sub="TOTAL VOID" 
-                    icon={<HiCollection size={12} />} 
-                    chartData={stats?.charts?.postGrowth?.map(d => d.count)}
-                />
-                <StatCard 
-                    label="Comments" 
-                    value={stats?.commentsToday || 0} 
-                    sub="DAILY ECHO" 
-                    icon={<HiChatAlt2 size={12} />} 
-                />
-                <StatCard 
-                    label="Reports" 
-                    value={stats?.pendingReports || 0} 
-                    accent={stats?.pendingReports > 0}
-                />
-            </section>
-
-            <div className="flex flex-col lg:flex-row gap-12 items-start">
-                {/* --- NAVIGATION --- */}
-                <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-
-                {/* --- MAIN INTERFACE --- */}
-                <main className="flex-1 min-h-[600px]">
-                    <AnimatePresence mode="wait">
-                        
-                        {/* DASHBOARD MODULE */}
-                        {activeTab === 'dashboard' && (
-                            <motion.div key="dashboard" className="space-y-10" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                                    {/* Recent Activity */}
-                                    <div className="xl:col-span-2 admin-surface-el p-6 md:p-8">
-                                        <div className="flex justify-between items-center mb-10">
-                                            <h3 className="text-lg font-bold text-primary uppercase tracking-tight flex items-center gap-3">
-                                                <HiGlobe className="text-accent" /> Platform Velocity
-                                            </h3>
-                                        </div>
-                                        <div className="flex flex-col gap-3">
-                                            {feedback.slice(0, 5).map(f => (
-                                                <div key={f._id} className="flex items-center justify-between p-5 rounded-[20px] bg-surface-subtle border border-border/50 hover:border-accent/30 hover:bg-hover transition-all group/item cursor-pointer">
-                                                    <div className="flex items-center gap-5 flex-1">
-                                                        <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)] shrink-0" />
-                                                        <div className="flex flex-col min-w-0">
-                                                            <p className="text-[14px] text-primary font-bold tracking-tight truncate mb-1">{f.content}</p>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-[9px] font-black text-muted uppercase tracking-[0.1em] opacity-40">SIGNAL AUDIT</span>
-                                                                <span className="w-1 h-1 rounded-full bg-border" />
-                                                                <span className="text-[9px] font-bold text-accent uppercase tracking-widest">@{f.userId?.username || 'SYSTEM'}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-4 pl-4 opacity-0 group-hover/item:opacity-100 group-hover/item:translate-x-1 transition-all duration-300">
-                                                        <HiArrowRight className="text-accent" size={14} />
-                                                    </div>
+                <div className="flex flex-col lg:flex-row gap-12 items-start">
+                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} />
+                    <main className="flex-1 min-h-[600px]">
+                        <AnimatePresence mode="wait">
+                            {activeTab === 'dashboard' && <AnalyticsModule stats={stats} analytics={analytics} key="dashboard" />}
+                            {activeTab === 'users' && (
+                                <UserModule 
+                                    key="users"
+                                    users={users} 
+                                    search={search} 
+                                    setSearch={setSearch} 
+                                    onVerify={handleToggleVerify} 
+                                    onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
+                                    loading={loading}
+                                />
+                            )}
+                            {activeTab === 'posts' && (
+                                <PostModule 
+                                    key="posts"
+                                    posts={posts} 
+                                    onDelete={handleDeletePost} 
+                                    contentType={contentType} 
+                                    setContentType={setContentType}
+                                />
+                            )}
+                            {activeTab === 'comments' && (
+                                <CommentModule 
+                                    key="comments"
+                                    comments={comments} 
+                                    onDelete={handleDeleteComment} 
+                                    search={search} 
+                                    setSearch={setSearch} 
+                                />
+                            )}
+                            {activeTab === 'reports' && (
+                                <ReportModule 
+                                    key="reports"
+                                    reports={reports} 
+                                    onResolve={handleModerationAction} 
+                                />
+                            )}
+                            {activeTab === 'infrastructure' && (
+                                <div key="infra" className="space-y-10">
+                                    <InfrastructurePulse pulse={pulse} />
+                                    <StorageModule stats={stats} />
+                                </div>
+                            )}
+                            {activeTab === 'audit' && (
+                                <AuditModule key="audit" logs={logs} loading={loading} />
+                            )}
+                            {activeTab === 'settings' && (
+                                <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="admin-surface-el p-10">
+                                            <h3 className="text-xl font-black text-primary uppercase tracking-tight mb-8">Platform Identity</h3>
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between p-4 bg-surface-subtle rounded-2xl border border-border">
+                                                    <span className="text-[12px] font-bold text-muted uppercase">Environment</span>
+                                                    <span className="text-[11px] font-black text-accent uppercase tracking-widest">Production</span>
                                                 </div>
-                                            ))}
-                                            {feedback.length === 0 && <div className="text-center py-24 opacity-20 text-[10px] font-black uppercase tracking-[0.3em]">No Pulse Detected</div>}
-                                        </div>
-                                    </div>
-
-                                    {/* High-Level Analysis */}
-                                    <div className="admin-surface-el p-6 md:p-8 flex flex-col justify-between">
-                                        <div>
-                                            <h3 className="text-lg font-bold text-primary uppercase tracking-tight mb-10">Integrity Indices</h3>
-                                            <div className="space-y-10">
-                                                <div>
-                                                    <div className="flex justify-between items-center text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 opacity-50">
-                                                        <span>Synchronicity</span>
-                                                        <span className="px-2 py-0.5 rounded-md bg-success/10 text-success">{stats?.health?.synchronicity || 0}%</span>
-                                                    </div>
-                                                    <div className="h-1 w-full bg-border rounded-full overflow-hidden">
-                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.health?.synchronicity || 0}%` }} className="h-full bg-success shadow-[0_0_12px_var(--success)]" />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div className="flex justify-between items-center text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 opacity-50">
-                                                        <span>Allocation</span>
-                                                        <span className="px-2 py-0.5 rounded-md bg-accent/10 text-accent">{stats?.storage?.percentage || 0}%</span>
-                                                    </div>
-                                                    <div className="h-1 w-full bg-border rounded-full overflow-hidden">
-                                                        <motion.div initial={{ width: 0 }} animate={{ width: `${stats?.storage?.percentage || 0}%` }} className="h-full bg-accent shadow-[0_0_12px_var(--accent)]" />
-                                                    </div>
+                                                <div className="flex items-center justify-between p-4 bg-surface-subtle rounded-2xl border border-border">
+                                                    <span className="text-[12px] font-bold text-muted uppercase">Registry Lock</span>
+                                                    <div className="w-10 h-5 bg-success/20 rounded-full relative"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full" /></div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="mt-10 p-5 rounded-xl bg-accent/5 border border-accent/10">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <HiShieldCheck size={14} className="text-accent" />
-                                                <span className="text-[9px] font-black text-primary uppercase tracking-widest">Protocol {stats?.health?.status || 'Online'}</span>
-                                            </div>
-                                            <p className="text-[10px] font-bold text-muted uppercase tracking-tight leading-relaxed opacity-50">Infrastructure operating within nominal parameters.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* IDENTITY MODULE */}
-                        {activeTab === 'users' && (
-                            <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="flex flex-col md:flex-row justify-between items-stretch gap-6 mb-10">
-                                    <div className="relative flex-1 flex items-center gap-4 bg-surface-subtle border border-border/50 rounded-[20px] px-8 py-4 focus-within:border-accent/50 focus-within:ring-4 ring-accent/5 transition-all shadow-sm">
-                                        <HiSearch className="text-muted opacity-40 shrink-0" size={20} />
-                                        <input 
-                                            className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:text-muted/40 text-primary uppercase tracking-tight" 
-                                            placeholder="Search unique identifiers..." 
-                                            value={search}
-                                            onChange={(e) => {
-                                                setSearch(e.target.value)
-                                                fetchUsers(e.target.value)
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div className="admin-table-container">
-                                    <table className="admin-table">
-                                        <thead>
-                                            <tr>
-                                                <th>User Account</th>
-                                                <th>Status</th>
-                                                <th>Access Level</th>
-                                                <th className="text-right">Management</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {loading ? (
-                                                <tr>
-                                                    <td colSpan="4" className="p-0 border-none">
-                                                        <div className="space-y-0">
-                                                            {[1, 2, 3, 4, 5, 6].map(i => (
-                                                                <div key={i} className="flex items-center gap-6 py-4 px-6 border-b border-border">
-                                                                    <div className="skeleton w-8 h-8 rounded-lg" />
-                                                                    <div className="flex-1 space-y-2">
-                                                                        <div className="skeleton skeleton-text h-3 w-32 !mb-0" />
-                                                                        <div className="skeleton skeleton-text h-2 w-48 !mb-0" />
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ) : users.map(u => (
-                                                <tr key={u._id} className="hover:bg-surface-subtle transition-colors group">
-                                                    <td>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-lg overflow-hidden border border-border bg-surface-subtle flex items-center justify-center group-hover:border-border transition-all">
-                                                                <img src={u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username}&background=0A0A0A&color=fff`} className="w-full h-full object-cover" alt="" />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="font-bold text-primary text-[13px] tracking-tight lowercase">@{u.username}</span>
-                                                                <span className="text-[10px] text-muted font-medium opacity-40">{u.email}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className={`w-1.5 h-1.5 rounded-full ${u.isVerified ? 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-border'}`} />
-                                                            <span className={`text-[10px] font-bold uppercase tracking-widest ${u.isVerified ? 'text-success' : 'text-muted opacity-40'}`}>
-                                                                {u.isVerified ? 'Verified' : 'Unverified'}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded border ${u.role === 'admin' ? 'bg-accent/5 text-accent border-accent/20' : 'bg-surface-subtle border-border text-muted'}`}>
-                                                            {u.role || 'user'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="text-right">
-                                                        <div className="flex justify-end gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => handleToggleVerify(u._id)} title="Update Clearance" className="p-1.5 border border-border rounded-lg hover:bg-accent/10 hover:text-accent hover:border-accent/20 transition-all text-muted">
-                                                                <HiKey size={13} />
-                                                            </button>
-                                                            <button onClick={() => { setTargetUserId(u._id); setShowDeleteModal(true); }} title="Terminate" className="p-1.5 border border-border rounded-lg hover:bg-error/10 hover:text-error hover:border-error/20 transition-all text-muted">
-                                                                <HiTrash size={13} />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* POSTS MODULE */}
-                        {activeTab === 'posts' && (
-                            <motion.div key="posts" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
-                                <div className="flex items-center gap-3 mb-8 border-b border-border pb-6 overflow-x-auto">
-                                    {['all', 'image', 'video'].map(t => (
-                                        <button 
-                                            key={t}
-                                            onClick={() => { setContentType(t); fetchPosts(t); }}
-                                            className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${contentType === t ? 'bg-accent text-white shadow-xl shadow-accent/20' : 'text-muted hover:text-primary'}`}
-                                        >
-                                            {t}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                                    {posts.map(p => (
-                                        <div key={p._id} className="admin-surface-el overflow-hidden group hover:border-border transition-all">
-                                            <div className="aspect-[4/5] relative bg-surface-3">
-                                                {p.mediaType === 'video' ? (
-                                                    <video src={p.mediaUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                                ) : (
-                                                    <img src={p.mediaUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="" />
-                                                )}
-                                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                                                    <button onClick={() => handleDeletePost(p._id)} className="p-2.5 bg-error text-white rounded-lg shadow-xl hover:scale-105 active:scale-95" title="Delete Post">
-                                                        <HiTrash size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div className="mt-auto p-4 border-t border-border bg-surface-subtle">
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <div className="w-7 h-7 rounded-lg overflow-hidden bg-surface-subtle">
-                                                        <img src={p.author?.avatarUrl || `https://ui-avatars.com/api/?name=${p.author?.username}&background=0A0A0A&color=fff`} className="w-full h-full object-cover" alt="" />
-                                                    </div>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="text-[12px] font-black text-primary truncate lowercase">@{p.author?.username}</span>
-                                                        <span className="text-[8px] font-bold text-muted uppercase opacity-30 mt-[-2px]">{new Date(p.createdAt).toLocaleDateString()}</span>
-                                                    </div>
-                                                </div>
-                                                <p className="text-[11px] text-muted font-medium line-clamp-1 opacity-50 italic">&ldquo;{p.caption || 'No description provided.'}&rdquo;</p>
+                                        <div className="admin-surface-el p-10 border-dashed border-error/20">
+                                            <h3 className="text-xl font-black text-error uppercase tracking-tight mb-8">Danger Zone</h3>
+                                            <p className="text-[11px] text-muted font-medium mb-8 opacity-50">These actions are irreversible and will be logged to the permanent audit trail.</p>
+                                            <div className="space-y-4">
+                                                <button 
+                                                    onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
+                                                    className="w-full py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
+                                                >
+                                                    Purge User Database
+                                                </button>
+                                                <button 
+                                                    onClick={() => { setSystemActionType('full'); setShowSystemModal(true); }}
+                                                    className="w-full py-4 bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                                >
+                                                    Full Factory Reset
+                                                </button>
                                             </div>
                                         </div>
-                                    ))}
-                                    {posts.length === 0 && <div className="col-span-full py-32 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em]">Broadcast Vault Offline</div>}
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* COMMENTS MODULE */}
-                        {activeTab === 'comments' && (
-                            <motion.div key="comments" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="flex flex-col md:flex-row justify-between items-stretch gap-6 mb-10">
-                                    <div className="relative flex-1 flex items-center gap-4 bg-surface-subtle border border-border/50 rounded-[20px] px-8 py-4 focus-within:border-accent/50 focus-within:ring-4 ring-accent/5 transition-all shadow-sm">
-                                        <HiSearch className="text-muted opacity-40 shrink-0" size={20} />
-                                        <input 
-                                            className="w-full bg-transparent border-none outline-none text-sm font-bold placeholder:text-muted/40 text-primary uppercase tracking-tight" 
-                                            placeholder="Search comment registry..." 
-                                            value={search}
-                                            onChange={(e) => {
-                                                setSearch(e.target.value)
-                                                fetchComments(e.target.value)
-                                            }}
-                                        />
                                     </div>
-                                </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                                <div className="admin-table-container">
-                                    <table className="admin-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Identity & Context</th>
-                                                <th>Signal (Content)</th>
-                                                <th>Reference (Post)</th>
-                                                <th className="text-right">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {loading ? (
-                                                <tr>
-                                                    <td colSpan="4" className="py-20 text-center opacity-20 text-[10px] font-black uppercase tracking-widest">Synchronizing Registry...</td>
-                                                </tr>
-                                            ) : comments.map(c => (
-                                                <tr key={c._id} className="hover:bg-surface-subtle transition-colors group">
-                                                    <td>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-lg overflow-hidden border border-border bg-surface-subtle shrink-0">
-                                                                <img src={c.author?.avatarUrl || `https://ui-avatars.com/api/?name=${c.author?.username}&background=0A0A0A&color=fff`} className="w-full h-full object-cover" alt="" />
-                                                            </div>
-                                                            <div className="flex flex-col min-w-0">
-                                                                <span className="font-black text-primary text-[12px] tracking-tight lowercase truncate">@{c.author?.username}</span>
-                                                                <span className="text-[8px] text-muted font-bold uppercase opacity-30">{new Date(c.createdAt).toLocaleDateString()}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="max-w-[300px]">
-                                                        <p className="text-[12px] text-primary font-medium line-clamp-2 opacity-80 leading-relaxed italic">
-                                                            &ldquo;{c.body}&rdquo;
-                                                        </p>
-                                                    </td>
-                                                    <td>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] font-bold text-accent uppercase tracking-widest opacity-60">Source Link</span>
-                                                            <span className="text-[9px] text-muted truncate max-w-[150px]">{c.post?.caption || 'Infrastructure Artifact'}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="text-right">
-                                                        <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                                                            <button 
-                                                                onClick={() => handleDeleteComment(c._id)}
-                                                                className="p-2 border border-border rounded-lg hover:bg-error/10 hover:text-error hover:border-error/20 transition-all text-muted"
-                                                            >
-                                                                <HiTrash size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                            {comments.length === 0 && !loading && (
-                                                <tr>
-                                                    <td colSpan="4" className="py-32 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em]">Signal Repository Empty</td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* REPORTS MODULE */}
-                        {activeTab === 'reports' && (
-                            <motion.div key="reports" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="flex justify-between items-center mb-10">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-primary uppercase tracking-tight">Content Moderation</h3>
-                                        <p className="text-xs font-medium text-muted opacity-40 uppercase tracking-widest mt-1">Review flagged items</p>
-                                    </div>
-                                    <div className="bg-accent/10 px-4 py-2 rounded-full border border-accent/20">
-                                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest">{reports.length} Pending Reports</span>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-4">
-                                    {reports.map((report) => (
-                                        <div key={report._id} className="admin-surface-el p-6 flex flex-col xl:flex-row gap-6 group hover:border-border transition-all">
-                                            {/* Content Preview */}
-                                            <div className="w-full xl:w-48 shrink-0 aspect-video rounded-lg bg-surface-3 border border-border overflow-hidden relative group-hover:border-accent/20 transition-all">
-                                                {report.targetType === 'Post' || report.targetType === 'Story' ? (
-                                                    report.targetId?.mediaType === 'video' ? (
-                                                        <video src={report.targetId?.mediaUrl} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
-                                                    ) : (
-                                                        <img src={report.targetId?.mediaUrl} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
-                                                    )
-                                                ) : report.targetType === 'Comment' ? (
-                                                    <div className="p-4 text-[10px] text-muted font-medium line-clamp-4 italic leading-relaxed opacity-60">
-                                                        &ldquo;{report.targetId?.body}&rdquo;
-                                                    </div>
-                                                ) : (
-                                                    <div className="h-full flex items-center justify-center text-muted/10 uppercase font-black tracking-tighter text-[10px]">Registry Alert</div>
-                                                )}
-                                                <div className="absolute top-2 left-2 bg-accent/90 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-xl tracking-tighter">
-                                                    {report.targetType}
-                                                </div>
-                                            </div>
-
-                                            {/* Report Details */}
-                                            <div className="flex-1 flex flex-col justify-between min-w-0">
-                                                <div>
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className={`w-1 h-1 rounded-full ${report.priority === 'urgent' ? 'bg-error animate-pulse' : 'bg-accent'}`} />
-                                                            <span className="text-[10px] font-black text-primary uppercase tracking-widest">{report.reason}</span>
-                                                        </div>
-                                                        <span className="text-[9px] font-medium text-muted opacity-20 uppercase">REC: {new Date(report.createdAt).toLocaleDateString()}</span>
-                                                    </div>
-                                                    <p className="text-[12px] text-muted font-medium leading-relaxed mb-4 p-3 rounded-lg bg-surface-subtle border border-border opacity-70">
-                                                        {report.description || 'No specialized metadata provided.'}
-                                                    </p>
-                                                    <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest opacity-30">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span>Signal:</span>
-                                                            <span className="text-primary">@{report.reporter?.username}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span>Target:</span>
-                                                            <span className="text-accent">@{report.targetId?.author?.username || report.targetId?.username || 'SYSTEM'}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2 mt-6">
-                                                    <button 
-                                                        onClick={() => handleModerationAction(report, 'approve')}
-                                                        className="flex-1 py-2.5 bg-accent/5 border border-accent/10 text-accent font-black text-[9px] tracking-widest rounded-lg hover:bg-accent hover:text-white transition-all flex items-center justify-center gap-2"
-                                                    >
-                                                        <HiCheck size={12} /> CLEAR
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleModerationAction(report, 'warn')}
-                                                        className="flex-1 py-2.5 bg-surface-subtle border border-border text-muted font-black text-[9px] tracking-widest rounded-lg hover:bg-hover hover:text-primary transition-all flex items-center justify-center gap-2"
-                                                    >
-                                                        <HiSpeakerphone size={12} /> WARN
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleModerationAction(report, 'remove')}
-                                                        className="flex-1 py-2.5 bg-error/5 border border-error/10 text-error font-black text-[9px] tracking-widest rounded-lg hover:bg-error hover:text-white transition-all flex items-center justify-center gap-2"
-                                                    >
-                                                        <HiTrash size={12} /> PURGE
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleModerationAction(report, 'ban')}
-                                                        className="p-2.5 bg-error shrink-0 text-white rounded-lg hover:scale-[1.05] active:scale-[0.95] transition-all"
-                                                        title="Terminate Access"
-                                                    >
-                                                        <HiBan size={14} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    {reports.length === 0 && (
-                                        <div className="admin-surface-el p-40 text-center opacity-20 flex flex-col items-center">
-                                            <div className="w-20 h-20 rounded-full border-4 border-dashed border-border mb-8 animate-spin-slow" />
-                                            <p className="text-sm font-bold uppercase tracking-[0.5em]">No Pending Reports</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* STORAGE MODULE (STUB) */}
-                        {activeTab === 'storage' && (
-                            <motion.div key="storage" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="admin-surface-el p-12 text-center opacity-20 border-dashed">
-                                    <HiDatabase size={24} className="mx-auto mb-4" />
-                                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Infrastructure Registry</p>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* ANALYTICS MODULE (STUB) */}
-                        {activeTab === 'analytics' && (
-                            <motion.div key="analytics" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div className="admin-surface-el p-12 text-center opacity-20 border-dashed">
-                                    <HiTrendingUp size={24} className="mx-auto mb-4" />
-                                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">Intelligence Engine Syncing</p>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* SECURITY MODULE */}
-                        {activeTab === 'security' && (
-                            <motion.div key="security" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                                <div className="admin-table-container">
-                                    <div className="p-6 border-b border-border flex items-center justify-between">
-                                        <h3 className="text-xs font-black text-primary uppercase tracking-widest">Administrative Audit Trail</h3>
-                                        <span className="text-[10px] font-bold text-muted opacity-30 uppercase tracking-[0.2em]">Live Registry</span>
-                                    </div>
-                                    <table className="admin-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Administrator</th>
-                                                <th>Operation</th>
-                                                <th>Target</th>
-                                                <th className="text-right">Timestamp</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {loading ? (
-                                                <tr>
-                                                    <td colSpan="4" className="p-0 border-none">
-                                                        <div className="space-y-0">
-                                                            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                                                                <div key={i} className="flex items-center gap-6 py-4 px-6 border-b border-border">
-                                                                    <div className="w-6 h-6 rounded bg-surface-subtle" />
-                                                                    <div className="flex-1 space-y-2">
-                                                                        <div className="h-3 w-24 bg-surface-subtle rounded" />
-                                                                        <div className="h-2 w-40 bg-surface-subtle rounded" />
-                                                                    </div>
-                                                                    <div className="w-24 h-3 bg-surface-subtle rounded" />
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ) : logs.map(log => (
-                                                <tr key={log._id} className="hover:bg-surface-subtle">
-                                                    <td>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-5 h-5 rounded overflow-hidden bg-surface-subtle">
-                                                                <img src={log.adminId?.avatarUrl || `https://ui-avatars.com/api/?name=${log.adminId?.username}&background=0A0A0A&color=fff`} className="w-full h-full object-cover" alt="" />
-                                                            </div>
-                                                            <span className="text-[11px] font-bold text-primary lowercase">@{log.adminId?.username || 'system'}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
-                                                            <span className="text-[9px] text-muted opacity-40 truncate max-w-xs">{log.details}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span className="text-[9px] font-bold text-muted uppercase px-2 py-0.5 rounded bg-surface-subtle border border-border">{log.targetType}</span>
-                                                    </td>
-                                                    <td className="text-right">
-                                                        <span className="text-[10px] font-medium text-muted opacity-40 uppercase">{new Date(log.createdAt).toLocaleString()}</span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                            {logs.length === 0 && !loading && (
-                                                <tr>
-                                                    <td colSpan="4" className="py-32 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em]">Audit Trail Empty</td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* SETTINGS / DANGER ZONE */}
-                        {activeTab === 'settings' && (
-                            <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                {/* Profile Settings (Placeholder for Logic) */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                                    <div className="admin-surface-el p-6 flex flex-col gap-4">
-                                        <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-40">Regional Config</h4>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[13px] font-medium text-primary">Cloud Sync</span>
-                                            <div className="w-8 h-4 bg-accent/20 rounded-full relative"><div className="absolute right-1 top-1 w-2 h-2 bg-accent rounded-full" /></div>
-                                        </div>
-                                    </div>
-                                    <div className="admin-surface-el p-6 flex flex-col gap-4">
-                                        <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-40">Telemetry</h4>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[13px] font-medium text-primary">Live Logs</span>
-                                            <div className="w-8 h-4 bg-surface-subtle rounded-full relative"><div className="absolute left-1 top-1 w-2 h-2 bg-border rounded-full" /></div>
-                                        </div>
-                                    </div>
-                                    <div className="admin-surface-el p-6 flex flex-col gap-4 border-dashed border-border">
-                                        <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-20">Extensions</h4>
-                                        <span className="text-[11px] font-medium text-primary opacity-20 italic">No modules detected</span>
-                                    </div>
-                                </div>
-
-                                {/* Restricted Hero */}
-                                <div className="mb-8 p-8 rounded-2xl bg-error/[0.04] border border-error/10 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
-                                        <HiShieldCheck size={120} className="text-error" />
-                                    </div>
-                                    <div className="relative">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-                                            <h3 className="text-[10px] font-bold text-error uppercase tracking-widest">Restricted Area</h3>
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-primary mb-4 tracking-tighter uppercase">Infrastructure Operations</h2>
-                                        <p className="text-[13px] text-muted font-medium max-w-xl leading-relaxed opacity-50">
-                                            Irrevocable actions on global platform state. Authorization required for all execution strings.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {[
-                                        { 
-                                            id: 'users', 
-                                            label: 'Wipe User Base', 
-                                            desc: 'Permanently remove all platform users and profile metadata.',
-                                            icon: <HiUsers size={20} />
-                                        },
-                                        { 
-                                            id: 'content', 
-                                            label: 'Clear Media Store', 
-                                            desc: 'Purge all posts, stories, and comments from network buckets.',
-                                            icon: <HiDatabase size={20} />
-                                        }
-                                    ].map((action) => (
-                                        <div key={action.id} className="admin-surface-el p-6 hover:border-error/30 transition-all group flex flex-col justify-between">
-                                            <div>
-                                                <div className="w-10 h-10 rounded-xl bg-surface-subtle border border-border flex items-center justify-center text-muted group-hover:text-error group-hover:border-error/20 transition-all mb-6">
-                                                    {action.icon}
-                                                </div>
-                                                <h4 className="text-sm font-black text-primary uppercase tracking-tight mb-2">{action.label}</h4>
-                                                <p className="text-[11px] text-muted font-medium leading-relaxed opacity-40 mb-8">{action.desc}</p>
-                                            </div>
-                                            <button 
-                                                onClick={() => {
-                                                    setSystemActionType(action.id)
-                                                    setSystemConfirmCode('')
-                                                    setSystemAdminPassword('')
-                                                    setShowSystemModal(true)
-                                                }}
-                                                className="w-full py-3 rounded-lg bg-surface-subtle border border-border text-[9px] font-black text-muted hover:bg-error hover:border-error hover:text-white transition-all uppercase tracking-[0.2em]"
-                                            >
-                                                Initialize
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="mt-6 p-6 rounded-2xl bg-error/[0.03] border border-error/10 hover:border-error/20 transition-all group">
-                                    <div className="flex flex-col xl:flex-row justify-between items-center gap-6">
-                                        <div className="flex gap-4 items-center text-center xl:text-left">
-                                            <div className="w-12 h-12 rounded-xl bg-error/10 flex items-center justify-center text-error shrink-0">
-                                                <HiRefresh size={24} />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-base font-black text-primary uppercase tracking-tight">Full Factory Reset</h4>
-                                                <p className="text-[10px] font-bold text-muted mt-1 opacity-40 uppercase tracking-[0.05em]">Complete network purge and infrastructure reset.</p>
-                                            </div>
-                                        </div>
-                                        <button 
-                                            onClick={() => {
-                                                setSystemActionType('full')
-                                                setSystemConfirmCode('')
-                                                setSystemAdminPassword('')
-                                                setShowSystemModal(true)
-                                            }}
-                                            className="w-full xl:w-auto px-10 py-4 bg-error text-white font-black text-[10px] tracking-[0.2em] rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-error/20 uppercase">
-                                            Execute
-                                        </button>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-
-
-                    </AnimatePresence>
                 </main>
             </div>
 
@@ -1217,6 +1155,7 @@ export default function Admin() {
 
             <AdminFooter user={user} />
         </div>
+    </div>
     )
 }
 
