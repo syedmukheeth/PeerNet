@@ -1337,22 +1337,23 @@ textarea:focus-visible {
 .post-card-media-wrap {
   position: relative;
   width: 100%;
-  background: var(--surface-1);
+  background: #000; /* Solid dark background for media containment */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  /* Bounded Instagram-style dimensions */
-  min-height: 300px;
-  max-height: 620px;
+  /* Senior Dev: Allow flexible heights but cap at Instagram's portrait limit */
+  min-height: 200px;
 }
 
 .post-card-media {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 75vh; /* 75% of viewport height is standard for high-end feeds */
   display: block;
   object-fit: cover;
-  object-position: center;
+  /* Top-weighted positioning ensures heads are rarely cut off in portraits */
+  object-position: center 15%; 
 }
 
 .post-card-heart-overlay {
