@@ -7982,3 +7982,164 @@ textarea:focus-visible {
         opacity: 1;
     }
 }
+
+/* ========================================================================== 
+   MOBILE GLASSMORPHISM OVERHAUL (v2.0) 
+   ========================================================================== */ 
+ 
+@media (max-width: 768px) { 
+    /* 1. Base Aesthetics */ 
+    body { 
+        background: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #050505 100%) fixed !important; 
+    } 
+ 
+    /* 2. Glass Navigation */ 
+    .mobile-top-header { 
+        background: rgba(10, 10, 12, 0.4) !important; 
+        backdrop-filter: blur(24px) saturate(200%) !important; 
+        -webkit-backdrop-filter: blur(24px) saturate(200%) !important; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; 
+        box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5); 
+    } 
+ 
+    .mobile-nav { 
+        background: rgba(15, 15, 18, 0.4) !important; 
+        backdrop-filter: blur(32px) saturate(200%) !important; 
+        -webkit-backdrop-filter: blur(32px) saturate(200%) !important; 
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important; 
+        height: 72px !important; 
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6); 
+    } 
+ 
+    .mobile-nav-item.active { 
+        background: rgba(255, 255, 255, 0.03); 
+        border-radius: 20px; 
+    } 
+ 
+    /* 3. Glass Post Cards */ 
+    .l-post-card { 
+        background: rgba(20, 20, 25, 0.4) !important; 
+        backdrop-filter: blur(12px); 
+        -webkit-backdrop-filter: blur(12px); 
+        border: 1px solid rgba(255, 255, 255, 0.05) !important; 
+        margin-bottom: 12px !important; 
+        border-radius: 24px !important; 
+        width: calc(100% - 24px) !important; 
+        margin-left: 12px !important; 
+        margin-right: 12px !important; 
+        overflow: hidden; 
+        box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5); 
+    } 
+ 
+    .post-card-header { 
+        background: rgba(255, 255, 255, 0.02); 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
+    } 
+ 
+    .post-card-media-wrap { 
+        border-radius: 0 !important; 
+    } 
+ 
+    /* 4. Floating Suggestions Rail */ 
+    .sp-container { 
+        display: flex !important; 
+        flex-direction: row !important; 
+        overflow-x: auto !important; 
+        padding: 16px !important; 
+        gap: 16px !important; 
+        scrollbar-width: none; 
+        background: rgba(255, 255, 255, 0.02); 
+        border-radius: 24px; 
+        margin: 0 12px 24px; 
+        border: 1px solid rgba(255, 255, 255, 0.05); 
+    } 
+ 
+    .sp-container::-webkit-scrollbar { display: none; } 
+ 
+    .sp-user-card { display: none !important; } 
+    .sp-section-header { display: none !important; } 
+ 
+    .sp-suggestion-row { 
+        flex-shrink: 0; 
+        flex-direction: column !important; 
+        align-items: center !important; 
+        width: 120px !important; 
+        padding: 16px 12px !important; 
+        background: rgba(255, 255, 255, 0.03); 
+        border: 1px solid rgba(255, 255, 255, 0.05); 
+        border-radius: 20px; 
+        gap: 8px !important; 
+        text-align: center; 
+    } 
+ 
+    .sp-suggestion-avatar { 
+        width: 56px !important; 
+        height: 56px !important; 
+        margin: 0 !important; 
+    } 
+ 
+    .sp-suggestion-info { 
+        margin: 0 !important; 
+        width: 100%; 
+    } 
+ 
+    .sp-suggestion-username { 
+        font-size: 11px !important; 
+        justify-content: center; 
+    } 
+ 
+    .sp-suggestion-subtext { display: none !important; } 
+ 
+    .sp-btn-follow { 
+        width: 100%; 
+        padding: 6px 0 !important; 
+        background: var(--accent) !important; 
+        color: white !important; 
+        border-radius: 10px !important; 
+        margin-top: 4px; 
+    } 
+ 
+    /* 5. Story Rail Refinement */ 
+    .story-rail-wrap { 
+        background: transparent !important; 
+        border-bottom: none !important; 
+        padding: 8px 0 16px !important; 
+    } 
+ 
+    .story-item { 
+        min-width: 80px !important; 
+    } 
+ 
+    .story-ring-vibrant { 
+        padding: 2px !important; 
+    } 
+ 
+    .story-avatar-inner { 
+        border-width: 2px !important; 
+    } 
+}
+
+@media (max-width: 768px) { 
+    .l-feed-grid { 
+        flex-direction: column !important; 
+    } 
+    .l-side-panel { 
+        width: 100% !important; 
+        order: -1; /* Show suggestions above the feed on mobile */ 
+    } 
+}
+
+@media (max-width: 768px) { 
+    .sp-suggestions-list { 
+        flex-direction: row !important; 
+        gap: 12px !important; 
+    } 
+}
+
+@media (max-width: 768px) { 
+    .main-col { 
+        padding-top: 56px !important; 
+        padding-bottom: 84px !important; 
+        height: auto !important; 
+    } 
+}

@@ -43,7 +43,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="admin-sidebar-v2 hidden xl:block">
+        <aside className="admin-sidebar-v2 hidden lg:block">
             <div className="admin-glass-v2 p-8 rounded-[40px] h-full flex flex-col justify-between border-white/5">
                 <div className="space-y-10">
                     <div className="px-2">
@@ -133,9 +133,9 @@ const InfrastructurePulse = ({ pulse }) => {
                 {Array.from({ length: 12 }).map((_, i) => (
                     <motion.div 
                         key={i}
-                        animate={{ height: `${20 + Math.random() * 80}%`, opacity: [0.2, 0.5, 0.2] }}
+                        animate={{ height: `${20 + Math.random() * 80}%`, opacity: [0.3, 0.7, 0.3] }}
                         transition={{ repeat: Infinity, duration: 1.5 + Math.random(), repeatType: 'reverse' }}
-                        className="w-1.5 bg-accent/20 rounded-full"
+                        className="w-1.5 bg-accent/40 rounded-full"
                     />
                 ))}
             </div>
@@ -1236,107 +1236,105 @@ export default function Admin() {
     return (
         <div className="min-h-screen bg-black text-white selection:bg-accent/30 selection:text-white">
             <div className="admin-page-v2">
-                <div className="flex flex-col xl:flex-row gap-12">
-                    {/* Sidebar */}
-                    <AdminSidebar 
-                        activeTab={activeTab} 
-                        setActiveTab={setActiveTab} 
-                        pulse={pulse} 
-                        stats={stats}
-                        reports={reports}
-                    />
+                {/* Sidebar */}
+                <AdminSidebar 
+                    activeTab={activeTab} 
+                    setActiveTab={setActiveTab} 
+                    pulse={pulse} 
+                    stats={stats}
+                    reports={reports}
+                />
 
-                    {/* Mobile Navigation (Visible only on small screens) */}
-                    <div className="xl:hidden flex overflow-x-auto gap-3 pb-6 no-scrollbar">
-                        {[
-                            { id: 'dashboard', label: 'Command', icon: HiGlobe },
-                            { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp },
-                            { id: 'users', label: 'Identities', icon: HiUsers },
-                            { id: 'posts', label: 'Broadcasts', icon: HiCollection },
-                            { id: 'reports', label: 'Violations', icon: HiFlag }
-                        ].map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                className={`flex items-center gap-3 px-6 py-4 rounded-2xl whitespace-nowrap transition-all border ${
-                                    activeTab === item.id 
-                                    ? 'bg-accent border-accent/50 text-white shadow-xl shadow-accent/20' 
-                                    : 'bg-white/5 border-white/5 text-muted hover:border-white/10'
-                                }`}
-                            >
-                                <item.icon size={18} />
-                                <span className="text-sm font-bold tracking-tight">{item.label}</span>
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Main Content Area */}
-                    <main className="flex-1 min-w-0 space-y-12">
-                        {/* Header */}
-                        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/5">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="px-2 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent text-[9px] font-black uppercase tracking-widest">
-                                        Live Console
-                                    </div>
-                                    <div className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-30">
-                                        Ref: PN-GOV-{new Date().getFullYear()}-{Math.floor(Math.random() * 9000) + 1000}
-                                    </div>
-                                </div>
-                                <h1 className="admin-h1-v2">
-                                    {activeTab === 'dashboard' ? 'Governance' : 
-                                     activeTab === 'analytics' ? 'Intelligence' :
-                                     activeTab === 'users' ? 'Identities' :
-                                     activeTab === 'posts' ? 'Broadcasts' :
-                                     activeTab === 'comments' ? 'Transmissions' :
-                                     activeTab === 'reports' ? 'Violations' :
-                                     activeTab}
-                                </h1>
-                                <p className="text-muted font-bold text-[11px] uppercase tracking-[0.3em] opacity-40 ml-1">
-                                    Active Administrative Session • Restricted Access
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                <button 
-                                    onClick={() => init()}
-                                    className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-accent/30 transition-all group"
-                                    title="Synchronize Data"
-                                >
-                                    <HiRefresh className="text-muted group-hover:text-accent group-hover:rotate-180 transition-all duration-700" size={20} />
-                                </button>
-                                <div className="h-12 w-[1px] bg-white/10 mx-2" />
-                                <div className="flex items-center gap-4 pl-2">
-                                    <div className="text-right hidden sm:block">
-                                        <div className="text-xs font-black text-primary uppercase">@{user?.username}</div>
-                                        <div className="text-[10px] font-bold text-success uppercase tracking-widest flex items-center justify-end gap-1.5">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                                            Root Access
-                                        </div>
-                                    </div>
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-accent-dark border border-white/10 flex items-center justify-center text-white font-black shadow-lg shadow-accent/20">
-                                        {user?.username?.substring(0, 2).toUpperCase()}
-                                    </div>
-                                </div>
-                            </div>
-                        </header>
-
-                        {/* Module Render */}
-                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={activeTab}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                                >
-                                    {renderModule()}
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
-                    </main>
+                {/* Mobile Navigation (Visible only on small screens) */}
+                <div className="lg:hidden flex overflow-x-auto gap-3 pb-6 no-scrollbar">
+                    {[
+                        { id: 'dashboard', label: 'Command', icon: HiGlobe },
+                        { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp },
+                        { id: 'users', label: 'Identities', icon: HiUsers },
+                        { id: 'posts', label: 'Broadcasts', icon: HiCollection },
+                        { id: 'reports', label: 'Violations', icon: HiFlag }
+                    ].map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`flex items-center gap-3 px-6 py-4 rounded-2xl whitespace-nowrap transition-all border ${
+                                activeTab === item.id 
+                                ? 'bg-accent border-accent/50 text-white shadow-xl shadow-accent/20' 
+                                : 'bg-white/5 border-white/5 text-muted hover:border-white/10'
+                            }`}
+                        >
+                            <item.icon size={18} />
+                            <span className="text-sm font-bold tracking-tight">{item.label}</span>
+                        </button>
+                    ))}
                 </div>
+
+                {/* Main Content Area */}
+                <main className="flex-1 min-w-0 space-y-12">
+                    {/* Header */}
+                    <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/5">
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                                <div className="px-2 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent text-[9px] font-black uppercase tracking-widest">
+                                    Live Console
+                                </div>
+                                <div className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-30">
+                                    Ref: PN-GOV-{new Date().getFullYear()}-{Math.floor(Math.random() * 9000) + 1000}
+                                </div>
+                            </div>
+                            <h1 className="admin-h1-v2">
+                                {activeTab === 'dashboard' ? 'Governance' : 
+                                    activeTab === 'analytics' ? 'Intelligence' :
+                                    activeTab === 'users' ? 'Identities' :
+                                    activeTab === 'posts' ? 'Broadcasts' :
+                                    activeTab === 'comments' ? 'Transmissions' :
+                                    activeTab === 'reports' ? 'Violations' :
+                                    activeTab}
+                            </h1>
+                            <p className="text-muted font-bold text-[11px] uppercase tracking-[0.3em] opacity-40 ml-1">
+                                Active Administrative Session • Restricted Access
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <button 
+                                onClick={() => init()}
+                                className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-accent/30 transition-all group"
+                                title="Synchronize Data"
+                            >
+                                <HiRefresh className="text-muted group-hover:text-accent group-hover:rotate-180 transition-all duration-700" size={20} />
+                            </button>
+                            <div className="h-12 w-[1px] bg-white/10 mx-2" />
+                            <div className="flex items-center gap-4 pl-2">
+                                <div className="text-right hidden sm:block">
+                                    <div className="text-xs font-black text-primary uppercase">@{user?.username}</div>
+                                    <div className="text-[10px] font-bold text-success uppercase tracking-widest flex items-center justify-end gap-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                                        Root Access
+                                    </div>
+                                </div>
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-accent-dark border border-white/10 flex items-center justify-center text-white font-black shadow-lg shadow-accent/20">
+                                    {user?.username?.substring(0, 2).toUpperCase()}
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Module Render */}
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                            >
+                                {renderModule()}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </main>
             </div>
 
             {/* Global Overlays */}
@@ -1440,7 +1438,7 @@ export default function Admin() {
             </AnimatePresence>
 
             <footer className="mt-20 py-10 border-t border-white/5 opacity-40">
-                <div className="admin-page-v2">
+                <div className="max-w-[1700px] mx-auto px-8">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                         <div className="flex items-center gap-8">
                             <div className="flex flex-col">

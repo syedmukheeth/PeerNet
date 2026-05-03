@@ -31,10 +31,12 @@ export const useSocket = (user) => {
                 console.log('[SOCKET] Initializing singleton connection...')
                 socketInstance = io(SOCKET_URL, {
                     auth: { token },
-                    transports: ['websocket', 'polling'],
+                    transports: ['polling', 'websocket'],
                     reconnection: true,
-                    reconnectionAttempts: 10,
-                    reconnectionDelay: 2000,
+                    reconnectionAttempts: Infinity, // Keep trying in production
+                    reconnectionDelay: 3000,
+                    reconnectionDelayMax: 10000,
+                    timeout: 20000,
                 })
 
                 socketInstance.on('connect', () => {

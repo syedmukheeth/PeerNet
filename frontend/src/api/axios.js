@@ -12,7 +12,7 @@ const BASE_URL = rawApiUrl
 // Chat endpoints consolidated to Main API host (unified)
 export const CHAT_BASE_URL = `${BASE_URL}/conversations`;
 
-export const SOCKET_URL = BASE_URL.replace(/\/api\/v1\/?$/, '');
+export const SOCKET_URL = BASE_URL.split('/api/v1')[0].replace(/\/+$/, '');
 
 // ── Shared Interceptor Logic ────────────────────────────────────
 

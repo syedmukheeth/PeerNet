@@ -78,7 +78,7 @@ function RightPanel() {
                     <Link to="/search" className="sp-action-link sp-action-link--muted">See All</Link>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col sp-suggestions-list">
                     {loading ? (
                         [...Array(5)].map((_, i) => (
                             <div key={i} className="sp-suggestion-row opacity-50">
@@ -291,7 +291,7 @@ export default function Feed() {
                 </div>
 
                 {/* ── Right panel ───────────── */}
-                <aside className="l-side-panel dm-mobile-hidden">
+                <aside className="l-side-panel">
                     <RightPanel />
                 </aside>
 
