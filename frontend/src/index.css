@@ -1347,9 +1347,9 @@ textarea:focus-visible {
 .post-card-media {
   width: 100%;
   height: auto;
-  max-height: 85vh; /* Don't grow past viewport */
+  max-height: 80vh; 
   display: block;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .post-card-heart-overlay {
@@ -7514,3 +7514,109 @@ textarea:focus-visible {
 }
 
 
+
+/* ==========================================================================
+   MOBILE & TABLET UI OVERHAUL (Digital Obsidian v6.1)
+   ========================================================================== */
+
+:root {
+    --feed-surface: rgba(18, 18, 18, 0.4);
+    --profile-stat-gap: 24px;
+}
+
+@media (max-width: 1024px) {
+    .l-feed-grid {
+        gap: 0;
+        padding: 0;
+        max-width: 100%;
+    }
+    
+    .l-main-col {
+        flex: 1;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .l-post-card {
+        margin-bottom: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        background: transparent;
+    }
+
+    .post-card-header {
+        padding: 10px 12px;
+    }
+
+    .post-card-media-wrap {
+        border-radius: 0;
+    }
+
+    .post-card-actions {
+        padding: 8px 12px 4px;
+    }
+
+    .post-card-footer {
+        padding: 4px 12px 16px;
+    }
+
+    .story-rail-wrap {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 24px;
+        padding: 20px 16px;
+    }
+
+    .profile-avatar-col {
+        margin: 0;
+    }
+
+    .profile-info-col {
+        align-items: center;
+        width: 100%;
+    }
+
+    .profile-username-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .profile-stats {
+        width: 100%;
+        justify-content: space-around;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 0;
+        margin: 12px 0;
+    }
+
+    .profile-bio-row {
+        text-align: center;
+        padding: 0 16px;
+    }
+
+    .profile-tabs {
+        justify-content: space-around;
+        height: 44px;
+    }
+
+    .profile-tab-btn span {
+        display: none;
+    }
+
+    .profile-grid {
+        gap: 2px;
+        padding: 2px;
+    }
+}

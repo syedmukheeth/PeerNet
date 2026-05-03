@@ -167,15 +167,15 @@ export default function Profile() {
                         onClick={() => hasStory && setViewerOpen(true)}
                         className={`relative ${hasStory ? 'cursor-pointer' : 'cursor-default'} inline-block`}
                     >
-                        {/* Gradient story ring — only shown when user has stories */}
+                        {/* Premium Gradient Ring */}
                         {hasStory && (
-                            <div className="absolute -inset-[3px] rounded-full bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45] animate-[rotateBorder_3s_linear_infinite] p-[2px] z-0" />
+                            <div className="absolute -inset-[4px] rounded-full bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45] animate-pulse p-[2px] z-0" />
                         )}
-                        <div className={`${hasStory ? '' : 'profile-avatar-ring'} relative z-10 rounded-full bg-bg ${hasStory ? 'p-[3px]' : ''} inline-block`}>
+                        <div className="relative z-10 rounded-full bg-bg p-[4px] inline-block shadow-xl shadow-black/20">
                             <img
                                 src={avatar}
                                 alt={profile.username}
-                                className={`${hasStory ? 'w-[150px] h-[150px]' : 'w-[150px] h-[150px]'} rounded-full object-cover block`}
+                                className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover block border-2 border-border/20"
                             />
                         </div>
                     </div>
@@ -185,75 +185,64 @@ export default function Profile() {
                 <div className="profile-info-col">
 
                     {/* Row 1: username + buttons */}
-                    <div className="profile-username-row">
-                        <h1>{profile.username}</h1>
-                        <div className="flex items-center gap-1.5">
+                    <div className="profile-username-row flex items-center flex-wrap gap-4 mb-6">
+                        <h1 className="text-xl md:text-2xl font-bold tracking-tight">{profile.username}</h1>
+                        <div className="flex items-center gap-1.5 mr-2">
                             {profile.isVerified && (
-                                <HiBadgeCheck className="text-[18px] text-accent shrink-0" title="Verified" />
+                                <HiBadgeCheck className="text-[20px] text-accent shrink-0" title="Verified" />
                             )}
                         </div>
-                        {isMe ? (
-                            <button className="btn btn-secondary btn-sm" onClick={() => setEditProfile(true)}>Edit profile</button>
-                        ) : (
-                            <>
-                                <motion.button
-                                    className={`btn btn-sm min-w-[100px] ${following ? 'btn-secondary' : 'btn-primary'}`}
-                                    onClick={handleFollow}
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}>
-                                    {following ? 'Following' : 'Follow'}
-                                </motion.button>
-                                <motion.button
-                                    className="btn btn-secondary btn-sm flex items-center gap-1.5"
-                                    onClick={handleMessage}
-                                    disabled={messaging}
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}>
-                                    {messaging
-                                        ? <span className="spinner w-3.5 h-3.5" />
-                                        : <><HiChatAlt2 /> Message</>
-                                    }
-                                </motion.button>
-                            </>
-                        )}
+                        <div className="flex flex-wrap gap-2">
+                            {isMe ? (
+                                <button className="btn btn-secondary btn-sm px-6 h-9 rounded-xl font-bold" onClick={() => setEditProfile(true)}>Edit Profile</button>
+                            ) : (
+                                <>
+                                    <motion.button
+                                        className={`btn btn-sm min-w-[100px] h-9 rounded-xl font-bold ${following ? 'btn-secondary' : 'btn-primary'}`}
+                                        onClick={handleFollow}
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}>
+                                        {following ? 'Following' : 'Follow'}
+                                    </motion.button>
+                                    <motion.button
+                                        className="btn btn-secondary btn-sm flex items-center gap-1.5 h-9 rounded-xl font-bold"
+                                        onClick={handleMessage}
+                                        disabled={messaging}
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}>
+                                        {messaging
+                                            ? <span className="spinner w-3.5 h-3.5" />
+                                            : <><HiChatAlt2 size={16} /> Message</>
+                                        }
+                                    </motion.button>
+                                </>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Admin Dashboard Sidebar — Only for admins viewing others */}
-                    {me?.role === 'admin' && !isMe && (
-                        <div className="admin-profile-dashboard">
-                            <p className="font-bold text-[11px] uppercase tracking-wider text-accent mb-3">Admin Governance</p>
-                            <div className="l-cluster gap-2">
-                                <button className={`btn btn-sm btn-premium ${profile.isVerified ? 'btn-secondary' : 'btn-primary'}`} 
-                                    onClick={handleToggleVerify}>
-                                    {profile.isVerified ? 'Unverify User' : 'Verify User'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Row 2: stats — Instagram inline style */}
-                    <div className="profile-stats">
-                        <div className="profile-stat">
-                            <span className="profile-stat-num">{posts.length}</span>
-                            <span className="profile-stat-label">posts</span>
+                    <div className="profile-stats flex gap-8 mb-6 md:mb-8">
+                        <div className="profile-stat flex items-center gap-1.5">
+                            <span className="profile-stat-num font-bold text-lg">{posts.length}</span>
+                            <span className="profile-stat-label text-muted text-sm tracking-wide">posts</span>
                         </div>
-                        <div className="profile-stat cursor-pointer" onClick={() => setShowFollowers(true)}>
-                            <span className="profile-stat-num">{profile.followersCount || 0}</span>
-                            <span className="profile-stat-label">followers</span>
+                        <div className="profile-stat cursor-pointer flex items-center gap-1.5" onClick={() => setShowFollowers(true)}>
+                            <span className="profile-stat-num font-bold text-lg">{profile.followersCount || 0}</span>
+                            <span className="profile-stat-label text-muted text-sm tracking-wide">followers</span>
                         </div>
-                        <div className="profile-stat cursor-pointer" onClick={() => setShowFollowing(true)}>
-                            <span className="profile-stat-num">{profile.followingCount || 0}</span>
-                            <span className="profile-stat-label">following</span>
+                        <div className="profile-stat cursor-pointer flex items-center gap-1.5" onClick={() => setShowFollowing(true)}>
+                            <span className="profile-stat-num font-bold text-lg">{profile.followingCount || 0}</span>
+                            <span className="profile-stat-label text-muted text-sm tracking-wide">following</span>
                         </div>
                     </div>
 
                     {/* Row 3: name + bio + website */}
-                    <div className="profile-bio-row">
-                        {profile.fullName && <p className="profile-full-name">{profile.fullName}</p>}
-                        {profile.bio && <p className="profile-bio">{profile.bio}</p>}
+                    <div className="profile-bio-row space-y-1">
+                        {profile.fullName && <p className="profile-full-name font-bold text-[15px]">{profile.fullName}</p>}
+                        {profile.bio && <p className="profile-bio text-[14px] leading-relaxed max-w-[450px]">{profile.bio}</p>}
                         {profile.website && (
-                            <a href={profile.website} target="_blank" rel="noreferrer" className="profile-website">
-                                {profile.website}
+                            <a href={profile.website} target="_blank" rel="noreferrer" className="profile-website text-accent font-medium text-sm flex items-center gap-1 mt-2">
+                                🔗 {profile.website.replace(/^https?:\/\//, '')}
                             </a>
                         )}
                     </div>

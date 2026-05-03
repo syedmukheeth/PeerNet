@@ -37,8 +37,8 @@
 
 .story-avatar-container {
     position: relative;
-    width: 82px;
-    height: 82px;
+    width: 76px;
+    height: 76px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -48,12 +48,13 @@
 .story-ring-vibrant {
     position: absolute;
     inset: 0;
-    padding: 2px;
+    padding: 2.5px;
     border-radius: 50%;
     background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .story-ring-vibrant.seen {

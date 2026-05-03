@@ -214,9 +214,9 @@ export default function Notifications() {
     )
 
     return (
-        <div className="min-h-dvh pb-20 bg-black">
+        <div className="min-h-dvh pb-20 bg-bg">
             {/* Header - Sticky */}
-            <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+            <div className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-white/5">
                 <div className="l-main-col flex items-center justify-between px-4 py-4">
                     <h1 className="text-[24px] font-bold tracking-tight">Notifications</h1>
                     <button className="p-2 hover:bg-white/10 rounded-full transition-colors">

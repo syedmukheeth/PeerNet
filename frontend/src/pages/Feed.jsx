@@ -108,22 +108,22 @@ function RightPanel() {
                                     alt="" 
                                     onClick={() => navigate(`/profile/${u._id}`)}
                                 />
-                                <div className="sp-suggestion-info">
-                                    <div 
-                                        className="sp-suggestion-username"
-                                        onClick={() => navigate(`/profile/${u._id}`)}
-                                    >
-                                        {u.username}
-                                        {u.isVerified && <HiBadgeCheck className="text-accent" />}
-                                    </div>
-                                    <div className="sp-suggestion-subtext">Followed by PeerNet</div>
-                                </div>
-                                <button 
-                                    onClick={() => handleFollow(u)} 
-                                    className={`sp-btn-follow ${isFollowed ? 'active' : ''}`}
-                                >
-                                    {isFollowed ? 'Following' : 'Follow'}
-                                </button>
+                                <div className="sp-suggestion-info ml-1">
+                                     <div 
+                                         className="sp-suggestion-username cursor-pointer hover:underline"
+                                         onClick={() => navigate(`/profile/${u._id}`)}
+                                     >
+                                         {u.username}
+                                         {u.isVerified && <HiBadgeCheck className="text-accent" />}
+                                     </div>
+                                     <div className="sp-suggestion-subtext text-[11px] opacity-60">PeerNet Recommended</div>
+                                 </div>
+                                 <button 
+                                     onClick={() => handleFollow(u)} 
+                                     className={`sp-btn-follow text-xs font-bold ${isFollowed ? 'text-muted' : 'text-accent hover:text-accent-hover'}`}
+                                 >
+                                     {isFollowed ? 'Following' : 'Follow'}
+                                 </button>
                             </motion.div>
                         )
                     })}
@@ -262,19 +262,19 @@ export default function Feed() {
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="empty-state-premium l-card-premium p-16 text-center"
+                            className="empty-state-premium bg-surface-el/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-16 text-center shadow-2xl"
                         >
-                            <div className="empty-state-visual mb-6">
-                                <div className="visual-circle">
-                                    <span className="text-4xl text-accent">✨</span>
+                            <div className="empty-state-visual mb-8">
+                                <div className="visual-circle w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center mx-auto border border-accent/20">
+                                    <span className="text-5xl animate-bounce">✨</span>
                                 </div>
                             </div>
-                            <h2 className="t-h2 mb-2 font-bold">Your feed is just beginning</h2>
-                            <p className="t-body text-muted mb-8 max-w-sm mx-auto">
-                                Follow peers and join communities to see the best of PeerNet right here.
+                            <h2 className="text-2xl font-black mb-3 tracking-tight">Your feed is waiting...</h2>
+                            <p className="text-muted text-[15px] mb-10 max-w-sm mx-auto leading-relaxed">
+                                Join the community, follow your peers, and start your journey on PeerNet today.
                             </p>
-                            <Link to="/search" className="btn btn-primary px-8 py-3 no-underline inline-flex items-center gap-2">
-                                Discover People ↗
+                            <Link to="/search" className="btn btn-primary px-10 py-3.5 rounded-2xl font-bold no-underline inline-flex items-center gap-2 shadow-lg shadow-accent/20">
+                                Discover Creators ↗
                             </Link>
                         </motion.div>
                     )}
