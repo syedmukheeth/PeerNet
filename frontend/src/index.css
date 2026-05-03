@@ -4519,17 +4519,17 @@ textarea:focus-visible {
     display: flex;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 64px;
-    background: var(--surface-overlay);
-    border-top: 1px solid var(--border-sm);
+    height: 68px;
+    background: rgba(10, 10, 10, 0.75);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     align-items: center;
     justify-content: space-around;
-    padding: 0 8px;
+    padding: 0 12px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    z-index: var(--z-fixed);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
   }
 
   .mobile-nav-item,
@@ -4539,33 +4539,36 @@ textarea:focus-visible {
     align-items: center;
     justify-content: center;
     color: var(--text-3);
-    width: 52px;
-    height: 52px;
-    transition: transform 0.2s var(--ease-spring), color 0.2s var(--ease-out);
+    width: 56px;
+    height: 56px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: transparent;
     border: none;
     position: relative;
+    border-radius: 18px;
   }
 
-  .mobile-nav-item:active,
-  .mobile-nav-create:active {
-    transform: scale(0.85);
+  .mobile-nav-item:active {
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .mobile-nav-item.active {
-    color: var(--text-1);
+    color: #fff;
   }
 
   .mobile-nav-item.active::after {
     content: '';
     position: absolute;
-    bottom: 2px;
-    width: 4px;
-    height: 4px;
+    top: 6px;
+    right: 12px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: var(--accent);
-    animation: fade-in-up 0.2s var(--ease-out);
+    box-shadow: 0 0 12px var(--accent);
+    animation: badge-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
+
 
   @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(4px); }
@@ -7003,7 +7006,8 @@ textarea:focus-visible {
   scroll-behavior: smooth;
 }
 
-@media (max-width: 1024px) {
+/* Responsive Messaging Architecture */
+@media (max-width: 767px) {
   .zn-messages-sidebar {
     width: 100% !important;
     position: absolute;
@@ -7019,7 +7023,67 @@ textarea:focus-visible {
   .zn-chat-main {
     width: 100vw;
   }
+
+  .zn-bubble-container {
+    max-width: 85% !important;
+  }
+
+  .zn-convo-row {
+    padding: 14px 16px !important;
+  }
+
+  .zn-convo-avatar {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .zn-sidebar-header {
+    padding: 20px 16px 12px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Make bubbles slightly more compact on mobile */
+  .zn-bubble {
+    padding: 8px 14px !important;
+    font-size: 14px !important;
+  }
+
+  /* Adjust action bar for mobile touch */
+  .zn-bubble-actions {
+    display: none !important; /* Hide hover actions on mobile, maybe implement long-press later */
+  }
+  
+  .zn-footer {
+    padding: 10px 12px env(safe-area-inset-bottom) !important;
+  }
+
+  .zn-composer-pill {
+    padding: 4px 6px !important;
+  }
 }
+
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .zn-messages-root {
+    flex-direction: row;
+  }
+  
+  .zn-messages-sidebar {
+    width: 320px !important;
+    position: relative !important;
+    display: flex !important;
+    border-right: 1px solid var(--border);
+  }
+  
+  .zn-chat-main {
+    flex: 1;
+  }
+  
+  .lg\:hidden {
+    display: none !important; /* Hide back button on tablet since it's split view */
+  }
+}
+
 
 
 /* Ensure empty space at top for short conversations if desired, 
@@ -7620,3 +7684,37 @@ textarea:focus-visible {
         padding: 2px;
     }
 }
+
+@media (max-width: 768px) {
+    .mobile-top-header {
+        display: flex;
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 60px;
+        background: rgba(10, 10, 10, 0.85);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 1000;
+    }
+
+    .mobile-header-spacer {
+        height: 60px;
+        width: 100%;
+        display: block;
+    }
+
+    .l-feed-grid {
+        padding-top: 0 !important;
+    }
+
+    .story-rail-wrap {
+        padding: 14px 0;
+        background: transparent;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+}
+

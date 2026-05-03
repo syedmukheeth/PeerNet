@@ -48,42 +48,40 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="w-full lg:w-56 flex-shrink-0 flex lg:flex-col gap-4 lg:gap-0 sticky top-[56px] lg:top-6 z-20 bg-surface-overlay/80 backdrop-blur-xl lg:bg-transparent lg:backdrop-blur-none border-b lg:border-b-0 lg:border-r border-border/20 lg:h-[calc(100vh-80px)] overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto scrollbar-hide px-4 py-3 lg:p-0 lg:pr-6 -mx-4 lg:mx-0 mb-6 lg:mb-0">
-            <div className="flex lg:flex-col gap-2 lg:gap-1 w-max lg:w-full">
-                {navGroups.map((group) => (
-                    <div key={group.title} className="flex lg:flex-col lg:mb-6 items-center lg:items-stretch gap-2 lg:gap-0">
-                        <p className="hidden lg:block text-[9px] font-bold text-muted/30 uppercase tracking-[0.35em] px-3 mb-2">{group.title}</p>
-                        <div className="flex lg:flex-col gap-2 lg:gap-0.5">
+        <aside className="w-full lg:w-64 flex-shrink-0 flex lg:flex-col gap-4 lg:gap-0 sticky top-[56px] lg:top-6 z-20 bg-surface-overlay/90 backdrop-blur-3xl lg:bg-transparent lg:backdrop-blur-none border-b lg:border-b-0 lg:border-r border-border/20 lg:h-[calc(100vh-80px)] overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto scrollbar-hide px-4 py-4 lg:p-0 lg:pr-8 -mx-4 lg:mx-0 mb-6 lg:mb-0 shadow-2xl lg:shadow-none">
+            <div className="flex lg:flex-col gap-3 lg:gap-1.5 w-max lg:w-full">
+                {navGroups.map((group, gIdx) => (
+                    <div key={group.title} className="flex lg:flex-col lg:mb-8 items-center lg:items-stretch gap-3 lg:gap-0">
+                        <p className="hidden lg:block text-[10px] font-black text-muted/40 uppercase tracking-[0.3em] px-3 mb-3">{group.title}</p>
+                        <div className="flex lg:flex-col gap-2.5 lg:gap-1">
                             {group.items.map(item => (
                                 <button 
                                     key={item.id} 
                                     onClick={() => setActiveTab(item.id)} 
-                                    className={`group flex items-center gap-2 lg:gap-3 px-3 lg:px-3 py-2 lg:py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap ${
+                                    className={`group flex items-center gap-2.5 lg:gap-4 px-4 lg:px-4 py-2.5 lg:py-3 rounded-2xl transition-all duration-300 whitespace-nowrap active:scale-95 ${
                                         activeTab === item.id 
-                                        ? 'bg-accent text-white shadow-lg shadow-accent/20' 
-                                        : 'bg-surface lg:bg-transparent border border-border/30 lg:border-none text-muted/60 hover:bg-white/[0.04] hover:text-white'
+                                        ? 'bg-white text-black shadow-xl shadow-white/10 ring-1 ring-white/10' 
+                                        : 'bg-white/5 lg:bg-transparent border border-white/5 lg:border-none text-muted/70 hover:bg-white/[0.08] hover:text-white'
                                     }`}
                                 >
-                                    <item.icon size={15} className="flex-shrink-0" />
-                                    <span className="text-[11px] font-semibold tracking-wide flex-1 text-left">{item.label}</span>
+                                    <item.icon size={16} className={`flex-shrink-0 transition-transform group-hover:scale-110 ${activeTab === item.id ? 'text-black' : 'text-accent'}`} />
+                                    <span className="text-[12px] font-bold tracking-tight flex-1 text-left">{item.label}</span>
                                     {item.badge && (
-                                        <span className="ml-1 lg:ml-auto text-[9px] font-black bg-error text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center animate-pulse">
+                                        <span className={`ml-1 lg:ml-auto text-[9px] font-black rounded-full px-2 py-0.5 min-w-[20px] text-center animate-pulse ${activeTab === item.id ? 'bg-black text-white' : 'bg-error text-white'}`}>
                                             {item.badge}
-                                        </span>
-                                    )}
-                                    {item.id === 'infrastructure' && pulse?.activeUsers > 0 && activeTab !== item.id && (
-                                        <span className="ml-1 lg:ml-auto text-[9px] font-black text-success bg-success/10 border border-success/20 rounded-full px-1.5 py-0.5">
-                                            {pulse.activeUsers}
                                         </span>
                                     )}
                                 </button>
                             ))}
                         </div>
-                        {/* Separator for mobile between groups */}
-                        <div className="w-[1px] h-6 bg-border/30 ml-2 lg:hidden block" />
+                        {/* Elegant separator for mobile between groups */}
+                        {gIdx < navGroups.length - 1 && (
+                            <div className="w-[1.5px] h-8 bg-white/10 mx-2 lg:hidden block" />
+                        )}
                     </div>
                 ))}
             </div>
+
 
             <div className="hidden lg:block mt-auto pt-4 border-t border-border/20 space-y-3">
                 <div className="flex items-center justify-between px-1">
@@ -206,36 +204,37 @@ const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
     <div 
         role="article"
         aria-label={`${label}: ${value}`}
-        className={`relative group overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+        className={`relative group overflow-hidden rounded-3xl border transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${
             accent 
             ? 'bg-error/5 border-error/20 hover:border-error/40 hover:shadow-error/10'
-            : 'bg-surface-subtle border-border/50 hover:border-accent/30 hover:shadow-accent/5'
+            : 'bg-surface-subtle/40 backdrop-blur-sm border-white/5 hover:border-accent/30 hover:shadow-accent/10'
         }`}
     >
         {/* Top accent line */}
-        <div className={`absolute top-0 inset-x-0 h-[2px] ${accent ? 'bg-error/60' : 'bg-accent/60'} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+        <div className={`absolute top-0 inset-x-0 h-[3px] ${accent ? 'bg-error' : 'bg-accent'} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
         
-        <div className="p-5">
-            <div className="flex items-start justify-between mb-5">
-                <div className={`p-2 rounded-xl ${ accent ? 'bg-error/10 text-error' : 'bg-accent/10 text-accent' } transition-transform duration-300 group-hover:scale-110`}>
-                    {React.cloneElement(icon, { size: 15 })}
+        <div className="p-4 lg:p-6">
+            <div className="flex items-start justify-between mb-4 lg:mb-6">
+                <div className={`p-2.5 rounded-2xl ${ accent ? 'bg-error/10 text-error' : 'bg-accent/10 text-accent' } transition-all duration-300 group-hover:rotate-12 group-hover:scale-110`}>
+                    {React.cloneElement(icon, { size: 16 })}
                 </div>
                 {chartData && chartData.length > 0 && (
-                    <div className="w-16 h-7 opacity-20 group-hover:opacity-70 transition-all duration-500">
+                    <div className="w-16 h-8 opacity-20 group-hover:opacity-80 transition-all duration-500">
                         <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
                     </div>
                 )}
             </div>
 
-            <p className="text-[9px] font-semibold text-muted/50 uppercase tracking-widest mb-1">{label}</p>
-            <p className="text-3xl font-black text-primary tabular-nums tracking-tight leading-none mb-3">{value}</p>
-            <div className="flex items-center gap-1.5">
-                <div className={`w-1 h-1 rounded-full flex-shrink-0 ${ accent ? 'bg-error' : 'bg-success' } animate-pulse`} />
-                <p className="text-[9px] text-muted/40 uppercase tracking-widest leading-none">{sub}</p>
+            <p className="text-[10px] font-black text-muted/40 uppercase tracking-[0.15em] mb-1.5">{label}</p>
+            <p className="text-2xl lg:text-4xl font-black text-primary tabular-nums tracking-tighter leading-none mb-4">{value}</p>
+            <div className="flex items-center gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ accent ? 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]' } animate-pulse`} />
+                <p className="text-[10px] font-bold text-muted/60 uppercase tracking-widest leading-none">{sub}</p>
             </div>
         </div>
     </div>
 )
+
 
 
 // --- High-Fidelity Modules ---
@@ -1061,7 +1060,7 @@ export default function Admin() {
     }
 
     return (
-        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 p-4 md:p-8 lg:p-12 xl:p-16 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 p-4 md:p-6 lg:p-10 font-sans relative overflow-hidden">
             {/* Background Effects */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
                 <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] animate-pulse" />
@@ -1115,7 +1114,7 @@ export default function Admin() {
                     <StatCard label="Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Review" icon={<HiFlag size={14} />} />
                 </section>
 
-                <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 items-start">
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
                     <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} reports={reports} />
                     <main className="flex-1 min-w-0 w-full">
                         <AnimatePresence mode="wait">

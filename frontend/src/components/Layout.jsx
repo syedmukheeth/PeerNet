@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal
+    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal, HiPlus
 } from 'react-icons/hi'
 import {
     HiOutlineHome, HiOutlineSearch, HiOutlineFilm, HiOutlineChatAlt2,
@@ -502,44 +502,46 @@ export default function Layout() {
                 <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     {({ isActive }) => (
                         <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiHome size={24} /> : <HiOutlineHome size={24} />}
+                            {isActive ? <HiHome size={26} className="text-white" /> : <HiOutlineHome size={26} />}
                         </motion.div>
                     )}
                 </NavLink>
                 <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     {({ isActive }) => (
                         <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiSearch size={24} /> : <HiOutlineSearch size={24} />}
+                            {isActive ? <HiSearch size={26} className="text-white" /> : <HiOutlineSearch size={26} />}
                         </motion.div>
                     )}
                 </NavLink>
-                <motion.button 
-                    onClick={() => setShowCreate(true)} 
-                    className="mobile-nav-create"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-accent to-accent-light flex items-center justify-center text-white shadow-lg shadow-accent/20">
-                        <HiPlusCircle size={24} />
-                    </div>
-                </motion.button>
+                <div className="flex items-center justify-center px-2">
+                    <motion.button 
+                        onClick={() => setShowCreate(true)} 
+                        className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-90 transition-transform"
+                        whileHover={{ scale: 1.05 }}
+                    >
+                        <HiPlus size={24} strokeWidth={1} />
+                    </motion.button>
+                </div>
                 <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     {({ isActive }) => (
                         <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiFilm size={24} /> : <HiOutlineFilm size={24} />}
+                            {isActive ? <HiFilm size={26} className="text-white" /> : <HiOutlineFilm size={26} />}
                         </motion.div>
                     )}
                 </NavLink>
                 <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                        <img 
-                            src={avatarUrl} 
-                            alt="" 
-                            className={`w-7 h-7 rounded-full object-cover border-2 ${location.pathname.startsWith(`/profile/${user?._id}`) ? 'border-accent shadow-sm shadow-accent/20' : 'border-transparent'}`} 
-                        />
+                        <div className={`p-[2px] rounded-full transition-all ${location.pathname.startsWith(`/profile/${user?._id}`) ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : ''}`}>
+                            <img 
+                                src={avatarUrl} 
+                                alt="" 
+                                className="w-6.5 h-6.5 rounded-full object-cover border-2 border-black" 
+                            />
+                        </div>
                     </motion.div>
                 </NavLink>
             </nav>
+
 
             <AnimatePresence>
                 {showCreate && <CreatePostModal onClose={() => setShowCreate(false)} />}

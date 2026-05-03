@@ -350,21 +350,25 @@ export default function Messages() {
     return (
         <div className="zn-messages-root">
             {/* 1. SIDEBAR: The conversation navigator */}
-            <aside className={`zn-messages-sidebar w-[380px] flex-shrink-0 border-r border-border bg-surface-1 z-40 transition-all duration-300 ${convoId ? 'hidden-mobile' : ''}`}>
-                <div className="zn-sidebar-header">
+            <aside className={`zn-messages-sidebar w-full md:w-[320px] lg:w-[380px] flex-shrink-0 border-r border-border bg-surface-1 z-40 transition-all duration-300 ${convoId ? 'hidden-mobile' : ''}`}>
+                <div className="zn-sidebar-header px-5 pt-8 pb-4">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-xl font-bold tracking-tight text-primary">Messages</h1>
+                        <h1 className="text-2xl font-black tracking-tighter text-primary uppercase">Messages</h1>
+                        <button className="p-2 hover:bg-white/5 rounded-xl transition-colors">
+                            <HiPencil size={20} className="text-accent" />
+                        </button>
                     </div>
-                    <div className="zn-sidebar-search-wrapper flex items-center gap-3 bg-surface-2 border border-border rounded-full px-4 py-2.5 group-focus-within:border-accent/30 transition-all">
-                        <HiSearch className="text-muted group-focus-within:text-accent transition-colors shrink-0" size={18} />
+                    <div className="zn-sidebar-search-wrapper flex items-center gap-3 bg-surface-2 border border-border/40 rounded-2xl px-4 py-3 group-focus-within:border-accent/30 transition-all shadow-inner">
+                        <HiSearch className="text-muted/50 group-focus-within:text-accent transition-colors shrink-0" size={18} />
                         <input 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-transparent border-none outline-none text-sm font-medium placeholder:text-muted transition-all" 
-                            placeholder="Search" 
+                            className="w-full bg-transparent border-none outline-none text-[13px] font-bold placeholder:text-muted/40 transition-all" 
+                            placeholder="Search chats..." 
                         />
                     </div>
                 </div>
+
 
                 <div className="zn-sidebar-scroll no-scrollbar">
                     <AnimatePresence mode="popLayout">
@@ -430,54 +434,54 @@ export default function Messages() {
 
             {/* 2. CHAT MAIN: The viewport of active connection */}
             <main className="zn-chat-main">
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                     {convoId ? (
                         <motion.div 
                             key={`chat-${convoId}`}
-                            initial={{ opacity: 0, x: 10 }}
+                            initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.15, ease: "easeOut" }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
                             className="zn-page-transition h-full flex flex-col"
                         >
-                            <header className="zn-chat-header px-6 border-b border-border bg-surface/40 backdrop-blur-3xl z-30">
-                                <div className="flex items-center gap-4">
+                            <header className="zn-chat-header px-4 md:px-6 border-b border-border bg-surface/40 backdrop-blur-3xl z-30 sticky top-0">
+                                <div className="flex items-center gap-3 md:gap-4">
                                     <button 
                                         onClick={() => navigate('/messages')}
-                                        className="lg:hidden p-2 -ml-2 rounded-full hover:bg-surface-subtle transition-colors text-primary"
+                                        className="lg:hidden p-2 -ml-2 rounded-full hover:bg-surface-subtle transition-colors text-primary active:scale-90"
                                     >
-                                        <HiArrowLeft size={20} />
+                                        <HiArrowLeft size={22} />
                                     </button>
-                                    <div className="relative group cursor-pointer">
+                                    <div className="relative group cursor-pointer" onClick={() => navigate(`/profile/${peer?._id}`)}>
                                         <img 
                                             src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}`} 
-                                            className="w-10 h-10 rounded-2xl object-cover border border-border shadow-2xl transition-transform group-hover:scale-105" 
+                                            className="w-9 h-9 md:w-10 md:h-10 rounded-full md:rounded-2xl object-cover border border-border shadow-2xl transition-transform group-hover:scale-105" 
                                             alt="" 
                                         />
                                         {peer?.isOnline && (
-                                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-4 border-bg rounded-full" />
+                                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-bg rounded-full" />
                                         )}
                                     </div>
-                                    <div>
-                                        <h2 className="text-sm font-black text-primary tracking-tight leading-none mb-1">{peer?.username || 'Chatting...'}</h2>
+                                    <div onClick={() => navigate(`/profile/${peer?._id}`)} className="cursor-pointer">
+                                        <h2 className="text-[13px] md:text-sm font-black text-primary tracking-tight leading-none mb-1">{peer?.username || 'Chatting...'}</h2>
                                         <div className="flex items-center gap-1.5">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${peer?.isOnline ? 'bg-green-500' : 'bg-muted'}`} />
-                                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${peer?.isOnline ? 'bg-green-500' : 'bg-muted/30'}`} />
+                                            <p className="text-[9px] font-bold text-muted uppercase tracking-widest">
                                                 {peer?.isOnline ? 'Online' : 'Offline'}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 md:gap-2">
                                     <button 
                                         onClick={() => { setIsSearchingInChat(!isSearchingInChat); if (!isSearchingInChat) setChatSearchQuery('') }} 
-                                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSearchingInChat ? 'bg-accent/10 text-accent' : 'text-muted hover:bg-surface-subtle'}`}
+                                        className={`w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all ${isSearchingInChat ? 'bg-accent/10 text-accent' : 'text-muted hover:bg-surface-subtle'}`}
                                     >
-                                        <HiSearch size={20} />
+                                        <HiSearch size={18} />
                                     </button>
-                                    <button className="w-10 h-10 rounded-xl text-muted hover:bg-surface-subtle flex items-center justify-center transition-all">
-                                        <HiDotsVertical size={20} />
+                                    <button className="w-9 h-9 md:w-10 md:h-10 rounded-xl text-muted hover:bg-surface-subtle flex items-center justify-center transition-all">
+                                        <HiDotsVertical size={18} />
                                     </button>
                                 </div>
                             </header>
@@ -485,37 +489,37 @@ export default function Messages() {
                             <AnimatePresence>
                                 {isSearchingInChat && (
                                     <motion.div 
-                                        initial={{ height: 0, opacity: 0, y: -20 }} 
+                                        initial={{ height: 0, opacity: 0, y: -10 }} 
                                         animate={{ height: 'auto', opacity: 1, y: 0 }} 
-                                        exit={{ height: 0, opacity: 0, y: -20 }} 
-                                        className="zn-search-inline bg-surface/50 backdrop-blur-md border-b border-border"
+                                        exit={{ height: 0, opacity: 0, y: -10 }} 
+                                        className="zn-search-inline bg-surface/50 backdrop-blur-md border-b border-border sticky top-[60px] z-20"
                                     >
                                         <div className="flex items-center gap-3 px-6 py-3">
-                                            <HiSearch className="text-muted" size={18} />
+                                            <HiSearch className="text-muted" size={16} />
                                             <input 
                                                 autoFocus 
                                                 value={chatSearchQuery} 
                                                 onChange={(e) => setChatSearchQuery(e.target.value)} 
                                                 placeholder="Search in conversation..." 
-                                                className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-primary placeholder:text-muted" 
+                                                className="flex-1 bg-transparent border-none outline-none text-[13px] font-bold text-primary placeholder:text-muted" 
                                             />
-                                            <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="w-8 h-8 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-muted hover:text-primary transition-colors">
-                                                <HiX size={18} />
+                                            <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="w-7 h-7 rounded-lg hover:bg-surface-subtle flex items-center justify-center text-muted hover:text-primary transition-colors">
+                                                <HiX size={16} />
                                             </button>
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            <div ref={viewportRef} className="zn-viewport scroll-gpu">
+                            <div ref={viewportRef} className="zn-viewport scroll-gpu no-scrollbar">
                                 <AnimatePresence mode="popLayout" initial={false}>
                                     {loadingMsgs ? (
-                                        <div key="chat-skeleton" className="space-y-8 px-6 pt-6">
+                                        <div key="chat-skeleton" className="space-y-6 px-4 md:px-6 pt-6">
                                             {[...Array(4)].map((_, i) => (
                                                 <div key={i} className={`zn-row ${i % 2 === 0 ? 'self' : 'peer'} flex flex-col`}>
                                                     <div className="zn-bubble-container flex flex-col">
-                                                        <div className="skeleton h-14 rounded-[24px] mb-2 w-56 opacity-20" />
-                                                        <div className="skeleton skeleton-text s opacity-10" />
+                                                        <div className="skeleton h-12 rounded-[20px] mb-2 w-48 md:w-56 opacity-20" />
+                                                        <div className="skeleton skeleton-text s opacity-10 w-12" />
                                                     </div>
                                                 </div>
                                             ))}
@@ -526,9 +530,9 @@ export default function Messages() {
                                                 <motion.div 
                                                     key={item.id}
                                                     layout
-                                                    className="flex justify-center my-8"
+                                                    className="flex justify-center my-6 md:my-8"
                                                 >
-                                                    <span className="px-5 py-1.5 rounded-full bg-surface-2 border border-border text-[9px] font-black uppercase tracking-[0.2em] text-muted shadow-sm">
+                                                    <span className="px-4 py-1 rounded-full bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-muted/60 shadow-sm">
                                                         {item.value}
                                                     </span>
                                                 </motion.div>
@@ -553,26 +557,44 @@ export default function Messages() {
                                             )
                                         ))
                                     ) : chatSearchQuery ? (
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-muted font-black text-sm uppercase tracking-widest min-h-[300px]">
-                                            <HiSearch size={40} className="mb-4 opacity-10" />
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-muted font-black text-xs uppercase tracking-widest min-h-[300px]">
+                                            <HiSearch size={32} className="mb-4 opacity-10" />
                                             No matches found
                                         </motion.div>
                                     ) : (
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-muted text-xs font-bold py-20 px-12 text-center leading-relaxed">
-                                            <HiMail size={32} className="mb-4 opacity-20" />
-                                            Beginning of a legendary conversation with {peer?.username || 'your contact'}.
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-muted text-[11px] font-bold py-20 px-8 text-center leading-relaxed">
+                                            <HiMail size={28} className="mb-4 opacity-20" />
+                                            <p className="max-w-[200px]">Beginning of a conversation with {peer?.username || 'your contact'}.</p>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </div>
 
-                            <footer className="zn-footer">
+                            <footer className="zn-footer pb-safe">
                                 <div className="zn-composer-wrapper">
+                                    {replyingTo && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="zn-reply-preview mb-2 bg-surface-subtle p-3 rounded-2xl border border-border/50 flex items-center justify-between"
+                                        >
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                <div className="w-1 h-8 bg-accent rounded-full shrink-0" />
+                                                <div className="min-w-0">
+                                                    <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-0.5">Replying to {replyingTo.sender?.username || 'user'}</p>
+                                                    <p className="text-xs text-muted truncate">{replyingTo.body}</p>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => setReplyingTo(null)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors shrink-0">
+                                                <HiX size={16} />
+                                            </button>
+                                        </motion.div>
+                                    )}
                                     <div className="zn-composer-pill">
-                                        <button className="zn-composer-action-btn">
+                                        <button className="zn-composer-action-btn hover:text-accent transition-colors">
                                             <HiEmojiHappy size={22} />
                                         </button>
-                                        <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
+                                        <button className="zn-composer-action-btn hover:text-accent transition-colors" onClick={() => fileInputRef.current?.click()}>
                                             <HiPaperClip size={22} />
                                         </button>
                                         <input type="file" ref={fileInputRef} onChange={handleFileUpload} hidden />
@@ -583,7 +605,7 @@ export default function Messages() {
                                             onChange={(e) => {
                                                 setInputText(e.target.value);
                                                 e.target.style.height = 'auto';
-                                                e.target.style.height = e.target.scrollHeight + 'px';
+                                                e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px';
                                             }}
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -592,23 +614,23 @@ export default function Messages() {
                                                     e.target.style.height = 'auto';
                                                 }
                                             }}
-                                            placeholder={`Message ${peer?.username || '...'}`}
-                                            className="zn-composer-input resize-none max-h-40"
+                                            placeholder="Message..."
+                                            className="zn-composer-input resize-none"
                                         />
                                         
                                         <div className="flex items-center gap-1 self-end mb-1">
-
-                                            <button 
+                                            <motion.button 
                                                 disabled={!inputText.trim() && !replyingTo}
                                                 onClick={() => {
                                                     handleSend();
                                                     const ta = document.querySelector('.zn-composer-input');
                                                     if (ta) ta.style.height = 'auto';
                                                 }}
+                                                whileTap={{ scale: 0.9 }}
                                                 className="zn-send-btn"
                                             >
                                                 <HiArrowRight size={22} />
-                                            </button>
+                                            </motion.button>
                                         </div>
                                     </div>
                                 </div>
@@ -620,30 +642,31 @@ export default function Messages() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="flex-1 flex flex-col items-center justify-center p-12 text-center relative overflow-hidden h-full bg-surface"
+                            className="flex-1 flex flex-col items-center justify-center p-8 md:p-12 text-center relative overflow-hidden h-full bg-surface"
                         >
                             <motion.div 
-                                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                                initial={{ scale: 0.95, opacity: 0, y: 15 }}
                                 animate={{ scale: 1, opacity: 1, y: 0 }}
                                 transition={{ type: 'spring', delay: 0.1 }}
                                 className="relative z-10"
                             >
-                                <div className="w-24 h-24 rounded-full bg-surface-2 border border-border flex items-center justify-center mb-8 mx-auto shadow-xl">
-                                    <HiMail size={40} className="text-accent" />
+                                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-surface-2 border border-border flex items-center justify-center mb-6 md:mb-8 mx-auto shadow-xl">
+                                    <HiMail size={36} className="text-accent" />
                                 </div>
-                                <h2 className="text-3xl font-bold text-primary mb-3 tracking-tight">Your Messages</h2>
-                                <p className="text-secondary font-medium max-w-xs mx-auto leading-relaxed text-sm">
+                                <h2 className="text-2xl md:text-3xl font-bold text-primary mb-3 tracking-tight">Your Messages</h2>
+                                <p className="text-secondary font-medium max-w-[280px] mx-auto leading-relaxed text-[13px] md:text-sm">
                                     Send private photos and messages to a friend or group.
                                 </p>
                                 
-                                <div className="mt-8 flex flex-wrap justify-center gap-3">
-                                    <button className="px-6 py-2.5 bg-accent rounded-lg text-sm font-bold text-white shadow-lg transition-all active:scale-95">Send Message</button>
+                                <div className="mt-8">
+                                    <button className="px-8 py-3 bg-accent rounded-2xl text-[13px] font-black uppercase tracking-widest text-white shadow-lg shadow-accent/20 transition-all active:scale-95">Send Message</button>
                                 </div>
                             </motion.div>
                         </motion.div>
                     )}
                 </AnimatePresence>
             </main>
+
 
             {/* Editing Overlay Modal: Cinematic focused editing */}
             <AnimatePresence>
