@@ -109,16 +109,22 @@ export default function Search() {
             </AnimatePresence>
 
             {q.length >= 2 && !loading && results.length === 0 && (
-                <div className="empty-state">
-                    <div className="empty-state-icon">🔍</div>
-                    <p className="empty-state-title">No results</p>
-                    <p className="empty-state-desc">No users found for &quot;{q}&quot;</p>
+                <div className="flex flex-col items-center justify-center py-20 px-6 text-center animate-fade-in">
+                    <div className="w-20 h-20 rounded-full bg-surface-subtle flex items-center justify-center mb-6">
+                        <HiSearch className="text-3xl text-muted/40" />
+                    </div>
+                    <p className="text-lg font-bold text-primary mb-1">No results found</p>
+                    <p className="text-sm text-muted max-w-[200px]">No users found matching &quot;{q}&quot;</p>
                 </div>
             )}
             {q.length < 2 && (
-                <div className="empty-state">
-                    <div className="empty-state-icon">✨</div>
-                    <p className="empty-state-desc">Search for people to follow</p>
+                <div className="flex flex-col items-center justify-center py-24 px-6 text-center animate-fade-in">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-accent/20 to-primary/10 flex items-center justify-center mb-8 relative">
+                        <div className="absolute inset-0 rounded-full bg-accent/5 animate-ping" />
+                        <HiSearch className="text-4xl text-accent relative z-10" />
+                    </div>
+                    <p className="text-xl font-black tracking-tight text-primary mb-2 italic uppercase">Discover PeerNet</p>
+                    <p className="text-[13px] font-medium text-muted/60 max-w-[220px] leading-relaxed uppercase tracking-widest">Search for creators, friends, and community leaders</p>
                 </div>
             )}
         </motion.div>

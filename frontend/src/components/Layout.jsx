@@ -409,11 +409,8 @@ export default function Layout() {
                     </motion.div>
                     
                     <div className="mobile-top-actions">
-                        <NavLink to="/search" className="mobile-nav-item !w-auto !h-auto">
-                            <HiOutlineSearch size={22} className="text-muted/80" />
-                        </NavLink>
                         <NavLink to="/notifications" className="relative mobile-nav-item !w-auto !h-auto">
-                            <HiOutlineBell size={22} className="text-muted/80" />
+                            <HiOutlineBell size={24} className="text-muted/80" />
                             {unreadCount > 0 && (
                                 <motion.span 
                                     initial={{ scale: 0 }}
@@ -425,7 +422,7 @@ export default function Layout() {
                             )}
                         </NavLink>
                         <NavLink to="/messages" className="relative mobile-nav-item !w-auto !h-auto">
-                            <HiOutlineChatAlt2 size={22} className="text-muted/80" />
+                            <HiOutlineChatAlt2 size={24} className="text-muted/80" />
                             {msgCount > 0 && (
                                 <motion.span 
                                     initial={{ scale: 0 }}
@@ -502,43 +499,45 @@ export default function Layout() {
                 <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     {({ isActive }) => (
                         <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiHome size={26} className="text-white" /> : <HiOutlineHome size={26} />}
+                            {isActive ? <HiHome size={28} className="text-white" /> : <HiOutlineHome size={28} />}
                         </motion.div>
                     )}
                 </NavLink>
                 <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     {({ isActive }) => (
                         <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiSearch size={26} className="text-white" /> : <HiOutlineSearch size={26} />}
+                            {isActive ? <HiSearch size={28} className="text-white" /> : <HiOutlineSearch size={28} />}
                         </motion.div>
                     )}
                 </NavLink>
-                <div className="flex items-center justify-center px-2">
+                <div className="flex items-center justify-center px-1">
                     <motion.button 
                         onClick={() => setShowCreate(true)} 
-                        className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-90 transition-transform"
+                        className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center shadow-lg active:scale-90 transition-transform"
                         whileHover={{ scale: 1.05 }}
                     >
-                        <HiPlus size={24} strokeWidth={1} />
+                        <HiPlus size={26} strokeWidth={1} />
                     </motion.button>
                 </div>
                 <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                     {({ isActive }) => (
                         <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiFilm size={26} className="text-white" /> : <HiOutlineFilm size={26} />}
+                            {isActive ? <HiFilm size={28} className="text-white" /> : <HiOutlineFilm size={28} />}
                         </motion.div>
                     )}
                 </NavLink>
                 <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                        <div className={`p-[2px] rounded-full transition-all ${location.pathname.startsWith(`/profile/${user?._id}`) ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' : ''}`}>
-                            <img 
-                                src={avatarUrl} 
-                                alt="" 
-                                className="w-6.5 h-6.5 rounded-full object-cover border-2 border-black" 
-                            />
-                        </div>
-                    </motion.div>
+                    {({ isActive }) => (
+                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                            <div className={`p-[2px] rounded-full transition-all ${isActive ? 'bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45]' : 'bg-transparent'}`}>
+                                <img 
+                                    src={avatarUrl} 
+                                    alt="" 
+                                    className="w-7 h-7 rounded-full object-cover border-2 border-black" 
+                                />
+                            </div>
+                        </motion.div>
+                    )}
                 </NavLink>
             </nav>
 

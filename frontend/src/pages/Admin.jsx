@@ -213,9 +213,9 @@ const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
         {/* Top accent line */}
         <div className={`absolute top-0 inset-x-0 h-[3px] ${accent ? 'bg-error' : 'bg-accent'} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
         
-        <div className="p-4 lg:p-6">
+        <div className="p-3.5 lg:p-6">
             <div className="flex items-start justify-between mb-4 lg:mb-6">
-                <div className={`p-2.5 rounded-2xl ${ accent ? 'bg-error/10 text-error' : 'bg-accent/10 text-accent' } transition-all duration-300 group-hover:rotate-12 group-hover:scale-110`}>
+                <div className={`p-2 rounded-2xl ${ accent ? 'bg-error/10 text-error' : 'bg-accent/10 text-accent' } transition-all duration-300 group-hover:rotate-12 group-hover:scale-110`}>
                     {React.cloneElement(icon, { size: 16 })}
                 </div>
                 {chartData && chartData.length > 0 && (
@@ -225,11 +225,11 @@ const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
                 )}
             </div>
 
-            <p className="text-[10px] font-black text-muted/40 uppercase tracking-[0.15em] mb-1.5">{label}</p>
-            <p className="text-2xl lg:text-4xl font-black text-primary tabular-nums tracking-tighter leading-none mb-4">{value}</p>
+            <p className="text-[9px] font-black text-muted/40 uppercase tracking-[0.15em] mb-1.5">{label}</p>
+            <p className="text-xl lg:text-4xl font-black text-primary tabular-nums tracking-tighter leading-none mb-3 lg:mb-4">{value}</p>
             <div className="flex items-center gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ accent ? 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]' } animate-pulse`} />
-                <p className="text-[10px] font-bold text-muted/60 uppercase tracking-widest leading-none">{sub}</p>
+                <div className={`w-1 h-1 rounded-full flex-shrink-0 ${ accent ? 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]' } animate-pulse`} />
+                <p className="text-[9px] font-bold text-muted/60 uppercase tracking-widest leading-none">{sub}</p>
             </div>
         </div>
     </div>
@@ -1069,157 +1069,143 @@ export default function Admin() {
             </div>
 
             <div className="max-w-[1700px] mx-auto relative">
-                {/* SYSTEM HEADER */}
-                <header className="mb-10 lg:mb-16">
-
-
-
-
-
-
-
-
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div>
-                            <h1 className="text-3xl lg:text-5xl font-black text-primary uppercase tracking-tighter leading-none mb-4">
-                                Governance <span className="text-accent opacity-50">Console</span>
-                            </h1>
-                            <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] lg:tracking-[0.4em]">
-                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
-                                <HiChevronRight className="text-muted/10" />
-                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
-                                <HiChevronRight className="text-muted/10" />
-                                <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 whitespace-nowrap">{activeTab}</span>
-                            </nav>
-                        </div>
-
-                        <div className="flex items-center gap-4 p-4 bg-surface-subtle/50 backdrop-blur-md rounded-[24px] border border-border/30 w-fit">
-                            <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
-                                <HiShieldCheck size={20} />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
-                                <span className="text-[9px] font-bold text-muted uppercase opacity-60">Secure Environment</span>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 lg:gap-4 mb-10 lg:mb-16">
-                    <StatCard label="Total Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="Registered" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
-                    <StatCard label="New Today" value={stats?.signupsToday || 0} sub="Joined" icon={<HiTrendingUp size={14} />} />
-                    <StatCard label="Active Now" value={pulse?.activeUsers || stats?.activeToday || 0} sub="Online" icon={<HiGlobe size={14} />} accent />
-                    <StatCard label="Total Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="Content" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
-                    <StatCard label="Comments" value={stats?.commentsToday || 0} sub="Today" icon={<HiChatAlt2 size={14} />} />
-                    <StatCard label="Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Review" icon={<HiFlag size={14} />} />
-                </section>
-
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+                    {/* SIDEBAR ON LEFT FOR DESKTOP, TOP FOR MOBILE */}
                     <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} reports={reports} />
-                    <main className="flex-1 min-w-0 w-full">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={activeTab}
-                                initial={{ opacity: 0, x: 20, filter: 'blur(12px)' }}
-                                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                                exit={{ opacity: 0, x: -20, filter: 'blur(12px)' }}
-                                transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
-                            >
-                                {activeTab === 'dashboard' && <AnalyticsModule stats={stats} analytics={analytics} key="dashboard" />}
-                                {activeTab === 'users' && (
-                                    <UserModule 
-                                        key="users"
-                                        users={users} 
-                                        search={search} 
-                                        setSearch={setSearch} 
-                                        onVerify={handleToggleVerify} 
-                                        onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
-                                        loading={loading}
-                                    />
-                                )}
-                                {activeTab === 'posts' && (
-                                    <PostModule 
-                                        key="posts"
-                                        posts={posts.filter(p => 
-                                            (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
-                                            (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
-                                        )} 
-                                        onDelete={handleDeletePost} 
-                                        contentType={contentType} 
-                                        setContentType={setContentType}
-                                        search={search}
-                                        setSearch={setSearch}
-                                    />
-                                )}
-                                {activeTab === 'comments' && (
-                                    <CommentModule 
-                                        key="comments"
-                                        comments={comments.filter(c => 
-                                            (c.content || c.body || '').toLowerCase().includes(search.toLowerCase()) ||
-                                            (c.author?.username || '').toLowerCase().includes(search.toLowerCase())
-                                        )} 
-                                        onDelete={handleDeleteComment} 
-                                        search={search} 
-                                        setSearch={setSearch} 
-                                    />
-                                )}
-                                {activeTab === 'reports' && (
-                                    <ReportModule 
-                                        key="reports"
-                                        reports={reports} 
-                                        onResolve={handleResolveReport} 
-                                        onAction={handleModerationAction}
-                                    />
-                                )}
-                                {activeTab === 'infrastructure' && (
-                                    <div key="infra" className="space-y-12">
-                                        <InfrastructurePulse pulse={pulse} />
-                                        <StorageModule stats={stats} />
+                    
+                    <div className="flex-1 min-w-0 w-full">
+                        {/* SYSTEM HEADER */}
+                        <header className="mb-10 lg:mb-12">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div>
+                                    <h1 className="text-3xl lg:text-5xl font-black text-primary uppercase tracking-tighter leading-none mb-4">
+                                        Governance <span className="text-accent opacity-50">Console</span>
+                                    </h1>
+                                    <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] lg:tracking-[0.4em]">
+                                        <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
+                                        <HiChevronRight className="text-muted/10" />
+                                        <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
+                                        <HiChevronRight className="text-muted/10" />
+                                        <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 whitespace-nowrap">{activeTab}</span>
+                                    </nav>
+                                </div>
+
+                                <div className="flex items-center gap-4 p-4 bg-surface-subtle/50 backdrop-blur-md rounded-[24px] border border-border/30 w-fit">
+                                    <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
+                                        <HiShieldCheck size={20} />
                                     </div>
-                                )}
-                                {activeTab === 'audit' && (
-                                    <AuditModule key="audit" logs={logs} loading={loading} />
-                                )}
-                                {activeTab === 'settings' && (
-                                    <div className="space-y-12">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            <div className="admin-surface-el p-10 bg-gradient-to-br from-surface-subtle/20 to-transparent">
-                                                <h3 className="text-xl font-black text-primary uppercase tracking-tighter mb-8">Platform Identity</h3>
-                                                <div className="space-y-6">
-                                                    <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
-                                                        <span className="text-[11px] font-black text-muted uppercase tracking-widest">Environment</span>
-                                                        <span className="text-[11px] font-black text-accent uppercase tracking-widest px-3 py-1 rounded-full bg-accent/10 border border-accent/20">Production</span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
-                                                        <span className="text-[11px] font-black text-muted uppercase tracking-widest">Registry Lock</span>
-                                                        <div className="w-10 h-5 bg-success/20 rounded-full relative shadow-inner"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" /></div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
+                                        <span className="text-[9px] font-bold text-muted uppercase opacity-60">Secure Environment</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        {/* QUICK STATS */}
+                        <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-3 lg:gap-4 mb-10 lg:mb-12">
+                            <StatCard label="Total Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="Registered" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
+                            <StatCard label="New Today" value={stats?.signupsToday || 0} sub="Joined" icon={<HiTrendingUp size={14} />} />
+                            <StatCard label="Active Now" value={pulse?.activeUsers || stats?.activeToday || 0} sub="Online" icon={<HiGlobe size={14} />} accent />
+                            <StatCard label="Total Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="Content" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
+                            <StatCard label="Comments" value={stats?.commentsToday || 0} sub="Today" icon={<HiChatAlt2 size={14} />} />
+                            <StatCard label="Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Review" icon={<HiFlag size={14} />} />
+                        </section>
+
+                        <main className="flex-1 min-w-0 w-full">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={activeTab}
+                                    initial={{ opacity: 0, x: 20, filter: 'blur(12px)' }}
+                                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                                    exit={{ opacity: 0, x: -20, filter: 'blur(12px)' }}
+                                    transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+                                >
+                                    {activeTab === 'dashboard' && <AnalyticsModule stats={stats} analytics={analytics} key="dashboard" />}
+                                    {activeTab === 'users' && (
+                                        <UserModule 
+                                            key="users"
+                                            users={users} 
+                                            search={search} 
+                                            setSearch={setSearch} 
+                                            onVerify={handleToggleVerify} 
+                                            onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
+                                            loading={loading}
+                                        />
+                                    )}
+                                    {activeTab === 'posts' && (
+                                        <PostModule 
+                                            key="posts"
+                                            posts={posts.filter(p => 
+                                                (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
+                                                (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
+                                            )} 
+                                            onDelete={handleDeletePost} 
+                                            contentType={contentType} 
+                                            setContentType={setContentType}
+                                            search={search}
+                                        />
+                                    )}
+                                    {activeTab === 'comments' && (
+                                        <CommentModule 
+                                            key="comments"
+                                            comments={comments.filter(c => (c.content || '').toLowerCase().includes(search.toLowerCase()))} 
+                                            onDelete={handleDeleteComment} 
+                                            search={search}
+                                        />
+                                    )}
+                                    {activeTab === 'reports' && (
+                                        <ReportModule 
+                                            key="reports"
+                                            reports={reports} 
+                                            onAction={handleModerationAction} 
+                                            onDeleteContent={handleDeleteReportContent}
+                                            search={search}
+                                        />
+                                    )}
+                                    {activeTab === 'infrastructure' && <InfrastructureModule pulse={pulse} key="infra" />}
+                                    {activeTab === 'audit' && <AuditModule logs={auditLogs} key="audit" />}
+                                    {activeTab === 'settings' && (
+                                        <div className="space-y-12">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div className="admin-surface-el p-10 bg-gradient-to-br from-surface-subtle/20 to-transparent">
+                                                    <h3 className="text-xl font-black text-primary uppercase tracking-tighter mb-8">Platform Identity</h3>
+                                                    <div className="space-y-6">
+                                                        <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
+                                                            <span className="text-[11px] font-black text-muted uppercase tracking-widest">Environment</span>
+                                                            <span className="text-[11px] font-black text-accent uppercase tracking-widest px-3 py-1 rounded-full bg-accent/10 border border-accent/20">Production</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
+                                                            <span className="text-[11px] font-black text-muted uppercase tracking-widest">Registry Lock</span>
+                                                            <div className="w-10 h-5 bg-success/20 rounded-full relative shadow-inner"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" /></div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="admin-surface-el p-10 border-dashed border-error/20 bg-error/[0.02]">
-                                                <h3 className="text-xl font-black text-error uppercase tracking-tighter mb-8">Danger Zone</h3>
-                                                <p className="text-[12px] text-muted font-medium mb-10 opacity-50 leading-relaxed">Irreversible administrative actions. All events are logged to the permanent system audit trail.</p>
-                                                <div className="space-y-4">
-                                                    <button
-                                                        onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
-                                                        className="w-full py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
-                                                    >
-                                                        Purge User Database
-                                                    </button>
-                                                    <button
-                                                        onClick={() => { setSystemActionType('full'); setShowSystemModal(true); }}
-                                                        className="w-full py-4 bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
-                                                    >
-                                                        Full Factory Reset
-                                                    </button>
+                                                <div className="admin-surface-el p-10 border-dashed border-error/20 bg-error/[0.02]">
+                                                    <h3 className="text-xl font-black text-error uppercase tracking-tighter mb-8">Danger Zone</h3>
+                                                    <p className="text-[12px] text-muted font-medium mb-10 opacity-50 leading-relaxed">Irreversible administrative actions. All events are logged to the permanent system audit trail.</p>
+                                                    <div className="space-y-4">
+                                                        <button
+                                                            onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
+                                                            className="w-full py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
+                                                        >
+                                                            Purge User Database
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { setSystemActionType('full'); setShowSystemModal(true); }}
+                                                            className="w-full py-4 bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                                        >
+                                                            Full Factory Reset
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
-                            </motion.div>
-                        </AnimatePresence>
-                    </main>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
+                        </main>
+                    </div>
                 </div>
 
             {/* --- CORE MODALS --- */}

@@ -175,7 +175,7 @@ export default function Profile() {
                             <img
                                 src={avatar}
                                 alt={profile.username}
-                                className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full object-cover block border-2 border-border/20"
+                                className="w-[86px] h-[86px] md:w-[150px] md:h-[150px] rounded-full object-cover block border-2 border-border/20"
                             />
                         </div>
                     </div>
