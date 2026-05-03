@@ -229,7 +229,9 @@ export default function Layout() {
 
     return (
         <div className="app-layout">
-            <aside className="sidebar">
+            {!location.pathname.startsWith('/admin') && (
+                <aside className="sidebar">
+
                 {/* Top: Branding */}
                 <div className="sidebar-logo-row">
                     <Link to="/" className="sidebar-brand">
@@ -393,11 +395,15 @@ export default function Layout() {
                     </div>
                 </div>
 
-            </aside>
+                </aside>
+            )}
 
-            <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''}`} ref={mainRef}>
 
-                <header className="mobile-top-header">
+            <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''} ${location.pathname.startsWith('/admin') ? 'main-col--admin' : ''}`} ref={mainRef}>
+
+                {!location.pathname.startsWith('/admin') && (
+                    <header className="mobile-top-header">
+
                     <motion.div 
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -434,10 +440,12 @@ export default function Layout() {
                             )}
                         </NavLink>
                     </div>
-                </header>
+                    </header>
+                )}
+
 
                 <div 
-                    className={`layout-container ${location.pathname.startsWith('/messages') ? 'h-full' : ''} ${(!['/messages', '/shorts'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
+                    className={`layout-container ${location.pathname.startsWith('/messages') ? 'h-full' : ''} ${(!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -495,51 +503,54 @@ export default function Layout() {
                 </div>
             </main>
 
-            <nav className="mobile-nav">
-                <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => (
-                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiHome size={28} className="text-white" /> : <HiOutlineHome size={28} />}
-                        </motion.div>
-                    )}
-                </NavLink>
-                <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => (
-                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiSearch size={28} className="text-white" /> : <HiOutlineSearch size={28} />}
-                        </motion.div>
-                    )}
-                </NavLink>
-                <div className="flex items-center justify-center px-1">
-                    <motion.button 
-                        onClick={() => setShowCreate(true)} 
-                        className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-                        whileHover={{ scale: 1.05 }}
-                    >
-                        <HiPlus size={26} strokeWidth={1} />
-                    </motion.button>
-                </div>
-                <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => (
-                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            {isActive ? <HiFilm size={28} className="text-white" /> : <HiOutlineFilm size={28} />}
-                        </motion.div>
-                    )}
-                </NavLink>
-                <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => (
-                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                            <div className={`p-[2px] rounded-full transition-all ${isActive ? 'bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45]' : 'bg-transparent'}`}>
-                                <img 
-                                    src={avatarUrl} 
-                                    alt="" 
-                                    className="w-7 h-7 rounded-full object-cover border-2 border-black" 
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </NavLink>
-            </nav>
+            {!location.pathname.startsWith('/admin') && (
+                <nav className="mobile-nav">
+                    <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        {({ isActive }) => (
+                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                                {isActive ? <HiHome size={28} className="text-white" /> : <HiOutlineHome size={28} />}
+                            </motion.div>
+                        )}
+                    </NavLink>
+                    <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        {({ isActive }) => (
+                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                                {isActive ? <HiSearch size={28} className="text-white" /> : <HiOutlineSearch size={28} />}
+                            </motion.div>
+                        )}
+                    </NavLink>
+                    <div className="flex items-center justify-center px-1">
+                        <motion.button 
+                            onClick={() => setShowCreate(true)} 
+                            className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <HiPlus size={26} strokeWidth={1} />
+                        </motion.button>
+                    </div>
+                    <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        {({ isActive }) => (
+                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                                {isActive ? <HiFilm size={28} className="text-white" /> : <HiOutlineFilm size={28} />}
+                            </motion.div>
+                        )}
+                    </NavLink>
+                    <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        {({ isActive }) => (
+                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                                <div className={`p-[2px] rounded-full transition-all ${isActive ? 'bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45]' : 'bg-transparent'}`}>
+                                    <img 
+                                        src={avatarUrl} 
+                                        alt="" 
+                                        className="w-7 h-7 rounded-full object-cover border-2 border-black" 
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </NavLink>
+                </nav>
+            )}
+
 
 
             <AnimatePresence>

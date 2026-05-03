@@ -48,54 +48,53 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="w-full lg:w-64 flex-shrink-0 flex lg:flex-col gap-4 lg:gap-0 sticky top-[56px] lg:top-6 z-20 bg-surface-overlay/90 backdrop-blur-3xl lg:bg-transparent lg:backdrop-blur-none border-b lg:border-b-0 lg:border-r border-border/20 lg:h-[calc(100vh-80px)] overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto scrollbar-hide px-4 py-4 lg:p-0 lg:pr-8 -mx-4 lg:mx-0 mb-6 lg:mb-0 shadow-2xl lg:shadow-none">
-            <div className="flex lg:flex-col gap-3 lg:gap-1.5 w-max lg:w-full">
-                {navGroups.map((group, gIdx) => (
-                    <div key={group.title} className="flex lg:flex-col lg:mb-8 items-center lg:items-stretch gap-3 lg:gap-0">
-                        <p className="hidden lg:block text-[10px] font-black text-muted/40 uppercase tracking-[0.3em] px-3 mb-3">{group.title}</p>
-                        <div className="flex lg:flex-col gap-2.5 lg:gap-1">
-                            {group.items.map(item => (
-                                <button 
-                                    key={item.id} 
-                                    onClick={() => setActiveTab(item.id)} 
-                                    className={`group flex items-center gap-2.5 lg:gap-4 px-4 lg:px-4 py-2.5 lg:py-3 rounded-2xl transition-all duration-300 whitespace-nowrap active:scale-95 ${
-                                        activeTab === item.id 
-                                        ? 'bg-white text-black shadow-xl shadow-white/10 ring-1 ring-white/10' 
-                                        : 'bg-white/5 lg:bg-transparent border border-white/5 lg:border-none text-muted/70 hover:bg-white/[0.08] hover:text-white'
-                                    }`}
-                                >
-                                    <item.icon size={16} className={`flex-shrink-0 transition-transform group-hover:scale-110 ${activeTab === item.id ? 'text-black' : 'text-accent'}`} />
-                                    <span className="text-[12px] font-bold tracking-tight flex-1 text-left">{item.label}</span>
-                                    {item.badge && (
-                                        <span className={`ml-1 lg:ml-auto text-[9px] font-black rounded-full px-2 py-0.5 min-w-[20px] text-center animate-pulse ${activeTab === item.id ? 'bg-black text-white' : 'bg-error text-white'}`}>
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
+        <aside className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-6 z-20">
+            <div className="admin-sidebar-rail">
+                <div className="flex lg:flex-col gap-4 lg:gap-8 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 no-scrollbar scroll-smooth px-1">
+                    {navGroups.map(group => (
+                        <div key={group.title} className="flex-shrink-0 lg:flex-shrink">
+                            <div className="hidden lg:block text-[9px] font-black text-muted/30 uppercase tracking-[0.3em] mb-4 pl-4">{group.title}</div>
+                            <div className="flex lg:flex-col gap-1.5">
+                                {group.items.map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => setActiveTab(item.id)}
+                                        className={`flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group whitespace-nowrap ${
+                                            activeTab === item.id 
+                                            ? 'bg-accent text-white shadow-lg shadow-accent/20 ring-1 ring-white/10' 
+                                            : 'text-muted hover:text-primary hover:bg-white/5 active:scale-95'
+                                        }`}
+                                    >
+                                        <div className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110 group-hover:rotate-6'}`}>
+                                            <item.icon size={20} />
+                                        </div>
+                                        <span className="text-[14px] font-bold tracking-tight">{item.label}</span>
+                                        {item.badge && (
+                                            <span className="ml-auto px-2 py-0.5 rounded-full bg-error text-white text-[9px] font-black">
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                        {activeTab === item.id && !item.badge && (
+                                            <motion.div layoutId="activeInd" className="ml-auto w-1 h-1 rounded-full bg-white hidden lg:block" />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        {/* Elegant separator for mobile between groups */}
-                        {gIdx < navGroups.length - 1 && (
-                            <div className="w-[1.5px] h-8 bg-white/10 mx-2 lg:hidden block" />
-                        )}
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
-
-            <div className="hidden lg:block mt-auto pt-4 border-t border-border/20 space-y-3">
-                <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                        <span className="text-[9px] font-semibold text-success uppercase tracking-wider">System OK</span>
+            
+            <div className="hidden lg:block">
+                <InfrastructurePulse pulse={pulse} />
+                
+                <div className="mt-8 p-6 rounded-[28px] bg-gradient-to-br from-accent/10 to-transparent border border-accent/10">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">Master Node</span>
                     </div>
-                    <span className="text-[9px] text-muted/40 font-mono tabular-nums">{pulse?.latency || 12}ms</span>
-                </div>
-                <div className="h-1 bg-border/20 rounded-full overflow-hidden">
-                    <motion.div
-                        animate={{ width: `${pulse?.load || 0.1}%` }}
-                        className="h-full bg-success/60 rounded-full"
-                    />
+                    <p className="text-[11px] text-muted leading-relaxed font-bold uppercase opacity-40">System synchronized with global consensus.</p>
                 </div>
             </div>
         </aside>
@@ -347,6 +346,36 @@ const AnalyticsModule = ({ stats, analytics }) => {
     )
 }
 
+const InfrastructureModule = ({ pulse }) => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard label="Processor Load" value={`${pulse?.load?.toFixed(1) || 0.1}%`} sub="CPU UTILIZATION" icon={<HiServer />} />
+            <StatCard label="Memory Latency" value={`${pulse?.latency || 42}ms`} sub="BUFFER DELAY" icon={<HiLightningBolt />} />
+            <StatCard label="Active Nodes" value={pulse?.activeUsers || 0} sub="CONCURRENT CONNECTIONS" icon={<HiGlobe />} />
+        </div>
+        
+        <div className="admin-surface-el p-10">
+            <h3 className="text-xl font-black text-primary uppercase tracking-tight mb-8">System Registry</h3>
+            <div className="space-y-6">
+                {[
+                    { label: 'Database Status', status: 'Online', color: 'text-success' },
+                    { label: 'Socket Bridge', status: 'Connected', color: 'text-success' },
+                    { label: 'CDN Edge', status: 'Optimal', color: 'text-accent' },
+                    { label: 'Audit Trail', status: 'Recording', color: 'text-warning' }
+                ].map(node => (
+                    <div key={node.label} className="flex items-center justify-between p-5 bg-black/20 rounded-2xl border border-white/5">
+                        <span className="text-[11px] font-black text-muted uppercase tracking-widest">{node.label}</span>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full bg-current ${node.color}`} />
+                            <span className={`text-[11px] font-black uppercase tracking-widest ${node.color}`}>{node.status}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </motion.div>
+)
+
 const StorageModule = ({ stats }) => {
     const storage = stats?.storage || { usedMB: 2400, maxMB: 10240, percentage: 24 }
     return (
@@ -420,7 +449,7 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
                     />
                 </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="admin-table-wrap">
             <table className="admin-table">
                 <thead>
                     <tr>
@@ -510,7 +539,7 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
                 />
             </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="admin-table-wrap">
             <table className="admin-table">
                 <thead>
                     <tr>
@@ -591,7 +620,7 @@ const AuditModule = ({ logs, loading }) => (
                 </div>
             </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="admin-table-wrap">
             <table className="admin-table">
                 <thead>
                     <tr>
@@ -641,71 +670,103 @@ const AuditModule = ({ logs, loading }) => (
 )
 
 const PostModule = ({ posts, onDelete, contentType, setContentType, search, setSearch }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="flex-1 flex items-center justify-between bg-surface-subtle p-1.5 rounded-2xl border border-border/50 w-full">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+        <div className="flex flex-col md:flex-row gap-5 items-center">
+            <div className="flex-1 flex items-center justify-between bg-surface-subtle/50 p-2 rounded-2xl border border-white/5 w-full backdrop-blur-md">
                 {['all', 'image', 'video', 'text'].map(type => (
                     <button 
                         key={type}
                         onClick={() => setContentType(type)}
-                        className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-bg text-accent shadow-sm' : 'text-muted hover:text-primary'}`}
+                        className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-muted hover:text-primary'}`}
                     >
                         {type}
                     </button>
                 ))}
             </div>
-            <div className="relative group w-full md:w-80">
-                <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
+            <div className="relative group w-full md:w-96">
+                <HiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
                 <input 
                     type="text" 
-                    placeholder="Search posts..." 
+                    placeholder="Search global feed..." 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="bg-surface-subtle border border-border rounded-2xl pl-12 pr-6 py-2.5 text-[12px] font-bold text-primary focus:border-accent outline-none transition-all w-full"
+                    className="bg-surface-subtle/50 border border-white/5 rounded-2xl pl-14 pr-6 py-3.5 text-[13px] font-bold text-primary focus:border-accent/50 outline-none transition-all w-full backdrop-blur-md"
                 />
             </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {posts.map(post => (
-                <div key={post._id} className="admin-surface-el group overflow-hidden">
-                    <div className="aspect-video bg-surface-subtle relative overflow-hidden">
+                <div key={post._id} className="admin-surface-el group overflow-hidden flex flex-col h-full hover:border-accent/20 transition-colors">
+                    {/* IG Style Header */}
+                    <div className="p-4 flex items-center justify-between border-b border-white/5">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 p-[2px] bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45]">
+                                <img 
+                                    src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} 
+                                    className="w-full h-full object-cover rounded-full border border-black" 
+                                    alt="" 
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[12px] font-black text-primary lowercase tracking-tight">@{post.author?.username}</span>
+                                <span className="text-[9px] font-bold text-muted uppercase tracking-widest opacity-50">{new Date(post.createdAt).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div className="px-2 py-1 rounded-md bg-surface-subtle border border-white/5 text-[9px] font-black text-muted uppercase tracking-widest">
+                            {post.type}
+                        </div>
+                    </div>
+
+                    {/* Media Body */}
+                    <div className="aspect-square bg-black relative overflow-hidden group/media">
                         {post.mediaUrl ? (
-                            <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                            <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover/media:scale-105" alt="" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted/10 bg-black/40">
+                            <div className="w-full h-full flex flex-col items-center justify-center text-muted/10 bg-surface-subtle/20 gap-3">
                                 <HiCollection size={48} />
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Text Entry</span>
                             </div>
                         )}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
+                        
+                        {/* Instant Action Overlay */}
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[4px]">
                             <button 
                                 onClick={() => onDelete(post._id)} 
-                                aria-label={`Purge object ${post._id}`}
-                                className="p-4 rounded-[22px] bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 transition-all transform translate-y-4 group-hover:translate-y-0 duration-300 flex items-center gap-2 group/btn"
+                                className="px-6 py-4 rounded-2xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 active:scale-95 transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center gap-3"
                             >
-                                <HiTrash size={22} className="group-hover/btn:rotate-12 transition-transform" />
-                                <span className="text-[10px] font-black uppercase tracking-widest pr-2">Execute Purge</span>
+                                <HiTrash size={20} />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Purge Artifact</span>
                             </button>
                         </div>
                     </div>
-                    <div className="p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-6 h-6 rounded-lg overflow-hidden bg-surface-subtle border border-white/5">
-                                <img src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} className="w-full h-full object-cover" alt="" />
+
+                    {/* Meta/Content */}
+                    <div className="p-5 flex-1 flex flex-col">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="flex items-center gap-1.5 text-accent">
+                                <HiTrendingUp size={16} className="opacity-80" />
+                                <span className="text-[12px] font-black">{post.likes?.length || 0}</span>
                             </div>
-                            <span className="text-[11px] font-black text-primary tracking-tight lowercase">@{post.author?.username}</span>
+                            <div className="flex items-center gap-1.5 text-muted">
+                                <HiCollection size={16} className="opacity-40" />
+                                <span className="text-[12px] font-black">{post.comments?.length || 0}</span>
+                            </div>
                         </div>
-                        <p className="text-[13px] text-muted line-clamp-2 leading-relaxed mb-6 font-medium opacity-70">{post.content}</p>
-                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                            <span className="text-[9px] font-black text-muted uppercase tracking-[0.2em] opacity-40">{post.type} • {new Date(post.createdAt).toLocaleDateString()}</span>
-                            <div className="flex items-center gap-2 text-accent">
-                                <HiTrendingUp size={14} className="opacity-50" />
-                                <span className="text-[10px] font-black tracking-widest">{post.likes?.length || 0}</span>
-                            </div>
+                        
+                        <p className="text-[13px] text-primary/80 line-clamp-3 leading-relaxed font-medium mb-4">
+                            {post.content}
+                        </p>
+                        
+                        <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+                            <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-30">ID: {post._id?.substring(0,8)}...</span>
+                            <button className="text-[10px] font-black text-accent uppercase tracking-widest hover:underline">Inspect Details</button>
                         </div>
                     </div>
                 </div>
             ))}
         </div>
+
         {posts.length === 0 && (
             <div className="admin-surface-el p-32 flex flex-col items-center justify-center text-center space-y-6">
                 <div className="w-20 h-20 rounded-full bg-accent/5 flex items-center justify-center text-accent/20 animate-pulse">
@@ -731,7 +792,7 @@ const ReportModule = ({ reports, onResolve }) => (
             </div>
             <HiShieldCheck className="text-error/20" size={32} />
         </div>
-        <div className="overflow-x-auto">
+        <div className="admin-table-wrap">
             <table className="admin-table">
                 <thead>
                     <tr>
@@ -1060,111 +1121,130 @@ export default function Admin() {
     }
 
     return (
-        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 p-4 md:p-6 lg:p-10 font-sans relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-                <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 font-sans relative overflow-x-hidden">
+            {/* Ambient Background */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/5 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 blur-[120px] rounded-full" />
             </div>
 
-            <div className="max-w-[1700px] mx-auto relative">
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
-                    {/* SIDEBAR ON LEFT FOR DESKTOP, TOP FOR MOBILE */}
-                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} reports={reports} />
-                    
-                    <div className="flex-1 min-w-0 w-full">
-                        {/* SYSTEM HEADER */}
-                        <header className="mb-10 lg:mb-12">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                <div>
-                                    <h1 className="text-3xl lg:text-5xl font-black text-primary uppercase tracking-tighter leading-none mb-4">
-                                        Governance <span className="text-accent opacity-50">Console</span>
-                                    </h1>
-                                    <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] lg:tracking-[0.4em]">
-                                        <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
-                                        <HiChevronRight className="text-muted/10" />
-                                        <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
-                                        <HiChevronRight className="text-muted/10" />
-                                        <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 whitespace-nowrap">{activeTab}</span>
-                                    </nav>
+            <div className="admin-page relative z-10 px-4 py-6 md:px-8 lg:px-10 lg:py-12">
+                <header className="mb-12 lg:mb-16">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div>
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center text-white shadow-xl shadow-accent/20 rotate-3">
+                                    <HiShieldCheck size={28} />
                                 </div>
-
-                                <div className="flex items-center gap-4 p-4 bg-surface-subtle/50 backdrop-blur-md rounded-[24px] border border-border/30 w-fit">
-                                    <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
-                                        <HiShieldCheck size={20} />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
-                                        <span className="text-[9px] font-bold text-muted uppercase opacity-60">Secure Environment</span>
-                                    </div>
+                                <h1 className="text-4xl md:text-5xl font-black text-primary uppercase tracking-tighter leading-none">Governance</h1>
+                            </div>
+                            <p className="text-sm font-bold text-muted uppercase tracking-[0.3em] opacity-40 ml-1">Central Intelligence Agency</p>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                            <div className="px-5 py-3 rounded-2xl bg-surface-subtle/50 border border-white/5 backdrop-blur-md">
+                                <span className="text-[10px] font-black text-muted uppercase tracking-widest block mb-1">Infrastructure</span>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-success shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
+                                    <span className="text-xs font-black text-primary uppercase">SYSTEM OK</span>
                                 </div>
                             </div>
-                        </header>
+                            <button onClick={() => init()} className="p-4 rounded-2xl bg-surface-subtle hover:bg-accent hover:text-white transition-all group">
+                                <HiTrendingUp className="group-hover:rotate-180 transition-transform duration-500" />
+                            </button>
+                        </div>
+                    </div>
+                </header>
 
-                        {/* QUICK STATS */}
-                        <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-3 lg:gap-4 mb-10 lg:mb-12">
-                            <StatCard label="Total Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="Registered" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
-                            <StatCard label="New Today" value={stats?.signupsToday || 0} sub="Joined" icon={<HiTrendingUp size={14} />} />
-                            <StatCard label="Active Now" value={pulse?.activeUsers || stats?.activeToday || 0} sub="Online" icon={<HiGlobe size={14} />} accent />
-                            <StatCard label="Total Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="Content" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
-                            <StatCard label="Comments" value={stats?.commentsToday || 0} sub="Today" icon={<HiChatAlt2 size={14} />} />
-                            <StatCard label="Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Review" icon={<HiFlag size={14} />} />
-                        </section>
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} reports={reports} />
+                    
+                    <main className="flex-1 min-w-0 w-full pb-20">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                {activeTab === 'dashboard' && (
+                                    <div className="space-y-10">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                                            <StatCard 
+                                                label="Total Users" 
+                                                value={(stats?.totalUsers || 0).toLocaleString()} 
+                                                sub="Global Identities" 
+                                                icon={<HiUsers />} 
+                                                chartData={stats?.charts?.userGrowth?.map(d => d.count)}
+                                            />
+                                            <StatCard 
+                                                label="Feed Volume" 
+                                                value={(stats?.totalPosts || 0).toLocaleString()} 
+                                                sub="Broadcast Objects" 
+                                                icon={<HiCollection />} 
+                                                chartData={[4, 8, 5, 9, 12, 10, 15]}
+                                            />
+                                            <StatCard 
+                                                label="Security Ops" 
+                                                value={reports.length.toString()} 
+                                                sub="Pending Resolution" 
+                                                icon={<HiShieldCheck />} 
+                                                accent={reports.length > 0}
+                                            />
+                                            <StatCard 
+                                                label="System Health" 
+                                                value="99.9%" 
+                                                sub="Uptime Velocity" 
+                                                icon={<HiTrendingUp />} 
+                                            />
+                                        </div>
+                                        <AnalyticsModule stats={stats} analytics={analytics} />
+                                    </div>
+                                )}
+                                {activeTab === 'analytics' && <AnalyticsModule stats={stats} analytics={analytics} />}
+                                {activeTab === 'users' && (
+                                    <UserModule 
+                                        users={users} 
+                                        search={search} 
+                                        setSearch={setSearch} 
+                                        onVerify={handleToggleVerify} 
+                                        onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
+                                        loading={loading}
+                                    />
+                                )}
+                                {activeTab === 'posts' && (
+                                    <PostModule 
+                                        posts={posts.filter(p => 
+                                            (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
+                                            (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
+                                        )} 
+                                        onDelete={handleDeletePost} 
+                                        contentType={contentType} 
+                                        setContentType={setContentType}
+                                        search={search}
+                                        setSearch={setSearch}
+                                    />
+                                )}
+                                {activeTab === 'comments' && (
+                                    <CommentModule 
+                                        comments={comments.filter(c => (c.content || '').toLowerCase().includes(search.toLowerCase()))} 
+                                        onDelete={handleDeleteComment} 
+                                        search={search}
+                                        setSearch={setSearch}
+                                    />
+                                )}
+                                {activeTab === 'reports' && (
+                                    <ReportModule 
+                                        reports={reports} 
+                                        onAction={handleModerationAction} 
+                                        onDeleteContent={handleDeleteReportContent}
+                                        search={search}
+                                    />
+                                )}
+                                {activeTab === 'infrastructure' && <InfrastructureModule pulse={pulse} />}
+                                {activeTab === 'audit' && <AuditModule logs={logs} />}
 
-                        <main className="flex-1 min-w-0 w-full">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={activeTab}
-                                    initial={{ opacity: 0, x: 20, filter: 'blur(12px)' }}
-                                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                                    exit={{ opacity: 0, x: -20, filter: 'blur(12px)' }}
-                                    transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
-                                >
-                                    {activeTab === 'dashboard' && <AnalyticsModule stats={stats} analytics={analytics} key="dashboard" />}
-                                    {activeTab === 'users' && (
-                                        <UserModule 
-                                            key="users"
-                                            users={users} 
-                                            search={search} 
-                                            setSearch={setSearch} 
-                                            onVerify={handleToggleVerify} 
-                                            onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
-                                            loading={loading}
-                                        />
-                                    )}
-                                    {activeTab === 'posts' && (
-                                        <PostModule 
-                                            key="posts"
-                                            posts={posts.filter(p => 
-                                                (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
-                                                (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
-                                            )} 
-                                            onDelete={handleDeletePost} 
-                                            contentType={contentType} 
-                                            setContentType={setContentType}
-                                            search={search}
-                                        />
-                                    )}
-                                    {activeTab === 'comments' && (
-                                        <CommentModule 
-                                            key="comments"
-                                            comments={comments.filter(c => (c.content || '').toLowerCase().includes(search.toLowerCase()))} 
-                                            onDelete={handleDeleteComment} 
-                                            search={search}
-                                        />
-                                    )}
-                                    {activeTab === 'reports' && (
-                                        <ReportModule 
-                                            key="reports"
-                                            reports={reports} 
-                                            onAction={handleModerationAction} 
-                                            onDeleteContent={handleDeleteReportContent}
-                                            search={search}
-                                        />
-                                    )}
-                                    {activeTab === 'infrastructure' && <InfrastructureModule pulse={pulse} key="infra" />}
-                                    {activeTab === 'audit' && <AuditModule logs={auditLogs} key="audit" />}
                                     {activeTab === 'settings' && (
                                         <div className="space-y-12">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1206,7 +1286,7 @@ export default function Admin() {
                             </AnimatePresence>
                         </main>
                     </div>
-                </div>
+
 
             {/* --- CORE MODALS --- */}
             
