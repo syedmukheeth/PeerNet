@@ -11,90 +11,77 @@ import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { useSocket } from '../hooks/useSocket'
+import './admin_v2.css'
 
 
 
 const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
     const navGroups = [
         {
-            title: 'Overview',
+            title: 'Operations',
             items: [
-                { id: 'dashboard', label: 'Dashboard', icon: HiGlobe },
-                { id: 'analytics', label: 'Analytics', icon: HiTrendingUp }
+                { id: 'dashboard', label: 'Command Center', icon: HiGlobe },
+                { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp }
             ]
         },
         {
-            title: 'Manage',
+            title: 'Platform Assets',
             items: [
-                { id: 'users', label: 'Users', icon: HiUsers },
-                { id: 'posts', label: 'Posts', icon: HiCollection },
-                { id: 'comments', label: 'Comments', icon: HiChatAlt2 },
-                { id: 'reports', label: 'Reports', icon: HiFlag, badge: reports.length > 0 ? reports.length : null }
+                { id: 'users', label: 'Identities', icon: HiUsers },
+                { id: 'posts', label: 'Broadcasts', icon: HiCollection },
+                { id: 'comments', label: 'Transmissions', icon: HiChatAlt2 },
+                { id: 'reports', label: 'Violations', icon: HiFlag, badge: reports.length > 0 ? reports.length : null }
             ]
         },
         {
-            title: 'System',
+            title: 'Infrastructure',
             items: [
-                { id: 'infrastructure', label: 'Health', icon: HiDatabase },
-                { id: 'audit', label: 'Audit Log', icon: HiShieldCheck }
-            ]
-        },
-        {
-            title: 'Admin',
-            items: [
-                { id: 'settings', label: 'Settings', icon: HiCog }
+                { id: 'infrastructure', label: 'Core Health', icon: HiDatabase },
+                { id: 'audit', label: 'Audit Trail', icon: HiShieldCheck }
             ]
         }
     ]
 
     return (
-        <aside className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-6 z-20">
-            <div className="admin-sidebar-rail">
-                <div className="flex lg:flex-col gap-4 lg:gap-8 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 no-scrollbar scroll-smooth px-1">
-                    {navGroups.map(group => (
-                        <div key={group.title} className="flex-shrink-0 lg:flex-shrink">
-                            <div className="hidden lg:block text-[9px] font-black text-muted/30 uppercase tracking-[0.3em] mb-4 pl-4">{group.title}</div>
-                            <div className="flex lg:flex-col gap-1.5">
-                                {group.items.map(item => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => setActiveTab(item.id)}
-                                        className={`flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group whitespace-nowrap ${
-                                            activeTab === item.id 
-                                            ? 'bg-accent text-white shadow-lg shadow-accent/20 ring-1 ring-white/10' 
-                                            : 'text-muted hover:text-primary hover:bg-white/5 active:scale-95'
-                                        }`}
-                                    >
-                                        <div className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110 group-hover:rotate-6'}`}>
-                                            <item.icon size={20} />
-                                        </div>
-                                        <span className="text-[14px] font-bold tracking-tight">{item.label}</span>
-                                        {item.badge && (
-                                            <span className="ml-auto px-2 py-0.5 rounded-full bg-error text-white text-[9px] font-black">
-                                                {item.badge}
-                                            </span>
-                                        )}
-                                        {activeTab === item.id && !item.badge && (
-                                            <motion.div layoutId="activeInd" className="ml-auto w-1 h-1 rounded-full bg-white hidden lg:block" />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
+        <aside className="admin-sidebar-v2 hidden xl:block">
+            <div className="admin-glass-v2 p-8 rounded-[40px] h-full flex flex-col justify-between border-white/5">
+                <div className="space-y-10">
+                    <div className="px-2">
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)]" />
+                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Governance v2</span>
                         </div>
-                    ))}
-                </div>
-            </div>
-
-            
-            <div className="hidden lg:block">
-                <InfrastructurePulse pulse={pulse} />
-                
-                <div className="mt-8 p-6 rounded-[28px] bg-gradient-to-br from-accent/10 to-transparent border border-accent/10">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">Master Node</span>
+                        <h2 className="text-xl font-black text-primary tracking-tighter uppercase">Command</h2>
                     </div>
-                    <p className="text-[11px] text-muted leading-relaxed font-bold uppercase opacity-40">System synchronized with global consensus.</p>
+
+                    <nav className="space-y-8">
+                        {navGroups.map(group => (
+                            <div key={group.title}>
+                                <div className="text-[9px] font-black text-muted/30 uppercase tracking-[0.3em] mb-4 px-2">{group.title}</div>
+                                <div className="space-y-1">
+                                    {group.items.map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => setActiveTab(item.id)}
+                                            className={`admin-nav-item-v2 ${activeTab === item.id ? 'active' : ''}`}
+                                        >
+                                            <item.icon size={20} className={activeTab === item.id ? 'text-white' : 'text-muted/40'} />
+                                            <span className="flex-1">{item.label}</span>
+                                            {item.badge && (
+                                                <span className="px-1.5 py-0.5 rounded-md bg-error/20 text-error text-[9px] font-black border border-error/20">
+                                                    {item.badge}
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </nav>
+                </div>
+
+                <div className="pt-8 border-t border-white/5">
+                    <InfrastructurePulse pulse={pulse} />
                 </div>
             </div>
         </aside>
@@ -200,35 +187,28 @@ const Sparkline = ({ data = [], color = 'var(--accent)' }) => {
 }
 
 const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
-    <div 
-        role="article"
-        aria-label={`${label}: ${value}`}
-        className={`relative group overflow-hidden rounded-3xl border transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${
-            accent 
-            ? 'bg-error/5 border-error/20 hover:border-error/40 hover:shadow-error/10'
-            : 'bg-surface-subtle/40 backdrop-blur-sm border-white/5 hover:border-accent/30 hover:shadow-accent/10'
-        }`}
-    >
-        {/* Top accent line */}
-        <div className={`absolute top-0 inset-x-0 h-[3px] ${accent ? 'bg-error' : 'bg-accent'} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-        
-        <div className="p-3.5 lg:p-6">
-            <div className="flex items-start justify-between mb-4 lg:mb-6">
-                <div className={`p-2 rounded-2xl ${ accent ? 'bg-error/10 text-error' : 'bg-accent/10 text-accent' } transition-all duration-300 group-hover:rotate-12 group-hover:scale-110`}>
-                    {React.cloneElement(icon, { size: 16 })}
-                </div>
-                {chartData && chartData.length > 0 && (
-                    <div className="w-16 h-8 opacity-20 group-hover:opacity-80 transition-all duration-500">
-                        <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
-                    </div>
-                )}
+    <div className="admin-stat-card-v2 group">
+        <div className="flex items-start justify-between mb-8">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${accent ? 'bg-error/10 text-error shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'bg-accent/10 text-accent shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]'} group-hover:scale-110 group-hover:rotate-3`}>
+                {React.cloneElement(icon, { size: 22 })}
             </div>
-
-            <p className="text-[9px] font-black text-muted/40 uppercase tracking-[0.15em] mb-1.5">{label}</p>
-            <p className="text-xl lg:text-4xl font-black text-primary tabular-nums tracking-tighter leading-none mb-3 lg:mb-4">{value}</p>
+            {chartData && (
+                <div className="w-20 h-10 opacity-30 group-hover:opacity-100 transition-opacity duration-700">
+                    <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
+                </div>
+            )}
+        </div>
+        
+        <div>
+            <div className="flex items-center gap-2 mb-1 opacity-40">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{label}</span>
+            </div>
+            <div className="text-4xl font-black text-primary tracking-tighter mb-4 group-hover:text-accent transition-colors duration-500">
+                {value}
+            </div>
             <div className="flex items-center gap-2">
-                <div className={`w-1 h-1 rounded-full flex-shrink-0 ${ accent ? 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]' } animate-pulse`} />
-                <p className="text-[9px] font-bold text-muted/60 uppercase tracking-widest leading-none">{sub}</p>
+                <div className={`w-1 h-1 rounded-full ${accent ? 'bg-error animate-pulse' : 'bg-success shadow-[0_0_10px_#22c55e]'}`} />
+                <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{sub}</span>
             </div>
         </div>
     </div>
@@ -1100,206 +1080,279 @@ export default function Admin() {
         }
     }
 
+    const renderModule = () => {
+        switch (activeTab) {
+            case 'dashboard':
+                return (
+                    <div className="space-y-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                            <StatCard 
+                                label="Global Identities" 
+                                value={(stats?.totalUsers || 0).toLocaleString()} 
+                                sub="Verified Users" 
+                                icon={<HiUsers />} 
+                                chartData={stats?.charts?.userGrowth?.map(d => d.count)}
+                            />
+                            <StatCard 
+                                label="Feed Velocity" 
+                                value={(stats?.totalPosts || 0).toLocaleString()} 
+                                sub="Broadcast Objects" 
+                                icon={<HiCollection />} 
+                                chartData={[4, 8, 5, 9, 12, 10, 15, 8, 14, 18]}
+                            />
+                            <StatCard 
+                                label="Security Queue" 
+                                value={reports.length.toString()} 
+                                sub="Pending Violations" 
+                                icon={<HiFlag />} 
+                                accent={reports.length > 0}
+                            />
+                            <StatCard 
+                                label="System Health" 
+                                value="99.9%" 
+                                sub="Uptime Velocity" 
+                                icon={<HiTrendingUp />} 
+                            />
+                        </div>
+                        <AnalyticsModule stats={stats} analytics={analytics} />
+                    </div>
+                )
+            case 'analytics':
+                return <AnalyticsModule stats={stats} analytics={analytics} />
+            case 'users':
+                return (
+                    <UserModule 
+                        users={users} 
+                        search={search} 
+                        setSearch={setSearch} 
+                        onVerify={handleToggleVerify} 
+                        onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
+                        loading={loading}
+                    />
+                )
+            case 'posts':
+                return (
+                    <PostModule 
+                        posts={posts.filter(p => 
+                            (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
+                            (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
+                        )} 
+                        onDelete={handleDeletePost} 
+                        contentType={contentType} 
+                        setContentType={setContentType}
+                        search={search}
+                        setSearch={setSearch}
+                    />
+                )
+            case 'comments':
+                return (
+                    <CommentModule 
+                        comments={comments.filter(c => (c.content || '').toLowerCase().includes(search.toLowerCase()))} 
+                        onDelete={handleDeleteComment} 
+                        search={search}
+                        setSearch={setSearch}
+                    />
+                )
+            case 'reports':
+                return (
+                    <ReportModule 
+                        reports={reports} 
+                        onResolve={handleResolveReport} 
+                        search={search}
+                    />
+                )
+            case 'infrastructure':
+                return <InfrastructureModule pulse={pulse} />
+            case 'audit':
+                return <AuditModule logs={logs} />
+            case 'settings':
+                return (
+                    <div className="space-y-12">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div className="admin-surface-el-v2 p-10 bg-gradient-to-br from-accent/5 to-transparent">
+                                <h3 className="text-xl font-black text-primary uppercase tracking-tighter mb-8">Platform Identity</h3>
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5">
+                                        <span className="text-[11px] font-black text-muted uppercase tracking-widest">Environment</span>
+                                        <span className="text-[11px] font-black text-accent uppercase tracking-widest px-3 py-1 rounded-full bg-accent/10 border border-accent/20">Production-PN</span>
+                                    </div>
+                                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5">
+                                        <span className="text-[11px] font-black text-muted uppercase tracking-widest">Registry Lock</span>
+                                        <div className="w-10 h-5 bg-success/20 rounded-full relative shadow-inner"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" /></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="admin-surface-el-v2 p-10 border-dashed border-error/20 bg-error/[0.02]">
+                                <h3 className="text-xl font-black text-error uppercase tracking-tighter mb-8">Danger Zone</h3>
+                                <p className="text-[12px] text-muted font-bold mb-10 opacity-50 leading-relaxed">High-risk administrative operations. All executions are recorded to the permanent system registry.</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
+                                        className="py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
+                                    >
+                                        Purge Identities
+                                    </button>
+                                    <button
+                                        onClick={() => { setSystemActionType('full'); setShowSystemModal(true); }}
+                                        className="py-4 bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                    >
+                                        Factory Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            default:
+                return null
+        }
+    }
+
     if (loading && !stats) {
         return (
-            <div className="admin-page min-h-screen px-4 py-8 md:px-8 lg:px-12 max-w-[1400px] mx-auto">
-                <header className="mb-10 opacity-30">
-                    <div className="skeleton h-2 w-16 mb-3" />
-                    <div className="skeleton h-7 w-56 rounded-lg" />
-                </header>
-                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-12">
-                    {[1, 2, 3, 4, 5, 6, 7].map(i => (
-                        <div key={i} className="admin-stat-card">
-                            <div className="skeleton h-4 w-12 mb-4" />
-                            <div className="skeleton h-8 w-20 mb-2" />
-                            <div className="skeleton h-3 w-16" />
+            <div className="min-h-screen bg-black text-white p-12">
+                <div className="max-w-[1600px] mx-auto space-y-12">
+                    <div className="flex justify-between items-end pb-8 border-b border-white/5">
+                        <div className="space-y-4">
+                            <div className="h-4 w-32 bg-white/5 rounded-full animate-pulse" />
+                            <div className="h-12 w-64 bg-white/5 rounded-2xl animate-pulse" />
                         </div>
-                    ))}
+                        <div className="flex gap-4">
+                            <div className="h-12 w-12 bg-white/5 rounded-2xl animate-pulse" />
+                            <div className="h-12 w-48 bg-white/5 rounded-2xl animate-pulse" />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="h-48 bg-white/5 rounded-[32px] animate-pulse" />
+                        ))}
+                    </div>
+                    <div className="h-[400px] bg-white/5 rounded-[40px] animate-pulse" />
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-bg text-primary selection:bg-accent/30 font-sans relative overflow-x-hidden">
-            {/* Ambient Background */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/5 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 blur-[120px] rounded-full" />
-            </div>
+        <div className="min-h-screen bg-black text-white selection:bg-accent/30 selection:text-white">
+            <div className="admin-page-v2">
+                <div className="flex flex-col xl:flex-row gap-12">
+                    {/* Sidebar */}
+                    <AdminSidebar 
+                        activeTab={activeTab} 
+                        setActiveTab={setActiveTab} 
+                        pulse={pulse} 
+                        stats={stats}
+                        reports={reports}
+                    />
 
-            <div className="admin-page relative z-10 px-4 py-6 md:px-8 lg:px-10 lg:py-12">
-                <header className="mb-12 lg:mb-16">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div>
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center text-white shadow-xl shadow-accent/20 rotate-3">
-                                    <HiShieldCheck size={28} />
-                                </div>
-                                <h1 className="text-4xl md:text-5xl font-black text-primary uppercase tracking-tighter leading-none">Governance</h1>
-                            </div>
-                            <p className="text-sm font-bold text-muted uppercase tracking-[0.3em] opacity-40 ml-1">Central Intelligence Agency</p>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                            <div className="px-5 py-3 rounded-2xl bg-surface-subtle/50 border border-white/5 backdrop-blur-md">
-                                <span className="text-[10px] font-black text-muted uppercase tracking-widest block mb-1">Infrastructure</span>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-success shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
-                                    <span className="text-xs font-black text-primary uppercase">SYSTEM OK</span>
-                                </div>
-                            </div>
-                            <button onClick={() => init()} className="p-4 rounded-2xl bg-surface-subtle hover:bg-accent hover:text-white transition-all group">
-                                <HiTrendingUp className="group-hover:rotate-180 transition-transform duration-500" />
-                            </button>
-                        </div>
-                    </div>
-                </header>
-
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
-                    <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} reports={reports} />
-                    
-                    <main className="flex-1 min-w-0 w-full pb-20">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={activeTab}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.3 }}
+                    {/* Mobile Navigation (Visible only on small screens) */}
+                    <div className="xl:hidden flex overflow-x-auto gap-3 pb-6 no-scrollbar">
+                        {[
+                            { id: 'dashboard', label: 'Command', icon: HiGlobe },
+                            { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp },
+                            { id: 'users', label: 'Identities', icon: HiUsers },
+                            { id: 'posts', label: 'Broadcasts', icon: HiCollection },
+                            { id: 'reports', label: 'Violations', icon: HiFlag }
+                        ].map(item => (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id)}
+                                className={`flex items-center gap-3 px-6 py-4 rounded-2xl whitespace-nowrap transition-all border ${
+                                    activeTab === item.id 
+                                    ? 'bg-accent border-accent/50 text-white shadow-xl shadow-accent/20' 
+                                    : 'bg-white/5 border-white/5 text-muted hover:border-white/10'
+                                }`}
                             >
-                                {activeTab === 'dashboard' && (
-                                    <div className="space-y-10">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                                            <StatCard 
-                                                label="Total Users" 
-                                                value={(stats?.totalUsers || 0).toLocaleString()} 
-                                                sub="Global Identities" 
-                                                icon={<HiUsers />} 
-                                                chartData={stats?.charts?.userGrowth?.map(d => d.count)}
-                                            />
-                                            <StatCard 
-                                                label="Feed Volume" 
-                                                value={(stats?.totalPosts || 0).toLocaleString()} 
-                                                sub="Broadcast Objects" 
-                                                icon={<HiCollection />} 
-                                                chartData={[4, 8, 5, 9, 12, 10, 15]}
-                                            />
-                                            <StatCard 
-                                                label="Security Ops" 
-                                                value={reports.length.toString()} 
-                                                sub="Pending Resolution" 
-                                                icon={<HiShieldCheck />} 
-                                                accent={reports.length > 0}
-                                            />
-                                            <StatCard 
-                                                label="System Health" 
-                                                value="99.9%" 
-                                                sub="Uptime Velocity" 
-                                                icon={<HiTrendingUp />} 
-                                            />
-                                        </div>
-                                        <AnalyticsModule stats={stats} analytics={analytics} />
-                                    </div>
-                                )}
-                                {activeTab === 'analytics' && <AnalyticsModule stats={stats} analytics={analytics} />}
-                                {activeTab === 'users' && (
-                                    <UserModule 
-                                        users={users} 
-                                        search={search} 
-                                        setSearch={setSearch} 
-                                        onVerify={handleToggleVerify} 
-                                        onDelete={(id) => { setTargetUserId(id); setShowDeleteModal(true); }}
-                                        loading={loading}
-                                    />
-                                )}
-                                {activeTab === 'posts' && (
-                                    <PostModule 
-                                        posts={posts.filter(p => 
-                                            (p.content || '').toLowerCase().includes(search.toLowerCase()) || 
-                                            (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
-                                        )} 
-                                        onDelete={handleDeletePost} 
-                                        contentType={contentType} 
-                                        setContentType={setContentType}
-                                        search={search}
-                                        setSearch={setSearch}
-                                    />
-                                )}
-                                {activeTab === 'comments' && (
-                                    <CommentModule 
-                                        comments={comments.filter(c => (c.content || '').toLowerCase().includes(search.toLowerCase()))} 
-                                        onDelete={handleDeleteComment} 
-                                        search={search}
-                                        setSearch={setSearch}
-                                    />
-                                )}
-                                {activeTab === 'reports' && (
-                                    <ReportModule 
-                                        reports={reports} 
-                                        onAction={handleModerationAction} 
-                                        onDeleteContent={handleDeleteReportContent}
-                                        search={search}
-                                    />
-                                )}
-                                {activeTab === 'infrastructure' && <InfrastructureModule pulse={pulse} />}
-                                {activeTab === 'audit' && <AuditModule logs={logs} />}
+                                <item.icon size={18} />
+                                <span className="text-sm font-bold tracking-tight">{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
 
-                                    {activeTab === 'settings' && (
-                                        <div className="space-y-12">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                <div className="admin-surface-el p-10 bg-gradient-to-br from-surface-subtle/20 to-transparent">
-                                                    <h3 className="text-xl font-black text-primary uppercase tracking-tighter mb-8">Platform Identity</h3>
-                                                    <div className="space-y-6">
-                                                        <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
-                                                            <span className="text-[11px] font-black text-muted uppercase tracking-widest">Environment</span>
-                                                            <span className="text-[11px] font-black text-accent uppercase tracking-widest px-3 py-1 rounded-full bg-accent/10 border border-accent/20">Production</span>
-                                                        </div>
-                                                        <div className="flex items-center justify-between p-5 bg-black/20 rounded-[20px] border border-white/5">
-                                                            <span className="text-[11px] font-black text-muted uppercase tracking-widest">Registry Lock</span>
-                                                            <div className="w-10 h-5 bg-success/20 rounded-full relative shadow-inner"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" /></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="admin-surface-el p-10 border-dashed border-error/20 bg-error/[0.02]">
-                                                    <h3 className="text-xl font-black text-error uppercase tracking-tighter mb-8">Danger Zone</h3>
-                                                    <p className="text-[12px] text-muted font-medium mb-10 opacity-50 leading-relaxed">Irreversible administrative actions. All events are logged to the permanent system audit trail.</p>
-                                                    <div className="space-y-4">
-                                                        <button
-                                                            onClick={() => { setSystemActionType('users'); setShowSystemModal(true); }}
-                                                            className="w-full py-4 bg-error/5 text-error text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-error/10 hover:bg-error hover:text-white transition-all"
-                                                        >
-                                                            Purge User Database
-                                                        </button>
-                                                        <button
-                                                            onClick={() => { setSystemActionType('full'); setShowSystemModal(true); }}
-                                                            className="w-full py-4 bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
-                                                        >
-                                                            Full Factory Reset
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                    {/* Main Content Area */}
+                    <main className="flex-1 min-w-0 space-y-12">
+                        {/* Header */}
+                        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/5">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="px-2 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent text-[9px] font-black uppercase tracking-widest">
+                                        Live Console
+                                    </div>
+                                    <div className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-30">
+                                        Ref: PN-GOV-{new Date().getFullYear()}-{Math.floor(Math.random() * 9000) + 1000}
+                                    </div>
+                                </div>
+                                <h1 className="admin-h1-v2">
+                                    {activeTab === 'dashboard' ? 'Governance' : 
+                                     activeTab === 'analytics' ? 'Intelligence' :
+                                     activeTab === 'users' ? 'Identities' :
+                                     activeTab === 'posts' ? 'Broadcasts' :
+                                     activeTab === 'comments' ? 'Transmissions' :
+                                     activeTab === 'reports' ? 'Violations' :
+                                     activeTab}
+                                </h1>
+                                <p className="text-muted font-bold text-[11px] uppercase tracking-[0.3em] opacity-40 ml-1">
+                                    Active Administrative Session • Restricted Access
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <button 
+                                    onClick={() => init()}
+                                    className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-accent/30 transition-all group"
+                                    title="Synchronize Data"
+                                >
+                                    <HiRefresh className="text-muted group-hover:text-accent group-hover:rotate-180 transition-all duration-700" size={20} />
+                                </button>
+                                <div className="h-12 w-[1px] bg-white/10 mx-2" />
+                                <div className="flex items-center gap-4 pl-2">
+                                    <div className="text-right hidden sm:block">
+                                        <div className="text-xs font-black text-primary uppercase">@{user?.username}</div>
+                                        <div className="text-[10px] font-bold text-success uppercase tracking-widest flex items-center justify-end gap-1.5">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                                            Root Access
                                         </div>
-                                    )}
+                                    </div>
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-accent-dark border border-white/10 flex items-center justify-center text-white font-black shadow-lg shadow-accent/20">
+                                        {user?.username?.substring(0, 2).toUpperCase()}
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        {/* Module Render */}
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={activeTab}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                                >
+                                    {renderModule()}
                                 </motion.div>
                             </AnimatePresence>
-                        </main>
-                    </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
 
-
-            {/* --- CORE MODALS --- */}
-            
+            {/* Global Overlays */}
             <AnimatePresence>
-                {/* Purge Confirmation */}
+                {/* Delete Confirmation */}
                 {showDeleteModal && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}>
-                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} onClick={e => e.stopPropagation()} className="w-full max-w-md admin-surface-el p-12 text-center shadow-2xl">
-                            <h2 className="text-2xl font-bold text-primary mb-4 uppercase tracking-tighter">Confirm Deletion?</h2>
-                            <p className="text-muted font-medium text-sm mb-10 leading-relaxed">This user account and all their content will be permanently removed from the platform.</p>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md" onClick={() => setShowDeleteModal(false)}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={e => e.stopPropagation()} className="w-full max-w-md admin-surface-el-v2 p-10 text-center shadow-2xl border-error/20">
+                            <div className="w-16 h-16 rounded-full bg-error/10 border border-error/20 flex items-center justify-center text-error mx-auto mb-6">
+                                <HiFlag size={32} />
+                            </div>
+                            <h2 className="text-2xl font-black text-primary mb-3 uppercase tracking-tighter">Terminate Asset?</h2>
+                            <p className="text-muted font-bold text-sm mb-10 leading-relaxed opacity-60">This operation is destructive and cannot be reversed. All associated data will be purged.</p>
                             <div className="grid grid-cols-2 gap-4">
-                                <button className="py-4 rounded-lg border border-border font-bold text-[10px] tracking-widest uppercase hover:bg-surface-subtle" onClick={() => setShowDeleteModal(false)}>Abort</button>
-                                <button className="py-4 rounded-lg bg-error text-white font-bold text-[10px] tracking-widest uppercase" onClick={handleDeleteUser}>Confirm</button>
+                                <button className="py-4 rounded-xl border border-white/5 font-black text-[10px] tracking-[0.2em] uppercase hover:bg-white/5 transition-all" onClick={() => setShowDeleteModal(false)}>Abort</button>
+                                <button className="py-4 rounded-xl bg-error text-white font-black text-[10px] tracking-[0.2em] uppercase shadow-lg shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all" onClick={handleDeleteUser}>Terminate</button>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -1307,128 +1360,106 @@ export default function Admin() {
 
                 {/* System Authentication */}
                 {showSystemModal && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-surface-overlay/90 backdrop-blur-xl">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[3000] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl">
                         <motion.div 
-                            initial={{ scale: 0.95, opacity: 0 }}
+                            initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="w-full max-w-lg bg-bg border border-error/30 rounded-[32px] overflow-hidden shadow-2xl shadow-error/10"
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="w-full max-w-lg admin-glass-v2 border border-error/30 rounded-[40px] overflow-hidden shadow-2xl shadow-error/20"
                         >
-                            <div className="p-10">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-14 h-14 rounded-2xl bg-error/10 border border-error/20 flex items-center justify-center text-error">
-                                        <HiShieldCheck size={28} />
+                            <div className="p-10 lg:p-12">
+                                <div className="flex items-center gap-6 mb-10">
+                                    <div className="w-16 h-16 rounded-3xl bg-error/10 border border-error/20 flex items-center justify-center text-error">
+                                        <HiShieldCheck size={32} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-primary uppercase tracking-tight">Access Clearance Required</h3>
-                                        <p className="text-[10px] font-bold text-error uppercase tracking-[0.3em] mt-1">High-Risk Operation: {systemActionType}</p>
+                                        <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Security Clearance</h3>
+                                        <p className="text-[10px] font-black text-error uppercase tracking-[0.3em] mt-1.5 opacity-80">Action: {systemActionType}</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-8">
-                                    {/* Security Step 1 */}
+                                <div className="space-y-10">
                                     <div>
-                                        <label className="block text-[10px] font-black text-muted uppercase tracking-widest mb-4">
-                                            1. Type <span className="text-primary">DELETE</span> to confirm
+                                        <label className="block text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 opacity-50">
+                                            1. Identity Confirmation (Type <span className="text-error">DELETE</span>)
                                         </label>
                                         <input 
                                             type="text"
                                             value={systemConfirmCode}
                                             onChange={(e) => setSystemConfirmCode(e.target.value)}
-                                            placeholder="DELETE"
-                                            className="w-full bg-surface-subtle border border-border rounded-xl px-5 py-4 text-sm font-bold text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-20"
+                                            placeholder="CONFIRMATION_CODE"
+                                            className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-10"
                                         />
                                     </div>
 
-                                    {/* Security Step 2 */}
                                     <div>
-                                        <label className="block text-[10px] font-black text-muted uppercase tracking-widest mb-4">
-                                            2. Verify Administrator Identity
+                                        <label className="block text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 opacity-50">
+                                            2. Administrative Key
                                         </label>
                                         <input 
                                             type="password"
                                             value={systemAdminPassword}
                                             onChange={(e) => setSystemAdminPassword(e.target.value)}
-                                            placeholder="Enter Administrator Password"
-                                            className="w-full bg-surface-subtle border border-border rounded-xl px-5 py-4 text-sm font-bold text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-20"
+                                            placeholder="••••••••••••"
+                                            className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-10"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4 mt-12">
+                                <div className="flex gap-6 mt-14">
                                     <button 
                                         onClick={() => setShowSystemModal(false)}
-                                        className="flex-1 py-4 text-[11px] font-black text-muted uppercase tracking-widest hover:text-primary transition-colors"
+                                        className="flex-1 py-5 text-[11px] font-black text-muted uppercase tracking-[0.3em] hover:text-primary transition-colors"
                                     >
-                                        Abort
+                                        Cancel
                                     </button>
                                     <button 
                                         disabled={systemConfirmCode !== 'DELETE' || !systemAdminPassword || isExecutingSystem}
                                         onClick={handleSystemAction}
-                                        className={`flex-[2] py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${
+                                        className={`flex-[2] py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 ${
                                             systemConfirmCode === 'DELETE' && systemAdminPassword
-                                            ? 'bg-error text-white shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-95'
-                                            : 'bg-surface-subtle text-muted cursor-not-allowed'
+                                            ? 'bg-error text-white shadow-xl shadow-error/40 hover:scale-[1.02] active:scale-95'
+                                            : 'bg-white/5 text-muted/30 cursor-not-allowed'
                                         }`}
                                     >
                                         {isExecutingSystem ? (
-                                            <div className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />
+                                            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                                         ) : (
-                                            <>EXECUTE PURGE</>
+                                            <>Authorize & Execute</>
                                         )}
                                     </button>
                                 </div>
                             </div>
                             
-                            <div className="bg-error/5 p-4 border-t border-error/10 text-center">
-                                <p className="text-[9px] font-bold text-error uppercase tracking-widest opacity-60">This action will be logged in the permanent audit trail</p>
+                            <div className="bg-error/10 p-5 border-t border-error/10 text-center">
+                                <p className="text-[9px] font-black text-error uppercase tracking-[0.4em]">Audit Trail Logging: Active</p>
                             </div>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <AdminFooter user={user} />
+            <footer className="mt-20 py-10 border-t border-white/5 opacity-40">
+                <div className="admin-page-v2">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="flex items-center gap-8">
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Infrastructure</span>
+                                <span className="text-[11px] font-bold text-primary tracking-widest uppercase">v2.0.0-GOV</span>
+                            </div>
+                            <div className="h-10 w-[1px] bg-white/10" />
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Status</span>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                    <span className="text-[11px] font-bold text-success uppercase tracking-widest">Nominal</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-[9px] font-bold text-muted uppercase tracking-[0.4em] opacity-20">© 2026 PeerNet Governance • Restricted Infrastructure Access</p>
+                    </div>
+                </div>
+            </footer>
         </div>
-    </div>
-    )
-}
-
-const AdminFooter = ({ user }) => {
-    return (
-        <footer className="mt-20 py-10 border-t border-border opacity-40">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                <div className="flex items-center gap-8">
-                    <div className="flex flex-col">
-                        <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Infrastructure</span>
-                        <span className="text-[11px] font-bold text-primary tracking-widest uppercase">v1.0.0-PROD</span>
-                    </div>
-                    <div className="h-px bg-border my-2" />
-                    <div className="flex flex-col">
-                        <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Status</span>
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                            <span className="text-[11px] font-bold text-success uppercase tracking-widest">Nominal</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-10">
-                    <div className="text-right hidden md:block">
-                        <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] block mb-1.5 opacity-50">Registry Sync</span>
-                        <span className="text-[11px] font-bold text-primary tracking-widest lowercase">Last: {new Date().toLocaleTimeString()}</span>
-                    </div>
-                    <div className="bg-surface-subtle px-5 py-2.5 rounded-xl border border-border flex items-center gap-3">
-                        <div className="flex flex-col">
-                            <span className="text-[8px] font-bold text-muted uppercase tracking-[0.2em] mb-0.5 opacity-50">Session Operator</span>
-                            <span className="text-[12px] font-bold text-accent tracking-tight">@{user?.username}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className="mt-12 text-center">
-                <p className="text-[9px] font-bold text-text-3 uppercase tracking-[0.4em] opacity-20">© 2026 PeerNet Governance • Restricted Infrastructure Access</p>
-            </div>
-        </footer>
     )
 }
