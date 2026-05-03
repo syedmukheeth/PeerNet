@@ -4417,7 +4417,10 @@ textarea:focus-visible {
    RESPONSIVE - TABLET (<=1264px) Collapsed Sidebar
    = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
 @media (max-width: 1264px) {
-  :root { --sidebar-w: var(--sidebar-collapsed-w); }
+  :root { 
+    --sidebar-w: var(--sidebar-collapsed-w);
+    --s-container: 100%;
+  }
 
   .sidebar {
     width: var(--sidebar-collapsed-w);
@@ -4464,86 +4467,117 @@ textarea:focus-visible {
 
   .mobile-top-header {
     display: flex;
-    height: 44px;
+    height: 56px;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    background: var(--surface-overlay);
+    border-bottom: 1px solid var(--border-sm);
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: var(--z-fixed);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: background-color var(--trans-smooth), backdrop-filter var(--trans-smooth);
   }
 
   .mobile-top-actions {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 22px;
     color: var(--text-1);
   }
 
   .mobile-badge {
     position: absolute;
-    top: -4px;
-    right: -6px;
+    top: -5px;
+    right: -7px;
     min-width: 18px;
     height: 18px;
     padding: 0 4px;
     border-radius: 9px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    border: 2px solid var(--surface);
+    transform-origin: center;
+    animation: badge-pop 0.3s var(--ease-spring);
+  }
+
+  @keyframes badge-pop {
+    0% { transform: scale(0); }
+    80% { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
 
   .mobile-nav {
     display: flex;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 52px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    height: 64px;
+    background: var(--surface-overlay);
+    border-top: 1px solid var(--border-sm);
     align-items: center;
     justify-content: space-around;
-    padding: 0 4px;
+    padding: 0 8px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
     z-index: var(--z-fixed);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
   }
 
   .mobile-nav-item,
   .mobile-nav-create {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-1);
-    width: 48px;
-    height: 48px;
-    transition: transform 0.1s var(--ease-out);
+    color: var(--text-3);
+    width: 52px;
+    height: 52px;
+    transition: transform 0.2s var(--ease-spring), color 0.2s var(--ease-out);
     background: transparent;
     border: none;
+    position: relative;
   }
 
-  .mobile-nav-item:active {
-    transform: scale(0.9);
+  .mobile-nav-item:active,
+  .mobile-nav-create:active {
+    transform: scale(0.85);
   }
 
   .mobile-nav-item.active {
     color: var(--text-1);
   }
 
-  .content-wrap {
-    padding: 64px 0 40px;
+  .mobile-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: fade-in-up 0.2s var(--ease-out);
   }
 
-  .mobile-header-spacer { display: block; height: 52px; flex-shrink: 0; }
-  .mobile-nav-spacer    { display: block; height: 56px; flex-shrink: 0; }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .content-wrap {
+    padding: 72px 0 80px;
+  }
+
+  .mobile-header-spacer { display: block; height: 56px; flex-shrink: 0; }
+  .mobile-nav-spacer    { display: block; height: 64px; flex-shrink: 0; }
 
   /* Feed mobile */
   .feed-layout { flex-direction: column; gap: 0; }
@@ -4616,7 +4650,31 @@ textarea:focus-visible {
   }
 
   /* Admin */
-  .admin-page { padding: 16px; }
+  .admin-page { padding: 12px; }
+  .admin-surface-el { border-radius: 24px; }
+  .admin-table-container { border-radius: 24px; }
+  
+  .admin-header-title { font-size: 24px !important; }
+  
+  /* Tables on mobile */
+  .admin-table th, .admin-table td {
+    padding: 12px 10px;
+    font-size: 11px;
+  }
+  
+  .admin-table td p {
+    max-width: 140px !important;
+  }
+  
+  /* Stat cards on mobile */
+  .admin-stat-card {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+  
+  .admin-stat-card .text-3xl {
+    font-size: 22px !important;
+  }
 }
 
 /* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 

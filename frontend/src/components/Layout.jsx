@@ -397,17 +397,44 @@ export default function Layout() {
 
             <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''}`} ref={mainRef}>
 
-                <header className="mobile-top-header px-4">
-                    <Link to="/" className="flex items-center gap-2 no-underline">
-                        <img src={logoImg} alt="PN" className="w-8 h-8 rounded-lg shadow-sm" />
-                        <span className="t-h2 logo-gradient-text">PeerNet</span>
-                    </Link>
+                <header className="mobile-top-header">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-2.5"
+                        onClick={() => navigate('/')}
+                    >
+                        <img src={logoImg} alt="PN" className="w-9 h-9 rounded-xl shadow-lg shadow-accent/10" />
+                        <span className="text-lg font-black tracking-tighter logo-gradient-text">PEERNET</span>
+                    </motion.div>
+                    
                     <div className="mobile-top-actions">
-                        <NavLink to="/notifications" className="relative">
-                            <HiBell size={24} /> {unreadCount > 0 && <span className="mobile-badge bg-error border-2 border-surface">{unreadCount}</span>}
+                        <NavLink to="/search" className="mobile-nav-item !w-auto !h-auto">
+                            <HiOutlineSearch size={22} className="text-muted/80" />
                         </NavLink>
-                        <NavLink to="/messages" className="relative">
-                            <HiChatAlt2 size={24} /> {msgCount > 0 && <span className="mobile-badge bg-accent border-2 border-surface">{msgCount}</span>}
+                        <NavLink to="/notifications" className="relative mobile-nav-item !w-auto !h-auto">
+                            <HiOutlineBell size={22} className="text-muted/80" />
+                            {unreadCount > 0 && (
+                                <motion.span 
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="mobile-badge bg-error"
+                                >
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </motion.span>
+                            )}
+                        </NavLink>
+                        <NavLink to="/messages" className="relative mobile-nav-item !w-auto !h-auto">
+                            <HiOutlineChatAlt2 size={22} className="text-muted/80" />
+                            {msgCount > 0 && (
+                                <motion.span 
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="mobile-badge bg-accent"
+                                >
+                                    {msgCount > 9 ? '9+' : msgCount}
+                                </motion.span>
+                            )}
                         </NavLink>
                     </div>
                 </header>
@@ -473,19 +500,44 @@ export default function Layout() {
 
             <nav className="mobile-nav">
                 <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => isActive ? <HiHome size={26} /> : <HiOutlineHome size={26} />}
+                    {({ isActive }) => (
+                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                            {isActive ? <HiHome size={24} /> : <HiOutlineHome size={24} />}
+                        </motion.div>
+                    )}
                 </NavLink>
                 <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => isActive ? <HiSearch size={26} /> : <HiOutlineSearch size={26} />}
+                    {({ isActive }) => (
+                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                            {isActive ? <HiSearch size={24} /> : <HiOutlineSearch size={24} />}
+                        </motion.div>
+                    )}
                 </NavLink>
-                <button onClick={() => setShowCreate(true)} className="mobile-nav-create">
-                    <HiPlusCircle size={30} />
-                </button>
+                <motion.button 
+                    onClick={() => setShowCreate(true)} 
+                    className="mobile-nav-create"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-accent to-accent-light flex items-center justify-center text-white shadow-lg shadow-accent/20">
+                        <HiPlusCircle size={24} />
+                    </div>
+                </motion.button>
                 <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => isActive ? <HiFilm size={26} /> : <HiOutlineFilm size={26} />}
+                    {({ isActive }) => (
+                        <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                            {isActive ? <HiFilm size={24} /> : <HiOutlineFilm size={24} />}
+                        </motion.div>
+                    )}
                 </NavLink>
                 <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    <img src={avatarUrl} alt="" className={`w-7 h-7 rounded-full object-cover border ${location.pathname.startsWith(`/profile/${user?._id}`) ? 'border-text-1' : 'border-transparent'}`} />
+                    <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
+                        <img 
+                            src={avatarUrl} 
+                            alt="" 
+                            className={`w-7 h-7 rounded-full object-cover border-2 ${location.pathname.startsWith(`/profile/${user?._id}`) ? 'border-accent shadow-sm shadow-accent/20' : 'border-transparent'}`} 
+                        />
+                    </motion.div>
                 </NavLink>
             </nav>
 

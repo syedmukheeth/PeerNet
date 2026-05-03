@@ -48,42 +48,44 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="w-56 flex-shrink-0 flex flex-col gap-0 sticky top-6 h-[calc(100vh-80px)] overflow-y-auto scrollbar-hide border-r border-border/20 pr-6">
-            <div className="flex flex-col gap-1">
+        <aside className="w-full lg:w-56 flex-shrink-0 flex lg:flex-col gap-4 lg:gap-0 sticky top-[56px] lg:top-6 z-20 bg-surface-overlay/80 backdrop-blur-xl lg:bg-transparent lg:backdrop-blur-none border-b lg:border-b-0 lg:border-r border-border/20 lg:h-[calc(100vh-80px)] overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto scrollbar-hide px-4 py-3 lg:p-0 lg:pr-6 -mx-4 lg:mx-0 mb-6 lg:mb-0">
+            <div className="flex lg:flex-col gap-2 lg:gap-1 w-max lg:w-full">
                 {navGroups.map((group) => (
-                    <div key={group.title} className="mb-6">
-                        <p className="text-[9px] font-bold text-muted/30 uppercase tracking-[0.35em] px-3 mb-2">{group.title}</p>
-                        <div className="space-y-0.5">
+                    <div key={group.title} className="flex lg:flex-col lg:mb-6 items-center lg:items-stretch gap-2 lg:gap-0">
+                        <p className="hidden lg:block text-[9px] font-bold text-muted/30 uppercase tracking-[0.35em] px-3 mb-2">{group.title}</p>
+                        <div className="flex lg:flex-col gap-2 lg:gap-0.5">
                             {group.items.map(item => (
                                 <button 
                                     key={item.id} 
                                     onClick={() => setActiveTab(item.id)} 
-                                    className={`w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                                    className={`group flex items-center gap-2 lg:gap-3 px-3 lg:px-3 py-2 lg:py-2.5 rounded-xl transition-all duration-200 whitespace-nowrap ${
                                         activeTab === item.id 
                                         ? 'bg-accent text-white shadow-lg shadow-accent/20' 
-                                        : 'text-muted/60 hover:bg-white/[0.04] hover:text-white'
+                                        : 'bg-surface lg:bg-transparent border border-border/30 lg:border-none text-muted/60 hover:bg-white/[0.04] hover:text-white'
                                     }`}
                                 >
                                     <item.icon size={15} className="flex-shrink-0" />
-                                    <span className="text-[11px] font-semibold tracking-wide truncate flex-1 text-left">{item.label}</span>
+                                    <span className="text-[11px] font-semibold tracking-wide flex-1 text-left">{item.label}</span>
                                     {item.badge && (
-                                        <span className="ml-auto text-[9px] font-black bg-error text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center animate-pulse">
+                                        <span className="ml-1 lg:ml-auto text-[9px] font-black bg-error text-white rounded-full px-1.5 py-0.5 min-w-[18px] text-center animate-pulse">
                                             {item.badge}
                                         </span>
                                     )}
                                     {item.id === 'infrastructure' && pulse?.activeUsers > 0 && activeTab !== item.id && (
-                                        <span className="ml-auto text-[9px] font-black text-success bg-success/10 border border-success/20 rounded-full px-1.5 py-0.5">
+                                        <span className="ml-1 lg:ml-auto text-[9px] font-black text-success bg-success/10 border border-success/20 rounded-full px-1.5 py-0.5">
                                             {pulse.activeUsers}
                                         </span>
                                     )}
                                 </button>
                             ))}
                         </div>
+                        {/* Separator for mobile between groups */}
+                        <div className="w-[1px] h-6 bg-border/30 ml-2 lg:hidden block" />
                     </div>
                 ))}
             </div>
 
-            <div className="mt-auto pt-4 border-t border-border/20 space-y-3">
+            <div className="hidden lg:block mt-auto pt-4 border-t border-border/20 space-y-3">
                 <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
@@ -1069,65 +1071,53 @@ export default function Admin() {
 
             <div className="max-w-[1700px] mx-auto relative">
                 {/* SYSTEM HEADER */}
-                <header className="mb-16 lg:mb-24 relative">
-                    <div className="absolute -left-12 top-0 bottom-0 w-1 bg-accent/20 rounded-full blur-[2px] hidden xl:block opacity-20" />
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-                    <div>
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="px-3 py-1 rounded-full bg-accent/10 border border-accent/20 flex items-center gap-2">
-                                <span className="text-[8px] font-black text-accent uppercase tracking-[0.3em]">Infra v2.1.0</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                                <span className="text-[9px] font-black text-success uppercase tracking-[0.4em]">Operational</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-8">
-                            <h1 className="text-6xl md:text-8xl font-black text-primary tracking-tighter uppercase leading-[0.85] drop-shadow-sm">
-                                Admin<br/><span className="text-muted/10">Console</span>
-                            </h1>
-                            <div className="h-20 w-px bg-border/40 hidden md:block" />
-                            <button 
-                                onClick={init}
-                                disabled={loading}
-                                className={`group w-16 h-16 rounded-[24px] bg-surface-subtle border border-border/50 flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-all shadow-lg active:scale-90 ${loading ? 'animate-spin text-accent' : ''}`}
-                            >
-                                <HiRefresh size={28} className="group-hover:rotate-180 transition-transform duration-700" />
-                            </button>
-                        </div>
-                        <nav className="flex items-center gap-4 mt-8 text-[11px] font-black uppercase tracking-[0.4em]">
-                            <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
-                            <HiChevronRight className="text-muted/10" />
-                            <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
-                            <HiChevronRight className="text-muted/10" />
-                            <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10">{activeTab}</span>
-                        </nav>
-                    </div>
+                <header className="mb-10 lg:mb-16">
 
-                    <div className="flex items-center gap-4 p-4 bg-surface-subtle rounded-[24px] border border-border/50">
-                        <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
-                            <HiShieldCheck size={20} />
+
+
+
+
+
+
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h1 className="text-3xl lg:text-5xl font-black text-primary uppercase tracking-tighter leading-none mb-4">
+                                Governance <span className="text-accent opacity-50">Console</span>
+                            </h1>
+                            <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] lg:tracking-[0.4em]">
+                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">System Cluster</span>
+                                <HiChevronRight className="text-muted/10" />
+                                <span className="text-muted/30 hover:text-muted/50 transition-colors cursor-default">Core Registry</span>
+                                <HiChevronRight className="text-muted/10" />
+                                <span className="text-accent drop-shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)] bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 whitespace-nowrap">{activeTab}</span>
+                            </nav>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
-                            <span className="text-[9px] font-bold text-muted uppercase">Secure Environment</span>
+
+                        <div className="flex items-center gap-4 p-4 bg-surface-subtle/50 backdrop-blur-md rounded-[24px] border border-border/30 w-fit">
+                            <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
+                                <HiShieldCheck size={20} />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Protocol Active</span>
+                                <span className="text-[9px] font-bold text-muted uppercase opacity-60">Secure Environment</span>
+                            </div>
                         </div>
-                    </div>
                     </div>
                 </header>
 
-                <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-12 lg:mb-16">
-                    <StatCard label="Total Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="Registered accounts" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
-                    <StatCard label="New Today" value={stats?.signupsToday || 0} sub="Joined today" icon={<HiTrendingUp size={14} />} />
-                    <StatCard label="Active Now" value={pulse?.activeUsers || stats?.activeToday || 0} sub="Online users" icon={<HiGlobe size={14} />} accent />
-                    <StatCard label="Total Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="All content" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
-                    <StatCard label="Comments Today" value={stats?.commentsToday || 0} sub="Daily comments" icon={<HiChatAlt2 size={14} />} />
-                    <StatCard label="Pending Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Need review" icon={<HiFlag size={14} />} />
+                <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 lg:gap-4 mb-10 lg:mb-16">
+                    <StatCard label="Total Users" value={(stats?.totalUsers || 0).toLocaleString()} sub="Registered" icon={<HiUsers size={14} />} chartData={stats?.charts?.userGrowth?.map(d => d.count)} />
+                    <StatCard label="New Today" value={stats?.signupsToday || 0} sub="Joined" icon={<HiTrendingUp size={14} />} />
+                    <StatCard label="Active Now" value={pulse?.activeUsers || stats?.activeToday || 0} sub="Online" icon={<HiGlobe size={14} />} accent />
+                    <StatCard label="Total Posts" value={(stats?.totalPosts || 0).toLocaleString()} sub="Content" icon={<HiCollection size={14} />} chartData={stats?.charts?.postGrowth?.map(d => d.count)} />
+                    <StatCard label="Comments" value={stats?.commentsToday || 0} sub="Today" icon={<HiChatAlt2 size={14} />} />
+                    <StatCard label="Reports" value={stats?.pendingReports || 0} accent={stats?.pendingReports > 0} sub="Review" icon={<HiFlag size={14} />} />
                 </section>
 
-                <div className="flex flex-row gap-6 items-start">
+                <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 items-start">
                     <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} pulse={pulse} stats={stats} reports={reports} />
-                    <main className="flex-1 min-w-0 min-h-[800px]">
+                    <main className="flex-1 min-w-0 w-full">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeTab}
