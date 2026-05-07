@@ -11,7 +11,7 @@ import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { useSocket } from '../hooks/useSocket'
-import './admin_v2.css'
+import '../admin_v2.css'
 
 
 
