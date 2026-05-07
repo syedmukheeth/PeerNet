@@ -30,3 +30,11 @@ build/
 
 # Scratch files
 scratch/
+
+# Dev scripts (PowerShell/shell auditors)
+*.ps1
+*.sh
+
+# Unused stubs
+frontend/src/App.css
+frontend/src/setupTests.js
