@@ -112,37 +112,41 @@ export default function Profile() {
 
 
     if (loading) return (
-        <div key="profile-skeleton" className="profile-page-wrap">
-            <div className="profile-header">
+        <div key="profile-skeleton" className="profile-page-wrap animate-pulse">
+            <div className="profile-header px-6 md:px-12 py-10 md:py-16">
                 <div className="profile-avatar-col">
-                    <div className="skeleton skeleton-avatar w-[150px] h-[150px]" />
+                    <div className="skeleton skeleton-circle w-[120px] h-[120px] md:w-[150px] md:h-[150px]" />
                 </div>
-                <div className="profile-info-col space-y-6">
-                    <div className="flex items-center gap-4">
-                        <div className="skeleton skeleton-text w-48 h-8 !mb-0" />
-                        <div className="skeleton skeleton-text w-24 h-8 !mb-0" />
+                <div className="profile-info-col">
+                    <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
+                        <div className="skeleton h-10 w-48 rounded-xl" />
+                        <div className="flex gap-3">
+                            <div className="skeleton h-10 w-28 rounded-xl" />
+                            <div className="skeleton h-10 w-28 rounded-xl opacity-50" />
+                        </div>
                     </div>
-                    <div className="flex gap-8">
-                        <div className="skeleton skeleton-text w-16 h-4 !mb-0" />
-                        <div className="skeleton skeleton-text w-16 h-4 !mb-0" />
-                        <div className="skeleton skeleton-text w-16 h-4 !mb-0" />
+                    <div className="flex gap-10 mb-8">
+                        <div className="skeleton h-5 w-20 rounded-md" />
+                        <div className="skeleton h-5 w-20 rounded-md" />
+                        <div className="skeleton h-5 w-20 rounded-md" />
                     </div>
-                    <div className="space-y-2">
-                        <div className="skeleton skeleton-text w-32 h-4 !mb-0" />
-                        <div className="skeleton skeleton-text w-64 h-3 opacity-50 !mb-0" />
+                    <div className="space-y-4">
+                        <div className="skeleton h-6 w-40 rounded-lg" />
+                        <div className="skeleton h-4 w-full max-w-sm rounded-md opacity-40" />
+                        <div className="skeleton h-4 w-32 rounded-md opacity-30" />
                     </div>
                 </div>
             </div>
-            <div className="profile-tabs mt-12 border-t border-white/5 pt-4">
+            <div className="profile-tabs border-t border-white/5 py-4">
                 <div className="flex justify-center gap-12">
-                    <div className="skeleton skeleton-text w-20 h-4 !mb-0" />
-                    <div className="skeleton skeleton-text w-20 h-4 !mb-0" />
-                    <div className="skeleton skeleton-text w-20 h-4 !mb-0" />
+                    <div className="skeleton h-8 w-24 rounded-lg" />
+                    <div className="skeleton h-8 w-24 rounded-lg opacity-40" />
+                    <div className="skeleton h-8 w-24 rounded-lg opacity-30" />
                 </div>
             </div>
-            <div className="profile-grid mt-8">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
-                    <div key={i} className="skeleton aspect-square" />
+            <div className="profile-grid px-4 md:px-6 mt-8">
+                {[...Array(9)].map((_, i) => (
+                    <div key={i} className="skeleton aspect-square rounded-xl opacity-[0.4]" />
                 ))}
             </div>
         </div>
@@ -159,57 +163,51 @@ export default function Profile() {
     return (
         <div className="profile-page-wrap fade-in">
             {/* ── Header ── */}
-            <header className="profile-header">
-
-                {/* Avatar Column */}
-                <div className="profile-avatar-col">
-                    <div
-                        onClick={() => hasStory && setViewerOpen(true)}
-                        className={`profile-avatar-ring ${hasStory ? 'has-story' : ''}`}
-                    >
-                        <img
-                            src={avatar}
-                            alt={profile.username}
-                            loading="eager"
+            <header className="profile-header-v2">
+                <div className="profile-avatar-wrap">
+                    <div className={`avatar-ring ${hasStory ? 'has-stories' : ''}`} onClick={() => hasStory && setViewerOpen(true)}>
+                        <img 
+                            src={profile.avatarUrl || `https://ui-avatars.com/api/?name=${profile.username}&background=6366F1&color=fff`} 
+                            className="profile-avatar-img" 
+                            alt={profile.username} 
                         />
                     </div>
                 </div>
 
-                {/* Info Column */}
                 <div className="profile-info-col">
 
-                    {/* Row 1: Username & Actions */}
-                    <div className="profile-username-row">
-                        <h1 className="profile-username">{profile.username}</h1>
-                        
-                        {profile.isVerified && (
-                            <HiBadgeCheck className="profile-verified-badge" title="Verified" />
-                        )}
-
-                        <div className="profile-actions">
+                {/* Desktop/Tablet Header Structure */}
+                <div className="profile-info-main">
+                    {/* Row 1: Username + Actions */}
+                    <div className="profile-header-top">
+                        <div className="flex items-center gap-2">
+                            <h1 className="profile-username">{profile.username}</h1>
+                            {profile.isVerified && <HiBadgeCheck className="text-accent text-[20px]" />}
+                        </div>
+                        <div className="profile-actions-row">
                             {isMe ? (
-                                <button className="btn btn-secondary btn-sm profile-action-btn" onClick={() => setEditProfile(true)}>
-                                    Edit Profile
-                                </button>
+                                <>
+                                    <button className="btn btn-secondary btn-sm px-5" onClick={() => setEditProfile(true)}>
+                                        Edit Profile
+                                    </button>
+                                    <button className="btn btn-secondary btn-sm" onClick={() => navigate('/settings')}>
+                                        <HiCog size={18} />
+                                    </button>
+                                </>
                             ) : (
                                 <>
                                     <motion.button
-                                        className={`btn btn-sm profile-action-btn ${following ? 'btn-secondary' : 'btn-primary'}`}
+                                        className={`btn btn-sm min-w-[100px] ${following ? 'btn-secondary' : 'btn-primary'}`}
                                         onClick={handleFollow}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}>
+                                        whileTap={{ scale: 0.95 }}>
                                         {following ? 'Following' : 'Follow'}
                                     </motion.button>
                                     <motion.button
-                                        className="btn btn-secondary btn-sm profile-action-btn flex items-center gap-2"
+                                        className="btn btn-secondary btn-sm px-4 flex items-center gap-2"
                                         onClick={handleMessage}
                                         disabled={messaging}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}>
-                                        {messaging
-                                            ? <span className="spinner-sm" />
-                                            : <><HiChatAlt2 size={18} /> Message</>
-                                        }
+                                        whileTap={{ scale: 0.95 }}>
+                                        {messaging ? <span className="spinner-sm" /> : 'Message'}
                                     </motion.button>
                                 </>
                             )}
@@ -217,33 +215,33 @@ export default function Profile() {
                     </div>
 
                     {/* Row 2: Stats */}
-                    <div className="profile-stats">
-                        <div className="profile-stat">
-                            <span className="profile-stat-num">{posts.length}</span>
-                            <span className="profile-stat-label">posts</span>
+                    <div className="profile-stats-v2">
+                        <div className="profile-stat-item">
+                            <span className="stat-value">{posts.length}</span>
+                            <span className="stat-label">posts</span>
                         </div>
-                        <div className="profile-stat cursor-pointer" onClick={() => setShowFollowers(true)}>
-                            <span className="profile-stat-num">{profile.followersCount || 0}</span>
-                            <span className="profile-stat-label">followers</span>
+                        <div className="profile-stat-item cursor-pointer" onClick={() => setShowFollowers(true)}>
+                            <span className="stat-value">{profile.followersCount || 0}</span>
+                            <span className="stat-label">followers</span>
                         </div>
-                        <div className="profile-stat cursor-pointer" onClick={() => setShowFollowing(true)}>
-                            <span className="profile-stat-num">{profile.followingCount || 0}</span>
-                            <span className="profile-stat-label">following</span>
+                        <div className="profile-stat-item cursor-pointer" onClick={() => setShowFollowing(true)}>
+                            <span className="stat-value">{profile.followingCount || 0}</span>
+                            <span className="stat-label">following</span>
                         </div>
                     </div>
 
                     {/* Row 3: Bio */}
-                    <div className="profile-bio-row">
-                        {profile.fullName && <h2 className="profile-full-name">{profile.fullName}</h2>}
-                        {profile.bio && <p className="profile-bio">{profile.bio}</p>}
+                    <div className="profile-bio-v2">
+                        <div className="font-bold text-[15px]">{profile.fullName}</div>
+                        <div className="text-[14px] leading-relaxed whitespace-pre-wrap mt-1">{profile.bio}</div>
                         {profile.website && (
-                            <a href={profile.website} target="_blank" rel="noreferrer" className="profile-website">
-                                <span className="mr-1">🔗</span>
+                            <a href={profile.website} target="_blank" rel="noreferrer" className="profile-link-v2">
+                                <HiPlus size={12} className="rotate-45" />
                                 {profile.website.replace(/^https?:\/\//, '')}
                             </a>
                         )}
                     </div>
-
+                    </div>
                 </div>
             </header>
 

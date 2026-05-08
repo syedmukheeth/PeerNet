@@ -14,15 +14,18 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
         setUsers([])
         api.get(`/users/${userId}/${type}`)
             .then(({ data }) => {
-                // Ensure we handle different API response shapes (some might return the array directly in data)
                 const list = Array.isArray(data) ? data : (data.data || [])
-                setUsers(list)
+                // Robust check: filter out any nulls and ensure we have at least an object
+                setUsers(list.map(u => typeof u === 'string' ? { _id: u, username: 'Peer' } : u).filter(Boolean))
             })
             .catch(err => {
                 console.error("Failed to fetch user list:", err)
                 setUsers([])
             })
-            .finally(() => setLoading(false))
+            .finally(() => {
+                // Artificial delay for premium feel
+                setTimeout(() => setLoading(false), 400)
+            })
     }, [isOpen, userId, type])
 
     return (
@@ -65,8 +68,16 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                         {/* List */}
                         <div style={{ overflowY: 'auto', flex: 1 }}>
                             {loading ? (
-                                <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
-                                    <div className="spinner" />
+                                <div style={{ padding: '20px' }} className="space-y-4">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <div key={i} className="flex items-center gap-3">
+                                            <div className="skeleton skeleton-circle w-12 h-12" />
+                                            <div className="flex-1 space-y-2">
+                                                <div className="skeleton h-4 w-24 rounded" />
+                                                <div className="skeleton h-3 w-32 rounded opacity-50" />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             ) : (!users || users.length === 0) ? (
                                 <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-3)' }}>

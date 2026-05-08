@@ -313,10 +313,25 @@
 }
 
 /* Command Center Sidebar - Floating */
-.admin-sidebar-override {
+.admin-sidebar-v2 {
+    display: none;
+    flex-direction: column;
+    width: 320px;
+    height: 100dvh;
+    padding: 2.5rem 1.5rem;
     background: rgba(5, 5, 5, 0.8);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+@media (min-width: 1024px) {
+    .admin-sidebar-v2 {
+        display: flex;
+    }
 }
 
 /* Stat Cards 2.0 */

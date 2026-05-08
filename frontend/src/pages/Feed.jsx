@@ -239,18 +239,31 @@ export default function Feed() {
                     {loading && (
                         <div key="feed-skeleton" className="l-stack l-stack-lg pt-4 px-2">
                             {[1, 2].map(id => (
-                                <div key={id} className="l-card-premium p-4 space-y-4 border border-white/5 overflow-hidden">
-                                    <div className="flex items-center gap-3">
-                                        <div className="skeleton size-10 rounded-full" />
-                                        <div className="space-y-2 flex-1">
-                                            <div className="skeleton h-4 w-32" />
-                                            <div className="skeleton h-3 w-24 opacity-50" />
+                                <div key={id} className="l-post-card p-0 overflow-hidden">
+                                    <div className="post-card-header">
+                                        <div className="post-card-user">
+                                            <div className="skeleton size-10 rounded-full" />
+                                            <div className="space-y-2">
+                                                <div className="skeleton h-3.5 w-32 rounded-md" />
+                                                <div className="skeleton h-3 w-20 rounded-md opacity-40" />
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="skeleton w-full aspect-[4/5] rounded-xl" />
-                                    <div className="space-y-2.5">
-                                        <div className="skeleton skeleton-text l" />
-                                        <div className="skeleton skeleton-text m" />
+                                    <div className="skeleton w-full aspect-square md:aspect-[4/5] rounded-none" />
+                                    <div className="p-4 space-y-4">
+                                        <div className="flex justify-between">
+                                            <div className="flex gap-4">
+                                                <div className="skeleton size-6 rounded-md" />
+                                                <div className="skeleton size-6 rounded-md" />
+                                                <div className="skeleton size-6 rounded-md" />
+                                            </div>
+                                            <div className="skeleton size-6 rounded-md" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="skeleton h-4 w-1/4 rounded-md" />
+                                            <div className="skeleton h-3.5 w-full rounded-md" />
+                                            <div className="skeleton h-3.5 w-2/3 rounded-md" />
+                                        </div>
                                     </div>
                                 </div>
                             ))}

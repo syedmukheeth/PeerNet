@@ -17,35 +17,40 @@ import '../admin_v2.css'
 
 
 
-const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
-    const navGroups = [
-        {
-            title: 'Operations',
-            items: [
-                { id: 'dashboard', label: 'Command Center', icon: HiGlobe },
-                { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp }
-            ]
-        },
-        {
-            title: 'Platform Assets',
-            items: [
-                { id: 'users', label: 'Identities', icon: HiUsers },
-                { id: 'posts', label: 'Broadcasts', icon: HiCollection },
-                { id: 'comments', label: 'Transmissions', icon: HiChatAlt2 },
-                { id: 'reports', label: 'Violations', icon: HiFlag, badge: reports.length > 0 ? reports.length : null }
-            ]
-        },
-        {
-            title: 'Infrastructure',
-            items: [
-                { id: 'infrastructure', label: 'Core Health', icon: HiDatabase },
-                { id: 'audit', label: 'Audit Trail', icon: HiShieldCheck }
-            ]
-        }
-    ]
+const navGroups = [
+    {
+        title: 'Operations',
+        items: [
+            { id: 'dashboard', label: 'Command Center', icon: HiGlobe },
+            { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp }
+        ]
+    },
+    {
+        title: 'Platform Assets',
+        items: [
+            { id: 'users', label: 'Identities', icon: HiUsers },
+            { id: 'posts', label: 'Broadcasts', icon: HiCollection },
+            { id: 'comments', label: 'Transmissions', icon: HiChatAlt2 },
+            { id: 'reports', label: 'Violations', icon: HiFlag }
+        ]
+    },
+    {
+        title: 'Infrastructure',
+        items: [
+            { id: 'infrastructure', label: 'Core Health', icon: HiDatabase },
+            { id: 'audit', label: 'Audit Trail', icon: HiShieldCheck }
+        ]
+    }
+]
 
+const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
+    // Add badge to reports item
+    const groups = navGroups.map(g => ({
+        ...g,
+        items: g.items.map(i => i.id === 'reports' ? { ...i, badge: reports.length > 0 ? reports.length : null } : i)
+    }))
     return (
-        <aside className="sidebar admin-sidebar-override">
+        <aside className="admin-sidebar-v2">
             {/* Top: Branding */}
             <div className="sidebar-logo-row mb-8">
                 <Link to="/" className="flex flex-col gap-1 px-4 group">
@@ -53,16 +58,18 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
                         <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
                         <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Governance v2</span>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center justify-between mt-1">
                         <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none group-hover:text-accent transition-colors">Command</h2>
-                        <HiHome size={18} className="text-muted/20 group-hover:text-accent transition-all opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-muted group-hover:bg-accent group-hover:text-white transition-all">
+                            <HiHome size={16} />
+                        </div>
                     </div>
                 </Link>
             </div>
 
             {/* Middle: Navigation */}
             <nav className="sidebar-nav no-scrollbar px-2 flex-1">
-                {navGroups.map(group => (
+                {groups.map(group => (
                     <div key={group.title} className="mb-8">
                         <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-4 px-4 opacity-50">{group.title}</div>
                         <div className="flex flex-col gap-1.5">
@@ -247,8 +254,8 @@ const AnalyticsModule = ({ stats, analytics }) => {
         ? chartData.map((d, i) => `${(i / (chartData.length - 1)) * 1000},${300 - (d.count * 10)}`).join(' L ')
         : "0,250 Q100,220 200,240 T400,180 T600,120 T800,150 T1000,80"
 
-    const svgPath = chartData.length > 0 ? `M ${pathData}` : `M ${pathData}`
-    const areaPath = chartData.length > 0 ? `${svgPath} V 300 H 0 Z` : `${pathData} V 300 H 0 Z`
+    const svgPath = `M ${pathData}`
+    const areaPath = `${svgPath} V 300 H 0 Z`
     
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
@@ -1233,25 +1240,45 @@ export default function Admin() {
 
     if (loading && !stats) {
         return (
-            <div className="min-h-screen bg-black text-white p-12">
-                <div className="max-w-[1600px] mx-auto space-y-12">
-                    <div className="flex justify-between items-end pb-8 border-b border-white/5">
-                        <div className="space-y-4">
-                            <div className="h-4 w-32 bg-white/5 rounded-full animate-pulse" />
-                            <div className="h-12 w-64 bg-white/5 rounded-2xl animate-pulse" />
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="h-12 w-12 bg-white/5 rounded-2xl animate-pulse" />
-                            <div className="h-12 w-48 bg-white/5 rounded-2xl animate-pulse" />
-                        </div>
+            <div className="admin-root-v2">
+                {/* Sidebar Skeleton */}
+                <aside className="sidebar admin-sidebar-override">
+                    <div className="px-4 mb-8">
+                        <div className="skeleton h-4 w-24 mb-2 rounded-full opacity-50" />
+                        <div className="skeleton h-8 w-32 rounded-xl" />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="h-48 bg-white/5 rounded-[32px] animate-pulse" />
+                    <div className="space-y-6 px-2">
+                        {[1, 2, 3].map(g => (
+                            <div key={g} className="space-y-3">
+                                <div className="skeleton h-3 w-16 ml-2 opacity-30" />
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="skeleton h-12 w-full rounded-2xl opacity-40" />
+                                ))}
+                            </div>
                         ))}
                     </div>
-                    <div className="h-[400px] bg-white/5 rounded-[40px] animate-pulse" />
-                </div>
+                </aside>
+
+                <main className="admin-main-col">
+                    <div className="admin-content-inner p-6 md:p-12 space-y-12">
+                        <header className="flex justify-between items-end pb-8 border-b border-white/5">
+                            <div className="space-y-4">
+                                <div className="skeleton h-4 w-32 rounded-full opacity-50" />
+                                <div className="skeleton h-12 w-64 rounded-2xl" />
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="skeleton h-12 w-12 rounded-2xl" />
+                                <div className="skeleton h-12 w-48 rounded-2xl" />
+                            </div>
+                        </header>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="skeleton h-48 rounded-[32px]" />
+                            ))}
+                        </div>
+                        <div className="skeleton h-[400px] rounded-[40px]" />
+                    </div>
+                </main>
             </div>
         )
     }
@@ -1267,26 +1294,33 @@ export default function Admin() {
                 reports={reports}
             />
 
-            {/* Mobile Navigation */}
+            {/* MOBILE NAVIGATION TABS - Expanded & Optimized */}
             <div className="lg:hidden flex overflow-x-auto gap-3 p-4 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-[1000] no-scrollbar">
                 {[
+                    { id: 'home', label: 'Home', icon: HiHome, action: () => navigate('/') },
                     { id: 'dashboard', label: 'Command', icon: HiGlobe },
-                    { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp },
-                    { id: 'users', label: 'Identities', icon: HiUsers },
-                    { id: 'posts', label: 'Broadcasts', icon: HiCollection },
-                    { id: 'reports', label: 'Violations', icon: HiFlag }
+                    { id: 'analytics', label: 'Intel', icon: HiTrendingUp },
+                    { id: 'users', label: 'IDs', icon: HiUsers },
+                    { id: 'posts', label: 'Posts', icon: HiCollection },
+                    { id: 'comments', label: 'Chat', icon: HiChatAlt2 },
+                    { id: 'reports', label: 'Alerts', icon: HiFlag },
+                    { id: 'infrastructure', label: 'Core', icon: HiDatabase },
+                    { id: 'audit', label: 'Logs', icon: HiShieldCheck }
                 ].map(item => (
                     <button
                         key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap transition-all ${
+                        onClick={() => {
+                            setActiveTab(item.id)
+                            window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 border ${
                             activeTab === item.id 
-                            ? 'bg-accent text-white shadow-lg shadow-accent/20' 
-                            : 'bg-white/5 text-muted'
+                                ? 'bg-primary text-black font-black border-primary shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)]' 
+                                : 'bg-white/5 text-muted border-white/10 hover:bg-white/10'
                         }`}
                     >
                         <item.icon size={16} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                        <span className="text-xs uppercase tracking-widest">{item.label}</span>
                     </button>
                 ))}
             </div>
@@ -1298,7 +1332,10 @@ export default function Admin() {
                     <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/5">
                         <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                                <div className="px-2 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent text-[9px] font-black uppercase tracking-widest">
+                                <Link to="/" className="lg:hidden flex items-center gap-2 px-3 py-1 rounded bg-accent/10 border border-accent/20 text-accent text-[9px] font-black uppercase tracking-widest hover:bg-accent/20 transition-all">
+                                    <HiExit size={12} /> Exit Console
+                                </Link>
+                                <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-muted text-[9px] font-black uppercase tracking-widest">
                                     Live Console
                                 </div>
                                 <div className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-30">
@@ -1306,13 +1343,7 @@ export default function Admin() {
                                 </div>
                             </div>
                             <h1 className="admin-h1-v2">
-                                {activeTab === 'dashboard' ? 'Governance' : 
-                                    activeTab === 'analytics' ? 'Intelligence' :
-                                    activeTab === 'users' ? 'Identities' :
-                                    activeTab === 'posts' ? 'Broadcasts' :
-                                    activeTab === 'comments' ? 'Transmissions' :
-                                    activeTab === 'reports' ? 'Violations' :
-                                    activeTab}
+                                {navGroups.flatMap(g => g.items).find(i => i.id === activeTab)?.label || activeTab}
                             </h1>
                             <p className="text-muted font-bold text-[11px] uppercase tracking-[0.3em] opacity-40 ml-1">
                                 Active Administrative Session • Restricted Access

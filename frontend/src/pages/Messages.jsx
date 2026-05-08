@@ -353,7 +353,16 @@ export default function Messages() {
             <aside className={`zn-messages-sidebar w-full md:w-[320px] lg:w-[380px] flex-shrink-0 border-r border-border bg-surface-1 z-40 transition-all duration-300 ${convoId ? 'hidden-mobile' : ''}`}>
                 <div className="zn-sidebar-header px-5 pt-8 pb-4">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-black tracking-tighter text-primary uppercase">Messages</h1>
+                        <div className="flex items-center gap-3">
+                            <button 
+                                onClick={() => navigate('/')}
+                                className="p-2 -ml-2 hover:bg-white/5 rounded-xl transition-all group active:scale-95"
+                                title="Return Home"
+                            >
+                                <HiHome size={22} className="text-muted group-hover:text-accent transition-colors" />
+                            </button>
+                            <h1 className="text-2xl font-black tracking-tighter text-primary uppercase">Messages</h1>
+                        </div>
                         <button className="p-2 hover:bg-white/5 rounded-xl transition-colors">
                             <HiPencil size={20} className="text-accent" />
                         </button>
@@ -373,13 +382,13 @@ export default function Messages() {
                 <div className="zn-sidebar-scroll no-scrollbar">
                     <AnimatePresence mode="popLayout">
                         {loadingConvos ? (
-                            <div key="skeleton" className="p-4 space-y-4">
-                                {[...Array(6)].map((_, i) => (
-                                    <div key={i} className="flex gap-4 items-center">
-                                        <div className="skeleton skeleton-avatar" />
+                            <div key="skeleton" className="px-2 py-4 space-y-2">
+                                {[...Array(12)].map((_, i) => (
+                                    <div key={i} className="flex items-center gap-4 p-4">
+                                        <div className="skeleton size-14 rounded-full flex-shrink-0" />
                                         <div className="flex-1 space-y-2.5">
-                                            <div className="skeleton skeleton-text m" />
-                                            <div className="skeleton skeleton-text s opacity-40" />
+                                            <div className="skeleton h-4 w-1/2 rounded-md" />
+                                            <div className="skeleton h-3.5 w-2/3 rounded-md opacity-30" />
                                         </div>
                                     </div>
                                 ))}
@@ -514,12 +523,12 @@ export default function Messages() {
                             <div ref={viewportRef} className="zn-viewport scroll-gpu no-scrollbar">
                                 <AnimatePresence mode="popLayout" initial={false}>
                                     {loadingMsgs ? (
-                                        <div key="chat-skeleton" className="space-y-6 px-4 md:px-6 pt-6">
-                                            {[...Array(4)].map((_, i) => (
-                                                <div key={i} className={`zn-row ${i % 2 === 0 ? 'self' : 'peer'} flex flex-col`}>
-                                                    <div className="zn-bubble-container flex flex-col">
-                                                        <div className="skeleton h-12 rounded-[20px] mb-2 w-48 md:w-56 opacity-20" />
-                                                        <div className="skeleton skeleton-text s opacity-10 w-12" />
+                                        <div key="chat-skeleton" className="flex-1 flex flex-col h-full bg-surface-subtle/5 backdrop-blur-3xl p-6 space-y-12 overflow-hidden">
+                                            {[1, 2, 3, 4, 5].map(i => (
+                                                <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className={`space-y-3 max-w-[70%] w-full ${i % 2 === 0 ? 'flex flex-col items-end' : ''}`}>
+                                                        <div className={`skeleton h-14 w-full md:w-80 rounded-[28px] opacity-${i % 2 === 0 ? '40' : '20'} ${i % 2 === 0 ? 'bg-accent/20 border border-accent/10' : 'border border-white/5'}`} />
+                                                        <div className={`skeleton h-3 w-16 rounded-full opacity-10`} />
                                                     </div>
                                                 </div>
                                             ))}
@@ -529,10 +538,9 @@ export default function Messages() {
                                             item.type === 'date' ? (
                                                 <motion.div 
                                                     key={item.id}
-                                                    layout
                                                     className="flex justify-center my-6 md:my-8"
                                                 >
-                                                    <span className="px-4 py-1 rounded-full bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-muted/60 shadow-sm">
+                                                    <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-muted/60 shadow-sm backdrop-blur-sm">
                                                         {item.value}
                                                     </span>
                                                 </motion.div>
@@ -675,61 +683,66 @@ export default function Messages() {
                         initial={{ opacity: 0 }} 
                         animate={{ opacity: 1 }} 
                         exit={{ opacity: 0 }} 
-                        className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[999] flex items-center justify-center p-6"
+                        className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[5000] flex items-center justify-center p-4 md:p-6"
                     >
                         <motion.div 
-                            initial={{ scale: 0.9, y: 40, opacity: 0 }} 
+                            initial={{ scale: 0.95, y: 20, opacity: 0 }} 
                             animate={{ scale: 1, y: 0, opacity: 1 }} 
-                            exit={{ scale: 0.9, y: 40, opacity: 0 }}
-                            className="w-full max-w-xl bg-surface-1 backdrop-blur-2xl border border-border rounded-[48px] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] relative overflow-hidden"
+                            exit={{ scale: 0.95, y: 20, opacity: 0 }}
+                            className="w-full max-w-lg bg-[#0c0c0e] border border-white/10 rounded-[32px] overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.8)] relative"
                         >
-                            {/* Decorative Background Glow */}
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-accent/20 blur-[120px] pointer-events-none" />
+                            {/* Accent Glow */}
+                            <div className="absolute -top-24 -left-24 w-48 h-48 bg-accent/20 blur-[80px] pointer-events-none" />
                             
-                            <div className="relative z-10">
-                                <div className="flex justify-between items-start mb-8">
+                            <div className="relative z-10 p-8 md:p-10">
+                                <div className="flex justify-between items-center mb-8">
                                     <div>
-                                        <h3 className="text-2xl font-black text-primary tracking-tight uppercase font-display leading-none mb-2">Edit Message</h3>
-                                        <p className="text-muted text-xs font-medium uppercase tracking-widest">Updating your thoughts</p>
+                                        <h3 className="text-xl font-black text-white tracking-tight uppercase leading-none mb-1.5">Edit Message</h3>
+                                        <p className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">Updating your context</p>
                                     </div>
-                                    <button onClick={() => setEditingId(null)} className="w-10 h-10 rounded-2xl hover:bg-surface-subtle flex items-center justify-center text-text-3 transition-all hover:scale-110 active:scale-90">
-                                        <HiX size={24} />
-                                    </button>
-                                </div>
-                                
-                                <div className="relative mb-8 group">
-                                    <textarea 
-                                        value={editingText}
-                                        onChange={(e) => setEditingText(e.target.value)}
-                                        className="w-full bg-surface-2 border border-border rounded-[32px] p-8 text-primary text-lg font-medium outline-none focus:border-accent/40 focus:ring-8 focus:ring-accent/5 min-h-[220px] transition-all placeholder:text-muted"
-                                        placeholder="Type your message..."
-                                        autoFocus
-                                    />
-                                    <div className="absolute bottom-6 right-8 text-[10px] font-black uppercase tracking-widest text-muted select-none">
-                                        Editing Mode
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-center justify-end gap-4">
                                     <button 
                                         onClick={() => setEditingId(null)} 
-                                        className="px-8 py-4 rounded-2xl font-black text-secondary hover:text-primary transition-all hover:bg-surface-subtle active:scale-95"
+                                        className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all active:scale-90"
                                     >
-                                        Discard
+                                        <HiX size={20} />
                                     </button>
-                                    <button 
-                                        onClick={async () => {
-                                            if (!editingText.trim()) return
-                                            try {
-                                                await editMutation.mutateAsync({ messageId: editingId, text: editingText })
-                                                setEditingId(null)
-                                                toast.success('Message updated')
-                                            } catch { toast.error('Update failed') }
-                                        }}
-                                        className="px-10 py-4 bg-accent rounded-2xl font-black text-white shadow-2xl transition-all hover:scale-105 active:scale-95 hover:shadow-accent/40"
-                                    >
-                                        Save Changes
-                                    </button>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    <div className="relative group">
+                                        <textarea 
+                                            value={editingText}
+                                            onChange={(e) => setEditingText(e.target.value)}
+                                            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-6 text-white text-base font-medium outline-none focus:border-accent/40 focus:ring-4 focus:ring-accent/5 min-h-[180px] transition-all resize-none placeholder:text-muted/30"
+                                            placeholder="Type your message..."
+                                            autoFocus
+                                        />
+                                        <div className="absolute bottom-4 right-5 text-[9px] font-black uppercase tracking-widest text-muted/40 select-none bg-[#0c0c0e] px-2">
+                                            Live Editing
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        <button 
+                                            onClick={() => setEditingId(null)} 
+                                            className="flex-1 py-4 rounded-2xl bg-white/5 font-black text-[10px] uppercase tracking-[0.2em] text-white/60 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+                                        >
+                                            Discard
+                                        </button>
+                                        <button 
+                                            onClick={async () => {
+                                                if (!editingText.trim()) return
+                                                try {
+                                                    await editMutation.mutateAsync({ messageId: editingId, text: editingText })
+                                                    setEditingId(null)
+                                                    toast.success('Message synchronized')
+                                                } catch { toast.error('Sync failed') }
+                                            }}
+                                            className="flex-1 py-4 bg-accent rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white shadow-xl shadow-accent/10 hover:shadow-accent/30 transition-all hover:scale-[1.02] active:scale-95"
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

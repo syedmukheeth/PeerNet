@@ -289,28 +289,35 @@ export default function PostDetail() {
     }, [replyingTo, fetchAISuggestions])
 
     if (loading) return (
-        <div key="post-detail-skeleton" className="post-detail-card min-h-[600px]">
-            <div className="post-detail-media skeleton" />
-            <div className="post-detail-info p-6 space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="skeleton skeleton-avatar w-10 h-10" />
-                    <div className="skeleton skeleton-text w-32 h-4 !mb-0" />
+        <div key="post-detail-skeleton" className="post-detail-card overflow-hidden">
+            <div className="post-detail-media skeleton min-h-[400px] md:min-h-[600px]" />
+            <div className="post-detail-info p-6 space-y-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 border-b border-border/10 pb-6">
+                    <div className="skeleton size-10 rounded-full" />
+                    <div className="skeleton h-4 w-32 rounded-md" />
                 </div>
-                <div className="space-y-3">
-                    <div className="skeleton skeleton-text w-full h-4 !mb-0" />
-                    <div className="skeleton skeleton-text w-full h-4 !mb-0" />
-                    <div className="skeleton skeleton-text w-2/3 h-4 !mb-0" />
-                </div>
-                <div className="pt-8 space-y-6">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="flex gap-3">
-                            <div className="skeleton skeleton-avatar w-8 h-8" />
-                            <div className="flex-1 space-y-2">
-                                <div className="skeleton skeleton-text w-24 h-3 !mb-0" />
-                                <div className="skeleton skeleton-text w-full h-3 !mb-0" />
+                <div className="flex-1 space-y-8 py-4 overflow-hidden">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex gap-4 items-start">
+                            <div className="skeleton size-8 rounded-full flex-shrink-0" />
+                            <div className="flex-1 space-y-2.5 pt-1">
+                                <div className="skeleton h-3.5 w-1/4 rounded-md" />
+                                <div className="skeleton h-3.5 w-full rounded-md opacity-40" />
+                                <div className="skeleton h-3.5 w-2/3 rounded-md opacity-20" />
                             </div>
                         </div>
                     ))}
+                </div>
+                <div className="border-t border-border/10 pt-6 space-y-4">
+                    <div className="flex justify-between">
+                        <div className="flex gap-4">
+                            <div className="skeleton size-7 rounded-md" />
+                            <div className="skeleton size-7 rounded-md" />
+                            <div className="skeleton size-7 rounded-md" />
+                        </div>
+                        <div className="skeleton size-7 rounded-md" />
+                    </div>
+                    <div className="skeleton h-4 w-24 rounded-md" />
                 </div>
             </div>
         </div>

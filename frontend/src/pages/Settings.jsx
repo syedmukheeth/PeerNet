@@ -117,8 +117,19 @@ export default function Settings() {
 
     if (!mounted || !user) {
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '100px 0' }}>
-                <div className="spinner" style={{ width: 30, height: 30 }} />
+            <div className="settings-page p-6 max-w-2xl mx-auto space-y-12 animate-pulse">
+                <div className="space-y-4">
+                    <div className="skeleton h-8 w-32 rounded-lg" />
+                    <div className="skeleton h-4 w-64 rounded-md opacity-50" />
+                </div>
+                <div className="space-y-8">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="space-y-4">
+                            <div className="skeleton h-4 w-24 rounded-md" />
+                            <div className="skeleton h-32 w-full rounded-2xl" />
+                        </div>
+                    ))}
+                </div>
             </div>
         )
     }
