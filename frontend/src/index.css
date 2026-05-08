@@ -8143,3 +8143,104 @@ textarea:focus-visible {
         height: auto !important; 
     } 
 }
+
+/* ========================================================================================================================================================================================================================================
+   MOBILE BLOCKER - Desktop Only Enforcement
+   ======================================================================================================================================================================================================================================== */
+#desktop-only-blocker {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #050505;
+  color: #fafafa;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+#desktop-only-blocker::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(0, 149, 246, 0.05) 0%, transparent 70%);
+  z-index: -1;
+  animation: pulse 10s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+.blocker-content {
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  animation: fadeIn 0.8s var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.blocker-img {
+  width: 240px;
+  height: auto;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 20px rgba(0, 149, 246, 0.2));
+}
+
+.blocker-title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.blocker-text {
+  font-size: 1.1rem;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.blocker-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+@media (max-width: 1024px) {
+  #root {
+    display: none !important;
+  }
+  #desktop-only-blocker {
+    display: flex !important;
+  }
+  body {
+    overflow: hidden !important;
+    background: #050505 !important;
+  }
+}
+

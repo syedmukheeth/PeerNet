@@ -43,46 +43,45 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="admin-sidebar-v2 hidden lg:block">
-            <div className="admin-glass-v2 p-8 rounded-[40px] h-full flex flex-col justify-between border-white/5">
-                <div className="space-y-10">
-                    <div className="px-2">
-                        <div className="flex items-center gap-3 mb-1">
-                            <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)]" />
-                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Governance v2</span>
-                        </div>
-                        <h2 className="text-xl font-black text-primary tracking-tighter uppercase">Command</h2>
+        <aside className="sidebar admin-sidebar-override hidden lg:flex">
+            {/* Top: Branding */}
+            <div className="sidebar-logo-row">
+                <div className="flex flex-col gap-1 px-3">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
+                        <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Governance v2</span>
                     </div>
-
-                    <nav className="space-y-8">
-                        {navGroups.map(group => (
-                            <div key={group.title}>
-                                <div className="text-[9px] font-black text-muted/30 uppercase tracking-[0.3em] mb-4 px-2">{group.title}</div>
-                                <div className="space-y-1">
-                                    {group.items.map(item => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => setActiveTab(item.id)}
-                                            className={`admin-nav-item-v2 ${activeTab === item.id ? 'active' : ''}`}
-                                        >
-                                            <item.icon size={20} className={activeTab === item.id ? 'text-white' : 'text-muted/40'} />
-                                            <span className="flex-1">{item.label}</span>
-                                            {item.badge && (
-                                                <span className="px-1.5 py-0.5 rounded-md bg-error/20 text-error text-[9px] font-black border border-error/20">
-                                                    {item.badge}
-                                                </span>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </nav>
+                    <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none">Command</h2>
                 </div>
+            </div>
 
-                <div className="pt-8 border-t border-white/5">
-                    <InfrastructurePulse pulse={pulse} />
-                </div>
+            {/* Middle: Navigation */}
+            <nav className="sidebar-nav no-scrollbar px-1">
+                {navGroups.map(group => (
+                    <div key={group.title} className="mb-6">
+                        <div className="text-[9px] font-black text-muted/30 uppercase tracking-[0.3em] mb-3 px-4">{group.title}</div>
+                        <div className="space-y-1">
+                            {group.items.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`ig-link w-full border-none bg-transparent text-left ${activeTab === item.id ? 'ig-link--active' : ''}`}
+                                >
+                                    <div className="ig-icon-wrap">
+                                        <item.icon size={22} className={`ig-icon ${activeTab === item.id ? 'text-accent' : 'text-muted/50'}`} />
+                                        {item.badge && <span className="ig-badge">{item.badge}</span>}
+                                    </div>
+                                    <span className={`ig-label ${activeTab === item.id ? 'font-bold' : ''}`}>{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </nav>
+
+            {/* Bottom: Infrastructure */}
+            <div className="sidebar-footer border-t border-white/5 pt-6">
+                <InfrastructurePulse pulse={pulse} />
             </div>
         </aside>
     )
@@ -1234,43 +1233,43 @@ export default function Admin() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-accent/30 selection:text-white">
-            <div className="admin-page-v2">
-                {/* Sidebar */}
-                <AdminSidebar 
-                    activeTab={activeTab} 
-                    setActiveTab={setActiveTab} 
-                    pulse={pulse} 
-                    stats={stats}
-                    reports={reports}
-                />
+        <div className="admin-root-v2">
+            {/* Sidebar */}
+            <AdminSidebar 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab} 
+                pulse={stats?.health}
+                stats={stats}
+                reports={reports}
+            />
 
-                {/* Mobile Navigation (Visible only on small screens) */}
-                <div className="lg:hidden flex overflow-x-auto gap-3 pb-6 no-scrollbar">
-                    {[
-                        { id: 'dashboard', label: 'Command', icon: HiGlobe },
-                        { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp },
-                        { id: 'users', label: 'Identities', icon: HiUsers },
-                        { id: 'posts', label: 'Broadcasts', icon: HiCollection },
-                        { id: 'reports', label: 'Violations', icon: HiFlag }
-                    ].map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => setActiveTab(item.id)}
-                            className={`flex items-center gap-3 px-6 py-4 rounded-2xl whitespace-nowrap transition-all border ${
-                                activeTab === item.id 
-                                ? 'bg-accent border-accent/50 text-white shadow-xl shadow-accent/20' 
-                                : 'bg-white/5 border-white/5 text-muted hover:border-white/10'
-                            }`}
-                        >
-                            <item.icon size={18} />
-                            <span className="text-sm font-bold tracking-tight">{item.label}</span>
-                        </button>
-                    ))}
-                </div>
+            {/* Mobile Navigation */}
+            <div className="lg:hidden flex overflow-x-auto gap-3 p-4 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-[1000] no-scrollbar">
+                {[
+                    { id: 'dashboard', label: 'Command', icon: HiGlobe },
+                    { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp },
+                    { id: 'users', label: 'Identities', icon: HiUsers },
+                    { id: 'posts', label: 'Broadcasts', icon: HiCollection },
+                    { id: 'reports', label: 'Violations', icon: HiFlag }
+                ].map(item => (
+                    <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap transition-all ${
+                            activeTab === item.id 
+                            ? 'bg-accent text-white shadow-lg shadow-accent/20' 
+                            : 'bg-white/5 text-muted'
+                        }`}
+                    >
+                        <item.icon size={16} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                    </button>
+                ))}
+            </div>
 
-                {/* Main Content Area */}
-                <main className="flex-1 min-w-0 space-y-12">
+            {/* Main Content Area */}
+            <main className="admin-main-col">
+                <div className="admin-content-inner p-6 md:p-12 space-y-12">
                     {/* Header */}
                     <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/5">
                         <div className="space-y-3">
@@ -1334,8 +1333,30 @@ export default function Admin() {
                             </motion.div>
                         </AnimatePresence>
                     </div>
-                </main>
-            </div>
+
+                    <footer className="mt-20 py-10 border-t border-white/5 opacity-40">
+                        <div className="max-w-[1700px] mx-auto">
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                                <div className="flex items-center gap-8">
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Infrastructure</span>
+                                        <span className="text-[11px] font-bold text-primary tracking-widest uppercase">v2.0.0-GOV</span>
+                                    </div>
+                                    <div className="h-10 w-[1px] bg-white/10" />
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Status</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                            <span className="text-[11px] font-bold text-success uppercase tracking-widest">Nominal</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="text-[9px] font-bold text-muted uppercase tracking-[0.4em] opacity-20">© 2026 PeerNet Governance • Restricted Infrastructure Access</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </main>
 
             {/* Global Overlays */}
             <AnimatePresence>
@@ -1436,28 +1457,6 @@ export default function Admin() {
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <footer className="mt-20 py-10 border-t border-white/5 opacity-40">
-                <div className="max-w-[1700px] mx-auto px-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="flex items-center gap-8">
-                            <div className="flex flex-col">
-                                <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Infrastructure</span>
-                                <span className="text-[11px] font-bold text-primary tracking-widest uppercase">v2.0.0-GOV</span>
-                            </div>
-                            <div className="h-10 w-[1px] bg-white/10" />
-                            <div className="flex flex-col">
-                                <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] mb-1.5 opacity-50">Status</span>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                                    <span className="text-[11px] font-bold text-success uppercase tracking-widest">Nominal</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p className="text-[9px] font-bold text-muted uppercase tracking-[0.4em] opacity-20">© 2026 PeerNet Governance • Restricted Infrastructure Access</p>
-                    </div>
-                </div>
-            </footer>
         </div>
     )
 }

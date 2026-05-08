@@ -22,21 +22,28 @@
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 255, 255, 0));
 }
 
-.admin-page-v2 {
-    width: 100%;
-    max-width: 1700px;
-    margin: 0 auto;
-    padding: 2rem;
-    min-height: 100vh;
+.admin-root-v2 {
     display: flex;
-    flex-direction: column;
-    font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+    min-height: 100vh;
+    background: #000;
+    color: #fff;
+    overflow-x: hidden;
 }
 
-@media (min-width: 1024px) {
-    .admin-page-v2 {
-        flex-direction: row;
-        gap: 3rem;
+.admin-main-col {
+    flex: 1;
+    min-width: 0;
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+@media (max-width: 1024px) {
+    .admin-root-v2 {
+        flex-direction: column;
+    }
+    .admin-main-col {
+        margin-left: 0;
     }
 }
 
@@ -306,13 +313,10 @@
 }
 
 /* Command Center Sidebar - Floating */
-.admin-sidebar-v2 {
-    width: 300px;
-    flex-shrink: 0;
-    position: sticky;
-    top: 2rem;
-    height: calc(100vh - 4rem);
-    z-index: 100;
+.admin-sidebar-override {
+    background: rgba(5, 5, 5, 0.8);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Stat Cards 2.0 */
@@ -347,10 +351,10 @@
 
 /* Typography Scale */
 .admin-h1-v2 {
-    font-size: clamp(3rem, 7vw, 6rem);
+    font-size: clamp(2rem, 5vw, 4rem);
     font-weight: 900;
-    letter-spacing: -0.07em;
-    line-height: 0.75;
+    letter-spacing: -0.05em;
+    line-height: 1;
     text-transform: uppercase;
     font-family: var(--font-display, 'Syne', sans-serif);
     background: linear-gradient(to bottom, #fff 40%, rgba(255, 255, 255, 0.2) 100%);
@@ -358,7 +362,6 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
 }
 
 /* Table V2 */
