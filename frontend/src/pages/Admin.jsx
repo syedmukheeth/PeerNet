@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
     HiUsers, HiCollection, HiTrash, HiRefresh, HiArrowRight,
     HiKey, HiDatabase, HiGlobe, HiSearch, HiChatAlt2, HiFlag, 
     HiTrendingUp, HiCog, HiShieldCheck, HiCheck, HiBan, HiSpeakerphone,
     HiCubeTransparent, HiServer, HiLightningBolt, HiFingerPrint,
-    HiClock, HiDotsVertical, HiX, HiAdjustments, HiChevronRight, HiTerminal, HiDatabase as HiHardDrive
+    HiClock, HiDotsVertical, HiX, HiAdjustments, HiChevronRight, HiTerminal, HiDatabase as HiHardDrive,
+    HiHome, HiOutlineLogout as HiExit
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -46,13 +48,16 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
         <aside className="sidebar admin-sidebar-override">
             {/* Top: Branding */}
             <div className="sidebar-logo-row mb-8">
-                <div className="flex flex-col gap-1 px-4">
+                <Link to="/" className="flex flex-col gap-1 px-4 group">
                     <div className="flex items-center gap-2.5">
                         <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
                         <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Governance v2</span>
                     </div>
-                    <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none mt-1">Command</h2>
-                </div>
+                    <div className="flex items-center gap-2 mt-1">
+                        <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none group-hover:text-accent transition-colors">Command</h2>
+                        <HiHome size={18} className="text-muted/20 group-hover:text-accent transition-all opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
+                    </div>
+                </Link>
             </div>
 
             {/* Middle: Navigation */}
@@ -90,7 +95,16 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
             </nav>
 
             {/* Bottom: Infrastructure */}
-            <div className="sidebar-footer border-t border-white/5 pt-4">
+            <div className="sidebar-footer border-t border-white/5 pt-4 space-y-4">
+                <Link 
+                    to="/" 
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-muted hover:bg-white/5 hover:text-primary transition-all group"
+                >
+                    <div className="ig-icon-wrap !bg-error/10 !border-error/20">
+                        <HiExit size={20} className="text-error group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="text-[13px] font-black uppercase tracking-widest">Exit Console</span>
+                </Link>
                 <InfrastructurePulse pulse={pulse} />
             </div>
         </aside>
