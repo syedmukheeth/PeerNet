@@ -13,7 +13,15 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
         setLoading(true)
         setUsers([])
         api.get(`/users/${userId}/${type}`)
-            .then(({ data }) => setUsers(data.data || []))
+            .then(({ data }) => {
+                // Ensure we handle different API response shapes (some might return the array directly in data)
+                const list = Array.isArray(data) ? data : (data.data || [])
+                setUsers(list)
+            })
+            .catch(err => {
+                console.error("Failed to fetch user list:", err)
+                setUsers([])
+            })
             .finally(() => setLoading(false))
     }, [isOpen, userId, type])
 
@@ -60,16 +68,17 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                                 <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
                                     <div className="spinner" />
                                 </div>
-                            ) : users.length === 0 ? (
+                            ) : (!users || users.length === 0) ? (
                                 <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-3)' }}>
                                     <div style={{ fontSize: 38, marginBottom: 12 }}><HiUser /></div>
                                     <p style={{ fontWeight: 600, color: 'var(--text-2)' }}>No users yet</p>
                                 </div>
                             ) : (
                                 users.map(u => {
-                                    const avatar = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
+                                    if (!u) return null;
+                                    const avatar = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username || 'User'}&background=6366F1&color=fff`
                                     return (
-                                        <Link key={u._id} to={`/profile/${u._id}`} onClick={onClose}
+                                        <Link key={u._id || Math.random()} to={`/profile/${u._id}`} onClick={onClose}
                                             style={{ textDecoration: 'none', color: 'inherit' }}>
                                             <div style={{
                                                 display: 'flex', alignItems: 'center', gap: 13,
@@ -80,7 +89,7 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                                                 <img src={avatar} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block' }} alt="" />
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 700, fontSize: 14 }}>
-                                                        {u.username}
+                                                        {u.username || 'Anonymous'}
                                                         {u.isVerified && <HiBadgeCheck style={{ color: 'var(--accent)', fontSize: 14 }} />}
                                                     </div>
                                                     {u.fullName && (
