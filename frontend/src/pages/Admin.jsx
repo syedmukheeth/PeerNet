@@ -43,35 +43,45 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
     ]
 
     return (
-        <aside className="sidebar admin-sidebar-override hidden lg:flex">
+        <aside className="sidebar admin-sidebar-override">
             {/* Top: Branding */}
-            <div className="sidebar-logo-row">
-                <div className="flex flex-col gap-1 px-3">
+            <div className="sidebar-logo-row mb-8">
+                <div className="flex flex-col gap-1 px-4">
                     <div className="flex items-center gap-2.5">
                         <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
                         <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Governance v2</span>
                     </div>
-                    <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none">Command</h2>
+                    <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none mt-1">Command</h2>
                 </div>
             </div>
 
             {/* Middle: Navigation */}
-            <nav className="sidebar-nav no-scrollbar px-1">
+            <nav className="sidebar-nav no-scrollbar px-2 flex-1">
                 {navGroups.map(group => (
-                    <div key={group.title} className="mb-6">
-                        <div className="text-[9px] font-black text-muted/30 uppercase tracking-[0.3em] mb-3 px-4">{group.title}</div>
-                        <div className="space-y-1">
+                    <div key={group.title} className="mb-8">
+                        <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-4 px-4 opacity-50">{group.title}</div>
+                        <div className="flex flex-col gap-1.5">
                             {group.items.map(item => (
                                 <button
                                     key={item.id}
                                     onClick={() => setActiveTab(item.id)}
-                                    className={`ig-link w-full border-none bg-transparent text-left ${activeTab === item.id ? 'ig-link--active' : ''}`}
+                                    className={`ig-link w-full border-none bg-transparent text-left px-4 py-3.5 rounded-2xl flex items-center gap-4 transition-all duration-300 ${
+                                        activeTab === item.id 
+                                        ? 'bg-accent/10 text-accent' 
+                                        : 'text-muted hover:bg-white/5 hover:text-primary'
+                                    }`}
                                 >
-                                    <div className="ig-icon-wrap">
-                                        <item.icon size={22} className={`ig-icon ${activeTab === item.id ? 'text-accent' : 'text-muted/50'}`} />
-                                        {item.badge && <span className="ig-badge">{item.badge}</span>}
+                                    <div className="relative">
+                                        <item.icon size={22} className={activeTab === item.id ? 'text-accent' : 'text-muted/60'} />
+                                        {item.badge && (
+                                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-error text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-black">
+                                                {item.badge}
+                                            </span>
+                                        )}
                                     </div>
-                                    <span className={`ig-label ${activeTab === item.id ? 'font-bold' : ''}`}>{item.label}</span>
+                                    <span className={`text-[13px] tracking-tight ${activeTab === item.id ? 'font-black' : 'font-bold'}`}>
+                                        {item.label}
+                                    </span>
                                 </button>
                             ))}
                         </div>
@@ -80,7 +90,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
             </nav>
 
             {/* Bottom: Infrastructure */}
-            <div className="sidebar-footer border-t border-white/5 pt-6">
+            <div className="sidebar-footer border-t border-white/5 pt-4">
                 <InfrastructurePulse pulse={pulse} />
             </div>
         </aside>
