@@ -940,15 +940,20 @@ textarea:focus-visible {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: rgba(5, 5, 5, 0.8);
+  background: var(--bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid var(--border-md);
+  border-right: 1px solid var(--border);
   z-index: var(--z-fixed);
-  padding: 20px 12px;
+  padding: 24px 16px;
   overflow-y: visible;
   scrollbar-width: none;
-  transition: width 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  transition: all 0.3s var(--ease-out);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .sidebar {
+  background: rgba(5, 5, 5, 0.8);
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
 }
 
@@ -1084,7 +1089,7 @@ textarea:focus-visible {
 }
 
 .logo-gradient-text {
-  background: linear-gradient(to right, #fff, #a1a1aa);
+  background: var(--logo-gradient);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1092,7 +1097,7 @@ textarea:focus-visible {
 }
 
 .sidebar-logo-row {
-  margin-bottom: 36px;
+  margin-bottom: 48px;
   padding: 0 12px;
 }
 
@@ -1112,17 +1117,21 @@ textarea:focus-visible {
 
 .peernetLogo {
   font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
   color: var(--text-1);
+  background: var(--logo-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .sidebar-nav {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
@@ -1152,7 +1161,7 @@ textarea:focus-visible {
 }
 
 .ig-link--active {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--accent-low);
 }
 
 .ig-link--active::before {
@@ -1172,7 +1181,8 @@ textarea:focus-visible {
 }
 
 .ig-link--active .ig-icon {
-  transform: scale(1.05);
+  transform: scale(1.1);
+  color: var(--accent);
 }
 
 .ig-icon-wrap {
@@ -1191,11 +1201,12 @@ textarea:focus-visible {
 }
 
 .ig-label {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   margin-left: 16px;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   transition: all 0.2s ease;
+  color: var(--text-1);
 }
 
 .ig-badge {
@@ -1287,14 +1298,18 @@ textarea:focus-visible {
 
 .profile-card-role {
   font-size: 11px;
-  color: var(--text-3);
+  color: var(--text-2);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
+  letter-spacing: 0.1em;
+  font-weight: 800;
 }
 
 .sidebar-more-wrap {
   position: relative;
+}
+
+.ig-link--active.show-more .ig-icon {
+  color: var(--accent);
 }
 
 .ig-more-popup {
@@ -10313,14 +10328,14 @@ textarea:focus-visible {
   }
 
   .sidebar {
-    padding: 20px 0;
+    padding: 24px 0;
     align-items: center;
   }
 
   .sidebar-logo-row {
     padding: 0;
     justify-content: center;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
   }
 
   .peernetLogo,
