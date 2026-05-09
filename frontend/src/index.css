@@ -9772,7 +9772,7 @@ textarea:focus-visible {
     display: flex !important;
     flex-direction: column;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important; /* Allow flex to determine height */
     flex: 1 !important;
     min-height: 0 !important;
     overflow: hidden;
@@ -9784,10 +9784,10 @@ textarea:focus-visible {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important; /* Critical: Remove 100% height to let footer sit below it */
     flex: 1 !important;
     min-height: 0 !important;
-    max-height: 100% !important;
+    max-height: none !important;
     overflow: hidden;
   }
 
