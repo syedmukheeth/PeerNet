@@ -1079,7 +1079,7 @@ textarea:focus-visible {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 24px 20px;
+  padding: 12px 24px 20px;
   box-sizing: border-box;
 }
 
@@ -1145,7 +1145,7 @@ textarea:focus-visible {
 
 .sp-container {
   width: 100%;
-  padding: 24px 20px;
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
   background: var(--bg-card);
@@ -1336,7 +1336,7 @@ textarea:focus-visible {
   gap: 48px;
   align-items: flex-start;
   justify-content: center;
-  padding: 20px 20px 64px;
+  padding: 0 20px 64px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;

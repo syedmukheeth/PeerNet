@@ -221,7 +221,7 @@ export default function Feed() {
 
     return (
         <motion.div variants={pageVariants} initial="initial" animate="animate">
-            <div className="l-feed-grid md:pt-6">
+            <div className="l-feed-grid">
 
                 {/* ── Feed column ───────────── */}
                 <div className="l-main-col l-stack">
