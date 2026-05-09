@@ -57,7 +57,19 @@ const ConvoItem = ({ c, isActive, user, onClick }) => {
  * MESSAGE BUBBLE
  */
 const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQuery, pos, isNewGroup }) => {
-    const reactions = m.reactions || []
+    const reactions = useMemo(() => {
+        const raw = m.reactions || []
+        const map = {}
+        raw.forEach(r => {
+            if (!map[r.emoji]) {
+                map[r.emoji] = { emoji: r.emoji, count: 0, me: false }
+            }
+            map[r.emoji].count += (r.count || 1)
+            if (r.me) map[r.emoji].me = true
+        })
+        return Object.values(map)
+    }, [m.reactions])
+
     const quickEmojis = ['❤️', '😂', '🔥', '👍', '😢', '😮']
 
     const renderContent = () => {
@@ -217,8 +229,19 @@ export default function Messages() {
     const groupedMessages = useMemo(() => {
         const groups = []
         let lastDate = ''
+        
+        // DEDUPLICATE MESSAGES BY ID
+        const uniqueMessages = []
+        const seenIds = new Set()
+        
+        filteredMessages.forEach(m => {
+            if (!seenIds.has(m._id)) {
+                seenIds.add(m._id)
+                uniqueMessages.push(m)
+            }
+        })
 
-        filteredMessages.forEach((m, idx) => {
+        uniqueMessages.forEach((m, idx) => {
             const date = new Date(m.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
             if (date !== lastDate) {
                 groups.push({ type: 'date', value: date, id: `date-${date}` })

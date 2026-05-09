@@ -118,10 +118,27 @@ export const useMessageActions = (convoId) => {
             queryClient.setQueryData(['messages', convoId], old => old?.map(m => {
                 if (m._id !== messageId) return m
                 const reactions = m.reactions || []
-                const existing = reactions.find(r => r.emoji === emoji)
-                if (existing) {
-                    return { ...m, reactions: reactions.filter(r => r.emoji !== emoji) }
+                const existingIndex = reactions.findIndex(r => r.emoji === emoji)
+                
+                if (existingIndex > -1) {
+                    const existing = reactions[existingIndex]
+                    if (existing.me) {
+                        // User already reacted, so we're removing it
+                        const newReactions = [...reactions]
+                        if (existing.count > 1) {
+                            newReactions[existingIndex] = { ...existing, count: existing.count - 1, me: false }
+                        } else {
+                            newReactions.splice(existingIndex, 1)
+                        }
+                        return { ...m, reactions: newReactions }
+                    } else {
+                        // Someone else reacted, we're adding our reaction to the group
+                        const newReactions = [...reactions]
+                        newReactions[existingIndex] = { ...existing, count: existing.count + 1, me: true }
+                        return { ...m, reactions: newReactions }
+                    }
                 }
+                // Brand new reaction for this emoji
                 return { ...m, reactions: [...reactions, { emoji, count: 1, me: true }] }
             }))
             return { prev }
