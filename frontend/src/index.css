@@ -9815,3 +9815,173 @@ textarea:focus-visible {
 @media (max-width: 1263px) {
   .zn-back-btn { display: flex; }
 }
+
+/* ============================================================
+   MESSAGING LAYOUT FIX - COMPOSER & SCROLL
+   Ensures the footer (composer) is always visible above bottom nav
+   and the viewport is properly scrollable on mobile/tablet
+   ============================================================ */
+
+/* Desktop */
+.zn-messages-root {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100vh - 60px);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.zn-chat-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.zn-chat-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.zn-viewport {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  min-height: 0;
+}
+
+.zn-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--surface-1);
+  padding: 12px 16px;
+}
+
+.zn-messages-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  min-width: 260px;
+  height: 100%;
+  border-right: 1px solid var(--border);
+  background: var(--surface-1);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.zn-sidebar-header {
+  flex-shrink: 0;
+  padding: 20px 16px 12px;
+}
+
+.zn-sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1263px) {
+  .zn-messages-root {
+    margin-left: 72px;
+    height: calc(100vh - 0px);
+  }
+  .zn-messages-sidebar {
+    width: 280px;
+  }
+}
+
+/* Mobile - DEFINITIVE FIX */
+@media (max-width: 767px) {
+  /* Position the whole root between the header and bottom nav */
+  .zn-messages-root {
+    position: fixed !important;
+    top: 60px !important;       /* below mobile top header */
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 65px !important;    /* above mobile bottom nav */
+    height: auto !important;
+    margin: 0 !important;
+    flex-direction: column;
+    z-index: 50;
+    background: var(--bg);
+  }
+
+  /* Default: show only sidebar (list) */
+  .zn-messages-sidebar {
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  /* Default: hide chat area */
+  .zn-chat-main {
+    display: none !important;
+  }
+
+  /* When chat is active: hide list, show chat */
+  .zn-messages-root.chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .zn-messages-root.chat-active .zn-chat-main {
+    display: flex !important;
+    flex-direction: column;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden;
+  }
+
+  /* Chat inner must fill the full height and let footer sit at bottom */
+  .zn-chat-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Viewport fills remaining space and scrolls */
+  .zn-viewport {
+    flex: 1;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  /* Footer stays at the bottom, never hidden */
+  .zn-footer {
+    flex-shrink: 0 !important;
+    padding: 10px 12px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    background: var(--surface-1) !important;
+    border-top: 1px solid var(--border) !important;
+  }
+
+  /* Main-col must NOT add padding for messages page */
+  .main-col {
+    padding-bottom: 0;
+  }
+}
+
+/* Messages page: override main-col padding so zn-messages-root (position:fixed) works correctly */
+@media (max-width: 767px) {
+  /* When on messages page, the fixed zn-messages-root handles layout.
+     We must zero out the main-col padding-bottom to avoid double-spacing. */
+  body:has(.zn-messages-root) .main-col {
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+}
