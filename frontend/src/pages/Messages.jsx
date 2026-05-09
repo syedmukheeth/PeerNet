@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import EmojiPicker from 'emoji-picker-react'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 
 import {
     useConvos, useMessages, useSendMessage,
@@ -176,6 +177,7 @@ export default function Messages() {
     const { convoId } = useParams()
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { isDark } = useTheme()
 
     const {
         data: convos = [],
@@ -619,7 +621,7 @@ export default function Messages() {
                                                         </div>
                                                         <EmojiPicker 
                                                             onEmojiClick={handleEmojiClick}
-                                                            theme="dark"
+                                                            theme={isDark ? 'dark' : 'light'}
                                                             searchDisabled={false}
                                                             skinTonesDisabled
                                                             width="100%"
