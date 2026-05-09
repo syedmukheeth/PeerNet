@@ -7961,7 +7961,11 @@ textarea:focus-visible {
   .create-post-card {
     max-width: 100%;
     border-radius: 20px 20px 0 0;
-    max-height: 90vh;
+    max-height: 95vh;
+  }
+
+  .create-post-footer {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .modal-content {
@@ -7971,8 +7975,16 @@ textarea:focus-visible {
   /* Story creator mobile */
   .l-status-modal {
     max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
+    max-height: 95vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .status-footer-actions {
+    padding: 16px !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    background: var(--surface-1);
+    border-top: 1px solid var(--border);
+    margin: 0 !important;
   }
 
   .status-preview-canvas {
