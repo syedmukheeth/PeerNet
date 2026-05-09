@@ -10414,6 +10414,12 @@ textarea:focus-visible {
   }
 
   /* Feed and main col */
+  .main-col {
+    width: calc(100% - var(--sidebar-actual-w)) !important;
+    margin-left: var(--sidebar-actual-w) !important;
+    flex: none !important;
+  }
+
   .feed-layout {
     justify-content: center;
   }
@@ -11819,7 +11825,7 @@ textarea:focus-visible {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: calc(100vh - 60px);
+  height: 100dvh;
   background: var(--bg);
   overflow: hidden;
   position: relative;
@@ -12242,8 +12248,8 @@ textarea:focus-visible {
 /* Tablet: side-by-side DM list + chat, both visible */
 @media (min-width: 768px) and (max-width: 1263px) {
   .zn-messages-root {
-    height: calc(100vh - 60px);
-    /* Parent .main-col already has margin-left for sidebar */
+    height: 100dvh;
+    /* Parent .main-col handles the sidebar offset */
     width: 100%;
     margin-left: 0;
     flex-direction: row;
@@ -13095,8 +13101,8 @@ textarea:focus-visible {
 /* Tablet — side-by-side layout */
 @media (min-width: 768px) and (max-width: 1263px) {
   .zn-messages-root {
-    height: calc(100vh - 60px);
-    /* Parent .main-col already has margin-left for sidebar */
+    height: 100dvh;
+    /* Parent .main-col handles the sidebar offset */
     width: 100%;
     margin-left: 0;
     flex-direction: row !important;
