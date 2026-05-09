@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { 
-    HiDotsVertical, HiPaperClip, HiEmojiHappy, 
+import {
+    HiDotsVertical, HiPaperClip, HiEmojiHappy,
     HiReply, HiPencil, HiTrash, HiSearch,
     HiX, HiCheckCircle, HiMail, HiArrowRight, HiArrowLeft, HiHome
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 
-import { 
-    useConvos, useMessages, useSendMessage, 
-    useMessageActions, useConvoActions, useChatState, useMarkRead 
+import {
+    useConvos, useMessages, useSendMessage,
+    useMessageActions, useConvoActions, useChatState, useMarkRead
 } from '../hooks/useChat'
 import { timeago as formatTime } from '../utils/timeago'
 import toast from 'react-hot-toast'
@@ -24,15 +24,15 @@ const ConvoItem = ({ c, isActive, user, onClick }) => {
     const isUnread = c.unreadCount > 0 || c.isMarkedUnread
 
     return (
-        <div 
+        <div
             onClick={onClick}
             className={`zn-convo-row${isActive ? ' active' : ''}`}
         >
             <div style={{ position: 'relative', flexShrink: 0 }}>
-                <img 
-                    src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=0095f6&color=fff`} 
-                    className="zn-convo-avatar" 
-                    alt={peer?.username} 
+                <img
+                    src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=0095f6&color=fff`}
+                    className="zn-convo-avatar"
+                    alt={peer?.username}
                 />
                 {peer?.isOnline && <div className="zn-online-dot" />}
             </div>
@@ -63,15 +63,15 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
     const renderContent = () => {
         if (!searchQuery) return m.body
         const parts = m.body.split(new RegExp(`(${searchQuery})`, 'gi'))
-        return parts.map((part, i) => 
-            part.toLowerCase() === searchQuery.toLowerCase() 
+        return parts.map((part, i) =>
+            part.toLowerCase() === searchQuery.toLowerCase()
                 ? <mark key={i} className="zn-search-highlight">{part}</mark>
                 : part
         )
     }
 
     return (
-        <motion.div 
+        <motion.div
             layout
             initial={{ opacity: 0, scale: 0.9, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -88,7 +88,7 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
 
                 <div className={`zn-bubble${m.isOptimistic ? ' optimistic' : ''}`}>
                     <div className="zn-bubble-text">{renderContent()}</div>
-                    
+
                     <div className={`zn-bubble-meta${isSelf ? ' self' : ''}`}>
                         <span>{formatTime(m.createdAt)}</span>
                         {isSelf && (
@@ -108,8 +108,8 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                         {reactions.length > 0 && (
                             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="zn-reactions">
                                 {reactions.map(r => (
-                                    <button 
-                                        key={r.emoji} 
+                                    <button
+                                        key={r.emoji}
                                         className={`zn-reaction-chip${r.me ? ' active' : ''}`}
                                         onClick={() => onReact(r.emoji)}
                                     >
@@ -140,9 +140,9 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                         <div className="zn-action-divider" />
                         <div className="zn-quick-emojis">
                             {quickEmojis.slice(0, 3).map(e => (
-                                <button 
-                                    key={e} 
-                                    onClick={() => onReact(e)} 
+                                <button
+                                    key={e}
+                                    onClick={() => onReact(e)}
                                     className="zn-emoji-btn"
                                 >
                                     {e}
@@ -163,13 +163,13 @@ export default function Messages() {
     const { convoId } = useParams()
     const navigate = useNavigate()
     const { user } = useAuth()
-    
-    const { 
-        data: convos = [], 
+
+    const {
+        data: convos = [],
         isLoading: loadingConvos
     } = useConvos()
     const { data: messages = [], isLoading: loadingMsgs } = useMessages(convoId)
-    
+
     const [searchQuery, setSearchQuery] = useState('')
     const [replyingTo, setReplyingTo] = useState(null)
     const [isSearchingInChat, setIsSearchingInChat] = useState(false)
@@ -199,7 +199,7 @@ export default function Messages() {
     }, [convoId, messages.length, activeConvo?.unreadCount, activeConvo?.isMarkedUnread])
 
     const peer = useMemo(() => activeConvo?.participants?.find(p => p._id !== user?._id), [activeConvo, user?._id])
-    
+
     const filteredConvos = useMemo(() => {
         return convos
             .filter(c => {
@@ -217,14 +217,14 @@ export default function Messages() {
     const groupedMessages = useMemo(() => {
         const groups = []
         let lastDate = ''
-        
+
         filteredMessages.forEach((m, idx) => {
             const date = new Date(m.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
             if (date !== lastDate) {
                 groups.push({ type: 'date', value: date, id: `date-${date}` })
                 lastDate = date
             }
-            
+
             const prev = filteredMessages[idx - 1]
             const next = filteredMessages[idx + 1]
             const senderId = m.sender?._id || m.sender
@@ -238,7 +238,7 @@ export default function Messages() {
             if (isSameAsPrev && isSameAsNext && !isTimeGap) pos = 'middle'
             else if (isSameAsPrev && !isTimeGap) pos = 'bottom'
             else if (isSameAsNext) pos = 'top'
-            
+
             groups.push({ type: 'message', value: m, id: m._id, pos, isNewGroup: !isSameAsPrev || isTimeGap })
         })
         return groups
@@ -253,7 +253,7 @@ export default function Messages() {
         }
     }, [])
 
-    useEffect(() => { 
+    useEffect(() => {
         if (!loadingMsgs) {
             scrollToBottom(messages.length <= (prevMsgCount.current || 0))
             prevMsgCount.current = messages.length
@@ -266,7 +266,7 @@ export default function Messages() {
             return () => clearTimeout(timer)
         }
     }, [convoId, loadingMsgs, scrollToBottom])
-    
+
     useEffect(() => {
         const draft = getDraft()
         setInputText(draft)
@@ -286,10 +286,10 @@ export default function Messages() {
         const replyId = replyingTo?._id
         setInputText('')
         setReplyingTo(null)
-        try { 
+        try {
             await sendMutation.mutateAsync({ text: body, replyToId: replyId })
             scrollToBottom()
-        } catch { 
+        } catch {
             toast.error('Failed to send message')
             setInputText(body)
         }
@@ -307,13 +307,13 @@ export default function Messages() {
 
     return (
         <div className={`zn-messages-root${showingChat ? ' chat-active' : ''}`}>
-            
+
             {/* SIDEBAR - Conversation List */}
             <aside className="zn-messages-sidebar">
                 <div className="zn-sidebar-header">
                     <div className="zn-sidebar-title-row">
                         <h1 className="zn-sidebar-title">Messages</h1>
-                        <button 
+                        <button
                             className="zn-icon-btn"
                             onClick={() => navigate('/search')}
                             aria-label="New Message"
@@ -323,11 +323,11 @@ export default function Messages() {
                     </div>
                     <div className="zn-sidebar-search">
                         <HiSearch size={16} className="zn-search-icon" />
-                        <input 
+                        <input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="zn-search-input" 
-                            placeholder="Search chats..." 
+                            className="zn-search-input"
+                            placeholder="Search chats..."
                         />
                     </div>
                 </div>
@@ -347,7 +347,7 @@ export default function Messages() {
                                 ))}
                             </div>
                         ) : filteredConvos.length > 0 ? (
-                            <motion.div 
+                            <motion.div
                                 key="list"
                                 initial="hidden"
                                 animate="visible"
@@ -361,8 +361,8 @@ export default function Messages() {
                                             visible: { opacity: 1, x: 0 }
                                         }}
                                     >
-                                        <ConvoItem 
-                                            c={c} isActive={convoId === c._id} user={user} 
+                                        <ConvoItem
+                                            c={c} isActive={convoId === c._id} user={user}
                                             onClick={() => navigate(`/messages/${c._id}`)}
                                             onPin={() => pinMutation.mutate(c._id)}
                                             onMute={() => muteMutation.mutate(c._id)}
@@ -372,7 +372,7 @@ export default function Messages() {
                                 ))}
                             </motion.div>
                         ) : (
-                            <motion.div 
+                            <motion.div
                                 key="empty"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -393,7 +393,7 @@ export default function Messages() {
             <main className="zn-chat-main">
                 <AnimatePresence mode="wait">
                     {convoId ? (
-                        <motion.div 
+                        <motion.div
                             key={`chat-${convoId}`}
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -404,22 +404,22 @@ export default function Messages() {
                             {/* Chat Header */}
                             <header className="zn-chat-header">
                                 <div className="zn-chat-header-left">
-                                    <button 
+                                    <button
                                         onClick={() => navigate('/messages')}
                                         className="zn-back-btn"
                                         aria-label="Back to messages"
                                     >
                                         <HiArrowLeft size={22} />
                                     </button>
-                                    <div 
+                                    <div
                                         className="zn-chat-peer-info"
                                         onClick={() => navigate(`/profile/${peer?._id}`)}
                                     >
                                         <div style={{ position: 'relative' }}>
-                                            <img 
-                                                src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=0095f6&color=fff`} 
+                                            <img
+                                                src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=0095f6&color=fff`}
                                                 className="zn-chat-peer-avatar"
-                                                alt="" 
+                                                alt=""
                                             />
                                             {peer?.isOnline && <div className="zn-online-dot-sm" />}
                                         </div>
@@ -432,16 +432,16 @@ export default function Messages() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="zn-chat-header-actions">
-                                    <button 
-                                        onClick={() => { setIsSearchingInChat(!isSearchingInChat); if (!isSearchingInChat) setChatSearchQuery('') }} 
+                                    <button
+                                        onClick={() => { setIsSearchingInChat(!isSearchingInChat); if (!isSearchingInChat) setChatSearchQuery('') }}
                                         className={`zn-icon-btn${isSearchingInChat ? ' active' : ''}`}
                                     >
                                         <HiSearch size={18} />
                                     </button>
                                     <div style={{ position: 'relative' }}>
-                                        <button 
+                                        <button
                                             onClick={() => setShowChatMenu(!showChatMenu)}
                                             className={`zn-icon-btn${showChatMenu ? ' active' : ''}`}
                                         >
@@ -452,7 +452,7 @@ export default function Messages() {
                                             {showChatMenu && (
                                                 <>
                                                     <div className="zn-menu-backdrop" onClick={() => setShowChatMenu(false)} />
-                                                    <motion.div 
+                                                    <motion.div
                                                         initial={{ opacity: 0, scale: 0.9, y: -10 }}
                                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                                         exit={{ opacity: 0, scale: 0.9, y: -10 }}
@@ -478,18 +478,18 @@ export default function Messages() {
                             {/* Inline Search */}
                             <AnimatePresence>
                                 {isSearchingInChat && (
-                                    <motion.div 
-                                        initial={{ height: 0, opacity: 0 }} 
-                                        animate={{ height: 'auto', opacity: 1 }} 
-                                        exit={{ height: 0, opacity: 0 }} 
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
                                         className="zn-chat-search-bar"
                                     >
                                         <HiSearch size={16} />
-                                        <input 
-                                            autoFocus 
-                                            value={chatSearchQuery} 
-                                            onChange={(e) => setChatSearchQuery(e.target.value)} 
-                                            placeholder="Search in conversation..." 
+                                        <input
+                                            autoFocus
+                                            value={chatSearchQuery}
+                                            onChange={(e) => setChatSearchQuery(e.target.value)}
+                                            placeholder="Search in conversation..."
                                             className="zn-search-input"
                                         />
                                         <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="zn-icon-btn-sm">
@@ -517,15 +517,15 @@ export default function Messages() {
                                                     <span className="zn-date-label">{item.value}</span>
                                                 </div>
                                             ) : (
-                                                <MessageBubble 
-                                                    key={item.id} 
-                                                    m={item.value} 
+                                                <MessageBubble
+                                                    key={item.id}
+                                                    m={item.value}
                                                     searchQuery={chatSearchQuery}
                                                     isSelf={
-                                                        item.value.sender === 'me' || 
-                                                        item.value.sender?._id === user?._id || 
+                                                        item.value.sender === 'me' ||
+                                                        item.value.sender?._id === user?._id ||
                                                         item.value.sender === user?._id
-                                                    } 
+                                                    }
                                                     pos={item.pos}
                                                     isNewGroup={item.isNewGroup}
                                                     onReply={setReplyingTo}
@@ -549,7 +549,7 @@ export default function Messages() {
                             <footer className="zn-footer">
                                 <div className="zn-composer-wrapper">
                                     {replyingTo && (
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className="zn-reply-preview"
@@ -572,8 +572,8 @@ export default function Messages() {
                                             <HiPaperClip size={22} />
                                         </button>
                                         <input type="file" ref={fileInputRef} onChange={handleFileUpload} hidden />
-                                        
-                                        <textarea 
+
+                                        <textarea
                                             rows="1"
                                             value={inputText}
                                             onChange={(e) => {
@@ -591,8 +591,8 @@ export default function Messages() {
                                             placeholder="Message..."
                                             className="zn-composer-input"
                                         />
-                                        
-                                        <motion.button 
+
+                                        <motion.button
                                             disabled={!inputText.trim() && !replyingTo}
                                             onClick={() => {
                                                 handleSend()
@@ -609,7 +609,7 @@ export default function Messages() {
                             </footer>
                         </motion.div>
                     ) : (
-                        <motion.div 
+                        <motion.div
                             key="select-convo"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -628,15 +628,15 @@ export default function Messages() {
             {/* Edit Message Modal */}
             <AnimatePresence>
                 {editingId && (
-                    <motion.div 
-                        initial={{ opacity: 0 }} 
-                        animate={{ opacity: 1 }} 
-                        exit={{ opacity: 0 }} 
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         className="zn-edit-overlay"
                     >
-                        <motion.div 
-                            initial={{ scale: 0.95, y: 20 }} 
-                            animate={{ scale: 1, y: 0 }} 
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.95, y: 20 }}
                             className="zn-edit-modal"
                         >
@@ -649,20 +649,20 @@ export default function Messages() {
                                     <HiX size={20} />
                                 </button>
                             </div>
-                            
-                            <textarea 
+
+                            <textarea
                                 value={editingText}
                                 onChange={(e) => setEditingText(e.target.value)}
                                 className="zn-edit-textarea"
                                 placeholder="Type your message..."
                                 autoFocus
                             />
-                            
+
                             <div className="zn-edit-modal-actions">
                                 <button onClick={() => setEditingId(null)} className="zn-btn-secondary">
                                     Discard
                                 </button>
-                                <button 
+                                <button
                                     onClick={async () => {
                                         if (!editingText.trim()) return
                                         try {

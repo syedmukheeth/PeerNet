@@ -63,7 +63,7 @@ export const useMessages = (convoId) => {
 export const useChatState = (convoId) => {
     const getDraft = useCallback(() => draftCache[convoId] || '', [convoId])
     const setDraft = useCallback((text) => { draftCache[convoId] = text }, [convoId])
-    
+
     const getScroll = useCallback(() => scrollCache[convoId] || 0, [convoId])
     const setScroll = useCallback((pos) => { scrollCache[convoId] = pos }, [convoId])
 
@@ -76,12 +76,12 @@ export const useChatState = (convoId) => {
 export const useSendMessage = (convoId) => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: ({ text, replyToId, attachments }) => 
+        mutationFn: ({ text, replyToId, attachments }) =>
             chatApi.post(`/${convoId}/messages`, { body: text, replyTo: replyToId, attachments }),
         onMutate: async ({ text, replyToId }) => {
             await queryClient.cancelQueries({ queryKey: ['messages', convoId] })
             const previousMessages = queryClient.getQueryData(['messages', convoId])
-            
+
             const optimisticMsg = {
                 _id: 'temp-' + Date.now(),
                 body: text,
@@ -91,7 +91,7 @@ export const useSendMessage = (convoId) => {
                 isOptimistic: true
             }
             queryClient.setQueryData(['messages', convoId], old => [...(old || []), optimisticMsg])
-            
+
             return { previousMessages }
         },
         onError: (err, text, context) => {
@@ -135,7 +135,7 @@ export const useMessageActions = (convoId) => {
         onMutate: async ({ messageId, text }) => {
             await queryClient.cancelQueries({ queryKey: ['messages', convoId] })
             const prev = queryClient.getQueryData(['messages', convoId])
-            queryClient.setQueryData(['messages', convoId], old => 
+            queryClient.setQueryData(['messages', convoId], old =>
                 old?.map(m => m._id === messageId ? { ...m, body: text, isEdited: true } : m)
             )
             return { prev }
