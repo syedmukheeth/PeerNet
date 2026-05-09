@@ -512,23 +512,25 @@ export default function Layout() {
                 </div>
             </main>
 
-            <nav className="mobile-nav">
-                <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => isActive ? <HiHome size={28} /> : <HiOutlineHome size={28} />}
-                </NavLink>
-                <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => isActive ? <HiSearch size={28} /> : <HiOutlineSearch size={28} />}
-                </NavLink>
-                <button className="mobile-nav-item text-primary bg-transparent border-none" onClick={() => setShowCreate(true)}>
-                    <HiPlus size={30} className="border-2 border-primary rounded-lg p-0.5" />
-                </button>
-                <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    {({ isActive }) => isActive ? <HiFilm size={28} /> : <HiOutlineFilm size={28} />}
-                </NavLink>
-                <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                    <img src={avatarUrl} className={`w-7 h-7 rounded-full border-2 ${location.pathname.includes(`/profile/${user?._id}`) ? 'border-primary' : 'border-transparent'}`} alt="" />
-                </NavLink>
-            </nav>
+            {!location.pathname.match(/^\/messages\/.+/) && (
+                <nav className="mobile-nav">
+                    <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        {({ isActive }) => isActive ? <HiHome size={28} /> : <HiOutlineHome size={28} />}
+                    </NavLink>
+                    <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        {({ isActive }) => isActive ? <HiSearch size={28} /> : <HiOutlineSearch size={28} />}
+                    </NavLink>
+                    <button className="mobile-nav-item text-primary bg-transparent border-none" onClick={() => setShowCreate(true)}>
+                        <HiPlus size={30} className="border-2 border-primary rounded-lg p-0.5" />
+                    </button>
+                    <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        {({ isActive }) => isActive ? <HiFilm size={28} /> : <HiOutlineFilm size={28} />}
+                    </NavLink>
+                    <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                        <img src={avatarUrl} className={`w-7 h-7 rounded-full border-2 ${location.pathname.includes(`/profile/${user?._id}`) ? 'border-primary' : 'border-transparent'}`} alt="" />
+                    </NavLink>
+                </nav>
+            )}
 
             <AnimatePresence>
                 {showCreate && <CreatePostModal onClose={() => setShowCreate(false)} />}
