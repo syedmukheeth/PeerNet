@@ -915,6 +915,18 @@ textarea:focus-visible {
   gap: 4px;
 }
 
+@media (max-width: 767px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
 .ig-more-item {
   display: flex;
   align-items: center;

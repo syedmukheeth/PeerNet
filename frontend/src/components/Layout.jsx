@@ -342,10 +342,28 @@ export default function Layout() {
                     </motion.div>
 
                     <div className="sidebar-more-wrap" ref={moreRef}>
+                        <div 
+                            className={`ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer ${showMore ? 'ig-link--active' : ''}`} 
+                            onClick={() => setShowMore(!showMore)}
+                            role="button"
+                            tabIndex={0}
+                        >
+                            <motion.div 
+                                className="flex items-center gap-4 w-full"
+                                whileHover={{ x: 4 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                            >
+                                <div className="ig-icon-wrap">
+                                    <HiMenu className="ig-icon" />
+                                </div>
+                                <span className="ig-label">More</span>
+                            </motion.div>
+                        </div>
+
                         <AnimatePresence>
                             {showMore && (
                                 <motion.div 
-                                    className="ig-more-popup" 
+                                    className="ig-more-popup desktop-only" 
                                     initial={{ opacity: 0, y: 12, scale: 0.95 }} 
                                     animate={{ opacity: 1, y: 0, scale: 1 }} 
                                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
@@ -368,26 +386,8 @@ export default function Layout() {
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                        <div 
-                            className={`ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer ${showMore ? 'ig-link--active' : ''}`} 
-                            onClick={() => setShowMore(!showMore)}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <motion.div 
-                                className="flex items-center gap-4 w-full"
-                                whileHover={{ x: 4 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                            >
-                                <div className="ig-icon-wrap">
-                                    <HiMenu className="ig-icon" />
-                                </div>
-                                <span className="ig-label">More</span>
-                            </motion.div>
-                        </div>
                     </div>
                 </div>
-
                 </aside>
             )}
 
@@ -395,13 +395,47 @@ export default function Layout() {
 
             <header className="mobile-top-header">
                 <div className="flex items-center gap-3">
-                    {/* Logout/More trigger for mobile */}
-                    <button 
-                        className="mobile-header-btn bg-transparent border-none text-primary"
-                        onClick={() => setShowMore(!showMore)}
-                    >
-                        <HiMenu size={24} />
-                    </button>
+                    <div style={{ position: 'relative' }}>
+                        <button 
+                            className="mobile-header-btn bg-transparent border-none text-primary"
+                            onClick={() => setShowMore(!showMore)}
+                        >
+                            <HiMenu size={24} />
+                        </button>
+                        
+                        <AnimatePresence>
+                            {showMore && (
+                                <motion.div 
+                                    className="ig-more-popup mobile-only" 
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }} 
+                                    animate={{ opacity: 1, y: 0, scale: 1 }} 
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    style={{ 
+                                        position: 'absolute', 
+                                        top: '100%', 
+                                        left: 0, 
+                                        marginTop: '12px',
+                                        width: '240px'
+                                    }}
+                                >
+                                    <button className="ig-more-item" onClick={() => { toggle(); setShowMore(false) }}>
+                                        {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
+                                        <span>Appearance</span>
+                                    </button>
+                                    <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                        <HiCog size={20} /> <span>Settings</span>
+                                    </NavLink>
+                                    <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
+                                        <HiSwitchHorizontal size={20} /> <span>Accounts</span>
+                                    </button>
+                                    <div className="ig-more-divider" />
+                                    <button className="ig-more-item text-error" onClick={handleLogout}>
+                                        <HiLogout size={20} /> <span>Log out</span>
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                     <Link to="/" className="flex items-center gap-2 text-decoration-none">
                         <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
                         <span className="mobile-peernet-logo text-lg font-black logo-gradient-text">PeerNet</span>

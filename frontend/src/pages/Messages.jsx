@@ -313,7 +313,11 @@ export default function Messages() {
                 <div className="zn-sidebar-header">
                     <div className="zn-sidebar-title-row">
                         <h1 className="zn-sidebar-title">Messages</h1>
-                        <button className="zn-icon-btn">
+                        <button 
+                            className="zn-icon-btn"
+                            onClick={() => navigate('/search')}
+                            aria-label="New Message"
+                        >
                             <HiPencil size={20} />
                         </button>
                     </div>
