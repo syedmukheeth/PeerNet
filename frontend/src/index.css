@@ -8875,3 +8875,127 @@ textarea:focus-visible {
     border-radius: 0 !important;
   }
 }
+/* ========================================================================================================================================================================================================================================
+   INSTAGRAM-VIBE PROFILE OVERHAUL
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 767px) {
+  /* Re-ordering Grid to match Instagram Mobile */
+  .profile-header-v2 {
+    display: grid !important;
+    grid-template-columns: 85px 1fr !important;
+    grid-template-areas: 
+      "avatar stats"
+      "bio bio"
+      "actions actions" !important;
+    gap: 12px 20px !important;
+    padding: 20px 16px 12px !important;
+    align-items: center !important;
+  }
+
+  .profile-avatar-wrap {
+    grid-area: avatar !important;
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .profile-avatar-img {
+    border: 1px solid var(--border) !important;
+    padding: 2px !important;
+    background: var(--bg) !important;
+  }
+
+  /* Stats next to Avatar */
+  .profile-stats-v2 {
+    grid-area: stats !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    gap: 0 !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    background: transparent !important;
+  }
+
+  .profile-stat-item {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .stat-value {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: var(--text-1) !important;
+  }
+
+  .stat-label {
+    font-size: 13px !important;
+    color: var(--text-1) !important;
+    font-weight: 400 !important;
+  }
+
+  /* Info Column (Username) - Hidden on mobile if redundant, or integrated into bio */
+  .profile-info-col {
+    display: contents !important; /* Let children use grid areas */
+  }
+
+  .profile-header-top {
+    display: none !important; /* Username is usually in the top fixed header on mobile */
+  }
+
+  /* Bio below Avatar/Stats */
+  .profile-bio-v2 {
+    grid-area: bio !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    text-align: left !important;
+  }
+
+  .profile-bio-v2 .font-bold {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
+
+  .profile-bio-v2 .text-\[14px\] {
+    font-size: 14px !important;
+    margin-top: 2px !important;
+    color: var(--text-1) !important;
+  }
+
+  /* Actions below Bio */
+  .profile-page-wrap .profile-actions-row {
+    grid-area: actions !important;
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 8px !important;
+    width: 100% !important;
+  }
+
+  .profile-actions-row .btn {
+    background: var(--card-alt) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-1) !important;
+    height: 34px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Skeleton Polish */
+  .skeleton.aspect-square {
+    background: linear-gradient(90deg, var(--card-alt) 25%, var(--border) 50%, var(--card-alt) 75%) !important;
+    background-size: 200% 100% !important;
+    animation: shimmer 1.5s infinite !important;
+    border-radius: 4px !important;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Faster Image Load Placeholder */
+  .profile-grid-item {
+    background: var(--card-alt) !important;
+  }
+}
