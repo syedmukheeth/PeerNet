@@ -676,15 +676,19 @@ textarea:focus-visible {
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 60px;
+  height: 50px;
   background: rgba(var(--bg-rgb), 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  z-index: var(--z-fixed);
+  z-index: 5000; /* Ensure it stays above EVERYTHING else */
   padding: 0 16px;
   align-items: center;
   justify-content: space-between;
+}
+.mobile-header-btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
 }
 
 .mobile-nav {
@@ -6814,6 +6818,8 @@ textarea:focus-visible {
 
 .zn-sidebar-header {
   padding: 24px 20px 16px;
+  position: relative;
+  z-index: 500; /* Ensure interactivity above scroll areas */
 }
 
 .zn-sidebar-scroll {
@@ -9585,7 +9591,7 @@ textarea:focus-visible {
 .zn-search-input::placeholder { color: var(--text-3); }
 
 /* Icon buttons */
-.zn-icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--text-2); cursor: pointer; border-radius: 10px; transition: background 0.15s, color 0.15s; }
+.zn-icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--text-2); cursor: pointer !important; pointer-events: auto !important; border-radius: 10px; transition: background 0.15s, color 0.15s; }
 .zn-icon-btn:hover { background: var(--hover); color: var(--text-1); }
 .zn-icon-btn.active { background: var(--accent-subtle); color: var(--accent); }
 .zn-icon-btn-sm { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--text-2); cursor: pointer; border-radius: 8px; transition: all 0.15s; }
