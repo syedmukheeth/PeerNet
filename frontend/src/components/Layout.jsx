@@ -512,7 +512,7 @@ export default function Layout() {
                 </div>
             </main>
 
-            {!location.pathname.match(/^\/messages\/.+/) && (
+            {!location.pathname.includes('/messages/') && location.pathname !== '/messages' && (
                 <nav className="mobile-nav">
                     <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                         {({ isActive }) => isActive ? <HiHome size={28} /> : <HiOutlineHome size={28} />}

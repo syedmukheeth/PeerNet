@@ -9803,6 +9803,8 @@ textarea:focus-visible {
     padding: 10px 12px !important;
     background: var(--surface-1) !important;
     border-top: 1px solid var(--border) !important;
+    z-index: 100 !important;
+    position: relative;
   }
 
   /* Main-col must NOT add padding for messages page */
@@ -9818,6 +9820,11 @@ textarea:focus-visible {
   body:has(.zn-messages-root) .main-col {
     padding-bottom: 0 !important;
     overflow: hidden !important;
+  }
+
+  /* CRITICAL: Hide global mobile nav when chat is active to prevent overlap */
+  body:has(.zn-messages-root.chat-active) .mobile-nav {
+    display: none !important;
   }
 }
 
