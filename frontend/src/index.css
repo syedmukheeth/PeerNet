@@ -2914,6 +2914,8 @@ textarea:focus-visible {
   transform: translateY(-1px);
 }
 
+.zn-viewport-spacer { height: env(safe-area-inset-bottom); }
+
 /* Removed misplaced grid style */
 
 .search-bar input {
@@ -9800,8 +9802,14 @@ textarea:focus-visible {
     -webkit-overflow-scrolling: touch;
     min-height: 0 !important;
     height: 100% !important; /* Force height for scrolling */
-    /* CRITICAL: Space for the fixed footer below */
-    padding: 12px 12px 100px !important;
+    padding: 12px 12px !important;
+  }
+
+  /* Physical spacer to push last message above the fixed footer */
+  .zn-viewport-spacer {
+    height: 120px !important;
+    width: 100%;
+    flex-shrink: 0;
   }
 
   /* Footer - NUCLEAR FIX: Use fixed positioning to bypass all parent clipping */

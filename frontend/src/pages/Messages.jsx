@@ -508,6 +508,7 @@ export default function Messages() {
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
+                                <div className="zn-viewport-spacer" />
                             </div>
 
                             {/* Composer Footer */}
