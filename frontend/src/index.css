@@ -13609,3 +13609,8 @@ body:has(.zn-messages-root) .content-wrap {
     font-size: 12px;
   }
 }
+/* EMOJI PICKER */
+.zn-emoji-picker-container { position: relative; display: flex; align-items: center; }
+.zn-emoji-picker-popover { position: absolute; bottom: 60px; left: 0; z-index: 1000; filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5)); }
+.zn-emoji-picker-popover .EmojiPickerReact { --epr-bg-color: rgba(13, 13, 13, 0.95) !important; --epr-category-label-bg-color: rgba(20, 20, 20, 0.95) !important; --epr-picker-border-color: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(20px); border-radius: 16px !important; }
+.zn-picker-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999; }

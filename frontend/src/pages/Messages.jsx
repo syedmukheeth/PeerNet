@@ -6,6 +6,7 @@ import {
     HiX, HiCheckCircle, HiMail, HiArrowRight, HiArrowLeft, HiHome
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
+import EmojiPicker from 'emoji-picker-react'
 import { useAuth } from '../context/AuthContext'
 
 import {
@@ -196,6 +197,7 @@ export default function Messages() {
     const [inputText, setInputText] = useState('')
     const [editingId, setEditingId] = useState(null)
     const [editingText, setEditingText] = useState('')
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const [showChatMenu, setShowChatMenu] = useState(false)
     const viewportRef = useRef(null)
     const markReadMutation = useMarkRead(convoId)
@@ -319,6 +321,11 @@ export default function Messages() {
     }
 
     const onReact = (messageId, emoji) => reactMutation.mutate({ messageId, emoji })
+
+    const handleEmojiClick = (emojiData) => {
+        setInputText(prev => prev + emojiData.emoji)
+        setShowEmojiPicker(false)
+    }
 
     const handleFileUpload = (e) => {
         const file = e.target.files[0]
@@ -588,9 +595,37 @@ export default function Messages() {
                                         </motion.div>
                                     )}
                                     <div className="zn-composer-pill">
-                                        <button className="zn-composer-action-btn">
-                                            <HiEmojiHappy size={22} />
-                                        </button>
+                                        <div className="zn-emoji-picker-container">
+                                            <button 
+                                                className={`zn-composer-action-btn${showEmojiPicker ? ' active' : ''}`}
+                                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                            >
+                                                <HiEmojiHappy size={22} />
+                                            </button>
+                                            
+                                            <AnimatePresence>
+                                                {showEmojiPicker && (
+                                                    <motion.div 
+                                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        className="zn-emoji-picker-popover"
+                                                    >
+                                                        <EmojiPicker 
+                                                            onEmojiClick={handleEmojiClick}
+                                                            theme="dark"
+                                                            searchDisabled={false}
+                                                            skinTonesDisabled
+                                                            width={320}
+                                                            height={400}
+                                                        />
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                            
+                                            {showEmojiPicker && <div className="zn-picker-backdrop" onClick={() => setShowEmojiPicker(false)} />}
+                                        </div>
+
                                         <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
                                             <HiPaperClip size={22} />
                                         </button>
