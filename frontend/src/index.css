@@ -6913,6 +6913,7 @@ textarea:focus-visible {
   position: sticky;
   top: 0;
   z-index: 100;
+  transform: translateZ(0); /* Safari z-index fix */
 }
 
 .zn-viewport {
@@ -9223,7 +9224,6 @@ textarea:focus-visible {
   word-wrap: break-word;
   position: relative;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s;
 }
 
 .zn-row.peer .zn-bubble {
@@ -9803,6 +9803,8 @@ textarea:focus-visible {
     display: flex;
     flex-direction: column;
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: translateZ(0); /* Safari z-index fix */
   }
 
   .zn-chat-menu button {
