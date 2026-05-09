@@ -9219,7 +9219,7 @@ textarea:focus-visible {
   flex-shrink: 0;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1000; /* Ensure it stays above message reactions (z-index 50) */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -9820,7 +9820,7 @@ textarea:focus-visible {
     position: fixed !important;
     display: flex !important;
     flex-direction: column !important;
-    top: 50px !important;
+    top: 50px !important; /* Default with global header */
     left: 0 !important;
     right: 0 !important;
     bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
@@ -9829,6 +9829,13 @@ textarea:focus-visible {
     z-index: 100;
     background: var(--bg);
     overflow: hidden !important;
+  }
+
+  /* When chat is active, we hide the global header and go full screen */
+  .zn-messages-root.chat-active {
+    top: 0 !important;
+    bottom: 0 !important;
+    z-index: 1100; /* Above everything */
   }
 
   /* Chat Menu Dropdown */
@@ -9987,8 +9994,9 @@ body:has(.zn-messages-root) .content-wrap {
 
 @media (max-width: 767px) {
 
-  /* CRITICAL: Hide global mobile nav when chat is active to prevent overlap */
-  body:has(.zn-messages-root.chat-active) .mobile-nav {
+  /* CRITICAL: Hide global mobile nav/header when chat is active to prevent overlap */
+  body:has(.zn-messages-root.chat-active) .mobile-nav,
+  body:has(.zn-messages-root.chat-active) .mobile-top-header {
     display: none !important;
   }
 }
