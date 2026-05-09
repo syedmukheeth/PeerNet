@@ -967,6 +967,14 @@ textarea:focus-visible {
     /* Room for bottom nav */
   }
 
+  /* Force zero top padding when messaging is active */
+  body:has(.zn-messages-root.chat-active) .main-col,
+  body:has(.zn-messages-root.chat-active) .content-wrap {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+
   .mobile-top-header {
     display: flex !important;
   }
@@ -13041,7 +13049,7 @@ textarea:focus-visible {
     min-height: 0 !important;
     height: 100% !important;
     /* Force height for scrolling */
-    padding: 12px 12px !important;
+    padding: 4px 12px 12px !important;
     /* CRITICAL: Tell the browser to reserve space at the bottom when scrolling */
     scroll-padding-bottom: 160px !important;
   }
