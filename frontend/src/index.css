@@ -640,12 +640,13 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   background: var(--bg);
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--border-sm);
   z-index: var(--z-fixed);
   padding: 20px 12px 20px;
   overflow-y: visible;
   scrollbar-width: none;
   transition: all 0.3s var(--ease-out);
+  box-shadow: 1px 0 10px rgba(0,0,0,0.02);
 }
 .sidebar::-webkit-scrollbar { display: none; }
 
@@ -1335,7 +1336,7 @@ textarea:focus-visible {
   gap: 48px;
   align-items: flex-start;
   justify-content: center;
-  padding: 40px 20px 64px;
+  padding: 20px 20px 64px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -1346,8 +1347,8 @@ textarea:focus-visible {
    ======================================================================================================================================================================================================================================== */
 .story-rail-wrap {
   width: 100%;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--border-sm);
 }
 
