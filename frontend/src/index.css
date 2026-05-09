@@ -9451,6 +9451,7 @@ textarea:focus-visible {
 
 
 
+@media (max-width: 767px) {
   /* Make back button visible on mobile */
   .lg\:hidden {
     display: flex !important;
