@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { chatApi } from '../api/axios'
 import { useCallback } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 // ZENITH SINGLETONS: These persist even when navigating away
 const draftCache = {}
@@ -109,6 +110,7 @@ export const useSendMessage = (convoId) => {
  */
 export const useMessageActions = (convoId) => {
     const queryClient = useQueryClient()
+    const { user } = useAuth()
 
     const react = useMutation({
         mutationFn: ({ messageId, emoji }) => chatApi.post(`/${convoId}/messages/${messageId}/react`, { emoji }),
@@ -118,28 +120,39 @@ export const useMessageActions = (convoId) => {
             queryClient.setQueryData(['messages', convoId], old => old?.map(m => {
                 if (m._id !== messageId) return m
                 const reactions = m.reactions || []
-                const existingIndex = reactions.findIndex(r => r.emoji === emoji)
                 
-                if (existingIndex > -1) {
-                    const existing = reactions[existingIndex]
-                    if (existing.me) {
-                        // User already reacted, so we're removing it
+                // Find a reaction with this emoji that belongs to me
+                const myReactionIndex = reactions.findIndex(r => 
+                    r.emoji === emoji && (r.me === true || r.user === user?._id || r.userId === user?._id)
+                )
+                
+                if (myReactionIndex > -1) {
+                    // I have already reacted, so we remove mine
+                    const newReactions = [...reactions]
+                    const existing = newReactions[myReactionIndex]
+                    
+                    if (existing.count > 1) {
+                        // It was a grouped reaction, decrement and unset 'me'
+                        newReactions[myReactionIndex] = { ...existing, count: existing.count - 1, me: false }
+                    } else {
+                        // Single reaction, remove it
+                        newReactions.splice(myReactionIndex, 1)
+                    }
+                    return { ...m, reactions: newReactions }
+                } else {
+                    // I haven't reacted yet. Check if this emoji group exists at all
+                    const groupIndex = reactions.findIndex(r => r.emoji === emoji)
+                    if (groupIndex > -1) {
+                        // Add to existing group
                         const newReactions = [...reactions]
-                        if (existing.count > 1) {
-                            newReactions[existingIndex] = { ...existing, count: existing.count - 1, me: false }
-                        } else {
-                            newReactions.splice(existingIndex, 1)
-                        }
+                        const existing = newReactions[groupIndex]
+                        newReactions[groupIndex] = { ...existing, count: (existing.count || 1) + 1, me: true }
                         return { ...m, reactions: newReactions }
                     } else {
-                        // Someone else reacted, we're adding our reaction to the group
-                        const newReactions = [...reactions]
-                        newReactions[existingIndex] = { ...existing, count: existing.count + 1, me: true }
-                        return { ...m, reactions: newReactions }
+                        // Brand new emoji group
+                        return { ...m, reactions: [...reactions, { emoji, count: 1, me: true }] }
                     }
                 }
-                // Brand new reaction for this emoji
-                return { ...m, reactions: [...reactions, { emoji, count: 1, me: true }] }
             }))
             return { prev }
         },
