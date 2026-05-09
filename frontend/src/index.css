@@ -966,20 +966,8 @@ textarea:focus-visible {
     padding-bottom: 70px;
   }
 
-  /* Strip top gap when messaging chat is open */
-  body:has(.zn-messages-root.chat-active) .main-col,
-  body:has(.zn-messages-root.chat-active) .content-wrap,
-  body.chat-active-mode .main-col,
-  body.chat-active-mode .content-wrap {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-  }
 
-  /* Also hide mobile top header when chat is open */
-  body:has(.zn-messages-root.chat-active) .mobile-top-header,
-  body.chat-active-mode .mobile-top-header {
-    display: none !important;
-  }
+
 
 
   .mobile-top-header {
@@ -988,6 +976,23 @@ textarea:focus-visible {
 
   .mobile-nav {
     display: flex !important;
+  }
+
+  /* MUST come after the show rules above — hides mobile chrome when chat is fullscreen */
+  body:has(.zn-messages-root.chat-active) .mobile-top-header,
+  body:has(.zn-messages-root.chat-active) .mobile-nav,
+  html body.chat-active-mode .mobile-top-header,
+  html body.chat-active-mode .mobile-nav {
+    display: none !important;
+  }
+
+  /* Strip top gap from layout when chat is open */
+  body:has(.zn-messages-root.chat-active) .main-col,
+  body:has(.zn-messages-root.chat-active) .content-wrap,
+  html body.chat-active-mode .main-col,
+  html body.chat-active-mode .content-wrap {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
   }
 }
 
@@ -12944,6 +12949,14 @@ textarea:focus-visible {
     z-index: 1100;
   }
 
+  /* Instagram-style: header absorbs the status-bar / notch area */
+  .zn-messages-root.chat-active .zn-chat-header {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    height: calc(56px + env(safe-area-inset-top, 0px)) !important;
+    align-items: center !important;
+  }
+
+
   /* Chat Menu Dropdown */
   .zn-chat-menu {
     position: absolute;
@@ -13722,3 +13735,4 @@ body:has(.zn-messages-root) .content-wrap {
     }
 }
 
+}
