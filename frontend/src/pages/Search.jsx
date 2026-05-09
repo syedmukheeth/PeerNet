@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,22 +14,63 @@ export default function Search() {
     const [following, setFollowing] = useState({})
     const [focused, setFocused] = useState(false)
     const inputRef = useRef()
+    const debounceRef = useRef(null)
+    const abortRef = useRef(null)
 
-    const handleSearch = async (e) => {
-        const val = e.target.value
-        setQ(val)
-        if (val.length < 2) { setResults([]); return }
+    const doSearch = useCallback(async (val) => {
+        // Cancel any in-flight request
+        if (abortRef.current) abortRef.current.abort()
+        abortRef.current = new AbortController()
+
         setLoading(true)
         try {
-            const { data } = await api.get('/users/search', { params: { q: val, limit: 20 } })
+            const { data } = await api.get('/users/search', {
+                params: { q: val, limit: 20 },
+                signal: abortRef.current.signal
+            })
             setResults(data.data || [])
-        } catch { /* silent */ }
-        finally { setLoading(false) }
+        } catch (err) {
+            if (err?.name !== 'CanceledError' && err?.code !== 'ERR_CANCELED') {
+                // silent - don't show error for search
+            }
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    const handleSearch = (e) => {
+        const val = e.target.value
+        setQ(val)
+
+        // Clear previous debounce timer
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+
+        if (val.length < 2) {
+            setResults([])
+            setLoading(false)
+            if (abortRef.current) abortRef.current.abort()
+            return
+        }
+
+        // Show loading immediately while debouncing
+        setLoading(true)
+        debounceRef.current = setTimeout(() => doSearch(val), 300)
     }
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current)
+            if (abortRef.current) abortRef.current.abort()
+        }
+    }, [])
 
     const clearSearch = () => {
         setQ('')
         setResults([])
+        setLoading(false)
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+        if (abortRef.current) abortRef.current.abort()
         inputRef.current?.focus()
     }
 
@@ -73,7 +114,7 @@ export default function Search() {
             {/* ── Loading Skeletons ── */}
             {loading && hasQuery && (
                 <div className="ig-search-skeleton">
-                    {[...Array(6)].map((_, i) => (
+                    {[...Array(5)].map((_, i) => (
                         <div key={i} className="ig-skeleton-row">
                             <div className="skeleton ig-skeleton-avatar" />
                             <div className="ig-skeleton-lines">
@@ -157,8 +198,8 @@ export default function Search() {
                 </motion.div>
             )}
 
-            {/* ── Initial Empty State (no query) ── */}
-            {!hasQuery && !loading && results.length === 0 && (
+            {/* ── Initial Empty State ── */}
+            {!hasQuery && !loading && (
                 <motion.div
                     className="ig-search-empty"
                     initial={{ opacity: 0 }}
