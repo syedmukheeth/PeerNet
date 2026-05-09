@@ -9977,13 +9977,15 @@ textarea:focus-visible {
 }
 
 /* Messages page: override main-col padding so zn-messages-root (position:fixed) works correctly */
+/* Messaging page: Eliminate container padding globally to allow flush composer alignment */
+body:has(.zn-messages-root) .main-col,
+body:has(.zn-messages-root) .content-wrap {
+  padding: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+}
+
 @media (max-width: 767px) {
-  /* When on messages page, the fixed zn-messages-root handles layout.
-     We must zero out the main-col padding-bottom to avoid double-spacing. */
-  body:has(.zn-messages-root) .main-col {
-    padding-bottom: 0 !important;
-    overflow: hidden !important;
-  }
 
   /* CRITICAL: Hide global mobile nav when chat is active to prevent overlap */
   body:has(.zn-messages-root.chat-active) .mobile-nav {
