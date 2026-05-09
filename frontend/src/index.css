@@ -224,6 +224,7 @@
 
   --sidebar-w: 244px;
   --sidebar-collapsed-w: 72px;
+  --sidebar-actual-w: var(--sidebar-w);
   --feed-max: 580px;
   --right-panel-w: 320px;
 }
@@ -935,18 +936,20 @@ textarea:focus-visible {
   left: 0;
   top: 0;
   bottom: 0;
-  width: var(--sidebar-w);
+  width: var(--sidebar-actual-w);
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border-md);
   z-index: var(--z-fixed);
-  padding: 20px 12px 20px;
+  padding: 20px 12px;
   overflow-y: visible;
   scrollbar-width: none;
-  transition: all 0.3s var(--ease-out);
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+  transition: width 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -1119,6 +1122,7 @@ textarea:focus-visible {
 }
 
 .ig-link {
+  position: relative;
   display: flex;
   align-items: center;
   padding: 12px;
@@ -1133,11 +1137,26 @@ textarea:focus-visible {
 
 .ig-link:hover {
   background: var(--hover);
-  transform: translateX(6px);
+}
+
+.ig-link:active {
+  opacity: 0.7;
+  transform: scale(0.98);
 }
 
 .ig-link--active {
-  background: rgba(var(--accent-rgb), 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ig-link--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
 }
 
 .ig-link--active .ig-label {
@@ -1401,7 +1420,7 @@ textarea:focus-visible {
 .main-col {
   flex: 1;
   height: 100dvh;
-  margin-left: var(--sidebar-w);
+  margin-left: var(--sidebar-actual-w);
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg);
@@ -1420,6 +1439,12 @@ textarea:focus-visible {
   margin: 0 auto;
   padding: 0 24px 20px;
   box-sizing: border-box;
+}
+
+/* Immersive layouts (Shorts) should fill the main column */
+.main-col:has(.shorts-viewer-overlay) .content-wrap {
+  padding: 0 !important;
+  max-width: none !important;
 }
 
 .layout-container {
@@ -7311,9 +7336,9 @@ textarea:focus-visible {
 
 /* Shorts Experience Module */
 .shorts-viewer-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-overlay);
+  position: relative;
+  width: 100%;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7322,6 +7347,16 @@ textarea:focus-visible {
     radial-gradient(120% 90% at 50% 0%, rgba(124, 58, 237, 0.18) 0%, transparent 58%),
     radial-gradient(90% 70% at 100% 100%, rgba(6, 182, 212, 0.12) 0%, transparent 62%),
     #000;
+  z-index: 10;
+}
+
+@media (max-width: 767px) {
+  .shorts-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    padding: 0;
+  }
 }
 
 .shorts-phone-wrapper {
@@ -10266,6 +10301,45 @@ textarea:focus-visible {
    TABLET (768px - 1263px) - Side Rail Mode
    ======================================================================================================================================================================================================================================== */
 @media (max-width: 1263px) {
+  :root {
+    --sidebar-actual-w: var(--sidebar-collapsed-w);
+  }
+
+  .sidebar {
+    padding: 20px 0;
+    align-items: center;
+  }
+
+  .sidebar-logo-row {
+    padding: 0;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .peernetLogo,
+  .ig-label,
+  .profile-card-info,
+  .sidebar-footer .ig-label,
+  .sidebar-footer span {
+    display: none !important;
+  }
+
+  .ig-link {
+    justify-content: center;
+    padding: 12px 0;
+    width: 48px;
+    margin: 4px auto;
+  }
+
+  .ig-link div {
+    justify-content: center;
+    gap: 0 !important;
+  }
+
+  .sidebar-profile-card {
+    justify-content: center;
+    padding: 12px 0;
+  }
 
   /* Hide right sidebar panel */
   .l-side-panel,
