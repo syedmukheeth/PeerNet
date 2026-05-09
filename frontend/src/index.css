@@ -725,19 +725,21 @@ textarea:focus-visible {
 
 .mobile-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: var(--error);
+  top: 4px;
+  right: 4px;
+  background: #FF3B30;
   color: white;
   font-size: 10px;
   font-weight: 800;
-  min-width: 16px;
-  height: 16px;
+  min-width: 18px;
+  height: 18px;
   border-radius: 99px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--bg);
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+  animation: badgePop 0.3s ease-out;
 }
 
 .logo-gradient-text {
@@ -839,8 +841,36 @@ textarea:focus-visible {
   transition: all 0.2s ease;
 }
 
+.ig-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #FF3B30; /* Vibrant iOS style red */
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 2px solid var(--surface-1);
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+  z-index: 10;
+  pointer-events: none;
+  animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 .ig-badge--msg {
-  background: var(--accent);
+  background: var(--accent); /* Blue for messages */
+  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.4);
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .sidebar-footer {
