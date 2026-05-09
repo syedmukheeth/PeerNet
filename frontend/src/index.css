@@ -8602,3 +8602,126 @@ textarea:focus-visible {
     height: 150px !important;
   }
 }
+/* ========================================================================================================================================================================================================================================
+   MESSAGING RESPONSIVE LOGIC - MASTER/DETAIL FIX
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 1263px) {
+  /* Messages Page Unification */
+  .chat-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    height: calc(100vh - 65px) !important; /* Account for nav */
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  /* Default state: List takes full width, Area is hidden */
+  .convo-list {
+    display: flex !important;
+    flex: 1 !important;
+    width: 100% !important;
+    border-right: none !important;
+    background: var(--bg) !important;
+    z-index: 10 !important;
+  }
+
+  .chat-area {
+    display: none !important; /* Hidden by default on mobile unless active */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 20 !important;
+    background: var(--bg) !important;
+  }
+
+  /* When a conversation is active (ID in URL) */
+  .chat-layout--active .convo-list {
+    display: none !important;
+  }
+
+  .chat-layout--active .chat-area {
+    display: flex !important;
+  }
+
+  /* Show back button on mobile chat area */
+  .mobile-chat-back-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin-right: 8px !important;
+    cursor: pointer !important;
+    color: var(--text-1) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .chat-layout {
+    height: calc(100vh - 125px) !important; /* Account for top header + bottom nav */
+  }
+}
+/* ========================================================================================================================================================================================================================================
+   MESSAGING RESPONSIVE LOGIC - MASTER/DETAIL FIX (ZN VERSION)
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 1263px) {
+  .zn-messages-root {
+    display: flex !important;
+    width: 100% !important;
+    height: calc(100vh - 65px) !important; /* Mobile/Tablet height */
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  /* Default state: Sidebar (List) takes full width, Main (Chat) is hidden */
+  .zn-messages-sidebar {
+    display: flex !important;
+    width: 100% !important;
+    flex: 1 !important;
+    border-right: none !important;
+    z-index: 10 !important;
+    background: var(--bg) !important;
+  }
+
+  .zn-chat-main {
+    display: none !important; 
+    position: fixed !important;
+    top: 60px !important; /* Account for top header */
+    left: 0 !important;
+    width: 100% !important;
+    height: calc(100vh - 120px) !important; /* Account for top header + bottom nav */
+    z-index: 50 !important;
+    background: var(--bg) !important;
+  }
+
+  /* When a chat is active */
+  .chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .chat-active .zn-chat-main {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Ensure the header and footer in chat area are correct on mobile */
+  .zn-chat-header {
+    height: 60px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .zn-messages-root {
+    height: calc(100vh - 65px) !important; 
+    padding-bottom: 60px !important; /* Space for bottom nav */
+  }
+  
+  .zn-chat-main {
+    height: calc(100vh - 125px) !important;
+  }
+}
