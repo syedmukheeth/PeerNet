@@ -6910,10 +6910,9 @@ textarea:focus-visible {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  transform: translateZ(0); /* Safari z-index fix */
+  position: relative; /* Changed from sticky to relative for better mobile stability */
+  z-index: 1000; /* Extremely high to beat any bubble animation */
+  transform: translateZ(10px); /* Lift it off the page */
 }
 
 .zn-viewport {
@@ -9791,7 +9790,7 @@ textarea:focus-visible {
   /* Chat Menu Dropdown */
   .zn-chat-menu {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 4px);
     right: 0;
     width: 200px;
     background: var(--surface-el);
@@ -9799,12 +9798,12 @@ textarea:focus-visible {
     border-radius: 12px;
     padding: 6px;
     box-shadow: var(--shadow-lg);
-    z-index: 1100;
+    z-index: 2000; /* Even higher than header */
     display: flex;
     flex-direction: column;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    transform: translateZ(0); /* Safari z-index fix */
+    transform: translateZ(20px);
   }
 
   .zn-chat-menu button {
@@ -9835,11 +9834,11 @@ textarea:focus-visible {
     background: rgba(0,0,0,0.1);
   }
 
-  /* Full screen when chat is active (nav and top header are hidden) */
+  /* Full screen when chat is active (nav is hidden, but site header is visible) */
   .zn-messages-root.chat-active {
     bottom: 0 !important;
-    top: 0 !important;
-    height: 100dvh !important;
+    top: 50px !important;
+    height: calc(100dvh - 50px) !important;
     display: flex !important;
     flex-direction: column !important;
   }

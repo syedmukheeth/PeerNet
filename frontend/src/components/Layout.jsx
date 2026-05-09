@@ -398,7 +398,6 @@ export default function Layout() {
 
 
 
-            {!(location.pathname.startsWith('/messages/') && location.pathname.split('/').filter(Boolean).length > 1) && (
                 <header className="mobile-top-header">
                     <div className="flex items-center gap-3">
                         <div style={{ position: 'relative' }}>
@@ -462,7 +461,7 @@ export default function Layout() {
                     )}
                 </AnimatePresence>
             </header>
-            )}
+
 
             <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''} ${location.pathname.startsWith('/admin') ? 'main-col--admin' : ''}`} ref={mainRef}>
                 <div 
