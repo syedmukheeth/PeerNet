@@ -8017,11 +8017,6 @@ textarea:focus-visible {
     display: flex !important;
   }
 
-  /* Zenith Messages mobile */
-  .zn-messages-root {
-    flex-direction: column;
-  }
-
   .zn-messages-sidebar {
     width: 100%;
     border-right: none;
@@ -8911,18 +8906,7 @@ textarea:focus-visible {
     margin-bottom: 2px !important;
   }
 
-  /* Messaging Blank Screen Fix */
-  .zn-messages-root, 
-  .chat-layout, 
-  .messages-container {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    height: calc(100vh - 65px) !important;
-    background: var(--bg) !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
+
 
   .zn-messages-sidebar, 
   .convo-list {
@@ -8962,17 +8946,7 @@ textarea:focus-visible {
     min-height: 100vh !important;
   }
 
-  /* MESSAGING RECONSTRUCTION */
-  .v4-root, .zn-messages-root, .messages-page, .chat-layout {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    height: calc(100vh - 65px) !important;
-    background: var(--bg) !important;
-    position: relative !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
+
 
   /* Ensure the sidebar/list is the only thing shown initially */
   .v4-middle-panel, .zn-messages-sidebar, .convo-list {
@@ -9475,46 +9449,7 @@ textarea:focus-visible {
   }
 }
 
-/* Mobile: full-screen master/detail toggle */
-@media (max-width: 767px) {
-  .zn-messages-root {
-    flex-direction: column;
-    height: calc(100vh - 125px); /* top header (60) + bottom nav (65) */
-    margin-left: 0;
-    margin-top: 60px; /* top header */
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 65px; /* bottom nav */
-    z-index: 10;
-  }
 
-  /* Default state: show ONLY the sidebar (conversation list) */
-  .zn-messages-sidebar {
-    display: flex !important;
-    width: 100% !important;
-    height: 100% !important;
-    border-right: none;
-    flex-shrink: 0;
-  }
-
-  /* Hide the chat area by default */
-  .zn-chat-main {
-    display: none !important;
-  }
-
-  /* When a conversation is active, flip: hide list, show chat */
-  .zn-messages-root.chat-active .zn-messages-sidebar {
-    display: none !important;
-  }
-
-  .zn-messages-root.chat-active .zn-chat-main {
-    display: flex !important;
-    width: 100% !important;
-    height: 100% !important;
-    flex-direction: column;
-  }
 
   /* Make back button visible on mobile */
   .lg\:hidden {
@@ -9525,6 +9460,10 @@ textarea:focus-visible {
   .zn-footer {
     padding: 12px 16px;
     padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    flex-shrink: 0 !important;
+    min-height: fit-content !important;
+    background: var(--surface-1, var(--card)) !important;
+    border-top: 1px solid var(--border);
   }
 
   /* Viewport takes available space */
@@ -9797,12 +9736,13 @@ textarea:focus-visible {
     flex-direction: column;
     z-index: 50;
     background: var(--bg);
+    overflow: hidden;
   }
 
   /* Full screen when chat is active */
   .zn-messages-root.chat-active {
     bottom: 0 !important;
-    max-height: calc(100vh - 50px) !important;
+    max-height: calc(100dvh - 50px) !important;
   }
 
   /* Default: show only sidebar (list) */
@@ -9832,13 +9772,15 @@ textarea:focus-visible {
     flex: 1 !important;
     min-height: 0 !important;
     overflow: hidden;
+    position: relative;
   }
 
   /* Chat inner must fill the full height and let footer sit at bottom */
   .zn-chat-inner {
-    height: 100% !important;
     display: flex !important;
-    flex-direction: column;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
     flex: 1 !important;
     min-height: 0 !important;
     max-height: 100% !important;
