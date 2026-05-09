@@ -9692,3 +9692,126 @@ textarea:focus-visible {
     overflow: hidden !important;
   }
 }
+
+/* ============================================================
+   ZN MESSAGING - MISSING CLASSES FOR REWRITTEN COMPONENT
+   ============================================================ */
+
+/* Convo row sub-elements */
+.zn-convo-info { flex: 1; min-width: 0; padding-right: 8px; }
+.zn-convo-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.zn-convo-time { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+.zn-convo-name { font-size: 14px; color: var(--text-1); font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zn-convo-name.unread { font-weight: 700; }
+.zn-convo-msg { font-size: 13px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
+.zn-convo-msg.unread { color: var(--accent); font-weight: 600; }
+.zn-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-left: 4px; }
+
+/* Sidebar title row */
+.zn-sidebar-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.zn-sidebar-title { font-size: 22px; font-weight: 900; color: var(--text-1); margin: 0; }
+
+/* Sidebar search */
+.zn-sidebar-search { display: flex; align-items: center; gap: 10px; background: var(--surface-el); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
+.zn-search-icon { color: var(--text-3); flex-shrink: 0; }
+.zn-search-input { flex: 1; background: transparent; border: none; outline: none; font-size: 14px; color: var(--text-1); font-family: inherit; }
+.zn-search-input::placeholder { color: var(--text-3); }
+
+/* Icon buttons */
+.zn-icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--text-2); cursor: pointer; border-radius: 10px; transition: background 0.15s, color 0.15s; }
+.zn-icon-btn:hover { background: var(--hover); color: var(--text-1); }
+.zn-icon-btn.active { background: var(--accent-subtle); color: var(--accent); }
+.zn-icon-btn-sm { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--text-2); cursor: pointer; border-radius: 8px; transition: all 0.15s; }
+.zn-icon-btn-sm:hover { background: var(--hover); color: var(--text-1); }
+
+/* Skeleton rows */
+.zn-skeleton-list { padding: 8px; }
+.zn-skeleton-row { display: flex; align-items: center; gap: 14px; padding: 12px; }
+.zn-skeleton-avatar { width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; }
+.zn-skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.zn-skeleton-name { height: 14px; width: 50%; border-radius: 6px; }
+.zn-skeleton-msg { height: 12px; width: 70%; border-radius: 6px; opacity: 0.5; }
+
+/* Empty state */
+.zn-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; }
+.zn-empty-icon { width: 72px; height: 72px; border-radius: 24px; background: var(--surface-el); display: flex; align-items: center; justify-content: center; color: var(--text-3); margin-bottom: 16px; }
+.zn-empty-title { font-size: 14px; font-weight: 800; color: var(--text-1); margin: 0 0 6px; }
+.zn-empty-sub { font-size: 12px; color: var(--text-3); margin: 0; }
+
+/* Chat inner wrapper */
+.zn-chat-inner { display: flex; flex-direction: column; height: 100%; }
+
+/* Chat header */
+.zn-chat-header-left { display: flex; align-items: center; gap: 10px; }
+.zn-chat-header-actions { display: flex; align-items: center; gap: 4px; }
+.zn-back-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--text-1); cursor: pointer; border-radius: 50%; transition: background 0.15s; flex-shrink: 0; }
+.zn-back-btn:hover { background: var(--hover); }
+.zn-chat-peer-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.zn-chat-peer-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border); }
+.zn-chat-peer-name { font-size: 14px; font-weight: 700; color: var(--text-1); line-height: 1; margin-bottom: 3px; }
+.zn-chat-peer-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.zn-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); }
+.zn-status-dot.online { background: #22c55e; }
+.zn-online-dot-sm { position: absolute; bottom: -1px; right: -1px; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg); }
+
+/* Chat search bar */
+.zn-chat-search-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); overflow: hidden; }
+
+/* Chat skeleton */
+.zn-chat-skeleton { display: flex; flex-direction: column; gap: 20px; padding: 20px; }
+.zn-chat-skeleton-row { display: flex; }
+.zn-chat-skeleton-row.self { justify-content: flex-end; }
+.zn-chat-skeleton-bubble { height: 50px; width: 200px; border-radius: 20px; }
+
+/* Date divider */
+.zn-date-divider { display: flex; justify-content: center; margin: 16px 0; }
+.zn-date-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-3); background: var(--surface-el); border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px; }
+
+/* Empty chat */
+.zn-empty-chat { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 300px; color: var(--text-3); font-size: 13px; text-align: center; padding: 20px; }
+.zn-empty-chat-icon { margin-bottom: 12px; opacity: 0.3; }
+
+/* Reply preview */
+.zn-reply-preview { display: flex; align-items: center; gap: 10px; background: var(--surface-el); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+.zn-reply-bar { width: 3px; height: 32px; border-radius: 4px; background: var(--accent); flex-shrink: 0; }
+.zn-reply-content { flex: 1; min-width: 0; }
+.zn-reply-name { font-size: 10px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 2px; }
+.zn-reply-body { font-size: 12px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
+
+/* Bubble sub-elements */
+.zn-seen-icons { display: flex; }
+.zn-edited { font-style: italic; font-size: 10px; }
+.zn-quick-emojis { display: flex; align-items: center; gap: 2px; padding: 0 4px; }
+.zn-emoji-btn { width: 30px; height: 30px; border: none; background: transparent; cursor: pointer; border-radius: 8px; font-size: 14px; transition: transform 0.15s; display: flex; align-items: center; justify-content: center; }
+.zn-emoji-btn:hover { transform: scale(1.2); background: var(--hover); }
+.zn-reaction-count { font-size: 11px; margin-left: 3px; opacity: 0.7; }
+.zn-search-highlight { background: rgba(0,149,246,0.3); color: white; border-radius: 2px; padding: 0 2px; }
+.zn-reply-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.5; margin-bottom: 2px; }
+.zn-reply-text { font-size: 11px; opacity: 0.7; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zn-bubble.optimistic { opacity: 0.65; }
+
+/* Select conversation state */
+.zn-select-convo { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; background: var(--bg); }
+.zn-select-convo-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--surface-el); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--accent); margin-bottom: 20px; }
+.zn-select-convo-title { font-size: 22px; font-weight: 700; color: var(--text-1); margin: 0 0 8px; }
+.zn-select-convo-sub { font-size: 14px; color: var(--text-2); margin: 0; }
+
+/* Edit modal */
+.zn-edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.zn-edit-modal { width: 100%; max-width: 480px; background: var(--surface-el); border: 1px solid var(--border-md); border-radius: 24px; padding: 28px; }
+.zn-edit-modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.zn-edit-modal-title { font-size: 18px; font-weight: 900; color: var(--text-1); margin: 0 0 4px; }
+.zn-edit-modal-sub { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
+.zn-edit-textarea { width: 100%; min-height: 140px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; color: var(--text-1); font-size: 15px; font-family: inherit; outline: none; resize: none; transition: border-color 0.2s; box-sizing: border-box; }
+.zn-edit-textarea:focus { border-color: var(--accent); }
+.zn-edit-modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.zn-btn-primary { flex: 1; height: 44px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.zn-btn-primary:hover { opacity: 0.9; }
+.zn-btn-secondary { flex: 1; height: 44px; background: var(--hover); color: var(--text-1); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.zn-btn-secondary:hover { background: var(--surface-el); }
+
+/* On desktop: hide back button (only show on tablet/mobile) */
+.zn-back-btn { display: none; }
+@media (max-width: 1263px) {
+  .zn-back-btn { display: flex; }
+}
