@@ -11954,9 +11954,9 @@ textarea:focus-visible {
 .zn-bubble-meta {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  opacity: 0.5;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.85;
   margin-top: 4px;
 }
 
@@ -13957,18 +13957,29 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 .zn-msg-status.seen {
-  color: #0095f6 !important; /* Instagram/Messenger Blue */
-  opacity: 1 !important;
+  color: #0095f6; /* Default Blue */
+}
+
+/* High Contrast for Self (Blue Bubbles) */
+.zn-row.self .zn-msg-status.seen {
+  color: #fff !important;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
 }
 
 .zn-msg-status.delivered {
-  color: var(--text-3);
-  opacity: 0.8;
+  color: var(--text-2);
+}
+
+.zn-row.self .zn-msg-status.delivered {
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .zn-msg-status.sent {
   color: var(--text-3);
-  opacity: 0.5;
+}
+
+.zn-row.self .zn-msg-status.sent {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .zn-msg-status svg {
