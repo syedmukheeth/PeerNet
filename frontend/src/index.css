@@ -7801,12 +7801,12 @@ textarea:focus-visible {
 
   /* Story rail mobile */
   .story-rail-wrap {
-    margin-bottom: 16px;
+    margin-bottom: 0;
   }
 
   .story-rail {
     gap: 10px;
-    padding: 0px 12px 12px;
+    padding: 0px 12px 4px;
   }
 
   .story-item {
@@ -8329,14 +8329,15 @@ textarea:focus-visible {
     margin: 4px 0;
 }
 
-/* Remove '2 lines' around story rail on mobile */
+/* Remove gap around story rail on mobile */
 @media (max-width: 767px) {
   .story-rail-wrap {
     border-top: none !important;
     border-bottom: none !important;
     padding-top: 0px;
-    padding-bottom: 4px;
+    padding-bottom: 0px;
     margin-top: 0px;
+    margin-bottom: 0px !important;
   }
   
   .story-rail {
