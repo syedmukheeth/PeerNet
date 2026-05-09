@@ -964,14 +964,21 @@ textarea:focus-visible {
     margin-left: 0 !important;
     padding-top: 50px;
     padding-bottom: 70px;
-    /* Room for bottom nav */
   }
 
-  /* Force zero top padding when messaging is active */
+  /* Strip top gap when messaging chat is open */
   body:has(.zn-messages-root.chat-active) .main-col,
-  body:has(.zn-messages-root.chat-active) .content-wrap {
+  body:has(.zn-messages-root.chat-active) .content-wrap,
+  body.chat-active-mode .main-col,
+  body.chat-active-mode .content-wrap {
     padding-top: 0 !important;
     margin-top: 0 !important;
+  }
+
+  /* Also hide mobile top header when chat is open */
+  body:has(.zn-messages-root.chat-active) .mobile-top-header,
+  body.chat-active-mode .mobile-top-header {
+    display: none !important;
   }
 
 
@@ -12929,12 +12936,12 @@ textarea:focus-visible {
     overflow: hidden !important;
   }
 
-  /* When chat is active, we hide the global header and go full screen */
+  /* When chat is active, go completely fullscreen (header + bottom nav hidden) */
   .zn-messages-root.chat-active {
     top: 0 !important;
     bottom: 0 !important;
+    height: 100dvh !important;
     z-index: 1100;
-    /* Above everything */
   }
 
   /* Chat Menu Dropdown */
@@ -12985,14 +12992,7 @@ textarea:focus-visible {
     background: rgba(0, 0, 0, 0.1);
   }
 
-  /* Full screen when chat is active (global header and nav are hidden) */
-  .zn-messages-root.chat-active {
-    top: 0 !important;
-    bottom: 0 !important;
-    height: 100dvh !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
+
 
   /* Default: show only sidebar (list) */
   .zn-messages-sidebar {
@@ -13693,6 +13693,15 @@ body:has(.zn-messages-root) .content-wrap {
     --epr-hover-bg-color: rgba(0, 0, 0, 0.05) !important;
 }
 
+/* Emoji backdrop - must cover full screen */
+.zn-emoji-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1999;
+    background: transparent;
+    cursor: default;
+}
+
 @media (max-width: 767px) { 
     .zn-emoji-popover { 
         position: fixed !important; 
@@ -13705,10 +13714,11 @@ body:has(.zn-messages-root) .content-wrap {
         max-height: 75vh !important; 
         transform: none !important;
         box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+        z-index: 2000;
     } 
     .zn-emoji-backdrop {
         background: rgba(0, 0, 0, 0.4) !important;
-        backdrop-filter: blur(8px) !important;
+        backdrop-filter: blur(6px) !important;
     }
 }
- }
+

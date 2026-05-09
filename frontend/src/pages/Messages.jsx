@@ -324,6 +324,16 @@ export default function Messages() {
 
     const onReact = (messageId, emoji) => reactMutation.mutate({ messageId, emoji })
 
+    // Toggle body class for mobile layout overrides
+    useEffect(() => {
+        if (convoId) {
+            document.body.classList.add('chat-active-mode');
+        } else {
+            document.body.classList.remove('chat-active-mode');
+        }
+        return () => document.body.classList.remove('chat-active-mode');
+    }, [convoId]);
+
     const handleEmojiClick = (emojiData) => {
         setInputText(prev => prev + emojiData.emoji)
         setShowEmojiPicker(false)
@@ -597,10 +607,12 @@ export default function Messages() {
                                         </motion.div>
                                     )}
                                     <div className="zn-composer-pill">
+                                        {/* Full-screen backdrop — must be OUTSIDE the 40px container */}
+                                        {showEmojiPicker && <div className="zn-emoji-backdrop" onClick={() => setShowEmojiPicker(false)} />}
                                         <div className="zn-emoji-picker-container">
                                             <button 
                                                 className={`zn-composer-action-btn${showEmojiPicker ? ' active' : ''}`}
-                                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                                onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(!showEmojiPicker); }}
                                             >
                                                 <HiEmojiHappy size={22} />
                                             </button>
@@ -612,6 +624,7 @@ export default function Messages() {
                                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                                         exit={{ opacity: 0, y: 15, scale: 0.92 }}
                                                         className="zn-emoji-popover"
+                                                        onClick={(e) => e.stopPropagation()}
                                                     >
                                                         <EmojiPicker 
                                                             onEmojiClick={handleEmojiClick}
@@ -626,8 +639,6 @@ export default function Messages() {
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>
-                                            
-                                            {showEmojiPicker && <div className="zn-emoji-backdrop" onClick={() => setShowEmojiPicker(false)} />}
                                         </div>
 
                                         <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
