@@ -8438,3 +8438,36 @@ textarea:focus-visible {
     display: inline-block !important; /* Force show branding text */
   }
 }
+/* ========================================================================================================================================================================================================================================
+   STORY CREATOR MOBILE & TABLET FIXES
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 1263px) {
+  /* Ensure status modal doesn't hide the header area */
+  .l-status-modal {
+    margin-top: 60px !important;
+    max-height: calc(100vh - 140px) !important;
+    width: 95% !important;
+    max-width: 450px !important;
+  }
+
+  .status-preview-canvas {
+    max-height: 60vh !important;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .l-status-modal {
+    margin-top: 70px !important; /* Move below mobile top header */
+    margin-bottom: 90px !important; /* Leave space for bottom nav */
+    height: auto !important;
+    max-height: calc(100vh - 160px) !important;
+    border-radius: 24px !important;
+  }
+
+  /* Fix bottom controls overlapping the nav */
+  .status-controls-footer {
+    padding-bottom: 20px !important;
+  }
+}
