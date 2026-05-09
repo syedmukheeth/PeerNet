@@ -9774,7 +9774,7 @@ textarea:focus-visible {
     width: 100% !important;
     flex: 1 !important;
     min-height: 0 !important;
-    height: auto !important;
+    height: 100% !important; /* Force height for scrolling */
     overflow: hidden !important;
     position: relative;
   }
@@ -9786,7 +9786,7 @@ textarea:focus-visible {
     width: 100% !important;
     flex: 1 !important;
     min-height: 0 !important;
-    height: auto !important;
+    height: 100% !important; /* Force height for scrolling */
     overflow: hidden !important;
     /* CRITICAL: Disable transforms so fixed children (footer) stay fixed to viewport */
     transform: none !important;
@@ -9799,6 +9799,7 @@ textarea:focus-visible {
     display: block !important;
     -webkit-overflow-scrolling: touch;
     min-height: 0 !important;
+    height: 100% !important; /* Force height for scrolling */
     /* CRITICAL: Space for the fixed footer below */
     padding: 12px 12px 100px !important;
   }
