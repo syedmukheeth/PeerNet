@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
@@ -962,7 +962,7 @@ textarea:focus-visible {
 
   .main-col {
     margin-left: 0 !important;
-    padding-top: 50px;
+    padding-top: 0 !important;
     padding-bottom: 70px;
   }
 
@@ -10348,7 +10348,7 @@ textarea:focus-visible {
   /* Remove left margin from main content */
   .main-col {
     margin-left: 0 !important;
-    padding-top: 50px !important;
+    padding-top: 0 !important;
     /* Space for top header */
     padding-bottom: 80px !important;
     /* Space for bottom nav */
@@ -10812,7 +10812,7 @@ textarea:focus-visible {
    ======================================================================================================================================================================================================================================== */
 @media (max-width: 767px) and (orientation: landscape) {
   .main-col {
-    padding-top: 50px !important;
+    padding-top: 0 !important;
     padding-bottom: 60px !important;
   }
 
@@ -11569,7 +11569,7 @@ textarea:focus-visible {
   .chat-active .zn-chat-main {
     display: flex !important;
     position: fixed !important;
-    top: 60px !important;
+    top: 0 !important;
     left: 0 !important;
     width: 100% !important;
     height: calc(100vh - 125px) !important;
@@ -11625,7 +11625,7 @@ textarea:focus-visible {
   .chat-active .chat-area {
     display: flex !important;
     position: fixed !important;
-    top: 60px !important;
+    top: 0 !important;
     left: 0 !important;
     width: 100% !important;
     height: calc(100vh - 125px) !important;
@@ -12929,7 +12929,7 @@ textarea:focus-visible {
     position: fixed !important;
     display: flex !important;
     flex-direction: column !important;
-    top: 50px !important;
+    top: 0 !important;
     /* Default with global header */
     left: 0 !important;
     right: 0 !important;
@@ -13814,7 +13814,7 @@ body:has(.zn-messages-root) .content-wrap {
     inset: 0 !important;
     width: 100vw !important;
     height: 100dvh !important;
-    z-index: 10001 !important; /* Above everything including root */
+    z-index: 10001 !important;
     background: rgba(0, 0, 0, 0.2) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -13823,7 +13823,7 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 .zn-emoji-popover {
-    z-index: 10002 !important; /* Above backdrop */
+    z-index: 10002 !important;
 }
 
 /* Light mode specific emoji adjustments */
@@ -13839,6 +13839,4 @@ body:has(.zn-messages-root) .content-wrap {
     background-color: #f0f2f5 !important;
     color: #000 !important;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-
-}
+}
