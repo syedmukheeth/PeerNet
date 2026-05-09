@@ -8668,66 +8668,7 @@ textarea:focus-visible {
     height: calc(100vh - 125px) !important; /* Account for top header + bottom nav */
   }
 }
-/* ========================================================================================================================================================================================================================================
-   MESSAGING RESPONSIVE LOGIC - MASTER/DETAIL FIX (ZN VERSION)
-   ======================================================================================================================================================================================================================================== */
 
-@media (max-width: 1263px) {
-  .zn-messages-root {
-    display: flex !important;
-    width: 100% !important;
-    height: calc(100vh - 65px) !important; /* Mobile/Tablet height */
-    overflow: hidden !important;
-    position: relative !important;
-  }
-
-  /* Default state: Sidebar (List) takes full width, Main (Chat) is hidden */
-  .zn-messages-sidebar {
-    display: flex !important;
-    width: 100% !important;
-    flex: 1 !important;
-    border-right: none !important;
-    z-index: 10 !important;
-    background: var(--bg) !important;
-  }
-
-  .zn-chat-main {
-    display: none !important; 
-    position: fixed !important;
-    top: 60px !important; /* Account for top header */
-    left: 0 !important;
-    width: 100% !important;
-    height: calc(100vh - 120px) !important; /* Account for top header + bottom nav */
-    z-index: 50 !important;
-    background: var(--bg) !important;
-  }
-
-  /* When a chat is active */
-  .chat-active .zn-messages-sidebar {
-    display: none !important;
-  }
-
-  .chat-active .zn-chat-main {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  /* Ensure the header and footer in chat area are correct on mobile */
-  .zn-chat-header {
-    height: 60px !important;
-  }
-}
-
-@media (max-width: 767px) {
-  .zn-messages-root {
-    height: calc(100vh - 65px) !important; 
-    padding-bottom: 60px !important; /* Space for bottom nav */
-  }
-  
-  .zn-chat-main {
-    height: calc(100vh - 125px) !important;
-  }
-}
 /* ========================================================================================================================================================================================================================================
    SENIOR DEV OVERRIDE: PROFILE PAGE V2 RESPONSIVE
    ======================================================================================================================================================================================================================================== */
@@ -9830,7 +9771,7 @@ textarea:focus-visible {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: calc(100vh - 60px);
+  height: 100dvh;
   background: var(--bg);
   overflow: hidden;
 }
@@ -9898,8 +9839,7 @@ textarea:focus-visible {
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1263px) {
   .zn-messages-root {
-    margin-left: 72px;
-    height: calc(100vh - 0px);
+    height: 100dvh;
   }
   .zn-messages-sidebar {
     width: 280px;
