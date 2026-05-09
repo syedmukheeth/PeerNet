@@ -1079,7 +1079,7 @@ textarea:focus-visible {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 12px 24px 20px;
+  padding: 0 24px 20px;
   box-sizing: border-box;
 }
 
@@ -6855,9 +6855,9 @@ textarea:focus-visible {
 }
 
 .zn-sidebar-header {
-  padding: 24px 20px 16px;
+  padding: 16px 20px 12px;
   position: relative;
-  z-index: 500; /* Ensure interactivity above scroll areas */
+  z-index: 500;
 }
 
 .zn-sidebar-scroll {
