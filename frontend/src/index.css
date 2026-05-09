@@ -640,13 +640,13 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   background: var(--bg);
-  border-right: 1px solid var(--border-sm);
+  border-right: 1px solid var(--border-md);
   z-index: var(--z-fixed);
   padding: 20px 12px 20px;
   overflow-y: visible;
   scrollbar-width: none;
   transition: all 0.3s var(--ease-out);
-  box-shadow: 1px 0 10px rgba(0,0,0,0.02);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.03);
 }
 .sidebar::-webkit-scrollbar { display: none; }
 
@@ -1347,7 +1347,7 @@ textarea:focus-visible {
    ======================================================================================================================================================================================================================================== */
 .story-rail-wrap {
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border-sm);
 }
@@ -1356,7 +1356,7 @@ textarea:focus-visible {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 8px 4px 8px;
+  padding: 0 4px 12px;
   scrollbar-width: none;
   width: 100%;
 }
