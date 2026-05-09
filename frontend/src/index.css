@@ -8471,3 +8471,134 @@ textarea:focus-visible {
     padding-bottom: 20px !important;
   }
 }
+/* ========================================================================================================================================================================================================================================
+   PROFILE PAGE - MOBILE & TABLET UNIFICATION
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 767px) {
+  .profile-page-wrap {
+    padding: 0 !important;
+  }
+
+  /* Header Layout: Avatar Left, Stats Right */
+  .profile-header {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 20px !important;
+    padding: 16px !important;
+    text-align: left !important;
+  }
+
+  .profile-avatar-col {
+    width: 80px !important;
+    height: 80px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .profile-info-col {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Stats Row */
+  .profile-stats {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .profile-stat {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    font-size: 13px !important;
+  }
+
+  .profile-stat-count {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Bio Row (Full Width) */
+  .profile-bio-row {
+    width: 100% !important;
+    margin-top: 4px !important;
+    text-align: left !important;
+  }
+
+  .profile-display-name {
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    display: block !important;
+  }
+
+  .profile-bio {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    margin-top: 2px !important;
+    color: var(--text-1) !important;
+  }
+
+  /* Action Buttons Row */
+  .profile-actions {
+    width: 100% !important;
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+  }
+
+  .profile-action-btn {
+    flex: 1 !important;
+    height: 36px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    background: var(--card-alt) !important;
+    border: 1px solid var(--border) !important;
+  }
+
+  /* Tabs Bar */
+  .profile-tabs {
+    display: flex !important;
+    justify-content: space-around !important;
+    border-top: 1px solid var(--border) !important;
+    margin-top: 10px !important;
+    gap: 0 !important;
+  }
+
+  .profile-tab {
+    flex: 1 !important;
+    padding: 12px 0 !important;
+    justify-content: center !important;
+    color: var(--text-3) !important;
+    border-top: 2px solid transparent !important;
+    margin-top: -1px !important;
+  }
+
+  .profile-tab--active {
+    color: var(--text-1) !important;
+    border-top-color: var(--text-1) !important;
+  }
+
+  .profile-tab-label {
+    display: none !important; /* Hide labels, show only icons on very small screens */
+  }
+}
+
+/* Tablet Adjustments */
+@media (min-width: 768px) and (max-width: 1263px) {
+  .profile-header {
+    gap: 40px !important;
+    padding: 32px 16px !important;
+  }
+
+  .profile-avatar-col {
+    width: 150px !important;
+    height: 150px !important;
+  }
+}
