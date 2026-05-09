@@ -12257,34 +12257,40 @@ textarea:focus-visible {
     position: relative;
   }
 
-  /* Narrower DM list so chat panel has breathing room */
+  /* Default: show only sidebar (list) */
   .zn-messages-sidebar {
-    width: 200px !important;
-    min-width: 160px !important;
-    max-width: 200px !important;
-    flex: none !important;
-    flex-shrink: 0 !important;
-  }
-
-  /* Chat area fills remaining space */
-  .zn-chat-main {
-    flex: 1 !important;
-    min-width: 0 !important;
-    overflow: hidden !important;
-    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
     display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
+    flex: 1 !important;
   }
 
-  /* Hide mobile-only back button on tablet */
-  .zn-chat-header .zn-back-btn,
-  .zn-back-btn,
-  .lg\:hidden {
+  .zn-chat-main {
     display: none !important;
   }
 
-  /* Composer footer stays fixed at bottom of chat area */
+  /* When chat is active: show only chat panel */
+  .zn-messages-root.chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .zn-messages-root.chat-active .zn-chat-main {
+    display: flex !important;
+    width: 100% !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    position: relative !important;
+    height: 100% !important;
+  }
+
+  /* Restore back button for tablet since we are panel-toggling */
+  .zn-chat-header .zn-back-btn,
+  .zn-back-btn,
+  .lg\:hidden {
+    display: flex !important;
+  }
+
+  /* Composer footer stays fixed at bottom */
   .zn-footer {
     flex-shrink: 0 !important;
     width: 100% !important;
@@ -13110,22 +13116,28 @@ textarea:focus-visible {
     overflow: hidden;
   }
 
-  /* DM list: fixed narrow width */
+  /* DEFAULT: show only sidebar */
   .zn-messages-sidebar {
-    width: 200px !important;
-    min-width: 160px !important;
-    max-width: 200px !important;
-    flex: none !important;
-    flex-shrink: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 !important;
     display: flex !important;
   }
 
-  /* Chat area fills remaining space */
   .zn-chat-main {
+    display: none !important;
+  }
+
+  /* ACTIVE: show only chat */
+  .zn-messages-root.chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .zn-messages-root.chat-active .zn-chat-main {
+    display: flex !important;
+    width: 100% !important;
     flex: 1 !important;
     min-width: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
     height: 100% !important;
     overflow: hidden !important;
     position: relative !important;
