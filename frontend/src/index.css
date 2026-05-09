@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 /* ============================================================================================================================================================================================================================================
    PeerNet - Unified Design System v6   "Digital Obsidian"
@@ -1230,7 +1230,7 @@ textarea:focus-visible {
 }
 
 .sp-footer-link::after {
-  content: "·";
+  content: "Â·";
   margin-left: 8px;
   opacity: 0.5;
 }
@@ -9913,6 +9913,7 @@ textarea:focus-visible {
     right: 0 !important;
     bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
     height: auto !important;
+    max-height: calc(100vh - 60px - 80px);
     margin: 0 !important;
     flex-direction: column;
     z-index: 50;
@@ -9943,14 +9944,19 @@ textarea:focus-visible {
     flex-direction: column;
     width: 100% !important;
     height: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
     overflow: hidden;
   }
 
   /* Chat inner must fill the full height and let footer sit at bottom */
   .zn-chat-inner {
-    height: 100%;
-    display: flex;
+    height: 100% !important;
+    display: flex !important;
     flex-direction: column;
+    flex: 1 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
     overflow: hidden;
   }
 
@@ -10082,3 +10088,127 @@ textarea:focus-visible {
     background: #f4f4f6 !important;
   }
 }
+
+/* ============================================================
+   MESSAGE ACTIONS (EDIT, DELETE, REACT, REPLY)
+   ============================================================ */
+
+.zn-bubble-actions {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.zn-row:hover .zn-bubble-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.zn-row.self .zn-bubble-actions {
+  right: calc(100% + 8px);
+}
+
+.zn-row.peer .zn-bubble-actions {
+  left: calc(100% + 8px);
+}
+
+.zn-action-bar {
+  display: flex;
+  align-items: center;
+  background: var(--surface-el);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.zn-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.zn-action-btn:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+.zn-action-btn.delete:hover {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+}
+
+.zn-action-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.zn-quick-emojis {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.zn-emoji-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.15s;
+}
+
+.zn-emoji-btn:hover {
+  background: var(--hover);
+  transform: scale(1.1);
+}
+
+/* On mobile, we might want the actions to be more accessible,
+   or just rely on touch-and-hold. But since there's no state for touch-hold,
+   we'll just show them statically below the bubble on mobile. */
+@media (max-width: 767px) {
+  .zn-bubble-actions {
+    position: relative;
+    top: 0;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    margin-top: 4px;
+  }
+  
+  .zn-row.self .zn-bubble-actions,
+  .zn-row.peer .zn-bubble-actions {
+    right: auto;
+    left: auto;
+  }
+  
+  .zn-action-bar {
+    box-shadow: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+}
+
