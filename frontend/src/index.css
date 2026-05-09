@@ -10361,7 +10361,8 @@ textarea:focus-visible {
    ======================================================================================================================================================================================================================================== */
 @media (max-width: 1263px) {
   :root {
-    --sidebar-actual-w: var(--sidebar-collapsed-w);
+    /* Widen sidebar on tablet as per user request */
+    --sidebar-actual-w: var(--sidebar-w);
   }
 
   .sidebar {
@@ -10378,9 +10379,13 @@ textarea:focus-visible {
   .peernetLogo,
   .ig-label,
   .profile-card-info,
-  .sidebar-footer .ig-label,
-  .sidebar-footer span {
+  .sidebar-footer .ig-label {
     display: none !important;
+  }
+
+  /* Ensure More popup labels are visible even if sidebar is collapsed */
+  .ig-more-item span {
+    display: block !important;
   }
 
   .ig-link {
@@ -11084,6 +11089,7 @@ textarea:focus-visible {
     margin-left: 6px !important;
     background: linear-gradient(135deg, #0095f6 0%, #00f2fe 100%);
     -webkit-background-clip: text !important;
+    background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
   }
 }
@@ -12087,18 +12093,18 @@ textarea:focus-visible {
 }
 
 .zn-composer-action-btn {
-  width: 36px;
-  height: 36px;
-  display: flex;
+  width: 40px;
+  height: 40px;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   border: none;
   background: transparent;
-  color: var(--text-3);
+  color: var(--text-2);
   cursor: pointer;
   border-radius: 50%;
   flex-shrink: 0;
-  transition: color 0.15s, background 0.15s;
+  transition: all 0.2s;
   margin-bottom: 2px;
 }
 
@@ -12195,8 +12201,8 @@ textarea:focus-visible {
 @media (min-width: 768px) and (max-width: 1263px) {
   .zn-messages-root {
     height: calc(100vh - 60px);
-    margin-left: 72px;
-    /* sidebar icon rail width */
+    margin-left: 244px; /* Adjusted for widened sidebar (244px) */
+    /* sidebar width */
   }
 
   .zn-messages-sidebar {
@@ -13746,11 +13752,12 @@ body:has(.zn-messages-root) .content-wrap {
 /* --- PREMIUM EMOJI PICKER REFINEMENT --- */
 .zn-emoji-picker-container { 
     position: relative !important; 
-    display: inline-flex !important; 
+    display: flex !important; /* Changed from inline-flex to flex for better layout */
     align-items: center; 
     justify-content: center; 
-    width: 40px; 
-    height: 40px; 
+    width: 44px; 
+    height: 44px; 
+    flex-shrink: 0;
 }
 
 .zn-emoji-popover { 
