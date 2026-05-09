@@ -13665,3 +13665,11 @@ body:has(.zn-messages-root) .content-wrap {
     backdrop-filter: blur(4px);
   }
 }
+
+/* --- EMOJI PICKER OVERRIDES --- */
+.zn-emoji-popover { position: absolute; bottom: 100%; right: 0; width: 350px; z-index: 2000; margin-bottom: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); display: flex; flex-direction: column; }
+.zn-emoji-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: rgba(255, 255, 255, 0.03); }
+.zn-emoji-title { font-size: 13px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; }
+.zn-emoji-popover .EmojiPickerReact { border: none !important; background: transparent !important; --epr-bg-color: transparent !important; --epr-category-label-bg-color: rgba(20, 20, 20, 0.4) !important; --epr-picker-border-color: transparent !important; --epr-search-border-color: var(--border) !important; --epr-search-input-bg-color: rgba(255, 255, 255, 0.05) !important; --epr-highlight-color: var(--accent) !important; }
+.zn-emoji-backdrop { position: fixed; inset: 0; z-index: 1999; background: rgba(0, 0, 0, 0.3) !important; backdrop-filter: blur(4px) !important; }
+@media (max-width: 767px) { .zn-emoji-popover { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; margin-bottom: 0; border-radius: 24px 24px 0 0; max-height: 80vh; } .zn-emoji-backdrop { background: rgba(0, 0, 0, 0.5) !important; backdrop-filter: blur(10px) !important; } }

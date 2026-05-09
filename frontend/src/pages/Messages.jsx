@@ -611,13 +611,20 @@ export default function Messages() {
                                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                                         className="zn-emoji-popover"
                                                     >
+                                                        <div className="zn-emoji-header">
+                                                            <span className="zn-emoji-title">Choose Emoji</span>
+                                                            <button onClick={() => setShowEmojiPicker(false)} className="zn-icon-btn-sm">
+                                                                <HiX size={18} />
+                                                            </button>
+                                                        </div>
                                                         <EmojiPicker 
                                                             onEmojiClick={handleEmojiClick}
                                                             theme="dark"
                                                             searchDisabled={false}
                                                             skinTonesDisabled
                                                             width="100%"
-                                                            height={400}
+                                                            height={350}
+                                                            previewConfig={{ showPreview: false }}
                                                         />
                                                     </motion.div>
                                                 )}
