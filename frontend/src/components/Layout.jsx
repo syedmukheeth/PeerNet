@@ -394,20 +394,61 @@ export default function Layout() {
 
 
             <header className="mobile-top-header">
-                <Link to="/" className="flex items-center gap-2 text-decoration-none">
-                    <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
-                    <span className="peernetLogo text-xl logo-gradient-text">PeerNet</span>
-                </Link>
-                <div className="flex items-center gap-5">
-                    <Link to="/notifications" className="relative text-primary">
-                        <HiOutlineBell size={26} />
+                <div className="flex items-center gap-3">
+                    {/* Logout/More trigger for mobile */}
+                    <button 
+                        className="mobile-header-btn bg-transparent border-none text-primary"
+                        onClick={() => setShowMore(!showMore)}
+                    >
+                        <HiMenu size={24} />
+                    </button>
+                    <Link to="/" className="flex items-center gap-2 text-decoration-none">
+                        <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
+                        <span className="mobile-peernet-logo text-lg font-black logo-gradient-text">PeerNet</span>
+                    </Link>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                    <Link to="/notifications" className="relative text-primary p-1">
+                        <HiOutlineBell size={24} />
                         {unreadCount > 0 && <span className="mobile-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
                     </Link>
-                    <Link to="/messages" className="relative text-primary">
-                        <HiOutlineChatAlt2 size={26} />
+                    <Link to="/messages" className="relative text-primary p-1">
+                        <HiOutlineChatAlt2 size={24} />
                         {msgCount > 0 && <span className="mobile-badge">{msgCount > 9 ? '9+' : msgCount}</span>}
                     </Link>
                 </div>
+
+                {/* Mobile More Popup (Absolute positioned to the top left) */}
+                <AnimatePresence>
+                    {showMore && (
+                        <motion.div 
+                            className="mobile-more-popup"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                        >
+                            <div className="mobile-more-header">
+                                <span className="font-bold">Menu</span>
+                                <button onClick={() => setShowMore(false)} className="bg-transparent border-none text-primary">×</button>
+                            </div>
+                            <button className="mobile-more-item" onClick={() => { toggle(); setShowMore(false) }}>
+                                {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
+                                <span>Appearance</span>
+                            </button>
+                            <NavLink to="/settings" className="mobile-more-item" onClick={() => setShowMore(false)}>
+                                <HiCog size={20} /> <span>Settings</span>
+                            </NavLink>
+                            <button className="mobile-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
+                                <HiSwitchHorizontal size={20} /> <span>Accounts</span>
+                            </button>
+                            <div className="mobile-more-divider" />
+                            <button className="mobile-more-item text-error" onClick={handleLogout}>
+                                <HiLogout size={20} /> <span>Log out</span>
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </header>
 
             <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''} ${location.pathname.startsWith('/admin') ? 'main-col--admin' : ''}`} ref={mainRef}>
