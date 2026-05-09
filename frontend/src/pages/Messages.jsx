@@ -372,6 +372,30 @@ export default function Messages() {
             {/* Global emoji backdrop moved to root level for reliable full-screen intercept */}
             {showEmojiPicker && <div className="zn-emoji-backdrop" onClick={() => setShowEmojiPicker(false)} />}
 
+            {/* Emoji Picker - Moved to root to avoid parent transform issues on mobile */}
+            <AnimatePresence>
+                {showEmojiPicker && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 15, scale: 0.92 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 15, scale: 0.92 }}
+                        className="zn-emoji-popover"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <EmojiPicker 
+                            onEmojiClick={handleEmojiClick}
+                            theme={isDark ? 'dark' : 'light'}
+                            searchDisabled={false}
+                            skinTonesDisabled
+                            width="100%"
+                            height={400}
+                            previewConfig={{ showPreview: false }}
+                            searchPlaceholder="Search emojis..."
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* SIDEBAR - Conversation List */}
             <aside className="zn-messages-sidebar">
                 <div className="zn-sidebar-header">
@@ -636,29 +660,6 @@ export default function Messages() {
                                             >
                                                 <HiEmojiHappy size={22} />
                                             </button>
-                                            
-                                            <AnimatePresence>
-                                                {showEmojiPicker && (
-                                                    <motion.div 
-                                                        initial={{ opacity: 0, y: 15, scale: 0.92 }}
-                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                        exit={{ opacity: 0, y: 15, scale: 0.92 }}
-                                                        className="zn-emoji-popover"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        <EmojiPicker 
-                                                            onEmojiClick={handleEmojiClick}
-                                                            theme={isDark ? 'dark' : 'light'}
-                                                            searchDisabled={false}
-                                                            skinTonesDisabled
-                                                            width="100%"
-                                                            height={400}
-                                                            previewConfig={{ showPreview: false }}
-                                                            searchPlaceholder="Search emojis..."
-                                                        />
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
                                         </div>
 
                                         <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>

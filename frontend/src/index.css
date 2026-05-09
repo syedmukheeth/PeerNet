@@ -13640,14 +13640,12 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 .zn-emoji-popover { 
-    position: absolute !important; 
-    bottom: 100% !important; 
-    left: 50% !important; 
-    transform: translateX(-50%) !important;
+    position: fixed !important; 
+    bottom: 80px !important; /* Standard desktop height above footer */
+    right: 20px !important;
     width: 360px !important; 
-    margin-bottom: 20px !important; 
-    transform-origin: bottom center;
-    z-index: 2000;
+    transform-origin: bottom right;
+    z-index: 10000; /* Extremely high to clear everything */
     box-shadow: var(--shadow-xl);
     border-radius: 24px;
     overflow: hidden;
@@ -13709,7 +13707,7 @@ body:has(.zn-messages-root) .content-wrap {
 .zn-emoji-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 1999;
+    z-index: 9999; /* Just below popover */
     background: transparent;
     cursor: default;
 }
@@ -13724,18 +13722,18 @@ body:has(.zn-messages-root) .content-wrap {
         width: 100% !important; 
         margin-bottom: 0 !important; 
         border-radius: 24px 24px 0 0 !important; 
-        height: 400px !important; /* Lock to the same height as the React component prop */
+        height: 400px !important; 
         max-height: 75vh !important; 
         transform: none !important;
         box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
-        z-index: 2000;
+        z-index: 10000;
     } 
 
     .zn-emoji-backdrop {
         background: rgba(0, 0, 0, 0.3) !important;
         backdrop-filter: blur(4px) !important;
-        /* Ensure the backdrop doesn't block the input when shifted */
-        bottom: 460px !important;
+        z-index: 9999;
+        bottom: 0 !important;
     }
 
     /* Shift footer up when emoji picker is active */
