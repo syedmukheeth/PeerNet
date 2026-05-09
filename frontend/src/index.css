@@ -9788,6 +9788,8 @@ textarea:focus-visible {
     min-height: 0 !important;
     height: auto !important;
     overflow: hidden !important;
+    /* CRITICAL: Disable transforms so fixed children (footer) stay fixed to viewport */
+    transform: none !important;
   }
 
   /* Viewport fills remaining space and scrolls */
@@ -9797,21 +9799,26 @@ textarea:focus-visible {
     display: block !important;
     -webkit-overflow-scrolling: touch;
     min-height: 0 !important;
-    padding: 12px 12px 24px !important;
+    /* CRITICAL: Space for the fixed footer below */
+    padding: 12px 12px 100px !important;
   }
 
-  /* Footer stays at the bottom, never hidden */
+  /* Footer - NUCLEAR FIX: Use fixed positioning to bypass all parent clipping */
   .zn-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     flex-shrink: 0 !important;
     padding: 10px 12px !important;
-    /* Important: Lift the composer above the home indicator on modern mobile devices */
-    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Safe area lift */
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
     background: var(--surface-1) !important;
     border-top: 1px solid var(--border) !important;
-    z-index: 200 !important;
-    position: relative;
+    z-index: 1000 !important;
     width: 100% !important;
     box-sizing: border-box;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
   }
 
   /* Main-col must NOT add padding for messages page */
