@@ -9727,26 +9727,26 @@ textarea:focus-visible {
   /* Position the whole root between the header and bottom nav */
   .zn-messages-root {
     position: fixed !important;
-    display: flex !important; /* CRITICAL: Must be flex to layout children */
-    top: calc(50px + env(safe-area-inset-top, 0px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    top: 50px !important;
     left: 0 !important;
     right: 0 !important;
-    /* By default (list view), stop 80px above the navigation bar */
     bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
     height: auto !important;
     margin: 0 !important;
-    flex-direction: column;
-    z-index: 50;
+    z-index: 100;
     background: var(--bg);
-    overflow: hidden;
+    overflow: hidden !important;
   }
 
   /* Full screen when chat is active (nav is hidden) */
-  /* Full screen when chat is active (nav is hidden) */
   .zn-messages-root.chat-active {
     bottom: 0 !important;
-    top: calc(50px + env(safe-area-inset-top, 0px)) !important;
+    top: 50px !important;
     height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   /* Default: show only sidebar (list) */
@@ -9770,12 +9770,12 @@ textarea:focus-visible {
 
   .zn-messages-root.chat-active .zn-chat-main {
     display: flex !important;
-    flex-direction: column;
+    flex-direction: column !important;
     width: 100% !important;
-    height: auto !important; /* Allow flex to determine height */
     flex: 1 !important;
     min-height: 0 !important;
-    overflow: hidden;
+    height: auto !important;
+    overflow: hidden !important;
     position: relative;
   }
 
@@ -9784,20 +9784,20 @@ textarea:focus-visible {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
-    height: auto !important; /* Critical: Remove 100% height to let footer sit below it */
     flex: 1 !important;
     min-height: 0 !important;
-    max-height: none !important;
-    overflow: hidden;
+    height: auto !important;
+    overflow: hidden !important;
   }
 
   /* Viewport fills remaining space and scrolls */
   .zn-viewport {
-    flex: 1;
+    flex: 1 !important;
     overflow-y: auto !important;
+    display: block !important;
     -webkit-overflow-scrolling: touch;
-    min-height: 0;
-    padding: 12px 12px 24px;
+    min-height: 0 !important;
+    padding: 12px 12px 24px !important;
   }
 
   /* Footer stays at the bottom, never hidden */
