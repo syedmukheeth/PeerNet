@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
     HiX, 
     HiPhotograph, 
-    HiSparkles, 
     HiPencilAlt, 
     HiCheckCircle,
     HiCloudUpload,
@@ -19,7 +18,7 @@ export default function CreatePostModal({ onClose }) {
     const navigate = useNavigate()
     const [isTextMode, setIsTextMode] = useState(false)
     const [backgroundColor, setBackgroundColor] = useState('linear-gradient(135deg, #0f172a 0%, #334155 100%)')
-    const [generatingAI, setGeneratingAI] = useState(false)
+
     const [file, setFile] = useState(null)
     const [preview, setPreview] = useState(null)
     const [caption, setCaption] = useState('')
@@ -52,41 +51,6 @@ export default function CreatePostModal({ onClose }) {
         }
     }, [caption])
 
-    const generateAICaption = async () => {
-        if (!file || isVideo) return 
-        setGeneratingAI(true)
-        try {
-            const fd = new FormData()
-            fd.append('media', file)
-            const { data } = await api.post('/ai/generate-caption', fd, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
-            if (data.success) {
-                setCaption(data.data.caption)
-                toast.success('AI: Caption suggested! ✨')
-            }
-        } catch {
-            toast.error('AI: Failed to generate caption')
-        } finally {
-            setGeneratingAI(false)
-        }
-    }
-
-    const optimizeAICaption = async () => {
-        if (!caption.trim()) return
-        setGeneratingAI(true)
-        try {
-            const { data } = await api.post('/ai/optimize-caption', { text: caption })
-            if (data.success) {
-                setCaption(data.data.optimized)
-                toast.success('AI: Caption optimized! ✨')
-            }
-        } catch {
-            toast.error('AI: Failed to optimize caption')
-        } finally {
-            setGeneratingAI(false)
-        }
-    }
 
     const processFile = (f) => { 
         if (!f) return
@@ -286,18 +250,6 @@ export default function CreatePostModal({ onClose }) {
                                         </div>
 
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            {((preview && !isVideo) || caption.trim().length > 3) && (
-                                                <motion.button
-                                                    className="btn-ai-sparkle"
-                                                    onClick={caption.trim().length > 0 ? optimizeAICaption : generateAICaption}
-                                                    disabled={generatingAI}
-                                                    whileHover={{ scale: 1.1 }}
-                                                    whileTap={{ scale: 0.9 }}
-                                                    style={{ position: 'relative' }}
-                                                >
-                                                    {generatingAI ? <span className="spinner-sm" /> : <HiSparkles />}
-                                                </motion.button>
-                                            )}
                                             <span className={`character-counter ${caption.length > MAX_CHARS * 0.9 ? 'warning' : ''}`}>
                                                 {caption.length}/{MAX_CHARS}
                                             </span>

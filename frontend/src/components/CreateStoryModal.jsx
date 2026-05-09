@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiX, HiEmojiHappy, HiSparkles, HiCamera, HiTrash } from 'react-icons/hi'
+import { HiX, HiEmojiHappy, HiCamera, HiTrash } from 'react-icons/hi'
 import { FiAlignLeft, FiAlignCenter, FiAlignRight, FiVideo } from 'react-icons/fi'
 import EmojiPicker from 'emoji-picker-react'
 import api from '../api/axios'
@@ -32,7 +32,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
     const [textAlign, setTextAlign] = useState('center')
     const [showEmoji, setShowEmoji] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [generatingAI, setGeneratingAI] = useState(false)
+
     const [mediaFile, setMediaFile] = useState(null)
     const [mediaPreview, setMediaPreview] = useState(null)
     const [mediaType, setMediaType] = useState('text') // 'text', 'image', 'video'
@@ -105,21 +105,6 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
         if (fileInputRef.current) fileInputRef.current.value = ''
     }
 
-    const optimizeWithAI = async () => {
-        if (!content.trim()) return
-        setGeneratingAI(true)
-        try {
-            const { data } = await api.post('/ai/optimize-caption', { text: content })
-            if (data.success) {
-                setContent(data.data.optimized)
-                toast.success('Optimized with AI ✨')
-            }
-        } catch {
-            toast.error('AI optimization failed')
-        } finally {
-            setGeneratingAI(false)
-        }
-    }
 
     const handleSubmit = async () => {
         if (!content.trim() && !mediaFile) return toast.error('Story cannot be empty')
@@ -236,19 +221,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                                 }}
                             />
 
-                            {/* Floating AI Assistant */}
-                            {content.length > 5 && (
-                                <motion.button
-                                    className="status-ai-btn z-10"
-                                    onClick={optimizeWithAI}
-                                    disabled={generatingAI}
-                                    initial={{ opacity: 0, x: 10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                >
-                                    {generatingAI ? <span className="spinner-sm" /> : <HiSparkles size={18} />}
-                                    <span>AI Polish</span>
-                                </motion.button>
-                            )}
+
                         </div>
                     </div>
 

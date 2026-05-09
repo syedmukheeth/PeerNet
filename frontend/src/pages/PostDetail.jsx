@@ -6,7 +6,7 @@ import api from '../api/axios'
 import {
     HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
     HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
-    HiBadgeCheck, HiShieldCheck,
+    HiBadgeCheck,
     HiOutlineChat
 } from 'react-icons/hi'
 import { FiSend } from 'react-icons/fi'
@@ -39,8 +39,7 @@ export default function PostDetail() {
     const [replyData, setReplyData] = useState({}) // { commentId: { replies: [], loading: false, show: false } }
     const [isScanning, setIsScanning] = useState(false)
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-    const [suggestions, setSuggestions] = useState([])
-    const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+
     const [showShareModal, setShowShareModal] = useState(false)
     const inputRef = useRef()
     const menuRef = useRef()
@@ -264,29 +263,7 @@ export default function PostDetail() {
         }
     }
 
-    const fetchAISuggestions = useCallback(async (commentText = null) => {
-        if (!post) return
-        setLoadingSuggestions(true)
-        try {
-            const { data } = await api.post('/ai/suggest-replies', {
-                caption: post.caption,
-                commentText
-            })
-            setSuggestions(data.data || [])
-        } catch (err) {
-            console.error('AI Suggestion error:', err)
-        } finally {
-            setLoadingSuggestions(false)
-        }
-    }, [post])
 
-    useEffect(() => {
-        if (replyingTo) {
-            fetchAISuggestions(replyingTo.body)
-        } else {
-            setSuggestions([])
-        }
-    }, [replyingTo, fetchAISuggestions])
 
     if (loading) return (
         <div key="post-detail-skeleton" className="post-detail-card overflow-hidden">
@@ -480,12 +457,7 @@ export default function PostDetail() {
                                                     </Link>
                                                 </strong>
                                                 <span style={{ color: 'var(--text-1)' }}>{c.body}</span>
-                                                {c.isAiVerified && (
-                                                    <HiShieldCheck 
-                                                        style={{ color: '#10B981', fontSize: 14, marginLeft: 6, verticalAlign: 'middle', cursor: 'help' }} 
-                                                        title="AI Verified Safe" 
-                                                    />
-                                                )}
+
                                             </div>
                                             <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, display: 'flex', gap: 12, alignItems: 'center' }}>
                                                 <span>{timeago(c.createdAt)}</span>
@@ -541,12 +513,6 @@ export default function PostDetail() {
                                                                             </Link>
                                                                         </strong>
                                                                         <span style={{ color: 'var(--text-1)' }}>{reply.body}</span>
-                                                                        {reply.isAiVerified && (
-                                                                            <HiShieldCheck 
-                                                                                style={{ color: '#10B981', fontSize: 12, marginLeft: 4, verticalAlign: 'middle', cursor: 'help' }} 
-                                                                                title="AI Verified Safe" 
-                                                                            />
-                                                                        )}
                                                                     </div>
                                                                     <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3, display: 'flex', gap: 10, alignItems: 'center' }}>
                                                                         <span>{timeago(reply.createdAt)}</span>
@@ -604,31 +570,6 @@ export default function PostDetail() {
                             <div className="flex-1 relative">
                                 {replyingTo && (
                                     <div className="post-detail-reply-badge">
-                                        {/* AI Suggestions Chips */}
-                                        {suggestions.length > 0 && (
-                                            <div className="ai-suggestion-row no-scrollbar">
-                                                {suggestions.map((s, idx) => (
-                                                    <motion.button
-                                                        key={idx}
-                                                        initial={{ opacity: 0, y: 5 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: idx * 0.1 }}
-                                                        onClick={() => setBody(s)}
-                                                        type="button"
-                                                        className="ai-suggestion-chip"
-                                                        whileHover={{ background: 'var(--hover)', color: 'var(--text-1)', scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
-                                                    >
-                                                        {s}
-                                                    </motion.button>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {loadingSuggestions && (
-                                            <div className="ai-thinking-label">
-                                                <div className="spinner w-[10px] h-[10px]" /> Thinking of replies...
-                                            </div>
-                                        )}
                                         <div className="text-[11px] text-muted">
                                             Replying to <strong>{replyingTo.author?.username}</strong>
                                         </div>
@@ -641,8 +582,8 @@ export default function PostDetail() {
                                     className="post-detail-input" />
                             </div>
                             {body.trim() && (
-                                <button type="submit" disabled={isScanning} className={`post-detail-submit ${isScanning ? 'is-scanning' : ''}`}>
-                                    {isScanning ? 'AI Scanning...' : 'Post'}
+                                <button type="submit" disabled={isScanning} className="post-detail-submit">
+                                    Post
                                 </button>
                             )}
                         </form>

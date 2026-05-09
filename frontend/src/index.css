@@ -1867,26 +1867,7 @@ textarea:focus-visible {
   filter: brightness(1.06);
 }
 
-/* AI Sparkle */
-.btn-ai-sparkle {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  background: var(--logo-gradient);
-  border: none;
-  border-radius: var(--r-sm);
-  color: white;
-  padding: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 10px var(--accent-ring);
-  transition: all var(--trans-fast);
-  z-index: 5;
-}
-.btn-ai-sparkle:hover { transform: scale(1.1); box-shadow: 0 4px 14px var(--accent-ring); }
-.btn-ai-sparkle:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
 
 /* ========================================================================================================================================================================================================================================
    INPUTS
@@ -3627,25 +3608,6 @@ textarea:focus-visible {
 }
 .status-main-textarea::placeholder { color: rgba(255,255,255,0.3); }
 
-.status-ai-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 10;
-  transition: all 0.2s;
-}
-.status-ai-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
 
 /* --- Controls Panel --- */
 .status-controls-panel {
