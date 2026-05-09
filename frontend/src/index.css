@@ -10359,50 +10359,52 @@ textarea:focus-visible {
 /* ========================================================================================================================================================================================================================================
    TABLET (768px - 1263px) - Side Rail Mode
    ======================================================================================================================================================================================================================================== */
-@media (max-width: 1263px) {
+/* ========================================================================================================================================================================================================================================
+   TABLET (768px - 1263px) - Full desktop-style sidebar
+   ======================================================================================================================================================================================================================================== */
+@media (min-width: 768px) and (max-width: 1263px) {
   :root {
-    /* Widen sidebar on tablet as per user request */
     --sidebar-actual-w: var(--sidebar-w);
   }
 
+  /* Sidebar stays FULL WIDTH — same as desktop */
   .sidebar {
     padding: 24px 0;
-    align-items: center;
+    align-items: stretch; /* full-width items */
+    width: var(--sidebar-w);
   }
 
+  /* Logo row stays left-aligned like desktop */
   .sidebar-logo-row {
-    padding: 0;
-    justify-content: center;
+    padding: 0 20px;
+    justify-content: flex-start;
     margin-bottom: 32px;
   }
 
+  /* Show logo, labels and profile info — same as desktop */
   .peernetLogo,
   .ig-label,
   .profile-card-info,
   .sidebar-footer .ig-label {
-    display: none !important;
+    display: unset !important;
   }
 
-  /* Ensure More popup labels are visible even if sidebar is collapsed */
-  .ig-more-item span {
-    display: block !important;
-  }
-
+  /* Nav links: full-width with label, same as desktop */
   .ig-link {
-    justify-content: center;
-    padding: 12px 0;
-    width: 48px;
-    margin: 4px auto;
+    justify-content: flex-start;
+    padding: 12px 20px;
+    width: auto;
+    margin: 2px 8px;
   }
 
   .ig-link div {
-    justify-content: center;
-    gap: 0 !important;
+    justify-content: flex-start;
+    gap: 14px !important;
   }
 
   .sidebar-profile-card {
-    justify-content: center;
-    padding: 12px 0;
+    justify-content: flex-start;
+    padding: 12px 20px;
   }
 
   /* Hide right sidebar panel */
@@ -10411,7 +10413,7 @@ textarea:focus-visible {
     display: none !important;
   }
 
-  /* Make feed full width */
+  /* Feed and main col */
   .feed-layout {
     justify-content: center;
   }
