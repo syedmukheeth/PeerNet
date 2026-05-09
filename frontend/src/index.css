@@ -9146,7 +9146,7 @@ textarea:focus-visible {
 
   /* TOP HEADER SYNC */
   .mobile-top-header {
-    background: rgba(10, 10, 10, 0.9) !important;
+    background: rgba(var(--bg-rgb), 0.92) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border-bottom: 1px solid var(--border) !important;
@@ -9156,7 +9156,7 @@ textarea:focus-visible {
 @media (max-width: 767px) {
   /* Navigation Safety */
   .mobile-nav {
-    background: rgba(10, 10, 10, 0.95) !important;
+    background: rgba(var(--bg-rgb), 0.95) !important;
     padding-bottom: env(safe-area-inset-bottom) !important;
   }
 }
@@ -9983,5 +9983,101 @@ textarea:focus-visible {
   body:has(.zn-messages-root) .main-col {
     padding-bottom: 0 !important;
     overflow: hidden !important;
+  }
+}
+
+/* ============================================================
+   LIGHT MODE COMPATIBILITY - MOBILE & MESSAGING
+   Ensures all theme-aware CSS variables are correctly applied
+   in light mode across the mobile interface.
+   ============================================================ */
+
+[data-theme="light"] {
+  /* Mobile header & nav - use white glass */
+  .mobile-top-header,
+  .mobile-nav {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Messaging sidebar */
+  .zn-messages-sidebar {
+    background: #fafafa !important;
+    border-right-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Chat header */
+  .zn-chat-header {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Composer footer */
+  .zn-footer {
+    background: #fafafa !important;
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Composer pill input */
+  .zn-composer-pill {
+    background: #f0f0f2 !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Peer bubbles (incoming messages) */
+  .zn-row.peer .zn-bubble {
+    background: #f0f0f2 !important;
+    color: #1a1a1a !important;
+  }
+
+  /* Conversation rows */
+  .zn-convo-row:hover {
+    background: #f4f4f6 !important;
+  }
+  .zn-convo-row.active {
+    background: rgba(0, 149, 246, 0.08) !important;
+  }
+
+  /* Search bar in sidebar */
+  .zn-sidebar-search {
+    background: #f0f0f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Date divider label */
+  .zn-date-label {
+    background: #f0f0f2 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: #71717a !important;
+  }
+
+  /* Edit modal */
+  .zn-edit-modal {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+  .zn-edit-textarea {
+    background: #f4f4f6 !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #1a1a1a !important;
+  }
+
+  /* Skeleton shimmer in light mode */
+  .skeleton {
+    background: linear-gradient(90deg, #e8e8e8 25%, #d0d0d0 50%, #e8e8e8 75%) !important;
+    background-size: 200% 100% !important;
+  }
+
+  /* Mobile more popup */
+  .mobile-more-popup {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  }
+  .mobile-more-item {
+    color: #1a1a1a !important;
+  }
+  .mobile-more-item:hover {
+    background: #f4f4f6 !important;
   }
 }
