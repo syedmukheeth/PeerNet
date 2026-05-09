@@ -11225,8 +11225,7 @@ textarea:focus-visible {
 
 @media (max-width: 767px) {
   .chat-layout {
-    height: calc(100vh - 125px) !important;
-    /* Account for top header + bottom nav */
+    height: 100dvh !important;
   }
 }
 
@@ -11572,7 +11571,7 @@ textarea:focus-visible {
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
-    height: calc(100vh - 125px) !important;
+    height: 100dvh !important;
     z-index: 200 !important;
   }
 }
@@ -11628,7 +11627,7 @@ textarea:focus-visible {
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
-    height: calc(100vh - 125px) !important;
+    height: 100dvh !important;
     z-index: 100 !important;
     background: var(--bg) !important;
   }
