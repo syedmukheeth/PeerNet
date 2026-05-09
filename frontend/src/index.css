@@ -8725,3 +8725,153 @@ textarea:focus-visible {
     height: calc(100vh - 125px) !important;
   }
 }
+/* ========================================================================================================================================================================================================================================
+   SENIOR DEV OVERRIDE: PROFILE PAGE V2 RESPONSIVE
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 767px) {
+  .profile-page-wrap {
+    padding-top: 0 !important;
+  }
+
+  /* Force vertical stack with grid for precise control */
+  .profile-header-v2 {
+    display: grid !important;
+    grid-template-columns: 80px 1fr !important;
+    grid-template-areas: 
+      "avatar main"
+      "bio bio"
+      "stats stats"
+      "actions actions" !important;
+    gap: 16px !important;
+    padding: 16px !important;
+    text-align: left !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .profile-avatar-wrap {
+    grid-area: avatar !important;
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .profile-info-col {
+    grid-area: main !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .profile-header-top {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+
+  .profile-username {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Hide desktop actions in the 'main' area, we'll place them in the 'actions' area */
+  .profile-header-top .profile-actions-row {
+    display: none !important;
+  }
+
+  /* Bio area - Full Width */
+  .profile-bio-v2 {
+    grid-area: bio !important;
+    width: 100% !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+  }
+
+  /* Stats area - Centered Row */
+  .profile-stats-v2 {
+    grid-area: stats !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    padding: 12px 0 !important;
+    margin: 8px 0 !important;
+    width: 100% !important;
+  }
+
+  .profile-stat-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+    flex: 1 !important;
+  }
+
+  .stat-value {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+  }
+
+  .stat-label {
+    font-size: 12px !important;
+    color: var(--text-3) !important;
+    text-transform: lowercase !important;
+  }
+
+  /* Actions area - Re-injecting buttons at the bottom */
+  .profile-page-wrap .profile-actions-row {
+    grid-area: actions !important;
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .profile-actions-row .btn {
+    flex: 1 !important;
+    height: 36px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+  }
+
+  /* Tabs Refinement */
+  .profile-tabs {
+    display: flex !important;
+    justify-content: space-around !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    border-top: none !important;
+  }
+
+  .profile-tab-btn {
+    flex: 1 !important;
+    padding: 12px 0 !important;
+    border-top: 2px solid transparent !important;
+    color: var(--text-3) !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .profile-tab-btn span {
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-weight: 800 !important;
+  }
+
+  .profile-tab-btn.active {
+    color: var(--text-1) !important;
+    border-top: 2px solid var(--text-1) !important;
+  }
+
+  /* Grid Alignment */
+  .profile-grid {
+    gap: 2px !important;
+    padding: 0 !important;
+  }
+  
+  .profile-grid-item {
+    border-radius: 0 !important;
+  }
+}
