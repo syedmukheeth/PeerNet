@@ -336,7 +336,7 @@ export default function Messages() {
     const showingChat = !!convoId
 
     return (
-        <div className={`zn-messages-root${showingChat ? ' chat-active' : ''}`}>
+        <div className={`zn-messages-root ${showingChat ? 'chat-active' : ''}`}>
 
             {/* SIDEBAR - Conversation List */}
             <aside className="zn-messages-sidebar">
@@ -609,21 +609,21 @@ export default function Messages() {
                                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                        className="zn-emoji-picker-popover"
+                                                        className="zn-emoji-popover"
                                                     >
                                                         <EmojiPicker 
                                                             onEmojiClick={handleEmojiClick}
                                                             theme="dark"
                                                             searchDisabled={false}
                                                             skinTonesDisabled
-                                                            width={320}
+                                                            width="100%"
                                                             height={400}
                                                         />
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>
                                             
-                                            {showEmojiPicker && <div className="zn-picker-backdrop" onClick={() => setShowEmojiPicker(false)} />}
+                                            {showEmojiPicker && <div className="zn-emoji-backdrop" onClick={() => setShowEmojiPicker(false)} />}
                                         </div>
 
                                         <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>

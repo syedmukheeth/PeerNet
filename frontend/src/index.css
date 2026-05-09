@@ -13614,3 +13614,54 @@ body:has(.zn-messages-root) .content-wrap {
 .zn-emoji-picker-popover { position: absolute; bottom: 60px; left: 0; z-index: 1000; filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5)); }
 .zn-emoji-picker-popover .EmojiPickerReact { --epr-bg-color: rgba(13, 13, 13, 0.95) !important; --epr-category-label-bg-color: rgba(20, 20, 20, 0.95) !important; --epr-picker-border-color: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(20px); border-radius: 16px !important; }
 .zn-picker-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999; }
+
+/* --- MOBILE MESSAGING GAP FIX --- */
+@media (max-width: 767px) {
+  body:has(.zn-messages-root) .main-col,
+  body:has(.zn-messages-root) .content-wrap {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .zn-messages-root {
+    top: 0 !important;
+  }
+  body:has(.zn-messages-root.chat-active) .mobile-top-header,
+  body:has(.zn-messages-root.chat-active) .mobile-nav {
+    display: none !important;
+  }
+}
+
+/* --- EMOJI PICKER STYLING --- */
+.zn-emoji-popover {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  z-index: 2000;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-xl);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--zn-composer-border);
+}
+.zn-emoji-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1999;
+  background: transparent;
+}
+@media (max-width: 767px) {
+  .zn-emoji-popover {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin-bottom: 0;
+    border-radius: 20px 20px 0 0;
+  }
+  .zn-emoji-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+  }
+}
