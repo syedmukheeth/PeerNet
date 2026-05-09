@@ -9798,18 +9798,22 @@ textarea:focus-visible {
   .zn-viewport {
     flex: 1 !important;
     overflow-y: auto !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     -webkit-overflow-scrolling: touch;
     min-height: 0 !important;
     height: 100% !important; /* Force height for scrolling */
     padding: 12px 12px !important;
+    /* CRITICAL: Tell the browser to reserve space at the bottom when scrolling */
+    scroll-padding-bottom: 160px !important;
   }
 
   /* Physical spacer to push last message above the fixed footer */
   .zn-viewport-spacer {
-    height: 120px !important;
-    width: 100%;
-    flex-shrink: 0;
+    height: 160px !important;
+    width: 100% !important;
+    flex-shrink: 0 !important;
+    display: block !important;
   }
 
   /* Footer - NUCLEAR FIX: Use fixed positioning to bypass all parent clipping */
