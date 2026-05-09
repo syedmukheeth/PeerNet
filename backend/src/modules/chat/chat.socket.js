@@ -1,6 +1,7 @@
 'use strict';
 
 const chatService = require('./chat.service');
+const User = require('../user/User');
 const logger = require('../../config/logger');
 const { getRedisOptional } = require('../../config/redis');
 
@@ -11,9 +12,15 @@ module.exports = (io, socket) => {
 
     const markOnline = async () => {
         const redis = getRedisOptional();
-        if (redis && userId) {
-            await redis.setEx(`online:${userId}`, ONLINE_TTL, '1');
-            // Broadcast online status to relevant rooms if needed
+        if (userId) {
+            if (redis) await redis.setEx(`online:${userId}`, ONLINE_TTL, '1');
+            
+            // Atomic update and check if we need to broadcast
+            const user = await User.findById(userId);
+            if (user && !user.isOnline) {
+                await User.findByIdAndUpdate(userId, { isOnline: true });
+                io.emit('user_status_change', { userId, isOnline: true });
+            }
         }
     };
     markOnline();
@@ -113,8 +120,22 @@ module.exports = (io, socket) => {
 
     socket.on('disconnect', async () => {
         const redis = getRedisOptional();
-        if (redis && userId) {
-            await redis.del(`online:${userId}`);
+        if (userId) {
+            if (redis) await redis.del(`online:${userId}`);
+
+            // Check if user has other active connections
+            const userRoom = `user:${userId}`;
+            const room = io.sockets.adapter.rooms.get(userRoom);
+            
+            // If room doesn't exist or only this socket was in it (already removed by socket.io)
+            // Note: In disconnect handler, the socket might already be removed from room
+            if (!room || room.size === 0) {
+                await User.findByIdAndUpdate(userId, { 
+                    isOnline: false, 
+                    lastSeen: new Date() 
+                });
+                io.emit('user_status_change', { userId, isOnline: false, lastSeen: new Date() });
+            }
         }
     });
 };

@@ -515,7 +515,7 @@ export default function Messages() {
                                             <div className="zn-chat-peer-name">{peer?.username || 'Chatting...'}</div>
                                             <div className="zn-chat-peer-status">
                                                 <div className={`zn-status-dot${peer?.isOnline ? ' online' : ''}`} />
-                                                <span>{peer?.isOnline ? 'Online' : 'Offline'}</span>
+                                                <span>{peer?.isOnline ? 'Online' : peer?.lastSeen ? `Last seen ${formatTime(peer.lastSeen)}` : 'Offline'}</span>
                                             </div>
                                         </div>
                                     </div>

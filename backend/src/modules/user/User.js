@@ -48,6 +48,8 @@ const userSchema = new mongoose.Schema(
         followingCount: { type: Number, default: 0, min: 0 },
         postsCount: { type: Number, default: 0, min: 0 },
         categoryAffinity: { type: Map, of: Number, default: {} },
+        isOnline: { type: Boolean, default: false },
+        lastSeen: { type: Date, default: Date.now },
     },
     { timestamps: true },
 );

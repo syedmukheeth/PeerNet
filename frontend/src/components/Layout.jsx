@@ -207,6 +207,29 @@ export default function Layout() {
     }, [socket, user, location.pathname, showMsgToast])
 
     useEffect(() => {
+        if (!socket || !user) return
+        
+        const onStatusChange = ({ userId, isOnline, lastSeen }) => {
+            // Update conversations list cache
+            queryClient.setQueryData(['conversations'], (old) => {
+                if (!old) return old
+                return old.map(convo => {
+                    const participants = convo.participants?.map(p => 
+                        p._id === userId ? { ...p, isOnline, lastSeen } : p
+                    )
+                    return { ...convo, participants }
+                })
+            })
+
+            // Also invalidate to be safe and get fresh data for other hooks
+            queryClient.invalidateQueries({ queryKey: ['messages', { userId }] })
+        }
+
+        socket.on('user_status_change', onStatusChange)
+        return () => socket.off('user_status_change', onStatusChange)
+    }, [socket, user, queryClient])
+
+    useEffect(() => {
         if (user) saveCurrentAccount(user)
     }, [user, saveCurrentAccount])
 
