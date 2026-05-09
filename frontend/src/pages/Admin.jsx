@@ -19,26 +19,26 @@ import '../admin_v2.css'
 
 const navGroups = [
     {
-        title: 'Operations',
+        title: 'Overview',
         items: [
-            { id: 'dashboard', label: 'Command Center', icon: HiGlobe },
-            { id: 'analytics', label: 'Intelligence', icon: HiTrendingUp }
+            { id: 'dashboard', label: 'Dashboard', icon: HiGlobe },
+            { id: 'analytics', label: 'Analytics', icon: HiTrendingUp }
         ]
     },
     {
-        title: 'Platform Assets',
+        title: 'Management',
         items: [
-            { id: 'users', label: 'Identities', icon: HiUsers },
-            { id: 'posts', label: 'Broadcasts', icon: HiCollection },
-            { id: 'comments', label: 'Transmissions', icon: HiChatAlt2 },
-            { id: 'reports', label: 'Violations', icon: HiFlag }
+            { id: 'users', label: 'User Accounts', icon: HiUsers },
+            { id: 'posts', label: 'Public Posts', icon: HiCollection },
+            { id: 'comments', label: 'Post Comments', icon: HiChatAlt2 },
+            { id: 'reports', label: 'Safety Reports', icon: HiFlag }
         ]
     },
     {
-        title: 'Infrastructure',
+        title: 'System',
         items: [
-            { id: 'infrastructure', label: 'Core Health', icon: HiDatabase },
-            { id: 'audit', label: 'Audit Trail', icon: HiShieldCheck }
+            { id: 'infrastructure', label: 'Server Status', icon: HiDatabase },
+            { id: 'audit', label: 'Activity Log', icon: HiShieldCheck }
         ]
     }
 ]
@@ -56,11 +56,11 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
                 <Link to="/" className="flex flex-col gap-1 px-4 group">
                     <div className="flex items-center gap-2.5">
                         <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
-                        <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Governance v2</span>
+                        <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Admin Panel</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                        <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none group-hover:text-accent transition-colors">Command</h2>
-                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-muted group-hover:bg-accent group-hover:text-white transition-all">
+                        <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none group-hover:text-accent transition-colors">Control</h2>
+                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-primary group-hover:bg-accent group-hover:text-white transition-all">
                             <HiHome size={16} />
                         </div>
                     </div>
@@ -71,16 +71,16 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
             <nav className="sidebar-nav no-scrollbar px-2 flex-1">
                 {groups.map(group => (
                     <div key={group.title} className="mb-8">
-                        <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-4 px-4 opacity-50">{group.title}</div>
+                        <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4 px-4 opacity-70">{group.title}</div>
                         <div className="flex flex-col gap-1.5">
                             {group.items.map(item => (
                                 <button
                                     key={item.id}
                                     onClick={() => setActiveTab(item.id)}
-                                    className={`ig-link w-full border-none bg-transparent text-left px-4 py-3.5 rounded-2xl flex items-center gap-4 transition-all duration-300 ${
+                                    className={`ig-link w-full border-none bg-transparent text-left px-4 py-3.5 rounded-2xl flex items-center gap-4 transition-all duration-500 transform ${
                                         activeTab === item.id 
-                                        ? 'bg-accent/10 text-accent' 
-                                        : 'text-muted hover:bg-white/5 hover:text-primary'
+                                        ? 'bg-accent text-white shadow-xl shadow-accent/30 scale-[1.02]' 
+                                        : 'text-primary/60 hover:bg-white/10 hover:text-primary'
                                     }`}
                                 >
                                     <div className="relative">
@@ -105,12 +105,10 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) =
             <div className="sidebar-footer border-t border-white/5 pt-4 space-y-4">
                 <Link 
                     to="/" 
-                    className="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-muted hover:bg-white/5 hover:text-primary transition-all group"
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-white bg-error shadow-lg shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] transition-all group"
                 >
-                    <div className="ig-icon-wrap !bg-error/10 !border-error/20">
-                        <HiExit size={20} className="text-error group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="text-[13px] font-black uppercase tracking-widest">Exit Console</span>
+                    <HiExit size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[13px] font-black uppercase tracking-widest">Exit Admin</span>
                 </Link>
                 <InfrastructurePulse pulse={pulse} />
             </div>
@@ -137,7 +135,7 @@ const InfrastructurePulse = ({ pulse }) => {
             
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-muted uppercase tracking-[0.2em] opacity-50">System Load</span>
+                    <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] opacity-70">Server Load</span>
                     <span className="text-[11px] font-black text-primary tabular-nums tracking-tighter">{load.toFixed(1)}%</span>
                 </div>
                 <div className="h-1.5 bg-border/30 rounded-full overflow-hidden p-[1px]">
@@ -149,12 +147,12 @@ const InfrastructurePulse = ({ pulse }) => {
             </div>
             
             <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-black/20 border border-white/5">
-                    <span className="text-[8px] font-black text-muted uppercase tracking-widest block mb-1">Latency</span>
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10">
+                    <span className="text-[8px] font-black text-primary uppercase tracking-widest block mb-1 opacity-70">Response</span>
                     <span className="text-[12px] font-black text-primary tabular-nums tracking-tighter">{latency.toFixed(0)}ms</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-black/20 border border-white/5">
-                    <span className="text-[8px] font-black text-muted uppercase tracking-widest block mb-1">Users</span>
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10">
+                    <span className="text-[8px] font-black text-primary uppercase tracking-widest block mb-1 opacity-70">Users</span>
                     <span className="text-[12px] font-black text-primary tabular-nums tracking-tighter">{pulse?.activeUsers || 0}</span>
                 </div>
             </div>
@@ -265,21 +263,21 @@ const AnalyticsModule = ({ stats, analytics }) => {
                         <div>
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)]" />
-                                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Network Velocity</h3>
+                                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Traffic Growth</h3>
                             </div>
-                            <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-40">Live Platform Throughput & Growth</p>
+                            <p className="text-[11px] font-black text-primary uppercase tracking-[0.2em] opacity-70">Live platform performance & activity</p>
                         </div>
                         <div className="flex gap-8">
                             <div className="flex flex-col items-end">
-                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40 mb-1">Load State</span>
+                                <span className="text-[10px] font-black text-primary uppercase tracking-widest opacity-70 mb-1">System Status</span>
                                 <span className="text-[12px] font-black text-success uppercase flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-success" />
-                                    Optimal
+                                    Working
                                 </span>
                             </div>
                             <div className="flex flex-col items-end border-l border-border/50 pl-8">
-                                <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-40 mb-1">Uptime</span>
-                                <span className="text-[12px] font-black text-primary uppercase tabular-nums">99.99%</span>
+                                <span className="text-[10px] font-black text-primary uppercase tracking-widest opacity-70 mb-1">Reliability</span>
+                                <span className="text-[12px] font-black text-primary uppercase tabular-nums">99.9%</span>
                             </div>
                         </div>
                     </div>
@@ -321,8 +319,8 @@ const AnalyticsModule = ({ stats, analytics }) => {
 
                 <div className="admin-surface-el p-8 md:p-12 flex flex-col justify-between bg-gradient-to-br from-surface-subtle/20 to-transparent">
                     <div>
-                        <h3 className="text-xl font-black text-primary uppercase tracking-tighter">Geographical</h3>
-                        <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mt-1 opacity-40">Traffic Distribution</p>
+                        <h3 className="text-xl font-black text-primary uppercase tracking-tighter">Traffic Locations</h3>
+                        <p className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mt-1 opacity-70">Where users are coming from</p>
                     </div>
                     <div className="space-y-8 py-12">
                         {[
@@ -359,9 +357,9 @@ const AnalyticsModule = ({ stats, analytics }) => {
 const InfrastructureModule = ({ pulse }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard label="Processor Load" value={`${pulse?.load?.toFixed(1) || 0.1}%`} sub="CPU UTILIZATION" icon={<HiServer />} />
-            <StatCard label="Memory Latency" value={`${pulse?.latency || 42}ms`} sub="BUFFER DELAY" icon={<HiLightningBolt />} />
-            <StatCard label="Active Nodes" value={pulse?.activeUsers || 0} sub="CONCURRENT CONNECTIONS" icon={<HiGlobe />} />
+            <StatCard label="CPU Usage" value={`${pulse?.load?.toFixed(1) || 0.1}%`} sub="PROCESSOR WORKLOAD" icon={<HiServer />} />
+            <StatCard label="Memory Speed" value={`${pulse?.latency || 42}ms`} sub="RESPONSE TIME" icon={<HiLightningBolt />} />
+            <StatCard label="Active Users" value={pulse?.activeUsers || 0} sub="CURRENT CONNECTIONS" icon={<HiGlobe />} />
         </div>
         
         <div className="admin-surface-el p-10">
@@ -369,9 +367,9 @@ const InfrastructureModule = ({ pulse }) => (
             <div className="space-y-6">
                 {[
                     { label: 'Database Status', status: 'Online', color: 'text-success' },
-                    { label: 'Socket Bridge', status: 'Connected', color: 'text-success' },
-                    { label: 'CDN Edge', status: 'Optimal', color: 'text-accent' },
-                    { label: 'Audit Trail', status: 'Recording', color: 'text-warning' }
+                    { label: 'Chat Connection', status: 'Connected', color: 'text-success' },
+                    { label: 'Global Delivery', status: 'Fast', color: 'text-accent' },
+                    { label: 'Activity Log', status: 'Recording', color: 'text-warning' }
                 ].map(node => (
                     <div key={node.label} className="flex items-center justify-between p-5 bg-black/20 rounded-2xl border border-white/5">
                         <span className="text-[11px] font-black text-muted uppercase tracking-widest">{node.label}</span>
@@ -391,10 +389,10 @@ const StorageModule = ({ stats }) => {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard label="Object Count" value={((stats?.totalPosts || 0) + (stats?.totalStories || 0)).toLocaleString()} sub="TOTAL BUCKET ASSETS" icon={<HiDatabase />} />
-                <StatCard label="Bandwidth" value={stats?.bandwidthUsage || '0 GB'} sub="TOTAL CONSUMPTION" icon={<HiTrendingUp />} />
+                <StatCard label="Total Files" value={((stats?.totalPosts || 0) + (stats?.totalStories || 0)).toLocaleString()} sub="FILES & DATA" icon={<HiDatabase />} />
+                <StatCard label="Bandwidth" value={stats?.bandwidthUsage || '0 GB'} sub="DATA USAGE" icon={<HiTrendingUp />} />
                 <StatCard label="Disk Usage" value={`${(storage.usedMB / 1024).toFixed(1)} GB`} sub={`${storage.percentage}% CAPACITY`} icon={<HiHardDrive />} />
-                <StatCard label="Synchronicity" value={`${stats?.health?.synchronicity || '100'}%`} sub="SYSTEM HEALTH" icon={<HiShieldCheck />} />
+                <StatCard label="Health Score" value={`${stats?.health?.synchronicity || '100'}%`} sub="SYSTEM STABILITY" icon={<HiShieldCheck />} />
             </div>
 
             <div className="admin-surface-el p-10">
@@ -440,12 +438,12 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
         <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-6">
                     <div>
-                        <h3 className="text-xl font-black text-primary uppercase tracking-tighter">Users</h3>
-                        <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mt-1 opacity-40">{users.length} registered accounts</p>
+                        <h3 className="text-xl font-black text-primary uppercase tracking-tighter">User Accounts</h3>
+                        <p className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mt-1 opacity-70">{users.length} members found</p>
                     </div>
                     <button className="hidden md:flex items-center gap-3 px-5 py-2.5 rounded-[20px] bg-accent text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all shadow-[0_8px_20px_rgba(var(--accent-rgb),0.25)] ring-1 ring-white/20">
                         <HiShieldCheck size={14} />
-                        Add User
+                        Create Account
                     </button>
                 </div>
                 <div className="relative group w-full md:w-96">
@@ -463,10 +461,10 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th scope="col">Identity Cluster</th>
-                        <th scope="col">Auth Status</th>
-                        <th scope="col">Privilege</th>
-                        <th scope="col" className="text-right">Access Control</th>
+                        <th scope="col">User Info</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Role</th>
+                        <th scope="col" className="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -553,10 +551,10 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th scope="col">Operator Node</th>
-                        <th scope="col">Transmission Payload</th>
-                        <th scope="col">Target Reference</th>
-                        <th scope="col" className="text-right">Purge Protocol</th>
+                        <th scope="col">Author</th>
+                        <th scope="col">Comment Text</th>
+                        <th scope="col">Post ID</th>
+                        <th scope="col" className="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -605,8 +603,8 @@ const AuditModule = ({ logs, loading }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
         <div className="p-6 border-b border-border flex items-center justify-between">
             <div>
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Audit Log</h3>
-                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Permanent record of all admin actions</p>
+                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Activity Log</h3>
+                <p className="text-[10px] font-bold text-primary uppercase tracking-widest mt-1 opacity-70">A complete record of all actions taken</p>
             </div>
             <div className="flex items-center gap-4">
                 <button 
@@ -687,7 +685,7 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
                     <button 
                         key={type}
                         onClick={() => setContentType(type)}
-                        className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-muted hover:text-primary'}`}
+                        className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-primary hover:bg-white/10'}`}
                     >
                         {type}
                     </button>
@@ -746,7 +744,7 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
                                 className="px-6 py-4 rounded-2xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 active:scale-95 transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center gap-3"
                             >
                                 <HiTrash size={20} />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Purge Artifact</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Delete Post</span>
                             </button>
                         </div>
                     </div>

@@ -17,7 +17,7 @@
     --success: #10b981;
     --error: #ed4956;
     --warning: #f59e0b;
-    --muted: #737373;
+    --muted: #a3a3a3;
     --primary: #fafafa;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 255, 255, 0));
 }
@@ -473,10 +473,10 @@
 [data-theme='light'] .admin-main-col { background: #ffffff !important; }
 [data-theme='light'] .admin-root-v2 {
     --primary: #1a1a1a;
-    --muted: #64748b;
-    --admin-border: rgba(0, 0, 0, 0.08);
-    --admin-surface: rgba(255, 255, 255, 0.8);
-    --admin-surface-2: rgba(240, 240, 243, 0.6);
+    --muted: #475569;
+    --admin-border: rgba(0, 0, 0, 0.1);
+    --admin-surface: rgba(255, 255, 255, 0.95);
+    --admin-surface-2: #f1f5f9;
 }
 [data-theme='light'] .admin-h1-v2 {
     background: linear-gradient(to bottom, #1a1a1a 40%, rgba(26, 26, 26, 0.4) 100%);
