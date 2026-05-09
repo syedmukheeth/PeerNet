@@ -327,16 +327,16 @@ export default function Shorts() {
 
     if (shorts.length === 0) return (
         <div className="shorts-viewer-overlay" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 32, gap: 16 }}>
-            <div style={{ fontSize: 64 }}>🎬</div>
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#fff', margin: 0 }}>No Shorts Found</h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', maxWidth: 300, margin: 0 }}>
+            <div style={{ fontSize: 64, filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.2))' }}>🎬</div>
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>No Shorts Found</h2>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.6)', maxWidth: 300, margin: 0, lineHeight: 1.5 }}>
                 Be the first to share a video! Tap the create button to start.
             </p>
             <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                <button onClick={() => refetch()} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20, padding: '10px 20px', fontWeight: 600, cursor: 'pointer' }}>
-                    <HiRefresh /> Retry
+                <button onClick={() => refetch()} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 24, padding: '12px 24px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, transition: 'all 0.2s' }}>
+                    <HiRefresh size={18} /> Retry
                 </button>
-                <button onClick={() => navigate(-1)} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: 20, padding: '10px 28px', fontWeight: 700, cursor: 'pointer' }}>
+                <button onClick={() => navigate(-1)} style={{ background: '#fff', color: '#000', border: 'none', borderRadius: 24, padding: '12px 32px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>
                     Go Back
                 </button>
             </div>

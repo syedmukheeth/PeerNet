@@ -19,26 +19,26 @@ import '../admin_v2.css'
 
 const navGroups = [
     {
-        title: 'Overview',
+        title: 'Insights',
         items: [
-            { id: 'dashboard', label: 'Dashboard', icon: HiGlobe },
-            { id: 'analytics', label: 'Analytics', icon: HiTrendingUp }
+            { id: 'dashboard', label: 'Summary', icon: HiGlobe },
+            { id: 'analytics', label: 'Performance', icon: HiTrendingUp }
         ]
     },
     {
-        title: 'Management',
+        title: 'Moderation',
         items: [
-            { id: 'users', label: 'User Accounts', icon: HiUsers },
-            { id: 'posts', label: 'Public Posts', icon: HiCollection },
-            { id: 'comments', label: 'Post Comments', icon: HiChatAlt2 },
-            { id: 'reports', label: 'Safety Reports', icon: HiFlag }
+            { id: 'users', label: 'People', icon: HiUsers },
+            { id: 'posts', label: 'All Content', icon: HiCollection },
+            { id: 'comments', label: 'User Feedback', icon: HiChatAlt2 },
+            { id: 'reports', label: 'Safety Flags', icon: HiFlag }
         ]
     },
     {
-        title: 'System',
+        title: 'Settings',
         items: [
-            { id: 'infrastructure', label: 'Server Status', icon: HiDatabase },
-            { id: 'audit', label: 'Activity Log', icon: HiShieldCheck }
+            { id: 'infrastructure', label: 'Server Health', icon: HiDatabase },
+            { id: 'audit', label: 'Activity Logs', icon: HiShieldCheck }
         ]
     }
 ]

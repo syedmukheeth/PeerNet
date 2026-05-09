@@ -3,30 +3,27 @@
    ========================================================================== */
 
 :root {
-    --accent: #0095f6;
-    --accent-rgb: 0, 149, 246;
-    --admin-bg: #030303;
-    --admin-surface: rgba(10, 10, 10, 0.7);
-    --admin-surface-2: rgba(20, 20, 20, 0.6);
-    --admin-border: rgba(255, 255, 255, 0.08);
-    --admin-border-hover: rgba(var(--accent-rgb), 0.3);
-    --admin-glow: rgba(var(--accent-rgb), 0.2);
-    --admin-accent-gradient: linear-gradient(135deg, #0095f6 0%, #a855f7 100%);
+    --admin-bg: var(--bg);
+    --admin-surface: var(--glass-bg);
+    --admin-surface-2: var(--surface-2);
+    --admin-border: var(--border);
+    --admin-border-hover: var(--accent);
+    --admin-glow: var(--shadow-accent);
+    --admin-accent-gradient: var(--logo-gradient);
     
-    /* System Colors */
-    --success: #10b981;
-    --error: #ed4956;
-    --warning: #f59e0b;
-    --muted: #a3a3a3;
-    --primary: #fafafa;
-    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 255, 255, 0));
+    /* System Colors mapping */
+    --primary: var(--text-1);
+    --muted: var(--text-3);
+    --success: var(--success);
+    --error: var(--error);
+    --warning: var(--warning);
 }
 
 .admin-root-v2 {
     display: flex;
     min-height: 100vh;
-    background: #000;
-    color: #fff;
+    background: var(--bg);
+    color: var(--text-1);
     overflow-x: hidden;
 }
 
@@ -393,33 +390,33 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.3em;
-    color: rgba(255, 255, 255, 0.25);
+    color: var(--text-3);
 }
 
 .admin-table-v2 tr {
-    background: rgba(255, 255, 255, 0.015);
+    background: var(--surface-1);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .admin-table-v2 tr:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--hover);
     transform: translateX(10px) scale(1.01);
 }
 
 .admin-table-v2 td {
     padding: 1.5rem 1.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.01);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.01);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 .admin-table-v2 tr td:first-child {
-    border-left: 1px solid rgba(255, 255, 255, 0.01);
+    border-left: 1px solid var(--border);
     border-top-left-radius: 24px;
     border-bottom-left-radius: 24px;
 }
 
 .admin-table-v2 tr td:last-child {
-    border-right: 1px solid rgba(255, 255, 255, 0.01);
+    border-right: 1px solid var(--border);
     border-top-right-radius: 24px;
     border-bottom-right-radius: 24px;
 }
@@ -431,7 +428,7 @@
     gap: 1.25rem;
     padding: 1.15rem 1.5rem;
     border-radius: 20px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-2);
     font-weight: 800;
     font-size: 15px;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -441,17 +438,16 @@
 }
 
 .admin-nav-item-v2:hover {
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
+    background: var(--hover);
+    color: var(--text-1);
     transform: translateX(5px);
 }
 
 .admin-nav-item-v2.active {
     background: var(--accent);
     color: #fff;
-    box-shadow: 0 20px 40px -10px rgba(var(--accent-rgb), 0.6);
+    box-shadow: var(--shadow-accent);
     transform: scale(1.05) translateX(8px);
-    border-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 1024px) {
