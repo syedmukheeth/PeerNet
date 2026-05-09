@@ -649,34 +649,6 @@ textarea:focus-visible {
 }
 .sidebar::-webkit-scrollbar { display: none; }
 
-/* Tablet State: Side Rail (768px - 1264px) */
-@media (max-width: 1264px) {
-  :root {
-    --sidebar-w: 72px;
-  }
-  
-  .sidebar {
-    width: var(--sidebar-w);
-    align-items: center;
-    padding: 20px 0;
-  }
-
-  .ig-label, .peernetLogo, .profile-card-info {
-    display: none;
-  }
-
-  .sidebar-logo-row, .sidebar-profile-card, .ig-link {
-    justify-content: center;
-    padding: 12px;
-    width: 48px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .ig-link:hover {
-    transform: scale(1.1);
-  }
-}
 
 /* Mobile State: Bottom Nav (< 768px) */
 @media (max-width: 767px) {
@@ -7696,44 +7668,6 @@ textarea:focus-visible {
    TABLET (768px - 1263px) - Side Rail Mode
    ======================================================================================================================================================================================================================================== */
 @media (max-width: 1263px) {
-  :root {
-    --sidebar-w: 72px;
-  }
-  
-  /* Collapse sidebar to icons only */
-  .sidebar {
-    width: 72px;
-    align-items: center;
-    padding: 20px 0;
-  }
-
-  /* Hide all text labels */
-  .ig-label, 
-  .peernetLogo, 
-  .profile-card-info {
-    display: none;
-  }
-
-  /* Center sidebar items */
-  .sidebar-logo-row, 
-  .sidebar-profile-card, 
-  .ig-link {
-    justify-content: center;
-    padding: 12px;
-    width: 48px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .ig-link:hover {
-    transform: scale(1.1);
-  }
-
-  /* Adjust main content */
-  .main-col {
-    margin-left: 72px;
-  }
-
   /* Hide right sidebar panel */
   .l-side-panel,
   .sp-container {
