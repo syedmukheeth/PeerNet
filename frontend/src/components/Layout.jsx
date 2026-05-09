@@ -407,44 +407,6 @@ export default function Layout() {
                         >
                             <HiMenu size={24} />
                         </button>
-                        
-                        <AnimatePresence>
-                            {showMore && (
-                                <motion.div 
-                                    className="ig-more-popup mobile-only" 
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }} 
-                                    animate={{ opacity: 1, y: 0, scale: 1 }} 
-                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    style={{ 
-                                        position: 'absolute', 
-                                        top: '100%', 
-                                        left: 0, 
-                                        marginTop: '12px',
-                                        width: '240px'
-                                    }}
-                                >
-                                    <button className="ig-more-item" onClick={() => { toggle(); setShowMore(false) }}>
-                                        {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
-                                        <span>Appearance</span>
-                                    </button>
-                                    <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
-                                        <HiCog size={20} /> <span>Settings</span>
-                                    </NavLink>
-                                    {user?.role === 'admin' && (
-                                        <NavLink to="/admin" className="ig-more-item" onClick={() => setShowMore(false)}>
-                                            <HiShieldCheck size={20} /> <span>Admin Console</span>
-                                        </NavLink>
-                                    )}
-                                    <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
-                                        <HiSwitchHorizontal size={20} /> <span>Accounts</span>
-                                    </button>
-                                    <div className="ig-more-divider" />
-                                    <button className="ig-more-item text-error" onClick={handleLogout}>
-                                        <HiLogout size={20} /> <span>Log out</span>
-                                    </button>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
                     </div>
                     <Link to="/" className="flex items-center gap-2 text-decoration-none">
                         <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
@@ -483,6 +445,11 @@ export default function Layout() {
                             <NavLink to="/settings" className="mobile-more-item" onClick={() => setShowMore(false)}>
                                 <HiCog size={20} /> <span>Settings</span>
                             </NavLink>
+                            {user?.role === 'admin' && (
+                                <NavLink to="/admin" className="mobile-more-item" onClick={() => setShowMore(false)}>
+                                    <HiShieldCheck size={20} /> <span>Admin Console</span>
+                                </NavLink>
+                            )}
                             <button className="mobile-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
                                 <HiSwitchHorizontal size={20} /> <span>Accounts</span>
                             </button>
