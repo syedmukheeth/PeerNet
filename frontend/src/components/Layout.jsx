@@ -30,14 +30,7 @@ const links = [
     { to: '/notifications', icon: HiOutlineBell, activeIcon: HiBell, label: 'Notifications', badge: true },
 ]
 
-const mobileBottomLinksLeft = [
-    { to: '/', icon: HiHome, exact: true },
-    { to: '/search', icon: HiSearch },
-]
 
-const mobileBottomLinksRight = [
-    { to: '/shorts', icon: HiFilm },
-]
 
 export default function Layout() {
     const { user, logout } = useAuth()
@@ -399,54 +392,29 @@ export default function Layout() {
             )}
 
 
+
+            <header className="mobile-top-header">
+                <Link to="/" className="flex items-center gap-2 text-decoration-none">
+                    <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
+                    <span className="peernetLogo text-xl logo-gradient-text">PeerNet</span>
+                </Link>
+                <div className="flex items-center gap-5">
+                    <Link to="/notifications" className="relative text-primary">
+                        <HiOutlineBell size={26} />
+                        {unreadCount > 0 && <span className="mobile-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                    </Link>
+                    <Link to="/messages" className="relative text-primary">
+                        <HiOutlineChatAlt2 size={26} />
+                        {msgCount > 0 && <span className="mobile-badge">{msgCount > 9 ? '9+' : msgCount}</span>}
+                    </Link>
+                </div>
+            </header>
+
             <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''} ${location.pathname.startsWith('/admin') ? 'main-col--admin' : ''}`} ref={mainRef}>
-
-                {!location.pathname.startsWith('/admin') && (
-                    <header className="mobile-top-header">
-
-                    <motion.div 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2.5"
-                        onClick={() => navigate('/')}
-                    >
-                        <img src={logoImg} alt="PN" className="w-9 h-9 rounded-xl shadow-lg shadow-accent/10" />
-                        <span className="text-lg font-black tracking-tighter logo-gradient-text">PEERNET</span>
-                    </motion.div>
-                    
-                    <div className="mobile-top-actions">
-                        <NavLink to="/notifications" className="relative mobile-nav-item !w-auto !h-auto">
-                            <HiOutlineBell size={24} className="text-muted/80" />
-                            {unreadCount > 0 && (
-                                <motion.span 
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="mobile-badge bg-error"
-                                >
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </motion.span>
-                            )}
-                        </NavLink>
-                        <NavLink to="/messages" className="relative mobile-nav-item !w-auto !h-auto">
-                            <HiOutlineChatAlt2 size={24} className="text-muted/80" />
-                            {msgCount > 0 && (
-                                <motion.span 
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="mobile-badge bg-accent"
-                                >
-                                    {msgCount > 9 ? '9+' : msgCount}
-                                </motion.span>
-                            )}
-                        </NavLink>
-                    </div>
-                    </header>
-                )}
-
-
                 <div 
                     className={`layout-container ${location.pathname.startsWith('/messages') ? 'h-full' : ''} ${(!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
+
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={location.pathname.split('/')[1] || 'root'}
@@ -503,55 +471,23 @@ export default function Layout() {
                 </div>
             </main>
 
-            {!location.pathname.startsWith('/admin') && (
-                <nav className="mobile-nav">
-                    <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                        {({ isActive }) => (
-                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                                {isActive ? <HiHome size={28} className="text-white" /> : <HiOutlineHome size={28} />}
-                            </motion.div>
-                        )}
-                    </NavLink>
-                    <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                        {({ isActive }) => (
-                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                                {isActive ? <HiSearch size={28} className="text-white" /> : <HiOutlineSearch size={28} />}
-                            </motion.div>
-                        )}
-                    </NavLink>
-                    <div className="flex items-center justify-center px-1">
-                        <motion.button 
-                            onClick={() => setShowCreate(true)} 
-                            className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-                            whileHover={{ scale: 1.05 }}
-                        >
-                            <HiPlus size={26} strokeWidth={1} />
-                        </motion.button>
-                    </div>
-                    <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                        {({ isActive }) => (
-                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                                {isActive ? <HiFilm size={28} className="text-white" /> : <HiOutlineFilm size={28} />}
-                            </motion.div>
-                        )}
-                    </NavLink>
-                    <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                        {({ isActive }) => (
-                            <motion.div whileTap={{ scale: 0.8 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                                <div className={`p-[2px] rounded-full transition-all ${isActive ? 'bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45]' : 'bg-transparent'}`}>
-                                    <img 
-                                        src={avatarUrl} 
-                                        alt="" 
-                                        className="w-7 h-7 rounded-full object-cover border-2 border-black" 
-                                    />
-                                </div>
-                            </motion.div>
-                        )}
-                    </NavLink>
-                </nav>
-            )}
-
-
+            <nav className="mobile-nav">
+                <NavLink to="/" end className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    {({ isActive }) => isActive ? <HiHome size={28} /> : <HiOutlineHome size={28} />}
+                </NavLink>
+                <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    {({ isActive }) => isActive ? <HiSearch size={28} /> : <HiOutlineSearch size={28} />}
+                </NavLink>
+                <button className="mobile-nav-item text-primary bg-transparent border-none" onClick={() => setShowCreate(true)}>
+                    <HiPlus size={30} className="border-2 border-primary rounded-lg p-0.5" />
+                </button>
+                <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    {({ isActive }) => isActive ? <HiFilm size={28} /> : <HiOutlineFilm size={28} />}
+                </NavLink>
+                <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                    <img src={avatarUrl} className={`w-7 h-7 rounded-full border-2 ${location.pathname.includes(`/profile/${user?._id}`) ? 'border-primary' : 'border-transparent'}`} alt="" />
+                </NavLink>
+            </nav>
 
             <AnimatePresence>
                 {showCreate && <CreatePostModal onClose={() => setShowCreate(false)} />}

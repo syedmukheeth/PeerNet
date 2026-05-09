@@ -189,7 +189,7 @@ export default function CreatePostModal({ onClose }) {
                                 <HiPencilAlt /> Status
                             </div>
                         </div>
-                        <h2 className="t-h2 dm-mobile-hidden m-0">
+                        <h2 className="t-h2 m-0">
                             {isTextMode ? 'Create Status' : 'Create New Post'}
                         </h2>
                         <button className="btn btn-ghost btn-icon-sm" onClick={onClose}>

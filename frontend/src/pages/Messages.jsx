@@ -348,9 +348,9 @@ export default function Messages() {
     }
 
     return (
-        <div className="zn-messages-root">
+        <div className={`zn-messages-root ${convoId ? 'chat-active' : ''}`}>
             {/* 1. SIDEBAR: The conversation navigator */}
-            <aside className={`zn-messages-sidebar w-full md:w-[320px] lg:w-[380px] flex-shrink-0 border-r border-border bg-surface-1 z-40 transition-all duration-300 ${convoId ? 'hidden-mobile' : ''}`}>
+            <aside className={`zn-messages-sidebar w-full md:w-[320px] lg:w-[380px] flex-shrink-0 border-r border-border bg-surface-1 z-40 transition-all duration-300`}>
                 <div className="zn-sidebar-header px-5 pt-8 pb-4">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
@@ -453,7 +453,7 @@ export default function Messages() {
                             transition={{ duration: 0.2, ease: "easeOut" }}
                             className="zn-page-transition h-full flex flex-col"
                         >
-                            <header className="zn-chat-header px-4 md:px-6 border-b border-border bg-surface/40 backdrop-blur-3xl z-30 sticky top-0">
+                            <header className="zn-chat-header px-4 md:px-6 border-b border-border bg-surface/40 backdrop-blur-3xl z-30 sticky top-0 flex items-center justify-between shrink-0">
                                 <div className="flex items-center gap-3 md:gap-4">
                                     <button 
                                         onClick={() => navigate('/messages')}
