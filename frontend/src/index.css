@@ -7684,3 +7684,687 @@ textarea:focus-visible {
     opacity: 0;
     transition: opacity 0.3s;
 }
+/* ============================================================================================================================================================================================================================================
+   RESPONSIVE BREAKPOINTS - FIXED & STANDARDIZED
+   Mobile: 0-767px | Tablet: 768px-1263px | Desktop: 1264px+
+   ============================================================================================================================================================================================================================================ */
+
+/* ========================================================================================================================================================================================================================================
+   TABLET (768px - 1263px) - Side Rail Mode
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 1263px) {
+  :root {
+    --sidebar-w: 72px;
+  }
+  
+  /* Collapse sidebar to icons only */
+  .sidebar {
+    width: 72px;
+    align-items: center;
+    padding: 20px 0;
+  }
+
+  /* Hide all text labels */
+  .ig-label, 
+  .peernetLogo, 
+  .profile-card-info {
+    display: none;
+  }
+
+  /* Center sidebar items */
+  .sidebar-logo-row, 
+  .sidebar-profile-card, 
+  .ig-link {
+    justify-content: center;
+    padding: 12px;
+    width: 48px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ig-link:hover {
+    transform: scale(1.1);
+  }
+
+  /* Adjust main content */
+  .main-col {
+    margin-left: 72px;
+  }
+
+  /* Hide right sidebar panel */
+  .l-side-panel,
+  .sp-container {
+    display: none !important;
+  }
+
+  /* Make feed full width */
+  .feed-layout {
+    justify-content: center;
+  }
+
+  .l-main-col {
+    flex: 1;
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  /* Story rail adjustments */
+  .story-rail {
+    gap: 12px;
+    padding: 8px 16px 12px;
+  }
+
+  .story-item {
+    width: 68px;
+  }
+
+  .story-avatar-wrap {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* Post cards */
+  .l-post-card {
+    margin-bottom: 16px;
+  }
+
+  /* Profile page adjustments */
+  .profile-header {
+    gap: 40px;
+    padding: 24px 0 32px;
+  }
+
+  .profile-avatar-col {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-stats {
+    gap: 24px;
+  }
+
+  /* Content wrap padding */
+  .content-wrap {
+    padding: 20px 16px;
+  }
+
+  /* Search bar */
+  .search-bar {
+    padding: 12px 18px;
+    margin-bottom: 20px;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   MOBILE (0-767px) - Bottom Navigation Mode
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 767px) {
+  /* Hide desktop sidebar completely */
+  .sidebar {
+    position: fixed;
+    transform: translateX(-100%);
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Remove left margin from main content */
+  .main-col {
+    margin-left: 0 !important;
+    padding-top: 60px !important; /* Space for top header */
+    padding-bottom: 80px !important; /* Space for bottom nav */
+  }
+
+  /* Show mobile top header */
+  .mobile-top-header {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(var(--bg-rgb), 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 0 16px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Show mobile bottom navigation */
+  .mobile-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background: rgba(var(--bg-rgb), 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding: 0 10px;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: max(env(safe-area-inset-bottom), 10px);
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    width: 56px;
+    height: 56px;
+    position: relative;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--text-1);
+  }
+
+  .mobile-nav-item svg {
+    font-size: 24px;
+  }
+
+  /* Content adjustments */
+  .content-wrap {
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  /* Hide page headings (top bar shows them) */
+  .t-heading,
+  .profile-page-wrap > h1,
+  .search-page-wrap > h1 {
+    display: none;
+  }
+
+  /* Feed layout mobile */
+  .feed-layout {
+    gap: 0;
+    padding: 0 0 20px;
+  }
+
+  .l-main-col {
+    flex: 1;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  /* Story rail mobile */
+  .story-rail-wrap {
+    margin-bottom: 16px;
+  }
+
+  .story-rail {
+    gap: 10px;
+    padding: 8px 12px 12px;
+  }
+
+  .story-item {
+    width: 64px;
+  }
+
+  .story-avatar-wrap {
+    width: 56px;
+    height: 56px;
+  }
+
+  .story-name {
+    font-size: 10px;
+  }
+
+  /* Post cards mobile */
+  .l-post-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin-bottom: 8px;
+  }
+
+  .post-card-header {
+    padding: 12px 16px;
+  }
+
+  .post-card-actions {
+    padding: 8px 16px 4px;
+  }
+
+  .post-card-footer {
+    padding: 4px 16px 12px;
+  }
+
+  /* Profile page mobile */
+  .profile-page-wrap {
+    padding: 16px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px 0 24px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar-col {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-info-col {
+    width: 100%;
+  }
+
+  .profile-username-row {
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .profile-stats {
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 16px;
+  }
+
+  .profile-stat {
+    font-size: 14px;
+  }
+
+  .profile-bio-row {
+    text-align: center;
+    align-items: center;
+  }
+
+  .profile-bio {
+    max-width: 100%;
+  }
+
+  .profile-actions {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .profile-action-btn {
+    flex: 1;
+  }
+
+  .profile-tabs {
+    gap: 40px;
+  }
+
+  .profile-grid {
+    gap: 2px;
+  }
+
+  /* Search bar mobile */
+  .search-bar {
+    padding: 10px 16px;
+    margin: 12px 16px 16px;
+    gap: 10px;
+  }
+
+  /* Modals mobile */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-card,
+  .create-post-card {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+  }
+
+  .modal-content {
+    border-radius: 20px 20px 0 0;
+  }
+
+  /* Story creator mobile */
+  .l-status-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .status-preview-canvas {
+    max-width: 100%;
+    aspect-ratio: 9/16;
+  }
+
+  /* Post detail mobile - stack vertically */
+  .post-detail-card {
+    flex-direction: column;
+    max-height: none;
+    min-height: auto;
+    border-radius: 0;
+  }
+
+  .post-detail-media {
+    flex: none;
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+  }
+
+  .post-detail-info {
+    flex: 1;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border-md);
+  }
+
+  /* Messages mobile */
+  .chat-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .convo-list {
+    display: none;
+  }
+
+  .chat-area {
+    width: 100%;
+  }
+
+  .chat-back-btn {
+    display: flex !important;
+  }
+
+  /* Zenith Messages mobile */
+  .zn-messages-root {
+    flex-direction: column;
+  }
+
+  .zn-messages-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .zn-chat-main {
+    width: 100%;
+  }
+
+  /* Settings mobile */
+  .settings-page {
+    padding: 20px 16px 80px;
+  }
+
+  .settings-card {
+    border-radius: 12px;
+  }
+
+  /* Admin page mobile */
+  .admin-page {
+    padding: 16px;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .admin-content-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-side-panel {
+    display: none;
+  }
+
+  .admin-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 600px;
+  }
+
+  /* Auth pages mobile */
+  .auth-page {
+    padding: 20px 16px;
+  }
+
+  .auth-card {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+
+  /* Shorts mobile optimization */
+  .shorts-phone-wrapper {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .shorts-viewer-overlay {
+    padding: 0;
+  }
+
+  /* Typography mobile */
+  .t-display {
+    font-size: 24px;
+  }
+
+  .t-h1 {
+    font-size: 20px;
+  }
+
+  .t-h2 {
+    font-size: 17px;
+  }
+
+  /* Buttons mobile */
+  .btn-lg {
+    height: 44px;
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+
+  /* Footer mobile */
+  .site-footer {
+    padding: 40px 16px 60px;
+  }
+
+  .site-footer__links {
+    gap: 8px 12px;
+  }
+
+  .site-footer__link {
+    font-size: 12px;
+  }
+
+  /* v4 Messages mobile */
+  .v4-root {
+    flex-direction: column;
+  }
+
+  .v4-nav-panel {
+    display: none;
+  }
+
+  .v4-middle-panel {
+    width: 100%;
+    border-right: none;
+  }
+
+  .v4-chat-main {
+    width: 100%;
+  }
+
+  .v4-composer-wrap {
+    padding: 12px 16px 20px;
+  }
+
+  /* Utility overrides for mobile */
+  .mobile\:hidden {
+    display: none !important;
+  }
+
+  .mobile\:block {
+    display: block !important;
+  }
+
+  .mobile\:flex {
+    display: flex !important;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   SMALL MOBILE (0-374px) - Extra small screens
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 374px) {
+  .mobile-nav {
+    padding: 0 5px;
+  }
+
+  .mobile-nav-item {
+    width: 50px;
+    height: 50px;
+  }
+
+  .mobile-nav-item svg {
+    font-size: 20px;
+  }
+
+  .story-item {
+    width: 56px;
+  }
+
+  .story-avatar-wrap {
+    width: 48px;
+    height: 48px;
+  }
+
+  .profile-stats {
+    gap: 16px;
+  }
+
+  .profile-stat {
+    font-size: 13px;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   LANDSCAPE MOBILE - Optimize for horizontal mobile screens
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 767px) and (orientation: landscape) {
+  .main-col {
+    padding-top: 50px !important;
+    padding-bottom: 60px !important;
+  }
+
+  .mobile-top-header {
+    height: 50px;
+  }
+
+  .mobile-nav {
+    height: 55px;
+  }
+
+  .story-rail {
+    padding: 6px 12px 8px;
+  }
+
+  .post-detail-media {
+    max-height: 80vh;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   SAFE AREA INSETS - iOS notch/home indicator support
+   ======================================================================================================================================================================================================================================== */
+@supports (padding: max(0px)) {
+  .mobile-top-header {
+    padding-top: max(env(safe-area-inset-top), 0px);
+    height: calc(60px + max(env(safe-area-inset-top), 0px));
+  }
+
+  .mobile-nav {
+    padding-bottom: max(env(safe-area-inset-bottom), 10px);
+    height: calc(65px + max(env(safe-area-inset-bottom), 0px));
+  }
+
+  .main-col {
+    padding-top: calc(60px + max(env(safe-area-inset-top), 0px)) !important;
+    padding-bottom: calc(80px + max(env(safe-area-inset-bottom), 0px)) !important;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   TOUCH OPTIMIZATION - Better tap targets and interactions
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 767px) {
+  /* Increase tap targets */
+  .ig-link,
+  .mobile-nav-item,
+  .post-card-action-btn,
+  .story-item {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+
+  /* Disable hover effects on touch devices */
+  @media (hover: none) {
+    .ig-link:hover,
+    .post-card-action-btn:hover,
+    .story-item:hover {
+      transform: none;
+    }
+  }
+
+  /* Smoother scrolling */
+  .main-col,
+  .zn-viewport,
+  .messages-box {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent zoom on input focus */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   PRINT STYLES
+   ======================================================================================================================================================================================================================================== */
+@media print {
+  .sidebar,
+  .mobile-top-header,
+  .mobile-nav,
+  .l-side-panel,
+  .story-rail-wrap,
+  .post-card-actions,
+  .post-card-header button,
+  .admin-side-panel {
+    display: none !important;
+  }
+
+  .main-col {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .l-post-card {
+    page-break-inside: avoid;
+  }
+}
