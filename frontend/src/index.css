@@ -13088,10 +13088,11 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 @media (max-width: 767px) {
-
-  /* CRITICAL: Hide global mobile nav/header when chat is active to prevent overlap */
+  /* CRITICAL: Hide global mobile nav/header when chat or admin is active to prevent overlap */
   body:has(.zn-messages-root.chat-active) .mobile-nav,
-  body:has(.zn-messages-root.chat-active) .mobile-top-header {
+  body:has(.zn-messages-root.chat-active) .mobile-top-header,
+  body:has(.admin-root-v2) .mobile-nav,
+  body:has(.admin-root-v2) .mobile-top-header {
     display: none !important;
   }
 }
