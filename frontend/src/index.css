@@ -9071,3 +9071,92 @@ textarea:focus-visible {
     z-index: 200 !important;
   }
 }
+
+/* ========================================================================================================================================================================================================================================
+   FINAL SENIOR STABILITY ENGINE - MOBILE & TABLET
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 1263px) {
+  /* GLOBAL CONTAINER FIXES */
+  #root, .App, .main-col, .content-wrap {
+    background: var(--bg) !important;
+    min-height: 100vh !important;
+  }
+
+  /* MESSAGING RECONSTRUCTION */
+  .v4-root, .zn-messages-root, .messages-page, .chat-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: calc(100vh - 65px) !important;
+    background: var(--bg) !important;
+    position: relative !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Ensure the sidebar/list is the only thing shown initially */
+  .v4-middle-panel, .zn-messages-sidebar, .convo-list {
+    display: flex !important;
+    width: 100% !important;
+    flex: 1 !important;
+    background: var(--bg) !important;
+    visibility: visible !important;
+    z-index: 10 !important;
+  }
+
+  /* Hide the chat detail by default on mobile/tablet */
+  .v4-chat-main, .zn-chat-main, .chat-area {
+    display: none !important;
+  }
+
+  /* If a conversation is active (caught by URL or parent class) */
+  .chat-active .v4-middle-panel, 
+  .chat-active .zn-messages-sidebar,
+  .chat-active .convo-list {
+    display: none !important;
+  }
+
+  .chat-active .v4-chat-main,
+  .chat-active .zn-chat-main,
+  .chat-active .chat-area {
+    display: flex !important;
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: calc(100vh - 125px) !important;
+    z-index: 100 !important;
+    background: var(--bg) !important;
+  }
+
+  /* PROFILE OVERLAP & STAT FIX */
+  .profile-stat-item {
+    flex-direction: column !important;
+    align-items: center !important;
+    min-width: 70px !important;
+  }
+
+  .stat-label {
+    display: block !important;
+    font-size: 11px !important;
+    opacity: 0.8 !important;
+    margin-top: -2px !important;
+  }
+
+  /* TOP HEADER SYNC */
+  .mobile-top-header {
+    background: rgba(10, 10, 10, 0.9) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Navigation Safety */
+  .mobile-nav {
+    background: rgba(10, 10, 10, 0.95) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
