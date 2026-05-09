@@ -10092,3 +10092,244 @@ textarea:focus-visible {
   }
 }
 
+/* ========================================================================================================================================================================================================================================
+   INSTAGRAM-STYLE SEARCH PAGE
+   ======================================================================================================================================================================================================================================== */
+
+.ig-search-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 24px;
+}
+
+/* Search bar */
+.ig-search-bar-wrap {
+  padding: 12px 0 8px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+.ig-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-1);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ig-search-bar.focused {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.ig-search-icon {
+  color: var(--text-3);
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+.ig-search-icon.loading { color: var(--accent); }
+
+.ig-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--text-1);
+  font-weight: 400;
+  font-family: inherit;
+  min-width: 0;
+}
+.ig-search-input::placeholder { color: var(--text-3); }
+
+.ig-search-clear {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text-3);
+  color: var(--bg);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.ig-search-clear:hover { background: var(--text-2); }
+
+/* Skeleton */
+.ig-search-skeleton {
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+.ig-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+}
+.ig-skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ig-skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.ig-skeleton-name { height: 13px; width: 40%; border-radius: 6px; }
+.ig-skeleton-sub { height: 11px; width: 25%; border-radius: 6px; opacity: 0.5; }
+
+/* Results list */
+.ig-search-results {
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.ig-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-sm, rgba(255,255,255,0.05));
+  gap: 12px;
+}
+.ig-result-row:last-child { border-bottom: none; }
+
+.ig-result-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.ig-result-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ig-result-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.ig-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ig-result-username {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ig-verified {
+  color: var(--accent);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ig-result-fullname {
+  font-size: 13px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ig-result-meta {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Follow button */
+.ig-follow-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: var(--accent);
+  color: #fff;
+}
+.ig-follow-btn.following {
+  background: var(--surface-1);
+  color: var(--text-1);
+  border: 1.5px solid var(--border);
+}
+.ig-follow-btn:hover { filter: brightness(1.1); }
+
+/* Empty / initial state */
+.ig-search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 64px 24px 24px;
+  gap: 10px;
+  flex: 1;
+}
+
+.ig-empty-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+
+.ig-empty-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.ig-empty-sub {
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 220px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 767px) {
+  .ig-search-bar-wrap { padding: 8px 0 6px; }
+  .ig-search-bar { padding: 10px 12px; }
+  .ig-result-avatar { width: 40px; height: 40px; }
+  .ig-follow-btn { padding: 6px 13px; font-size: 12px; }
+}
+
+
