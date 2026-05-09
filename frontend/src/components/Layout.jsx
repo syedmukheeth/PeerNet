@@ -200,6 +200,10 @@ export default function Layout() {
             if (msg.sender?._id === user?._id) return
             msgRef.current += 1
             setMsgCount(msgRef.current)
+            
+            // Invalidate conversations to update unread counts/previews
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+            
             if (!location.pathname.startsWith('/messages')) showMsgToast(msg)
         }
         socket.on('new_message', onMsg)

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5'
 import {
     HiDotsVertical, HiPaperClip, HiEmojiHappy,
     HiReply, HiPencil, HiTrash, HiSearch,
@@ -109,19 +110,19 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                         {isSelf && (
                             <span className={`zn-msg-status ${m.status}`}>
                                 {m.status === 'seen' ? (
-                                    <span className="zn-status-double-check seen">
-                                        <HiCheck size={12} className="check-1" />
-                                        <HiCheck size={12} className="check-2" />
+                                    <span className="zn-msg-status seen">
+                                        <IoCheckmarkDone size={14} />
                                     </span>
                                 ) : m.status === 'delivered' ? (
-                                    <span className="zn-status-double-check">
-                                        <HiCheck size={12} className="check-1" />
-                                        <HiCheck size={12} className="check-2" />
+                                    <span className="zn-msg-status delivered">
+                                        <IoCheckmarkDone size={14} />
                                     </span>
                                 ) : m.status === 'sending' || m.isOptimistic ? (
                                     <HiClock size={11} style={{ opacity: 0.5 }} />
                                 ) : (
-                                    <HiCheck size={12} className="sent" />
+                                    <span className="zn-msg-status sent">
+                                        <IoCheckmark size={14} />
+                                    </span>
                                 )}
                             </span>
                         )}
@@ -221,13 +222,15 @@ export default function Messages() {
 
     useEffect(() => {
         if (convoId && messages.length > 0) {
-            const hasUnread = activeConvo?.unreadCount > 0 || activeConvo?.isMarkedUnread
-            if (hasUnread) {
+            const lastMsg = messages[messages.length - 1]
+            const isFromPeer = lastMsg.sender?._id !== user?._id && lastMsg.sender !== 'me'
+            
+            if (isFromPeer && lastMsg.status !== 'seen') {
                 markReadMutation.mutate()
                 socket?.emit('mark_seen', { conversationId: convoId })
             }
         }
-    }, [convoId, messages.length, activeConvo?.unreadCount, activeConvo?.isMarkedUnread, socket])
+    }, [convoId, messages, socket, user?._id])
 
     // Join/Leave room
     useEffect(() => {

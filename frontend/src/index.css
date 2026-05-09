@@ -13877,4 +13877,32 @@ body:has(.zn-messages-root) .content-wrap {
     background-color: #f0f2f5 !important;
     color: #000 !important;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Updated Message Status Styles */
+.zn-msg-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.zn-msg-status.seen {
+  color: #0095f6 !important; /* Instagram/Messenger Blue */
+  opacity: 1 !important;
+}
+
+.zn-msg-status.delivered {
+  color: var(--text-3);
+  opacity: 0.8;
+}
+
+.zn-msg-status.sent {
+  color: var(--text-3);
+  opacity: 0.5;
+}
+
+.zn-msg-status svg {
+  display: block;
 }
