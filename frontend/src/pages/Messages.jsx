@@ -190,6 +190,7 @@ export default function Messages() {
     const [isSearchingInChat, setIsSearchingInChat] = useState(false)
     const [chatSearchQuery, setChatSearchQuery] = useState('')
     const fileInputRef = useRef(null)
+    const textareaRef = useRef(null)
 
     const { getDraft, setDraft } = useChatState(convoId)
     const sendMutation = useSendMessage(convoId)
@@ -335,8 +336,27 @@ export default function Messages() {
     }, [convoId]);
 
     const handleEmojiClick = (emojiData) => {
-        setInputText(prev => prev + emojiData.emoji)
-        setShowEmojiPicker(false)
+        const textarea = textareaRef.current
+        if (!textarea) return
+
+        const start = textarea.selectionStart
+        const end = textarea.selectionEnd
+        const text = inputText
+        const before = text.substring(0, start)
+        const after = text.substring(end)
+        
+        const newText = before + emojiData.emoji + after
+        setInputText(newText)
+        
+        // Use a timeout to ensure focus and cursor placement after React update
+        setTimeout(() => {
+            textarea.focus()
+            const newPos = start + emojiData.emoji.length
+            textarea.setSelectionRange(newPos, newPos)
+        }, 0)
+        
+        // Senior Dev: Don't close on every pick unless it's a small screen and we want to be aggressive, 
+        // but typically users want to pick multiple. We'll keep it open.
     }
 
     const handleFileUpload = (e) => {
@@ -348,7 +368,7 @@ export default function Messages() {
     const showingChat = !!convoId
 
     return (
-        <div className={`zn-messages-root ${showingChat ? 'chat-active' : ''}`}>
+        <div className={`zn-messages-root ${showingChat ? 'chat-active' : ''} ${showEmojiPicker ? 'emoji-open' : ''}`}>
             {/* Global emoji backdrop moved to root level for reliable full-screen intercept */}
             {showEmojiPicker && <div className="zn-emoji-backdrop" onClick={() => setShowEmojiPicker(false)} />}
 
@@ -647,6 +667,7 @@ export default function Messages() {
                                         <input type="file" ref={fileInputRef} onChange={handleFileUpload} hidden />
 
                                         <textarea
+                                            ref={textareaRef}
                                             rows="1"
                                             value={inputText}
                                             onChange={(e) => {

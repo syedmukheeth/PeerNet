@@ -13724,14 +13724,38 @@ body:has(.zn-messages-root) .content-wrap {
         width: 100% !important; 
         margin-bottom: 0 !important; 
         border-radius: 24px 24px 0 0 !important; 
+        height: 400px !important; /* Lock to the same height as the React component prop */
         max-height: 75vh !important; 
         transform: none !important;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
         z-index: 2000;
     } 
+
     .zn-emoji-backdrop {
-        background: rgba(0, 0, 0, 0.4) !important;
-        backdrop-filter: blur(6px) !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(4px) !important;
+        /* Ensure the backdrop doesn't block the input when shifted */
+        bottom: 460px !important;
+    }
+
+    /* Shift footer up when emoji picker is active */
+    .zn-messages-root.emoji-open .zn-footer {
+        transform: translateY(-400px) !important;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .zn-footer {
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    /* Ensure messages can be scrolled above the shifted footer */
+    .zn-messages-root.emoji-open .zn-viewport {
+        scroll-padding-bottom: 560px !important;
+    }
+    
+    .zn-messages-root.emoji-open .zn-viewport-spacer {
+        height: 560px !important;
+        transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 }
 
