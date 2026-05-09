@@ -349,6 +349,8 @@ export default function Messages() {
 
     return (
         <div className={`zn-messages-root ${showingChat ? 'chat-active' : ''}`}>
+            {/* Global emoji backdrop moved to root level for reliable full-screen intercept */}
+            {showEmojiPicker && <div className="zn-emoji-backdrop" onClick={() => setShowEmojiPicker(false)} />}
 
             {/* SIDEBAR - Conversation List */}
             <aside className="zn-messages-sidebar">
@@ -607,8 +609,6 @@ export default function Messages() {
                                         </motion.div>
                                     )}
                                     <div className="zn-composer-pill">
-                                        {/* Full-screen backdrop — must be OUTSIDE the 40px container */}
-                                        {showEmojiPicker && <div className="zn-emoji-backdrop" onClick={() => setShowEmojiPicker(false)} />}
                                         <div className="zn-emoji-picker-container">
                                             <button 
                                                 className={`zn-composer-action-btn${showEmojiPicker ? ' active' : ''}`}
