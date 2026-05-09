@@ -13673,3 +13673,8 @@ body:has(.zn-messages-root) .content-wrap {
 .zn-emoji-popover .EmojiPickerReact { border: none !important; background: transparent !important; --epr-bg-color: transparent !important; --epr-category-label-bg-color: rgba(20, 20, 20, 0.4) !important; --epr-picker-border-color: transparent !important; --epr-search-border-color: var(--border) !important; --epr-search-input-bg-color: rgba(255, 255, 255, 0.05) !important; --epr-highlight-color: var(--accent) !important; }
 .zn-emoji-backdrop { position: fixed; inset: 0; z-index: 1999; background: rgba(0, 0, 0, 0.3) !important; backdrop-filter: blur(4px) !important; }
 @media (max-width: 767px) { .zn-emoji-popover { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; margin-bottom: 0; border-radius: 24px 24px 0 0; max-height: 80vh; } .zn-emoji-backdrop { background: rgba(0, 0, 0, 0.5) !important; backdrop-filter: blur(10px) !important; } }
+
+/* --- EMOJI PICKER ANCHOR FIX --- */
+.zn-emoji-picker-container { position: relative !important; display: inline-flex !important; align-items: center; justify-content: center; width: 40px; height: 40px; }
+.zn-emoji-popover { position: absolute !important; bottom: 100% !important; left: 0 !important; right: auto !important; width: 320px !important; margin-bottom: 15px !important; transform-origin: bottom left; }
+@media (max-width: 767px) { .zn-emoji-popover { position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; margin-bottom: 0 !important; border-radius: 20px 20px 0 0 !important; } }
