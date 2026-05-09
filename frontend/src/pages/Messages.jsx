@@ -608,25 +608,20 @@ export default function Messages() {
                                             <AnimatePresence>
                                                 {showEmojiPicker && (
                                                     <motion.div 
-                                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        initial={{ opacity: 0, y: 15, scale: 0.92 }}
                                                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                        exit={{ opacity: 0, y: 15, scale: 0.92 }}
                                                         className="zn-emoji-popover"
                                                     >
-                                                        <div className="zn-emoji-header">
-                                                            <span className="zn-emoji-title">Choose Emoji</span>
-                                                            <button onClick={() => setShowEmojiPicker(false)} className="zn-icon-btn-sm">
-                                                                <HiX size={18} />
-                                                            </button>
-                                                        </div>
                                                         <EmojiPicker 
                                                             onEmojiClick={handleEmojiClick}
                                                             theme={isDark ? 'dark' : 'light'}
                                                             searchDisabled={false}
                                                             skinTonesDisabled
                                                             width="100%"
-                                                            height={350}
+                                                            height={400}
                                                             previewConfig={{ showPreview: false }}
+                                                            searchPlaceholder="Search emojis..."
                                                         />
                                                     </motion.div>
                                                 )}
