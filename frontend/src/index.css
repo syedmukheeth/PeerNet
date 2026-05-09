@@ -10105,7 +10105,7 @@ textarea:focus-visible {
 
 /* Search bar */
 .ig-search-bar-wrap {
-  padding: 12px 0 8px;
+  padding: 20px 0 8px;
   position: sticky;
   top: 0;
   background: var(--bg);
@@ -10326,7 +10326,7 @@ textarea:focus-visible {
 
 /* Mobile tweaks */
 @media (max-width: 767px) {
-  .ig-search-bar-wrap { padding: 8px 0 6px; }
+  .ig-search-bar-wrap { padding: 16px 0 6px; }
   .ig-search-bar { padding: 10px 12px; }
   .ig-result-avatar { width: 40px; height: 40px; }
   .ig-follow-btn { padding: 6px 13px; font-size: 12px; }
