@@ -13063,12 +13063,12 @@ textarea:focus-visible {
     /* Force height for scrolling */
     padding: 4px 12px 12px !important;
     /* CRITICAL: Tell the browser to reserve space at the bottom when scrolling */
-    scroll-padding-bottom: 160px !important;
+    scroll-padding-bottom: 90px !important;
   }
 
   /* Physical spacer to push last message above the fixed footer */
   .zn-viewport-spacer {
-    height: 160px !important;
+    height: 90px !important;
     width: 100% !important;
     flex-shrink: 0 !important;
     display: block !important;
@@ -13081,9 +13081,9 @@ textarea:focus-visible {
     left: 0 !important;
     right: 0 !important;
     flex-shrink: 0 !important;
-    padding: 10px 12px !important;
+    padding: 8px 12px !important;
     /* Safe area lift */
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
     background: var(--surface-1) !important;
     border-top: 1px solid var(--border) !important;
     z-index: 1000 !important;
@@ -13748,11 +13748,11 @@ body:has(.zn-messages-root) .content-wrap {
 
     /* Ensure messages can be scrolled above the shifted footer */
     .zn-messages-root.emoji-open .zn-viewport {
-        scroll-padding-bottom: 560px !important;
+        scroll-padding-bottom: 490px !important; /* 400 picker + 90 spacer */
     }
     
     .zn-messages-root.emoji-open .zn-viewport-spacer {
-        height: 560px !important;
+        height: 490px !important;
         transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 }
