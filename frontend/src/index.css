@@ -9160,3 +9160,535 @@ textarea:focus-visible {
     padding-bottom: env(safe-area-inset-bottom) !important;
   }
 }
+
+/* ============================================================
+   ZN MESSAGING SYSTEM - COMPLETE CSS ENGINE
+   These are the definitive styles for the Messages.jsx component.
+   The component uses zn-* class names that were missing from CSS.
+   ============================================================ */
+
+/* ---- ROOT CONTAINER ---- */
+.zn-messages-root {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100vh - 60px);
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ---- SIDEBAR (Conversation List) ---- */
+.zn-messages-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  min-width: 280px;
+  height: 100%;
+  border-right: 1px solid var(--border);
+  background: var(--surface-1, var(--card));
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.zn-sidebar-header {
+  flex-shrink: 0;
+}
+
+.zn-sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- CONVERSATION ROWS ---- */
+.zn-convo-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.zn-convo-row:hover {
+  background: var(--hover, rgba(255,255,255,0.05));
+}
+
+.zn-convo-row.active {
+  background: var(--accent-subtle, rgba(99,102,241,0.1));
+}
+
+.zn-convo-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.zn-online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.zn-convo-name {
+  font-size: 14px;
+  color: var(--text-1);
+}
+
+.zn-convo-msg {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.zn-convo-msg-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ---- CHAT MAIN AREA ---- */
+.zn-chat-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ---- CHAT HEADER ---- */
+.zn-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1, var(--card));
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ---- MESSAGE VIEWPORT ---- */
+.zn-viewport {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--bg);
+}
+
+/* ---- MESSAGE BUBBLES ---- */
+.zn-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.zn-row.self {
+  flex-direction: row-reverse;
+}
+
+.zn-bubble-container {
+  position: relative;
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+}
+
+.zn-row.self .zn-bubble-container {
+  align-items: flex-end;
+}
+
+.zn-bubble {
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  position: relative;
+}
+
+.zn-row.peer .zn-bubble {
+  background: var(--card, #1a1a2e);
+  color: var(--text-1);
+  border-radius: 4px 20px 20px 20px;
+}
+
+.zn-row.self .zn-bubble {
+  background: var(--accent, #6366f1);
+  color: white;
+  border-radius: 20px 4px 20px 20px;
+}
+
+.zn-bubble-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.zn-bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  opacity: 0.5;
+  margin-top: 4px;
+}
+
+.zn-bubble-meta.self {
+  justify-content: flex-end;
+}
+
+.zn-bubble-reply {
+  background: rgba(255,255,255,0.05);
+  border-left: 3px solid var(--accent);
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.zn-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.zn-reaction-chip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zn-reaction-chip.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+/* ---- BUBBLE ACTIONS ---- */
+.zn-bubble-actions {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.zn-row.self .zn-bubble-actions {
+  right: calc(100% + 4px);
+}
+
+.zn-row.peer .zn-bubble-actions {
+  left: calc(100% + 4px);
+}
+
+.zn-bubble-container:hover .zn-bubble-actions {
+  display: flex;
+}
+
+.zn-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  backdrop-filter: blur(12px);
+}
+
+.zn-action-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.zn-action-btn:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+.zn-action-btn.delete:hover {
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+}
+
+.zn-action-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 2px;
+}
+
+/* ---- FOOTER / COMPOSER ---- */
+.zn-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--surface-1, var(--card));
+  padding: 12px 16px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.zn-composer-wrapper {
+  width: 100%;
+}
+
+.zn-composer-pill {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 28px;
+  padding: 8px 8px 8px 14px;
+  transition: border-color 0.2s;
+}
+
+.zn-composer-pill:focus-within {
+  border-color: var(--accent);
+}
+
+.zn-composer-action-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+  margin-bottom: 2px;
+}
+
+.zn-composer-action-btn:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+.zn-composer-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--text-1);
+  resize: none;
+  max-height: 160px;
+  line-height: 1.5;
+  padding: 6px 0;
+  font-family: inherit;
+}
+
+.zn-composer-input::placeholder {
+  color: var(--text-3);
+}
+
+.zn-send-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+}
+
+.zn-send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(99,102,241,0.5);
+}
+
+.zn-send-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---- SEARCH INLINE ---- */
+.zn-search-inline {
+  overflow: hidden;
+}
+
+.zn-sidebar-search-wrapper:focus-within {
+  border-color: var(--accent, rgba(99,102,241,0.5));
+}
+
+/* ---- SKELETON ---- */
+.skeleton {
+  background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---- PAGE TRANSITION ---- */
+.zn-page-transition {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ============================================================
+   MOBILE & TABLET RESPONSIVE MESSAGING
+   ============================================================ */
+
+/* Tablet: show sidebar as a narrower panel */
+@media (min-width: 768px) and (max-width: 1263px) {
+  .zn-messages-root {
+    height: calc(100vh - 60px);
+    margin-left: 72px; /* sidebar icon rail width */
+  }
+
+  .zn-messages-sidebar {
+    width: 280px;
+    min-width: 220px;
+  }
+}
+
+/* Mobile: full-screen master/detail toggle */
+@media (max-width: 767px) {
+  .zn-messages-root {
+    flex-direction: column;
+    height: calc(100vh - 125px); /* top header (60) + bottom nav (65) */
+    margin-left: 0;
+    margin-top: 60px; /* top header */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 65px; /* bottom nav */
+    z-index: 10;
+  }
+
+  /* Default state: show ONLY the sidebar (conversation list) */
+  .zn-messages-sidebar {
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-right: none;
+    flex-shrink: 0;
+  }
+
+  /* Hide the chat area by default */
+  .zn-chat-main {
+    display: none !important;
+  }
+
+  /* When a conversation is active, flip: hide list, show chat */
+  .zn-messages-root.chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .zn-messages-root.chat-active .zn-chat-main {
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex-direction: column;
+  }
+
+  /* Make back button visible on mobile */
+  .lg\:hidden {
+    display: flex !important;
+  }
+
+  /* Ensure composer stays at bottom */
+  .zn-footer {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  /* Viewport takes available space */
+  .zn-viewport {
+    flex: 1;
+    min-height: 0;
+    padding: 12px;
+  }
+}
+
+/* ============================================================
+   UTILITY CLASSES (used by Messages.jsx)
+   ============================================================ */
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-gpu {
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
+}
+
+/* pb-safe: padding bottom safe area for iOS */
+.pb-safe {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* On mobile: messages page's main-col should not add extra padding */
+@media (max-width: 767px) {
+  .main-col:has(.zn-messages-root) {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1263px) {
+  .main-col:has(.zn-messages-root) {
+    padding-top: 0 !important;
+    overflow: hidden !important;
+  }
+}
