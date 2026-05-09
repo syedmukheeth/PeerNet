@@ -89,7 +89,8 @@ export const useSendMessage = (convoId) => {
                 replyTo: replyToId ? { _id: replyToId } : null,
                 sender: 'me',
                 createdAt: new Date().toISOString(),
-                isOptimistic: true
+                isOptimistic: true,
+                status: 'sending'
             }
             queryClient.setQueryData(['messages', convoId], old => [...(old || []), optimisticMsg])
 

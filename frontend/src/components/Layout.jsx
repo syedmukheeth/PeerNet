@@ -226,7 +226,26 @@ export default function Layout() {
         }
 
         socket.on('user_status_change', onStatusChange)
-        return () => socket.off('user_status_change', onStatusChange)
+        
+        const onMessagesSeen = ({ conversationId, viewerId }) => {
+            if (viewerId === user?._id) return
+            queryClient.setQueryData(['messages', conversationId], (old) => {
+                if (!old) return old
+                return old.map(m => {
+                    const isMe = m.sender?._id === user?._id || m.sender === 'me'
+                    if (isMe && m.status !== 'seen') {
+                        return { ...m, status: 'seen' }
+                    }
+                    return m
+                })
+            })
+        }
+        socket.on('messages_seen', onMessagesSeen)
+
+        return () => {
+            socket.off('user_status_change', onStatusChange)
+            socket.off('messages_seen', onMessagesSeen)
+        }
     }, [socket, user, queryClient])
 
     useEffect(() => {

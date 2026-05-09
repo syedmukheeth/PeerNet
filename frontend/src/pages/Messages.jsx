@@ -3,12 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
     HiDotsVertical, HiPaperClip, HiEmojiHappy,
     HiReply, HiPencil, HiTrash, HiSearch,
-    HiX, HiCheckCircle, HiMail, HiArrowRight, HiArrowLeft, HiHome
+    HiX, HiCheckCircle, HiCheck, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiHome
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import EmojiPicker from 'emoji-picker-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useSocket } from '../hooks/useSocket'
 
 import {
     useConvos, useMessages, useSendMessage,
@@ -106,14 +107,23 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                     <div className={`zn-bubble-meta${isSelf ? ' self' : ''}`}>
                         <span>{formatTime(m.createdAt)}</span>
                         {isSelf && (
-                            m.isSeen ? (
-                                <span className="zn-seen-icons">
-                                    <HiCheckCircle size={10} style={{ opacity: 0.4 }} />
-                                    <HiCheckCircle size={10} style={{ opacity: 0.9 }} />
-                                </span>
-                            ) : (
-                                <HiCheckCircle size={10} style={{ opacity: 0.4 }} />
-                            )
+                            <span className={`zn-msg-status ${m.status}`}>
+                                {m.status === 'seen' ? (
+                                    <span className="zn-status-double-check seen">
+                                        <HiCheck size={12} className="check-1" />
+                                        <HiCheck size={12} className="check-2" />
+                                    </span>
+                                ) : m.status === 'delivered' ? (
+                                    <span className="zn-status-double-check">
+                                        <HiCheck size={12} className="check-1" />
+                                        <HiCheck size={12} className="check-2" />
+                                    </span>
+                                ) : m.status === 'sending' || m.isOptimistic ? (
+                                    <HiClock size={11} style={{ opacity: 0.5 }} />
+                                ) : (
+                                    <HiCheck size={12} className="sent" />
+                                )}
+                            </span>
                         )}
                         {m.isEdited && <span className="zn-edited">(edited)</span>}
                     </div>
@@ -184,6 +194,7 @@ export default function Messages() {
         isLoading: loadingConvos
     } = useConvos()
     const { data: messages = [], isLoading: loadingMsgs } = useMessages(convoId)
+    const socket = useSocket(user)
 
     const [searchQuery, setSearchQuery] = useState('')
     const [replyingTo, setReplyingTo] = useState(null)
@@ -211,9 +222,20 @@ export default function Messages() {
     useEffect(() => {
         if (convoId && messages.length > 0) {
             const hasUnread = activeConvo?.unreadCount > 0 || activeConvo?.isMarkedUnread
-            if (hasUnread) markReadMutation.mutate()
+            if (hasUnread) {
+                markReadMutation.mutate()
+                socket?.emit('mark_seen', { conversationId: convoId })
+            }
         }
-    }, [convoId, messages.length, activeConvo?.unreadCount, activeConvo?.isMarkedUnread])
+    }, [convoId, messages.length, activeConvo?.unreadCount, activeConvo?.isMarkedUnread, socket])
+
+    // Join/Leave room
+    useEffect(() => {
+        if (socket && convoId) {
+            socket.emit('join_conversation', convoId)
+            return () => socket.emit('leave_conversation', convoId)
+        }
+    }, [socket, convoId])
 
     const peer = useMemo(() => activeConvo?.participants?.find(p => p._id !== user?._id), [activeConvo, user?._id])
 
