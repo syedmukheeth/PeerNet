@@ -9742,6 +9742,49 @@ textarea:focus-visible {
     overflow: hidden !important;
   }
 
+  /* Chat Menu Dropdown */
+  .zn-chat-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 200px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+  }
+
+  .zn-chat-menu button {
+    background: none;
+    border: none;
+    color: var(--text-main);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .zn-chat-menu button:hover {
+    background: var(--surface-3);
+  }
+
+  .zn-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    background: rgba(0,0,0,0.1);
+  }
+
   /* Full screen when chat is active (nav is hidden) */
   .zn-messages-root.chat-active {
     bottom: 0 !important;

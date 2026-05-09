@@ -184,6 +184,7 @@ export default function Messages() {
     const [inputText, setInputText] = useState('')
     const [editingId, setEditingId] = useState(null)
     const [editingText, setEditingText] = useState('')
+    const [showChatMenu, setShowChatMenu] = useState(false)
     const viewportRef = useRef(null)
     const markReadMutation = useMarkRead(convoId)
     const prevMsgCount = useRef(messages.length)
@@ -435,9 +436,38 @@ export default function Messages() {
                                     >
                                         <HiSearch size={18} />
                                     </button>
-                                    <button className="zn-icon-btn">
-                                        <HiDotsVertical size={18} />
-                                    </button>
+                                    <div style={{ position: 'relative' }}>
+                                        <button 
+                                            onClick={() => setShowChatMenu(!showChatMenu)}
+                                            className={`zn-icon-btn${showChatMenu ? ' active' : ''}`}
+                                        >
+                                            <HiDotsVertical size={18} />
+                                        </button>
+
+                                        <AnimatePresence>
+                                            {showChatMenu && (
+                                                <>
+                                                    <div className="zn-menu-backdrop" onClick={() => setShowChatMenu(false)} />
+                                                    <motion.div 
+                                                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                                                        className="zn-chat-menu"
+                                                    >
+                                                        <button onClick={() => { pinMutation.mutate(convoId); setShowChatMenu(false) }}>
+                                                            {activeConvo?.isPinned ? 'Unpin Chat' : 'Pin Chat'}
+                                                        </button>
+                                                        <button onClick={() => { muteMutation.mutate(convoId); setShowChatMenu(false) }}>
+                                                            {activeConvo?.isMuted ? 'Unmute' : 'Mute Notifications'}
+                                                        </button>
+                                                        <button onClick={() => { archiveMutation.mutate(convoId); navigate('/messages'); setShowChatMenu(false) }}>
+                                                            Archive Chat
+                                                        </button>
+                                                    </motion.div>
+                                                </>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
                                 </div>
                             </header>
 
