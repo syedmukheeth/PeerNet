@@ -658,7 +658,7 @@ textarea:focus-visible {
 
   .main-col {
     margin-left: 0 !important;
-    padding-top: 60px;
+    padding-top: 50px;
     padding-bottom: 70px; /* Room for bottom nav */
   }
 
@@ -7748,7 +7748,7 @@ textarea:focus-visible {
   /* Remove left margin from main content */
   .main-col {
     margin-left: 0 !important;
-    padding-top: 60px !important; /* Space for top header */
+    padding-top: 50px !important; /* Space for top header */
     padding-bottom: 80px !important; /* Space for bottom nav */
   }
 
@@ -7812,7 +7812,7 @@ textarea:focus-visible {
 
   /* Content adjustments */
   .content-wrap {
-    padding: 16px;
+    padding: 0px 16px 16px;
     max-width: 100%;
   }
 
@@ -7842,7 +7842,7 @@ textarea:focus-visible {
 
   .story-rail {
     gap: 10px;
-    padding: 8px 12px 12px;
+    padding: 0px 12px 12px;
   }
 
   .story-item {
@@ -8239,7 +8239,7 @@ textarea:focus-visible {
   }
 
   .main-col {
-    padding-top: calc(60px + max(env(safe-area-inset-top), 0px)) !important;
+    padding-top: calc(50px + max(env(safe-area-inset-top), 0px)) !important;
     padding-bottom: calc(80px + max(env(safe-area-inset-bottom), 0px)) !important;
   }
 }
@@ -8363,8 +8363,9 @@ textarea:focus-visible {
   .story-rail-wrap {
     border-top: none !important;
     border-bottom: none !important;
-    padding-top: 4px;
+    padding-top: 0px;
     padding-bottom: 4px;
+    margin-top: 0px;
   }
   
   .story-rail {
