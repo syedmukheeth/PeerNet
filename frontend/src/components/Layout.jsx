@@ -398,15 +398,16 @@ export default function Layout() {
 
 
 
-            <header className="mobile-top-header">
-                <div className="flex items-center gap-3">
-                    <div style={{ position: 'relative' }}>
-                        <button 
-                            className="mobile-header-btn bg-transparent border-none text-primary"
-                            onClick={() => setShowMore(!showMore)}
-                        >
-                            <HiMenu size={24} />
-                        </button>
+            {!(location.pathname.startsWith('/messages/') && location.pathname.split('/').filter(Boolean).length > 1) && (
+                <header className="mobile-top-header">
+                    <div className="flex items-center gap-3">
+                        <div style={{ position: 'relative' }}>
+                            <button 
+                                className="mobile-header-btn bg-transparent border-none text-primary"
+                                onClick={() => setShowMore(!showMore)}
+                            >
+                                <HiMenu size={24} />
+                            </button>
                     </div>
                     <Link to="/" className="flex items-center gap-2 text-decoration-none">
                         <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
@@ -461,6 +462,7 @@ export default function Layout() {
                     )}
                 </AnimatePresence>
             </header>
+            )}
 
             <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''} ${location.pathname.startsWith('/admin') ? 'main-col--admin' : ''}`} ref={mainRef}>
                 <div 
