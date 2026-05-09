@@ -376,6 +376,11 @@ export default function Layout() {
                                     <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
                                         <HiCog size={20} /> <span>Settings</span>
                                     </NavLink>
+                                    {user?.role === 'admin' && (
+                                        <NavLink to="/admin" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                            <HiShieldCheck size={20} /> <span>Admin Console</span>
+                                        </NavLink>
+                                    )}
                                     <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
                                         <HiSwitchHorizontal size={20} /> <span>Accounts</span>
                                     </button>
@@ -425,6 +430,11 @@ export default function Layout() {
                                     <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
                                         <HiCog size={20} /> <span>Settings</span>
                                     </NavLink>
+                                    {user?.role === 'admin' && (
+                                        <NavLink to="/admin" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                            <HiShieldCheck size={20} /> <span>Admin Console</span>
+                                        </NavLink>
+                                    )}
                                     <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
                                         <HiSwitchHorizontal size={20} /> <span>Accounts</span>
                                     </button>
