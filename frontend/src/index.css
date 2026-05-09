@@ -13713,6 +13713,7 @@ body:has(.zn-messages-root) .content-wrap {
     background: transparent;
     cursor: default;
 }
+}
 
 @media (max-width: 767px) { 
     .zn-emoji-popover { 
