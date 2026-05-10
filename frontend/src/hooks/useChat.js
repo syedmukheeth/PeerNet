@@ -195,6 +195,8 @@ export const useMessageActions = (convoId) => {
 
 /**
  * Hook for conversation management (Pin, Mute, Archive)
+ * These run as local-only state toggles — backend endpoints are not yet implemented.
+ * When backend support is added, swap mutationFn back to an API call.
  */
 export const useConvoActions = () => {
     const queryClient = useQueryClient()
@@ -205,22 +207,19 @@ export const useConvoActions = () => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] })
     }
 
-    const pin = useMutation({
-        mutationFn: (id) => chatApi.post(`/${id}/pin`),
-        onMutate: (id) => toggleState('pinned', id)
+    // Local-only toggle — no API call, no error
+    const localMutate = (type) => ({
+        mutate: (id) => toggleState(type, id),
+        mutateAsync: async (id) => toggleState(type, id),
+        isLoading: false,
+        isPending: false,
     })
 
-    const mute = useMutation({
-        mutationFn: (id) => chatApi.post(`/${id}/mute`),
-        onMutate: (id) => toggleState('muted', id)
-    })
-
-    const archive = useMutation({
-        mutationFn: (id) => chatApi.post(`/${id}/archive`),
-        onMutate: (id) => toggleState('archived', id)
-    })
-
-    return { pin, mute, archive }
+    return {
+        pin: localMutate('pinned'),
+        mute: localMutate('muted'),
+        archive: localMutate('archived'),
+    }
 }
 
 /**
