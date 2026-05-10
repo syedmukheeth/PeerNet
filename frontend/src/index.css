@@ -10378,7 +10378,7 @@ textarea:focus-visible {
   .ig-label,
   .profile-card-info,
   .sidebar-footer .ig-label {
-    display: unset !important;
+    display: flex !important;
   }
 
   /* Nav links: full-width with label, same as desktop */

@@ -394,7 +394,7 @@ export default function Layout() {
                         <img src={avatarUrl} className="profile-card-avatar" alt="" />
                         <div className="profile-card-info">
                             <span className="profile-card-name">{user?.username}</span>
-                            <span className="profile-card-role">{user?.role === 'admin' ? 'Super Admin' : 'Creator'}</span>
+                            <span className="profile-card-role">{user?.role === 'admin' ? 'Admin' : 'Creator'}</span>
                         </div>
                     </motion.div>
 

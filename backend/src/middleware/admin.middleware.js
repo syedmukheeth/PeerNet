@@ -11,7 +11,7 @@ const requireAdmin = (req, _res, next) => {
 
 const requireSuperAdmin = (req, _res, next) => {
     if (!req.user || req.user.role !== 'superadmin') {
-        return next(new ApiError(403, 'Access denied: Super Admin clearance required'));
+        return next(new ApiError(403, 'Access denied: Admin clearance required'));
     }
     next();
 };
