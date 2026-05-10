@@ -3939,6 +3939,11 @@ textarea:focus-visible {
   border: 1px solid rgba(0, 0, 0, 0.09);
 }
 
+/* Mobile-only author bar above image (hidden on desktop) */
+.post-mobile-author-bar {
+  display: none;
+}
+
 .post-detail-media {
   flex: 0 0 60%;
   background: #000;
@@ -10755,14 +10760,48 @@ textarea:focus-visible {
     flex-direction: column;
     max-height: none;
     min-height: auto;
-    border-radius: 0;
+    border-radius: 12px;
+    margin: 0 12px 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Show mobile author bar, hide desktop header */
+  .post-mobile-author-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-md);
+    flex-shrink: 0;
+  }
+
+  .post-detail-header--desktop {
+    display: none !important;
   }
 
   .post-detail-media {
     flex: none;
     width: 100%;
-    height: auto;
-    max-height: 60vh;
+    /* Square-ish aspect ratio for images, good for portraits */
+    aspect-ratio: 4 / 5;
+    max-height: 75vw;
+    overflow: hidden;
+  }
+
+  /* Cover image on mobile for clean fill */
+  .post-detail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .post-detail-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .post-detail-info {

@@ -43,6 +43,7 @@ export default function PostDetail() {
     const [showShareModal, setShowShareModal] = useState(false)
     const inputRef = useRef()
     const menuRef = useRef()
+    const mobileMenuRef = useRef()
     const commentsEndRef = useRef()
     const emojiRef = useRef()
 
@@ -64,10 +65,13 @@ export default function PostDetail() {
 
 
 
-    // Close menu on outside click
     useEffect(() => {
         if (!menuOpen) return
-        const h = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false) }
+        const h = (e) => {
+            if (menuRef.current?.contains(e.target)) return
+            if (mobileMenuRef.current?.contains(e.target)) return
+            setMenuOpen(false)
+        }
         document.addEventListener('mousedown', h)
         return () => document.removeEventListener('mousedown', h)
     }, [menuOpen])
@@ -328,6 +332,47 @@ export default function PostDetail() {
             {/* Instagram split-view card */}
             <div className={`post-detail-card ${!post.mediaUrl ? 'post-detail-card--text-only' : ''}`}>
 
+            {/* ── MOBILE AUTHOR BAR (above image, hidden on desktop) ── */}
+                <div className="post-mobile-author-bar" ref={mobileMenuRef}>
+                    <Link to={`/profile/${author._id}`}>
+                        <img src={avatar} className="post-detail-avatar" alt="" />
+                    </Link>
+                    <div className="flex-1 flex items-center">
+                        <div className="l-cluster gap-1 font-bold text-[14px]">
+                            <Link to={`/profile/${author._id}`} className="text-primary no-underline hover:underline">
+                                {author.username}
+                            </Link>
+                            {author.isVerified && <HiBadgeCheck className="text-accent text-[13px]" />}
+                            <span style={{ color: 'var(--text-3)', fontWeight: 400, margin: '0 4px', fontSize: 12 }}>•</span>
+                            <span style={{ color: 'var(--text-3)', fontWeight: 400, fontSize: 13 }}>{timeago(post.createdAt)}</span>
+                        </div>
+                    </div>
+                    <div className="relative">
+                        <button className="btn btn-ghost btn-icon" onClick={() => setMenuOpen(o => !o)}><HiDotsHorizontal /></button>
+                        <AnimatePresence>
+                            {menuOpen && (
+                                <motion.div initial={{ opacity: 0, scale: 0.9, y: -6 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: -6 }} transition={{ duration: 0.12 }}
+                                    style={{ position: 'absolute', top: '100%', right: 0, zIndex: 50, background: 'var(--surface)', border: '1px solid var(--border-md)', borderRadius: 12, boxShadow: 'var(--shadow-lg)', minWidth: 170, overflow: 'hidden' }}>
+                                    <button onClick={handleShare} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-1)', fontSize: 14 }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                        <HiShare /> Copy link
+                                    </button>
+                                    {isOwner && (<>
+                                        <button onClick={() => { setMenuOpen(false); setEditOpen(true) }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-1)', fontSize: 14 }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                            <HiPencil /> Edit post
+                                        </button>
+                                        <button onClick={() => { setMenuOpen(false); handleDelete() }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 14 }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                            <HiTrash /> Delete post
+                                        </button>
+                                    </>)}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+
                 {/* ── LEFT: media ──────────────────────────── */}
                 {post.mediaUrl ? (
                     <div className="post-detail-media">
@@ -357,8 +402,8 @@ export default function PostDetail() {
                 {/* ── RIGHT: info + comments ───────────────── */}
                 <div className="post-detail-info">
 
-                    {/* Header */}
-                    <div className="post-detail-header">
+                    {/* Header — desktop only, hidden on mobile */}
+                    <div className="post-detail-header post-detail-header--desktop" ref={menuRef}>
                         <Link to={`/profile/${author._id}`}>
                             <img src={avatar} className="post-detail-avatar" alt="" />
                         </Link>
