@@ -40,15 +40,16 @@
 .admin-main-col {
     flex: 1;
     min-width: 0;
-    margin-left: 320px;
-    min-height: 100vh;
-    background: var(--admin-bg);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (min-width: 1281px) {
+    .admin-main-col {
+        margin-left: 280px;
+    }
 }
 
 @media (max-width: 1280px) {
     .admin-main-col {
-        margin-left: 80px; /* Collapsed sidebar for tablets */
+        margin-left: 88px;
     }
 }
 
@@ -106,7 +107,7 @@
 
 /* --- Sidebar --- */
 .admin-sidebar-v2 {
-    width: 320px;
+    width: 280px;
     height: 100vh;
     position: fixed;
     top: 0;
@@ -115,15 +116,16 @@
     border-right: 1px solid var(--admin-border);
     display: flex;
     flex-direction: column;
-    padding: 32px 16px;
+    padding: 40px 20px;
     z-index: 1000;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 1280px) {
     .admin-sidebar-v2 {
-        width: 80px;
-        padding: 32px 12px;
+        width: 88px;
+        padding: 40px 16px;
     }
     .admin-sidebar-v2 .sidebar-brand-text,
     .admin-sidebar-v2 .sidebar-nav-item span,
@@ -134,7 +136,7 @@
     }
     .admin-sidebar-v2 .sidebar-nav-item {
         justify-content: center;
-        padding: 16px;
+        padding: 18px;
     }
 }
 
@@ -162,29 +164,43 @@
 .sidebar-nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    border-radius: 18px;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 20px;
     color: var(--admin-text-secondary);
-    font-weight: 700;
-    font-size: 14px;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border: 1px solid transparent;
     background: transparent;
     cursor: pointer;
     text-align: left;
+    margin-bottom: 2px;
 }
 
 .sidebar-nav-item:hover {
     background: var(--admin-surface-subtle);
     color: var(--admin-text-primary);
-    transform: translateX(4px);
+    border-color: var(--admin-border);
+    transform: translateX(6px);
 }
 
 .sidebar-nav-item.active {
-    background: var(--admin-accent);
+    background: linear-gradient(135deg, var(--admin-accent), #9333ea);
     color: white;
-    box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 24px rgba(var(--accent-rgb), 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+}
+
+.sidebar-nav-item svg {
+    transition: transform 0.3s ease;
+}
+
+.sidebar-nav-item:hover svg {
+    transform: scale(1.1) rotate(-5deg);
 }
 
 /* --- Tables --- */

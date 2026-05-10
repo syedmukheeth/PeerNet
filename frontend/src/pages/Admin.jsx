@@ -62,28 +62,31 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [], isO
                 )}
             </AnimatePresence>
             <aside className={`admin-sidebar-v2 no-scrollbar ${isOpen ? 'open' : ''}`}>
-                <div className="mb-10 px-4 flex items-center justify-between">
-                    <Link to="/" className="flex flex-col gap-1 group">
+                <div className="mb-12 px-4 flex items-center justify-between">
+                    <Link to="/" className="flex flex-col gap-2 group">
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
-                            <span className="text-[10px] font-black text-accent uppercase tracking-[0.2em] sidebar-brand-text">Governance</span>
+                            <div className="relative">
+                                <div className="w-3 h-3 rounded-full bg-accent animate-ping absolute inset-0 opacity-20" />
+                                <div className="w-3 h-3 rounded-full bg-accent shadow-[0_0_15px_var(--accent)] relative z-10" />
+                            </div>
+                            <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em] sidebar-brand-text">Governance</span>
                         </div>
-                        <h2 className="text-2xl font-black text-primary tracking-tighter uppercase group-hover:text-accent transition-colors">PeerNet</h2>
+                        <h2 className="text-3xl font-black text-primary tracking-tighter uppercase group-hover:text-accent transition-all duration-500">PeerNet</h2>
                     </Link>
                     {/* Close button for mobile */}
                     <button 
                         onClick={() => setIsOpen(false)}
-                        className="lg:hidden p-3 rounded-2xl bg-surface-subtle border border-subtle text-primary"
+                        className="lg:hidden p-4 rounded-2xl bg-surface-subtle border border-border text-primary hover:bg-accent/10 transition-colors"
                     >
-                        <HiChevronLeft size={20} />
+                        <HiChevronLeft size={24} />
                     </button>
                 </div>
 
-                <nav className="flex-1 space-y-8 overflow-y-auto no-scrollbar">
+                <nav className="flex-1 space-y-10 overflow-y-auto no-scrollbar pr-2">
                     {groups.map(group => (
                         <div key={group.title}>
-                            <div className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 px-4 opacity-50 admin-sidebar-header-text">{group.title}</div>
-                            <div className="flex flex-col gap-1">
+                            <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-5 px-5 opacity-40 admin-sidebar-header-text">{group.title}</div>
+                            <div className="flex flex-col gap-1.5">
                                 {group.items.map(item => (
                                     <button
                                         key={item.id}
@@ -94,14 +97,14 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [], isO
                                         className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
                                     >
                                         <div className="relative flex items-center justify-center">
-                                            <item.icon size={20} />
+                                            <item.icon size={22} className={activeTab === item.id ? 'text-white' : 'text-accent opacity-60'} />
                                             {item.badge && (
-                                                <span className="absolute -top-2 -right-2 min-w-[16px] h-[16px] bg-error text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-card">
+                                                <span className="absolute -top-3 -right-3 min-w-[20px] h-[20px] bg-error text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-admin-card shadow-lg shadow-error/20">
                                                     {item.badge}
                                                 </span>
                                             )}
                                         </div>
-                                        <span className="tracking-tight">{item.label}</span>
+                                        <span className="font-black">{item.label}</span>
                                     </button>
                                 ))}
                             </div>
@@ -109,13 +112,13 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [], isO
                     ))}
                 </nav>
 
-                <div className="mt-8 pt-6 border-t border-subtle space-y-4">
+                <div className="mt-8 pt-8 border-t border-admin-border space-y-6">
                     <InfrastructurePulse pulse={pulse} />
                     <Link 
                         to="/" 
-                        className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl text-white bg-error shadow-lg shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] transition-all font-black text-[11px] uppercase tracking-widest"
+                        className="flex items-center justify-center gap-3 w-full py-5 rounded-[24px] text-white bg-error shadow-xl shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] active:scale-95 transition-all font-black text-[11px] uppercase tracking-widest border border-white/5"
                     >
-                        <HiExit size={18} />
+                        <HiExit size={20} />
                         <span className="exit-console-text">Exit Console</span>
                     </Link>
                 </div>
@@ -137,44 +140,43 @@ const InfrastructurePulse = ({ pulse }) => {
     }, [pulse])
 
     return (
-        <div className="mt-6 p-6 rounded-[32px] bg-surface-subtle/40 border border-border/40 space-y-6 backdrop-blur-xl relative overflow-hidden group infrastructure-pulse-details">
-            <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-100 transition-opacity">
-                <HiTerminal className="text-accent" size={12} />
+        <div className="mt-6 p-6 rounded-[32px] bg-admin-card border border-admin-border space-y-6 relative overflow-hidden group infrastructure-pulse-details shadow-inner">
+            {/* Background Decoration */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors" />
+            
+            <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_var(--success)]" />
+                    <span className="text-[10px] font-black text-primary uppercase tracking-widest opacity-80">Node Status</span>
+                </div>
+                <HiHardDrive className="text-muted opacity-20 group-hover:opacity-100 transition-opacity" size={14} />
             </div>
             
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] opacity-70">Server Load</span>
-                    <span className="text-[11px] font-black text-primary tabular-nums tracking-tighter">{load.toFixed(1)}%</span>
+            <div className="space-y-5 relative z-10">
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-muted">
+                        <span>CPU Load</span>
+                        <span className="text-primary opacity-100 tabular-nums">{load.toFixed(1)}%</span>
+                    </div>
+                    <div className="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                        <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${load}%` }}
+                            className={`h-full rounded-full ${load > 80 ? 'bg-error shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]'}`}
+                        />
+                    </div>
                 </div>
-                <div className="h-1.5 bg-border/30 rounded-full overflow-hidden p-[1px]">
-                    <motion.div 
-                        animate={{ width: `${load}%` }}
-                        className={`h-full rounded-full ${load > 70 ? 'bg-error shadow-[0_0_10px_rgba(239,68,68,0.5)]' : load > 40 ? 'bg-warning shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-success shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`}
-                    />
-                </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/10">
-                    <span className="text-[8px] font-black text-primary uppercase tracking-widest block mb-1 opacity-70">Response</span>
-                    <span className="text-[12px] font-black text-primary tabular-nums tracking-tighter">{latency.toFixed(0)}ms</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/10">
-                    <span className="text-[8px] font-black text-primary uppercase tracking-widest block mb-1 opacity-70">Users</span>
-                    <span className="text-[12px] font-black text-primary tabular-nums tracking-tighter">{pulse?.activeUsers || 0}</span>
-                </div>
-            </div>
 
-            <div className="flex gap-1 h-8 items-end justify-between px-1">
-                {Array.from({ length: 12 }).map((_, i) => (
-                    <motion.div 
-                        key={i}
-                        animate={{ height: `${20 + Math.random() * 80}%`, opacity: [0.3, 0.7, 0.3] }}
-                        transition={{ repeat: Infinity, duration: 1.5 + Math.random(), repeatType: 'reverse' }}
-                        className="w-1.5 bg-accent/40 rounded-full"
-                    />
-                ))}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 rounded-2xl bg-black/20 border border-white/5">
+                        <div className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Latency</div>
+                        <div className="text-[12px] font-black text-primary tabular-nums">{latency}ms</div>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-black/20 border border-white/5">
+                        <div className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Users</div>
+                        <div className="text-[12px] font-black text-primary tabular-nums">{pulse?.users || 0}</div>
+                    </div>
+                </div>
             </div>
         </div>
     )
