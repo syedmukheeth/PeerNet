@@ -40,14 +40,16 @@
 .admin-main-col {
     flex: 1;
     min-width: 0;
+    transition: margin-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 @media (min-width: 1281px) {
     .admin-main-col {
         margin-left: 280px;
     }
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1280px) and (min-width: 1025px) {
     .admin-main-col {
         margin-left: 88px;
     }
@@ -124,40 +126,17 @@
 
 @media (max-width: 1280px) {
     .admin-sidebar-v2 {
-        width: 88px;
-        padding: 40px 16px;
-    }
-    .admin-sidebar-v2 .sidebar-brand-text,
-    .admin-sidebar-v2 .sidebar-nav-item span,
-    .admin-sidebar-v2 .admin-sidebar-header-text,
-    .admin-sidebar-v2 .infrastructure-pulse-details,
-    .admin-sidebar-v2 .exit-console-text {
-        display: none;
-    }
-    .admin-sidebar-v2 .sidebar-nav-item {
-        justify-content: center;
-        padding: 18px;
+        width: 280px;
     }
 }
 
 @media (max-width: 1024px) {
     .admin-sidebar-v2 {
         transform: translateX(-100%);
-        width: 280px;
     }
     .admin-sidebar-v2.open {
         transform: translateX(0);
         box-shadow: 20px 0 60px rgba(0, 0, 0, 0.5);
-    }
-    .admin-sidebar-v2 .sidebar-brand-text,
-    .admin-sidebar-v2 .sidebar-nav-item span,
-    .admin-sidebar-v2 .admin-sidebar-header-text,
-    .admin-sidebar-v2 .infrastructure-pulse-details,
-    .admin-sidebar-v2 .exit-console-text {
-        display: block;
-    }
-    .admin-sidebar-v2 .sidebar-nav-item {
-        justify-content: flex-start;
     }
 }
 
