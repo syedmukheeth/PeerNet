@@ -30,8 +30,8 @@
 
 .admin-root-v2 {
     display: flex;
-    height: 100vh;
-    max-height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     background: var(--admin-bg);
     color: var(--admin-text-primary);
     overflow: hidden;
@@ -40,7 +40,7 @@
 
 .admin-main-col {
     flex: 1;
-    height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
     min-width: 0;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -117,18 +117,22 @@
 /* --- Sidebar --- */
 .admin-sidebar-v2 {
     width: 280px;
-    height: 100vh;
+    height: 100dvh;
     position: fixed;
     top: 0;
     left: 0;
     background: var(--admin-card);
     border-right: 1px solid var(--admin-border);
-    display: flex;
-    flex-direction: column;
+    display: grid !important;
+    grid-template-rows: auto 1fr auto !important;
     z-index: 1000;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
     overflow: hidden;
+}
+
+.admin-sidebar-v2.collapsed {
+    width: 88px;
 }
 
 .admin-sidebar-v2.collapsed .sidebar-brand-text,

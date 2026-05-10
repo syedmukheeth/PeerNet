@@ -66,37 +66,41 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
             </AnimatePresence>
 
             <aside 
-                className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''} flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden`}
-                style={{ height: '100dvh' }}
+                className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''} grid grid-rows-[auto_1fr_auto] h-[100dvh] max-h-[100dvh] overflow-hidden`}
+                style={{ height: '100dvh', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}
             >
-                <div className="flex items-center justify-between p-6 shrink-0">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
-                            <span className="text-white font-black text-xs">PN</span>
+                {/* Header Section */}
+                <div className="p-6 border-b border-admin-border/30">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
+                                <span className="text-white font-black text-xs">PN</span>
+                            </div>
+                            <div className={`transition-all duration-500 sidebar-brand-text ${isCollapsed ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0'}`}>
+                                <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em] block">Admin</span>
+                                <span className="text-lg font-black text-primary uppercase tracking-tighter">PeerNet</span>
+                            </div>
                         </div>
-                        <div className={`transition-all duration-500 sidebar-brand-text ${isCollapsed ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0'}`}>
-                            <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em] block">Governance</span>
-                            <span className="text-lg font-black text-primary uppercase tracking-tighter">PeerNet</span>
-                        </div>
-                    </div>
-                    
-                    <button 
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden lg:flex w-10 h-10 rounded-xl bg-admin-surface-subtle border border-admin-border items-center justify-center text-muted hover:text-accent hover:border-accent transition-all"
-                    >
-                        {isCollapsed ? <HiChevronRight size={18} /> : <HiChevronLeft size={18} />}
-                    </button>
+                        
+                        <button 
+                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            className="hidden lg:flex w-10 h-10 rounded-xl bg-admin-surface-subtle border border-admin-border items-center justify-center text-muted hover:text-accent hover:border-accent transition-all"
+                        >
+                            {isCollapsed ? <HiChevronRight size={18} /> : <HiChevronLeft size={18} />}
+                        </button>
 
-                    <button 
-                        onClick={() => setIsOpen(false)} 
-                        className="lg:hidden p-3 rounded-xl bg-admin-surface-subtle text-muted"
-                    >
-                        <HiChevronLeft size={20} />
-                    </button>
+                        <button 
+                            onClick={() => setIsOpen(false)} 
+                            className="lg:hidden p-3 rounded-xl bg-admin-surface-subtle text-muted"
+                        >
+                            <HiChevronLeft size={20} />
+                        </button>
+                    </div>
                 </div>
 
-                <nav className="flex-1 overflow-y-auto px-5 custom-scrollbar min-h-0 basis-0">
-                    <div className="space-y-6 py-4">
+                {/* Scrollable Navigation */}
+                <nav className="overflow-y-auto px-5 custom-scrollbar py-4">
+                    <div className="space-y-6">
                         {groups.map(group => (
                             <div key={group.title}>
                                 <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-4 px-4 opacity-40 admin-sidebar-header-text">{group.title}</div>
@@ -127,11 +131,12 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </div>
                 </nav>
 
-                <div className="p-6 border-t border-admin-border space-y-4 shrink-0 bg-admin-card">
+                {/* Fixed Footer - Compressed for PC parity */}
+                <div className="p-4 border-t border-admin-border bg-admin-card/50 backdrop-blur-md">
                     <InfrastructurePulse pulse={pulse} />
                     <Link 
                         to="/" 
-                        className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl text-white bg-error shadow-xl shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] active:scale-95 transition-all font-black text-[11px] uppercase tracking-widest border border-white/5"
+                        className="flex items-center justify-center gap-3 w-full py-4 mt-4 rounded-2xl text-white bg-error shadow-xl shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] active:scale-95 transition-all font-black text-[11px] uppercase tracking-widest border border-white/5"
                     >
                         <HiExit size={20} />
                         <span className="exit-console-text">Exit Console</span>
@@ -155,41 +160,38 @@ const InfrastructurePulse = ({ pulse }) => {
     }, [pulse])
 
     return (
-        <div className="mt-6 p-6 rounded-[32px] bg-admin-card border border-admin-border space-y-6 relative overflow-hidden group infrastructure-pulse-details shadow-inner">
-            {/* Background Decoration */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/5 rounded-full blur-3xl group-hover:bg-accent/10 transition-colors" />
-            
-            <div className="flex items-center justify-between relative z-10">
+        <div className="p-4 rounded-[24px] bg-black/20 border border-white/5 space-y-4 relative overflow-hidden group infrastructure-pulse-details">
+            <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_var(--success)]" />
-                    <span className="text-[10px] font-black text-primary uppercase tracking-widest opacity-80">Node Status</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                    <span className="text-[9px] font-black text-muted uppercase tracking-widest">Node Status</span>
                 </div>
-                <HiHardDrive className="text-muted opacity-20 group-hover:opacity-100 transition-opacity" size={14} />
+                <HiHardDrive className="text-muted opacity-20" size={12} />
             </div>
             
-            <div className="space-y-5 relative z-10">
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-muted">
+            <div className="space-y-3">
+                <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-muted">
                         <span>CPU Load</span>
-                        <span className="text-primary opacity-100 tabular-nums">{load.toFixed(1)}%</span>
+                        <span className="text-primary tabular-nums">{load.toFixed(1)}%</span>
                     </div>
-                    <div className="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                    <div className="h-1 bg-black/40 rounded-full overflow-hidden">
                         <motion.div 
                             initial={{ width: 0 }}
                             animate={{ width: `${load}%` }}
-                            className={`h-full rounded-full ${load > 80 ? 'bg-error shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-accent shadow-[0_0_10px_rgba(var(--accent-rgb),0.3)]'}`}
+                            className={`h-full rounded-full ${load > 80 ? 'bg-error' : 'bg-accent'}`}
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 rounded-2xl bg-black/20 border border-white/5">
-                        <div className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Latency</div>
-                        <div className="text-[12px] font-black text-primary tabular-nums">{latency}ms</div>
+                <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-[7px] font-black text-muted uppercase">Latency</span>
+                        <span className="text-[10px] font-black text-primary">{latency}ms</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-black/20 border border-white/5">
-                        <div className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Users</div>
-                        <div className="text-[12px] font-black text-primary tabular-nums">{pulse?.users || 0}</div>
+                    <div className="flex flex-col items-end">
+                        <span className="text-[7px] font-black text-muted uppercase">Users</span>
+                        <span className="text-[10px] font-black text-primary">{pulse?.users || 0}</span>
                     </div>
                 </div>
             </div>
@@ -1549,7 +1551,7 @@ export default function Admin() {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-[2px] bg-accent" />
-                                    <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em]">Governance Console</span>
+                                    <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em]">Admin Console</span>
                                 </div>
                                 <h1 className="admin-h1-v2">
                                     {navGroups.flatMap(g => g.items).find(i => i.id === activeTab)?.label || activeTab}
@@ -1568,7 +1570,7 @@ export default function Admin() {
                             <div className="hidden sm:flex items-center gap-4 pl-4 border-l border-subtle">
                                 <div className="text-right">
                                     <div className="text-xs font-black text-primary uppercase tracking-tight">@{user?.username}</div>
-                                    <div className="text-[9px] font-bold text-success uppercase tracking-widest">Root Authority</div>
+                                    <div className="text-[9px] font-bold text-success uppercase tracking-widest">Platform Admin</div>
                                 </div>
                                 <div className="w-12 h-12 rounded-2xl bg-accent text-white flex items-center justify-center font-black shadow-lg shadow-accent/20">
                                     {user?.username?.substring(0, 2).toUpperCase()}
@@ -1610,7 +1612,7 @@ export default function Admin() {
                                         </div>
                                     </div>
                                 </div>
-                                <p className="text-[9px] font-bold text-muted uppercase tracking-[0.4em] opacity-20">© 2026 PeerNet Governance • Restricted Infrastructure Access</p>
+                                <p className="text-[9px] font-bold text-muted uppercase tracking-[0.4em] opacity-20">© 2026 PeerNet Admin • Restricted Infrastructure Access</p>
                             </div>
                         </div>
                     </footer>
