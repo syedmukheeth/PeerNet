@@ -65,8 +65,10 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                 )}
             </AnimatePresence>
 
-            <aside className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
-                <div className="flex items-center justify-between p-8 shrink-0">
+            <aside 
+                className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''} flex flex-col h-screen max-h-screen overflow-hidden`}
+            >
+                <div className="flex items-center justify-between p-6 shrink-0">
                     <div className="flex items-center gap-3 overflow-hidden">
                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
                             <span className="text-white font-black text-xs">PN</span>
@@ -92,11 +94,11 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </button>
                 </div>
 
-                <nav className="flex-1 overflow-y-auto px-5 custom-scrollbar min-h-0">
-                    <div className="space-y-8">
+                <nav className="flex-1 overflow-y-auto px-5 custom-scrollbar min-h-0 flex-shrink">
+                    <div className="space-y-6 py-4">
                         {groups.map(group => (
                             <div key={group.title}>
-                                <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-5 px-5 opacity-40 admin-sidebar-header-text">{group.title}</div>
+                                <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-4 px-4 opacity-40 admin-sidebar-header-text">{group.title}</div>
                                 <div className="flex flex-col gap-1.5">
                                     {group.items.map(item => (
                                         <button
@@ -124,11 +126,11 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </div>
                 </nav>
 
-                <div className="p-8 border-t border-admin-border space-y-6 shrink-0 bg-admin-card">
+                <div className="p-6 border-t border-admin-border space-y-4 shrink-0 bg-admin-card mt-auto">
                     <InfrastructurePulse pulse={pulse} />
                     <Link 
                         to="/" 
-                        className="flex items-center justify-center gap-3 w-full py-5 rounded-[24px] text-white bg-error shadow-xl shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] active:scale-95 transition-all font-black text-[11px] uppercase tracking-widest border border-white/5"
+                        className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl text-white bg-error shadow-xl shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] active:scale-95 transition-all font-black text-[11px] uppercase tracking-widest border border-white/5"
                     >
                         <HiExit size={20} />
                         <span className="exit-console-text">Exit Console</span>
