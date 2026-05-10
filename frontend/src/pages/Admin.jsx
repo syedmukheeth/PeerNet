@@ -43,13 +43,16 @@ const navGroups = [
     }
 ]
 
-const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [], isOpen, setIsOpen }) => {
+const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, setIsOpen }) => {
     const groups = navGroups.map(g => ({
         ...g,
         items: g.items.map(i => i.id === 'reports' ? { ...i, badge: reports.length > 0 ? reports.length : null } : i)
     }))
+    const [isCollapsed, setIsCollapsed] = useState(false)
+
     return (
         <>
+            {/* Mobile Backdrop */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div 
@@ -57,28 +60,35 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [], isO
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setIsOpen(false)}
-                        className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[999]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] lg:hidden"
                     />
                 )}
             </AnimatePresence>
-            <aside className={`admin-sidebar-v2 no-scrollbar ${isOpen ? 'open' : ''}`}>
-                <div className="mb-12 px-4 flex items-center justify-between">
-                    <Link to="/" className="flex flex-col gap-2 group">
-                        <div className="flex items-center gap-2">
-                            <div className="relative">
-                                <div className="w-3 h-3 rounded-full bg-accent animate-ping absolute inset-0 opacity-20" />
-                                <div className="w-3 h-3 rounded-full bg-accent shadow-[0_0_15px_var(--accent)] relative z-10" />
-                            </div>
-                            <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em] sidebar-brand-text">Governance</span>
+
+            <aside className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
+                <div className="flex items-center justify-between mb-12">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
+                            <span className="text-white font-black text-xs">PN</span>
                         </div>
-                        <h2 className="text-3xl font-black text-primary tracking-tighter uppercase group-hover:text-accent transition-all duration-500">PeerNet</h2>
-                    </Link>
-                    {/* Close button for mobile */}
+                        <div className={`transition-all duration-500 sidebar-brand-text ${isCollapsed ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0'}`}>
+                            <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em] block">Governance</span>
+                            <span className="text-lg font-black text-primary uppercase tracking-tighter">PeerNet</span>
+                        </div>
+                    </div>
+                    
                     <button 
-                        onClick={() => setIsOpen(false)}
-                        className="lg:hidden p-4 rounded-2xl bg-surface-subtle border border-border text-primary hover:bg-accent/10 transition-colors"
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="hidden lg:flex w-10 h-10 rounded-xl bg-admin-surface-subtle border border-admin-border items-center justify-center text-muted hover:text-accent hover:border-accent transition-all"
                     >
-                        <HiChevronLeft size={24} />
+                        {isCollapsed ? <HiChevronRight size={18} /> : <HiChevronLeft size={18} />}
+                    </button>
+
+                    <button 
+                        onClick={() => setIsOpen(false)} 
+                        className="lg:hidden p-3 rounded-xl bg-admin-surface-subtle text-muted"
+                    >
+                        <HiChevronLeft size={20} />
                     </button>
                 </div>
 

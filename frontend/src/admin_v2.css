@@ -40,18 +40,22 @@
 .admin-main-col {
     flex: 1;
     min-width: 0;
-    transition: margin-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    background: var(--admin-bg);
 }
 
-@media (min-width: 1281px) {
-    .admin-main-col {
-        margin-left: 280px;
-    }
+/* Sidebar Width Management */
+:root {
+    --sidebar-w: 280px;
 }
 
-@media (max-width: 1280px) and (min-width: 1025px) {
+.admin-sidebar-v2.collapsed {
+    --sidebar-w: 88px;
+}
+
+@media (min-width: 1025px) {
     .admin-main-col {
-        margin-left: 88px;
+        margin-left: var(--sidebar-w);
     }
 }
 
@@ -124,15 +128,27 @@
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 1280px) {
-    .admin-sidebar-v2 {
-        width: 280px;
-    }
+.admin-sidebar-v2.collapsed .sidebar-brand-text,
+.admin-sidebar-v2.collapsed .sidebar-nav-item span,
+.admin-sidebar-v2.collapsed .admin-sidebar-header-text,
+.admin-sidebar-v2.collapsed .infrastructure-pulse-details,
+.admin-sidebar-v2.collapsed .exit-console-text {
+    display: none;
+}
+
+.admin-sidebar-v2.collapsed .sidebar-nav-item {
+    justify-content: center;
+    padding: 16px;
+}
+
+.admin-sidebar-v2.collapsed {
+    padding: 40px 16px;
 }
 
 @media (max-width: 1024px) {
     .admin-sidebar-v2 {
         transform: translateX(-100%);
+        width: 280px;
     }
     .admin-sidebar-v2.open {
         transform: translateX(0);
