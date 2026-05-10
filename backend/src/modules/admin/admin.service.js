@@ -15,6 +15,7 @@ const Report = require('./Report');
 const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 const logger = require('../../config/logger');
+const { register } = require('../../config/metrics');
 
 const getUsers = async ({ limit = 20, skip = 0, search = '', role = '', status = '' }) => {
     let query = {};
@@ -220,6 +221,14 @@ const getPlatformStats = async () => {
     const bandwidthUsage = calculatedBandwidth > 1024 
         ? (calculatedBandwidth / 1024).toFixed(2) + ' TB' 
         : calculatedBandwidth.toFixed(2) + ' GB';
+
+    // Get real process metrics from prom-client
+    const metrics = await register.getMetricsAsJSON();
+    const memMetric = metrics.find(m => m.name === 'nodejs_heap_size_total_bytes');
+    const cpuMetric = metrics.find(m => m.name === 'process_cpu_user_seconds_total');
+    
+    const heapUsed = memMetric?.values[0]?.value || 0;
+    const cpuUsed = cpuMetric?.values[0]?.value || 0;
         
     return { 
         userCount, 
@@ -227,7 +236,12 @@ const getPlatformStats = async () => {
         storyCount, 
         shortsCount,
         openFeedback: feedbackCount,
-        bandwidthUsage
+        bandwidthUsage,
+        system: {
+            heapUsed: (heapUsed / 1024 / 1024).toFixed(2) + ' MB',
+            cpuSeconds: cpuUsed.toFixed(2),
+            uptime: process.uptime().toFixed(0)
+        }
     };
 };
 

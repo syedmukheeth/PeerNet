@@ -6,8 +6,8 @@ import {
     HiKey, HiDatabase, HiGlobe, HiSearch, HiChatAlt2, HiFlag, 
     HiTrendingUp, HiCog, HiShieldCheck, HiCheck, HiBan, HiSpeakerphone,
     HiCubeTransparent, HiServer, HiLightningBolt, HiFingerPrint,
-    HiClock, HiDotsVertical, HiX, HiAdjustments, HiChevronRight, HiTerminal, HiDatabase as HiHardDrive,
-    HiHome, HiOutlineLogout as HiExit
+    HiClock, HiDotsVertical, HiX, HiAdjustments, HiChevronRight, HiChevronLeft, HiTerminal, HiDatabase as HiHardDrive,
+    HiHome, HiOutlineLogout as HiExit, HiMenu
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -43,78 +43,87 @@ const navGroups = [
     }
 ]
 
-const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [] }) => {
-    // Add badge to reports item
+const AdminSidebar = ({ activeTab, setActiveTab, pulse, stats, reports = [], isOpen, setIsOpen }) => {
     const groups = navGroups.map(g => ({
         ...g,
         items: g.items.map(i => i.id === 'reports' ? { ...i, badge: reports.length > 0 ? reports.length : null } : i)
     }))
     return (
-        <aside className="admin-sidebar-v2">
-            {/* Top: Branding */}
-            <div className="sidebar-logo-row mb-8">
-                <Link to="/" className="flex flex-col gap-1 px-4 group">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
-                        <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Admin Panel</span>
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                        <h2 className="text-2xl font-black text-primary tracking-tighter uppercase leading-none group-hover:text-accent transition-colors">Control</h2>
-                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-primary group-hover:bg-accent group-hover:text-white transition-all">
-                            <HiHome size={16} />
+        <>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsOpen(false)}
+                        className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[999]"
+                    />
+                )}
+            </AnimatePresence>
+            <aside className={`admin-sidebar-v2 no-scrollbar ${isOpen ? 'open' : ''}`}>
+                <div className="mb-10 px-4 flex items-center justify-between">
+                    <Link to="/" className="flex flex-col gap-1 group">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)] animate-pulse" />
+                            <span className="text-[10px] font-black text-accent uppercase tracking-[0.2em] sidebar-brand-text">Governance</span>
                         </div>
-                    </div>
-                </Link>
-            </div>
+                        <h2 className="text-2xl font-black text-primary tracking-tighter uppercase group-hover:text-accent transition-colors">PeerNet</h2>
+                    </Link>
+                    {/* Close button for mobile */}
+                    <button 
+                        onClick={() => setIsOpen(false)}
+                        className="lg:hidden p-3 rounded-2xl bg-surface-subtle border border-subtle text-primary"
+                    >
+                        <HiChevronLeft size={20} />
+                    </button>
+                </div>
 
-            {/* Middle: Navigation */}
-            <nav className="sidebar-nav no-scrollbar px-2 flex-1">
-                {groups.map(group => (
-                    <div key={group.title} className="mb-8">
-                        <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4 px-4 opacity-70">{group.title}</div>
-                        <div className="flex flex-col gap-1.5">
-                            {group.items.map(item => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => setActiveTab(item.id)}
-                                    className={`ig-link w-full border-none bg-transparent text-left px-4 py-3.5 rounded-2xl flex items-center gap-4 transition-all duration-500 transform ${
-                                        activeTab === item.id 
-                                        ? 'bg-accent text-white shadow-xl shadow-accent/30 scale-[1.02]' 
-                                        : 'text-primary/60 hover:bg-white/10 hover:text-primary'
-                                    }`}
-                                >
-                                    <div className="relative">
-                                        <item.icon size={22} className={activeTab === item.id ? 'text-accent' : 'text-muted/60'} />
-                                        {item.badge && (
-                                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-error text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-black">
-                                                {item.badge}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span className={`text-[13px] tracking-tight ${activeTab === item.id ? 'font-black' : 'font-bold'}`}>
-                                        {item.label}
-                                    </span>
-                                </button>
-                            ))}
+                <nav className="flex-1 space-y-8 overflow-y-auto no-scrollbar">
+                    {groups.map(group => (
+                        <div key={group.title}>
+                            <div className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4 px-4 opacity-50 admin-sidebar-header-text">{group.title}</div>
+                            <div className="flex flex-col gap-1">
+                                {group.items.map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => {
+                                            setActiveTab(item.id)
+                                            if (window.innerWidth <= 1024) setIsOpen(false)
+                                        }}
+                                        className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
+                                    >
+                                        <div className="relative flex items-center justify-center">
+                                            <item.icon size={20} />
+                                            {item.badge && (
+                                                <span className="absolute -top-2 -right-2 min-w-[16px] h-[16px] bg-error text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-card">
+                                                    {item.badge}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="tracking-tight">{item.label}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </nav>
+                    ))}
+                </nav>
 
-            {/* Bottom: Infrastructure */}
-            <div className="sidebar-footer border-t border-white/5 pt-4 space-y-4">
-                <Link 
-                    to="/" 
-                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-white bg-error shadow-lg shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] transition-all group"
-                >
-                    <HiExit size={20} className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-[13px] font-black uppercase tracking-widest">Exit Admin</span>
-                </Link>
-                <InfrastructurePulse pulse={pulse} />
-            </div>
-        </aside>
+                <div className="mt-8 pt-6 border-t border-subtle space-y-4">
+                    <InfrastructurePulse pulse={pulse} />
+                    <Link 
+                        to="/" 
+                        className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl text-white bg-error shadow-lg shadow-error/20 hover:shadow-error/40 hover:scale-[1.02] transition-all font-black text-[11px] uppercase tracking-widest"
+                    >
+                        <HiExit size={18} />
+                        <span className="exit-console-text">Exit Console</span>
+                    </Link>
+                </div>
+            </aside>
+        </>
     )
 }
+
 
 const InfrastructurePulse = ({ pulse }) => {
     const [load, setLoad] = useState(pulse?.load || 24)
@@ -128,7 +137,7 @@ const InfrastructurePulse = ({ pulse }) => {
     }, [pulse])
 
     return (
-        <div className="mt-6 p-6 rounded-[32px] bg-surface-subtle/40 border border-border/40 space-y-6 backdrop-blur-xl relative overflow-hidden group">
+        <div className="mt-6 p-6 rounded-[32px] bg-surface-subtle/40 border border-border/40 space-y-6 backdrop-blur-xl relative overflow-hidden group infrastructure-pulse-details">
             <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-100 transition-opacity">
                 <HiTerminal className="text-accent" size={12} />
             </div>
@@ -235,7 +244,7 @@ const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
                 {value}
             </div>
             <div className="flex items-center gap-2">
-                <div className={`w-1 h-1 rounded-full ${accent ? 'bg-error animate-pulse' : 'bg-success shadow-[0_0_10px_#22c55e]'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full ${accent ? 'bg-error animate-pulse' : 'bg-success shadow-[0_0_10px_rgba(34,197,94,0.4)]'}`} />
                 <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{sub}</span>
             </div>
         </div>
@@ -334,7 +343,7 @@ const AnalyticsModule = ({ stats, analytics }) => {
                                     <span className="opacity-60 group-hover:opacity-100 transition-opacity">{region.label}</span>
                                     <span className="text-accent drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.3)] tabular-nums">{region.value}%</span>
                                 </div>
-                                <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden p-[1.5px] border border-white/5 shadow-inner">
+                                <div className="h-2 w-full bg-surface-subtle rounded-full overflow-hidden p-[1.5px] border border-subtle shadow-inner">
                                     <motion.div 
                                         initial={{ width: 0 }}
                                         animate={{ width: `${region.value}%` }}
@@ -357,9 +366,9 @@ const AnalyticsModule = ({ stats, analytics }) => {
 const InfrastructureModule = ({ pulse }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard label="CPU Usage" value={`${pulse?.load?.toFixed(1) || 0.1}%`} sub="PROCESSOR WORKLOAD" icon={<HiServer />} />
-            <StatCard label="Memory Speed" value={`${pulse?.latency || 42}ms`} sub="RESPONSE TIME" icon={<HiLightningBolt />} />
-            <StatCard label="Active Users" value={pulse?.activeUsers || 0} sub="CURRENT CONNECTIONS" icon={<HiGlobe />} />
+            <StatCard label="Memory Heap" value={pulse?.system?.heapUsed || '0 MB'} sub="NODEJS ALLOCATION" icon={<HiServer />} />
+            <StatCard label="Processing" value={`${pulse?.system?.cpuSeconds || 0}s`} sub="CPU EXECUTION TIME" icon={<HiLightningBolt />} />
+            <StatCard label="Network Pulse" value={pulse?.connectedClients || 0} sub="ACTIVE SOCKETS" icon={<HiGlobe />} />
         </div>
         
         <div className="admin-surface-el p-10">
@@ -367,8 +376,8 @@ const InfrastructureModule = ({ pulse }) => (
             <div className="space-y-6">
                 {[
                     { label: 'Database Status', status: 'Online', color: 'text-success' },
-                    { label: 'Chat Connection', status: 'Connected', color: 'text-success' },
-                    { label: 'Global Delivery', status: 'Fast', color: 'text-accent' },
+                    { label: 'Chat Connection', status: 'Active', color: 'text-success' },
+                    { label: 'System Uptime', status: pulse?.system?.uptime ? `${Math.floor(pulse.system.uptime / 60)}m ${pulse.system.uptime % 60}s` : 'Initializing', color: 'text-accent' },
                     { label: 'Activity Log', status: 'Recording', color: 'text-warning' }
                 ].map(node => (
                     <div key={node.label} className="flex items-center justify-between p-5 bg-black/20 rounded-2xl border border-white/5">
@@ -860,6 +869,7 @@ const ReportModule = ({ reports, onResolve }) => (
 export default function Admin() {
 
     const [activeTab, setActiveTab] = useState('dashboard')
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [stats, setStats] = useState(null)
     const [analytics, setAnalytics] = useState(null)
     const [pulse, setPulse] = useState({ load: 0.12, latency: 42, activeUsers: 0 })
@@ -1197,20 +1207,20 @@ export default function Admin() {
                 return (
                     <div className="space-y-12">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div className="admin-surface-el-v2 p-10 bg-gradient-to-br from-accent/5 to-transparent">
+                            <div className="admin-surface-el p-10 bg-gradient-to-br from-accent/[0.03] to-transparent">
                                 <h3 className="text-xl font-black text-primary uppercase tracking-tighter mb-8">Platform Identity</h3>
                                 <div className="space-y-6">
-                                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5">
+                                    <div className="flex items-center justify-between p-5 bg-surface-subtle rounded-2xl border border-subtle">
                                         <span className="text-[11px] font-black text-muted uppercase tracking-widest">Environment</span>
                                         <span className="text-[11px] font-black text-accent uppercase tracking-widest px-3 py-1 rounded-full bg-accent/10 border border-accent/20">Production-PN</span>
                                     </div>
-                                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5">
+                                    <div className="flex items-center justify-between p-5 bg-surface-subtle rounded-2xl border border-subtle">
                                         <span className="text-[11px] font-black text-muted uppercase tracking-widest">Registry Lock</span>
                                         <div className="w-10 h-5 bg-success/20 rounded-full relative shadow-inner"><div className="absolute right-1 top-1 w-3 h-3 bg-success rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" /></div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="admin-surface-el-v2 p-10 border-dashed border-error/20 bg-error/[0.02]">
+                            <div className="admin-surface-el p-10 border-dashed border-error/20 bg-error/[0.02]">
                                 <h3 className="text-xl font-black text-error uppercase tracking-tighter mb-8">Danger Zone</h3>
                                 <p className="text-[12px] text-muted font-bold mb-10 opacity-50 leading-relaxed">High-risk administrative operations. All executions are recorded to the permanent system registry.</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1290,87 +1300,55 @@ export default function Admin() {
                 pulse={stats?.health}
                 stats={stats}
                 reports={reports}
+                isOpen={isSidebarOpen}
+                setIsOpen={setIsSidebarOpen}
             />
 
-            {/* MOBILE NAVIGATION TABS - Expanded & Optimized */}
-            <div className="lg:hidden flex overflow-x-auto gap-3 p-4 bg-black/50 backdrop-blur-xl border-b border-white/5 sticky top-0 z-[1000] no-scrollbar">
-                {[
-                    { id: 'home', label: 'Home', icon: HiHome, action: () => navigate('/') },
-                    { id: 'dashboard', label: 'Command', icon: HiGlobe },
-                    { id: 'analytics', label: 'Intel', icon: HiTrendingUp },
-                    { id: 'users', label: 'IDs', icon: HiUsers },
-                    { id: 'posts', label: 'Posts', icon: HiCollection },
-                    { id: 'comments', label: 'Chat', icon: HiChatAlt2 },
-                    { id: 'reports', label: 'Alerts', icon: HiFlag },
-                    { id: 'infrastructure', label: 'Core', icon: HiDatabase },
-                    { id: 'audit', label: 'Logs', icon: HiShieldCheck }
-                ].map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => {
-                            setActiveTab(item.id)
-                            window.scrollTo({ top: 0, behavior: 'smooth' })
-                        }}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 border ${
-                            activeTab === item.id 
-                                ? 'bg-primary text-black font-black border-primary shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)]' 
-                                : 'bg-white/5 text-muted border-white/10 hover:bg-white/10'
-                        }`}
-                    >
-                        <item.icon size={16} />
-                        <span className="text-xs uppercase tracking-widest">{item.label}</span>
-                    </button>
-                ))}
-            </div>
+
 
             {/* Main Content Area */}
             <main className="admin-main-col">
-                <div className="admin-content-inner p-6 md:p-12 space-y-12">
-                    {/* Header */}
-                    <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-white/5">
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                                <Link to="/" className="lg:hidden flex items-center gap-2 px-3 py-1 rounded bg-accent/10 border border-accent/20 text-accent text-[9px] font-black uppercase tracking-widest hover:bg-accent/20 transition-all">
-                                    <HiExit size={12} /> Exit Console
-                                </Link>
-                                <div className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-muted text-[9px] font-black uppercase tracking-widest">
-                                    Live Console
+                <div className="p-6 md:p-12 max-w-[1700px] mx-auto">
+                    {/* Page Header */}
+                    <header className="flex items-center justify-between gap-8 mb-12 md:mb-16 border-b border-subtle pb-10">
+                        <div className="flex items-center gap-6">
+                            <button 
+                                onClick={() => setIsSidebarOpen(prev => !prev)}
+                                className={`lg:hidden p-4 rounded-2xl bg-admin-card border text-primary shadow-xl transition-all ${isSidebarOpen ? 'border-accent bg-accent/5' : 'border-admin-border'}`}
+                            >
+                                <HiMenu size={24} />
+                            </button>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-[2px] bg-accent" />
+                                    <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em]">Governance Console</span>
                                 </div>
-                                <div className="text-[10px] font-black text-muted uppercase tracking-[0.2em] opacity-30">
-                                    Ref: PN-GOV-{new Date().getFullYear()}-{Math.floor(Math.random() * 9000) + 1000}
-                                </div>
+                                <h1 className="admin-h1-v2">
+                                    {navGroups.flatMap(g => g.items).find(i => i.id === activeTab)?.label || activeTab}
+                                </h1>
                             </div>
-                            <h1 className="admin-h1-v2">
-                                {navGroups.flatMap(g => g.items).find(i => i.id === activeTab)?.label || activeTab}
-                            </h1>
-                            <p className="text-muted font-bold text-[11px] uppercase tracking-[0.3em] opacity-40 ml-1">
-                                Active Administrative Session • Restricted Access
-                            </p>
                         </div>
 
                         <div className="flex items-center gap-4">
                             <button 
                                 onClick={() => init()}
-                                className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-accent/30 transition-all group"
-                                title="Synchronize Data"
+                                className="w-12 h-12 rounded-2xl bg-surface-subtle border border-subtle flex items-center justify-center text-muted hover:text-accent hover:border-accent transition-all group"
+                                title="Refresh Data"
                             >
-                                <HiRefresh className="text-muted group-hover:text-accent group-hover:rotate-180 transition-all duration-700" size={20} />
+                                <HiRefresh size={20} className="group-hover:rotate-180 transition-all duration-700" />
                             </button>
-                            <div className="h-12 w-[1px] bg-white/10 mx-2" />
-                            <div className="flex items-center gap-4 pl-2">
-                                <div className="text-right hidden sm:block">
-                                    <div className="text-xs font-black text-primary uppercase">@{user?.username}</div>
-                                    <div className="text-[10px] font-bold text-success uppercase tracking-widest flex items-center justify-end gap-1.5">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                                        Root Access
-                                    </div>
+                            <div className="hidden sm:flex items-center gap-4 pl-4 border-l border-subtle">
+                                <div className="text-right">
+                                    <div className="text-xs font-black text-primary uppercase tracking-tight">@{user?.username}</div>
+                                    <div className="text-[9px] font-bold text-success uppercase tracking-widest">Root Authority</div>
                                 </div>
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-accent-dark border border-white/10 flex items-center justify-center text-white font-black shadow-lg shadow-accent/20">
+                                <div className="w-12 h-12 rounded-2xl bg-accent text-white flex items-center justify-center font-black shadow-lg shadow-accent/20">
                                     {user?.username?.substring(0, 2).toUpperCase()}
                                 </div>
                             </div>
                         </div>
                     </header>
+
 
                     {/* Module Render */}
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -1423,7 +1401,7 @@ export default function Admin() {
                             <h2 className="text-2xl font-black text-primary mb-3 uppercase tracking-tighter">Terminate Asset?</h2>
                             <p className="text-muted font-bold text-sm mb-10 leading-relaxed opacity-60">This operation is destructive and cannot be reversed. All associated data will be purged.</p>
                             <div className="grid grid-cols-2 gap-4">
-                                <button className="py-4 rounded-xl border border-white/5 font-black text-[10px] tracking-[0.2em] uppercase hover:bg-white/5 transition-all" onClick={() => setShowDeleteModal(false)}>Abort</button>
+                                <button className="py-4 rounded-xl border border-subtle font-black text-[10px] tracking-[0.2em] uppercase hover:bg-surface-subtle transition-all" onClick={() => setShowDeleteModal(false)}>Abort</button>
                                 <button className="py-4 rounded-xl bg-error text-white font-black text-[10px] tracking-[0.2em] uppercase shadow-lg shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all" onClick={handleDeleteUser}>Terminate</button>
                             </div>
                         </motion.div>
@@ -1460,7 +1438,7 @@ export default function Admin() {
                                             value={systemConfirmCode}
                                             onChange={(e) => setSystemConfirmCode(e.target.value)}
                                             placeholder="CONFIRMATION_CODE"
-                                            className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-10"
+                                            className="w-full bg-surface-subtle border border-subtle rounded-2xl px-6 py-5 text-sm font-black text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-10"
                                         />
                                     </div>
 
@@ -1473,7 +1451,7 @@ export default function Admin() {
                                             value={systemAdminPassword}
                                             onChange={(e) => setSystemAdminPassword(e.target.value)}
                                             placeholder="••••••••••••"
-                                            className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-10"
+                                            className="w-full bg-surface-subtle border border-subtle rounded-2xl px-6 py-5 text-sm font-black text-primary focus:border-error/50 focus:bg-error/5 outline-none transition-all placeholder:opacity-10"
                                         />
                                     </div>
                                 </div>
@@ -1491,7 +1469,7 @@ export default function Admin() {
                                         className={`flex-[2] py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 ${
                                             systemConfirmCode === 'DELETE' && systemAdminPassword
                                             ? 'bg-error text-white shadow-xl shadow-error/40 hover:scale-[1.02] active:scale-95'
-                                            : 'bg-white/5 text-muted/30 cursor-not-allowed'
+                                            : 'bg-surface-subtle text-muted/30 cursor-not-allowed'
                                         }`}
                                     >
                                         {isExecutingSystem ? (
@@ -1500,6 +1478,7 @@ export default function Admin() {
                                             <>Authorize & Execute</>
                                         )}
                                     </button>
+
                                 </div>
                             </div>
                             

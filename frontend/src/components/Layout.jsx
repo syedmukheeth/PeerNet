@@ -461,7 +461,10 @@ export default function Layout() {
                             <button 
                                 ref={mobileMenuBtnRef}
                                 className="mobile-header-btn bg-transparent border-none text-primary"
-                                onClick={() => setShowMore(!showMore)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMore(!showMore);
+                                }}
                             >
                                 <HiMenu size={24} />
                             </button>

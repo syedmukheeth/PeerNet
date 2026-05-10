@@ -97,8 +97,8 @@ function NotifRow({ n, index, onNavigate }) {
                         <img src={n.thumbnail} alt="" className="notif-thumbnail" />
                     </div>
                 ) : (
-                    <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-2">
-                        <cfg.icon size={16} className="text-muted" />
+                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-2 border border-border-sm">
+                        <cfg.icon size={18} style={{ color: cfg.color }} />
                     </div>
                 )}
             </div>
@@ -207,13 +207,13 @@ export default function Notifications() {
     )
 
     return (
-        <div className="min-h-dvh pb-20 bg-bg">
+        <div className="min-h-dvh pb-24 bg-bg">
             {/* Header - Sticky IG Style */}
-            <div className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-border-subtle">
-                <div className="l-main-col flex items-center justify-between px-4 py-3">
-                    <h1 className="text-xl font-bold text-primary">Notifications</h1>
+            <div className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-border-sm">
+                <div className="l-main-col flex items-center justify-between px-5 h-16">
+                    <h1 className="text-2xl font-black text-primary tracking-tighter">Notifications</h1>
                     <button className="p-2 hover:bg-surface-hover rounded-full transition-all active:scale-90">
-                        <HiDotsHorizontal size={20} className="text-primary" />
+                        <HiDotsHorizontal size={22} className="text-primary" />
                     </button>
                 </div>
             </div>
