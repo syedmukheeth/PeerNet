@@ -66,7 +66,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
             </AnimatePresence>
 
             <aside className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
-                <div className="flex items-center justify-between mb-12">
+                <div className="flex items-center justify-between mb-12 shrink-0">
                     <div className="flex items-center gap-3 overflow-hidden">
                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
                             <span className="text-white font-black text-xs">PN</span>
@@ -92,7 +92,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </button>
                 </div>
 
-                <nav className="flex-1 space-y-10 overflow-y-auto no-scrollbar pr-2 min-h-0">
+                <nav className="flex-1 space-y-10 overflow-y-auto pr-2 min-h-0 custom-scrollbar">
                     {groups.map(group => (
                         <div key={group.title}>
                             <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-5 px-5 opacity-40 admin-sidebar-header-text">{group.title}</div>
@@ -122,7 +122,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     ))}
                 </nav>
 
-                <div className="mt-8 pt-8 border-t border-admin-border space-y-6">
+                <div className="mt-8 pt-8 border-t border-admin-border space-y-6 shrink-0">
                     <InfrastructurePulse pulse={pulse} />
                     <Link 
                         to="/" 
