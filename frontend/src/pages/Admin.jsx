@@ -1554,7 +1554,7 @@ export default function Admin() {
 
             {/* Main Content Area */}
             <main className="admin-main-col h-screen overflow-y-auto custom-scrollbar">
-                <div className="p-4 md:p-12 max-w-[1700px] mx-auto">
+                <div className="px-4 pt-3 pb-4 md:px-10 md:pt-4 md:pb-10 max-w-[1700px] mx-auto">
                     {/* Page Header */}
                     <header className="flex items-center justify-between gap-4 mb-4 md:mb-6 border-b border-subtle pb-4 md:pb-5">
                         <div className="flex items-center gap-6">
