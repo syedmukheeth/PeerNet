@@ -99,7 +99,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                 </div>
 
                 {/* Scrollable Navigation */}
-                <nav className="overflow-y-auto px-5 custom-scrollbar py-4">
+                <nav className="overflow-y-auto px-5 custom-scrollbar py-4" style={{ minHeight: 0 }}>
                     <div className="space-y-6">
                         {groups.map(group => (
                             <div key={group.title}>

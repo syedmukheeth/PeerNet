@@ -154,6 +154,13 @@
     padding-right: 16px;
 }
 
+/* CRITICAL: Grid items default to min-height: auto, which prevents 1fr from
+   constraining the nav. This one rule makes the footer always visible. */
+.admin-sidebar-v2 > nav {
+    min-height: 0;
+    overflow-y: auto;
+}
+
 @media (max-width: 1024px) {
     .admin-sidebar-v2 {
         transform: translateX(-100%);
