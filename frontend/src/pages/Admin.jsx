@@ -92,7 +92,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </button>
                 </div>
 
-                <nav className="flex-1 space-y-10 overflow-y-auto no-scrollbar pr-2">
+                <nav className="flex-1 space-y-10 overflow-y-auto no-scrollbar pr-2 min-h-0">
                     {groups.map(group => (
                         <div key={group.title}>
                             <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-5 px-5 opacity-40 admin-sidebar-header-text">{group.title}</div>
