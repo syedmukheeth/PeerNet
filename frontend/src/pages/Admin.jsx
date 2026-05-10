@@ -30,8 +30,8 @@ const navGroups = [
         items: [
             { id: 'users', label: 'People', icon: HiUsers },
             { id: 'posts', label: 'All Content', icon: HiCollection },
-            { id: 'comments', label: 'User Feedback', icon: HiChatAlt2 },
-            { id: 'reports', label: 'Safety Flags', icon: HiFlag }
+            { id: 'comments', label: 'Comments', icon: HiChatAlt2 },
+            { id: 'reports', label: 'Reports', icon: HiFlag }
         ]
     },
     {
@@ -618,7 +618,7 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
         {/* Header Section */}
         <div className="p-8 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="space-y-1">
-                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Communication Feed</h3>
+                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Comments Registry</h3>
                 <p className="text-[10px] font-black text-accent uppercase tracking-[0.3em] opacity-80">{comments.length} entries in storage</p>
             </div>
             
@@ -873,8 +873,8 @@ const AuditModule = ({ logs, loading }) => (
             </div>
         </div>
         
-        {/* Responsive Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+        {/* High-Density Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {posts.map(post => (
                 <div key={post._id} className="admin-surface-el group overflow-hidden flex flex-col h-full hover:border-accent/20 transition-all duration-500 hover:shadow-2xl hover:shadow-accent/[0.05]">
                     {/* Header */}
@@ -897,8 +897,8 @@ const AuditModule = ({ logs, loading }) => (
                         </div>
                     </div>
 
-                    {/* Media Body */}
-                    <div className="h-48 bg-black relative overflow-hidden group/media">
+                    {/* Media Body - Compact Height */}
+                    <div className="h-32 bg-black relative overflow-hidden group/media">
                         {post.mediaUrl ? (
                             <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover/media:scale-110" alt="" />
                         ) : (
@@ -1520,7 +1520,7 @@ export default function Admin() {
     }
 
     return (
-        <div className="admin-root-v2">
+        <div className="admin-root-v2 h-screen overflow-hidden">
             {/* Sidebar */}
             <AdminSidebar 
                 activeTab={activeTab} 
@@ -1535,10 +1535,10 @@ export default function Admin() {
 
 
             {/* Main Content Area */}
-            <main className="admin-main-col">
-                <div className="p-6 md:p-12 max-w-[1700px] mx-auto">
+            <main className="admin-main-col h-screen overflow-y-auto custom-scrollbar">
+                <div className="p-4 md:p-12 max-w-[1700px] mx-auto">
                     {/* Page Header */}
-                    <header className="flex items-center justify-between gap-8 mb-12 md:mb-16 border-b border-subtle pb-10">
+                    <header className="flex items-center justify-between gap-8 mb-8 md:mb-16 border-b border-subtle pb-6 md:pb-10">
                         <div className="flex items-center gap-6">
                             <button 
                                 onClick={() => setIsSidebarOpen(prev => !prev)}
