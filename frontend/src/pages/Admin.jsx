@@ -66,7 +66,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
             </AnimatePresence>
 
             <aside className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
-                <div className="flex items-center justify-between mb-12 shrink-0">
+                <div className="flex items-center justify-between p-8 shrink-0">
                     <div className="flex items-center gap-3 overflow-hidden">
                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
                             <span className="text-white font-black text-xs">PN</span>
@@ -92,37 +92,39 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </button>
                 </div>
 
-                <nav className="flex-1 space-y-10 overflow-y-auto pr-2 min-h-0 custom-scrollbar">
-                    {groups.map(group => (
-                        <div key={group.title}>
-                            <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-5 px-5 opacity-40 admin-sidebar-header-text">{group.title}</div>
-                            <div className="flex flex-col gap-1.5">
-                                {group.items.map(item => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => {
-                                            setActiveTab(item.id)
-                                            if (window.innerWidth <= 1024) setIsOpen(false)
-                                        }}
-                                        className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
-                                    >
-                                        <div className="relative flex items-center justify-center">
-                                            <item.icon size={22} className={activeTab === item.id ? 'text-white' : 'text-accent opacity-60'} />
-                                            {item.badge && (
-                                                <span className="absolute -top-3 -right-3 min-w-[20px] h-[20px] bg-error text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-admin-card shadow-lg shadow-error/20">
-                                                    {item.badge}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <span className="font-black">{item.label}</span>
-                                    </button>
-                                ))}
+                <nav className="flex-1 overflow-y-auto px-5 custom-scrollbar min-h-0">
+                    <div className="space-y-8">
+                        {groups.map(group => (
+                            <div key={group.title}>
+                                <div className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mb-5 px-5 opacity-40 admin-sidebar-header-text">{group.title}</div>
+                                <div className="flex flex-col gap-1.5">
+                                    {group.items.map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => {
+                                                setActiveTab(item.id)
+                                                if (window.innerWidth <= 1024) setIsOpen(false)
+                                            }}
+                                            className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
+                                        >
+                                            <div className="relative flex items-center justify-center">
+                                                <item.icon size={22} className={activeTab === item.id ? 'text-white' : 'text-accent opacity-60'} />
+                                                {item.badge && (
+                                                    <span className="absolute -top-3 -right-3 min-w-[20px] h-[20px] bg-error text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-admin-card shadow-lg shadow-error/20">
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span className="font-black">{item.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </nav>
 
-                <div className="mt-8 pt-8 border-t border-admin-border space-y-6 shrink-0">
+                <div className="p-8 border-t border-admin-border space-y-6 shrink-0 bg-admin-card">
                     <InfrastructurePulse pulse={pulse} />
                     <Link 
                         to="/" 
