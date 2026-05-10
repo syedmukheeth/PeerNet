@@ -33,7 +33,10 @@ const getOrCreateConversation = async (userId, targetUserId) => {
  * Get all conversations for a user with optimized unread counts
  */
 const getUserConversations = async (userId) => {
-    const conversations = await Conversation.find({ participants: userId })
+    const conversations = await Conversation.find({ 
+        participants: userId,
+        'metadata.deleted': { $ne: userId }
+    })
         .populate('participants', 'username avatarUrl fullName isVerified isOnline')
         .populate('lastMessage')
         .sort({ updatedAt: -1 });
@@ -57,7 +60,20 @@ const getMessages = async (conversationId, userId, { limit = 30, cursor = null }
     }
 
     const query = { conversation: conversationId };
-    if (cursor) query.createdAt = { $lt: new Date(cursor) };
+    
+    // Hide messages sent before the user cleared the chat
+    const cleared = conversation.clearedBy?.find(c => c.user.toString() === userId.toString());
+    if (cleared) {
+        query.createdAt = { $gt: cleared.clearedAt };
+    }
+
+    if (cursor) {
+        if (query.createdAt) {
+            query.createdAt.$lt = new Date(cursor);
+        } else {
+            query.createdAt = { $lt: new Date(cursor) };
+        }
+    }
 
     const messages = await Message.find(query)
         .populate('sender', 'username avatarUrl')
@@ -106,6 +122,9 @@ const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaType
         await Message.findByIdAndDelete(message._id);
         throw new ApiError(404, 'Conversation not found');
     }
+
+    // Un-delete the conversation for everyone (if it was deleted)
+    updateQuery.$pull = { 'metadata.deleted': { $in: conversation.participants } };
 
     // Increment unread count for everyone except sender
     conversation.participants.forEach(pId => {
@@ -200,10 +219,43 @@ const deleteMessage = async (messageId, userId) => {
 };
 
 const getUnreadCount = async (userId) => {
-    const conversations = await Conversation.find({ participants: userId });
+    const conversations = await Conversation.find({ 
+        participants: userId,
+        'metadata.deleted': { $ne: userId }
+    });
     return conversations.reduce((acc, conv) => {
         return acc + (conv.unreadCounts?.get(userId.toString()) || 0);
     }, 0);
+};
+
+/**
+ * Delete a conversation for a user (hides it and clears history for them)
+ */
+const deleteConversation = async (conversationId, userId) => {
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) throw new ApiError(404, 'Conversation not found');
+    if (!conversation.participants.some((p) => p.toString() === userId.toString())) {
+        throw new ApiError(403, 'Access denied');
+    }
+
+    // Update clearedBy array
+    const clearedIndex = conversation.clearedBy?.findIndex(c => c.user.toString() === userId.toString());
+    if (clearedIndex > -1) {
+        conversation.clearedBy[clearedIndex].clearedAt = new Date();
+    } else {
+        if (!conversation.clearedBy) conversation.clearedBy = [];
+        conversation.clearedBy.push({ user: userId, clearedAt: new Date() });
+    }
+
+    // Mark as deleted in metadata so it is hidden from the inbox
+    if (!conversation.metadata) conversation.metadata = {};
+    if (!conversation.metadata.deleted) conversation.metadata.deleted = [];
+    if (!conversation.metadata.deleted.includes(userId)) {
+        conversation.metadata.deleted.push(userId);
+    }
+
+    await conversation.save();
+    return conversation;
 };
 
 module.exports = {
@@ -215,5 +267,6 @@ module.exports = {
     getUnreadCount,
     updateMessage,
     deleteMessage,
-    reactToMessage
+    reactToMessage,
+    deleteConversation
 };

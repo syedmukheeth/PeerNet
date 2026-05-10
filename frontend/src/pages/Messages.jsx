@@ -14,7 +14,7 @@ import { useSocket } from '../hooks/useSocket'
 
 import {
     useConvos, useMessages, useSendMessage,
-    useMessageActions, useConvoActions, useChatState, useMarkRead
+    useMessageActions, useConvoActions, useChatState, useMarkRead, useDeleteChat
 } from '../hooks/useChat'
 import { timeago as formatTime } from '../utils/timeago'
 import toast from 'react-hot-toast'
@@ -208,6 +208,7 @@ export default function Messages() {
     const sendMutation = useSendMessage(convoId)
     const { react: reactMutation, edit: editMutation, remove: deleteMutation } = useMessageActions(convoId)
     const { pin: pinMutation, mute: muteMutation, archive: archiveMutation } = useConvoActions()
+    const deleteChatMutation = useDeleteChat()
 
     const [inputText, setInputText] = useState('')
     const [editingId, setEditingId] = useState(null)
@@ -579,6 +580,10 @@ export default function Messages() {
                                                         </button>
                                                         <button onClick={() => { archiveMutation.mutate(convoId); navigate('/messages'); setShowChatMenu(false) }}>
                                                             Archive Chat
+                                                        </button>
+                                                        <div className="zn-chat-menu-divider" style={{ height: '1px', background: 'var(--border)', margin: '4px 0' }} />
+                                                        <button onClick={() => { deleteChatMutation.mutate(convoId); navigate('/messages'); setShowChatMenu(false) }} style={{ color: 'var(--danger, #ff4d4f)' }}>
+                                                            Delete Chat
                                                         </button>
                                                     </motion.div>
                                                 </>

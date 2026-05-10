@@ -15,11 +15,18 @@ const conversationSchema = new mongoose.Schema(
             default: {}
         },
 
-        // Metadata for Pin/Mute/Archive (Backend persistence)
+        // Track when a user cleared/deleted the chat history
+        clearedBy: [{
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            clearedAt: { type: Date, default: Date.now }
+        }],
+
+        // Metadata for Pin/Mute/Archive/Delete (Backend persistence)
         metadata: {
             pinned: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
             muted: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-            archived: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+            archived: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+            deleted: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
         }
     },
     { timestamps: true },

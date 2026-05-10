@@ -223,6 +223,24 @@ export const useConvoActions = () => {
 }
 
 /**
+ * Hook for permanently deleting a chat (for the current user)
+ */
+export const useDeleteChat = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (convoId) => chatApi.delete(`/${convoId}`),
+        onMutate: async (convoId) => {
+            await queryClient.cancelQueries({ queryKey: ['conversations'] })
+            const prev = queryClient.getQueryData(['conversations'])
+            queryClient.setQueryData(['conversations'], old => old?.filter(c => c._id !== convoId))
+            return { prev }
+        },
+        onError: (err, convoId, ctx) => queryClient.setQueryData(['conversations'], ctx.prev),
+        onSettled: () => queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    })
+}
+
+/**
  * Hook for marking messages as read
  */
 export const useMarkRead = (convoId) => {

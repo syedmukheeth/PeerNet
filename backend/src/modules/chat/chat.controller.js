@@ -163,6 +163,21 @@ const getUnreadCount = async (req, res, next) => {
     }
 };
 
+const deleteConversation = async (req, res, next) => {
+    try {
+        const { conversationId } = req.params;
+        const conversation = await chatService.deleteConversation(conversationId, req.user.id);
+        
+        // Notify the user who deleted it across all their connected devices to instantly remove it
+        const io = getIO();
+        io.to(`user:${req.user.id}`).emit('conversation_deleted', { conversationId });
+
+        res.json({ success: true, message: 'Conversation deleted successfully' });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getConversations,
     getOrCreateConversation,
@@ -172,5 +187,6 @@ module.exports = {
     getUnreadCount,
     editMessage,
     deleteMessage,
-    reactMessage
+    reactMessage,
+    deleteConversation
 };
