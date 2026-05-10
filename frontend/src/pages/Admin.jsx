@@ -869,13 +869,13 @@ const AuditModule = ({ logs, loading }) => (
         </div>
         
         {/* Responsive Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {posts.map(post => (
                 <div key={post._id} className="admin-surface-el group overflow-hidden flex flex-col h-full hover:border-accent/20 transition-all duration-500 hover:shadow-2xl hover:shadow-accent/[0.05]">
                     {/* Header */}
-                    <div className="p-5 flex items-center justify-between border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full overflow-hidden border border-admin-border p-[2px] bg-gradient-to-tr from-accent to-accent/20">
+                    <div className="p-4 flex items-center justify-between border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-admin-border p-[1px] bg-gradient-to-tr from-accent to-accent/20">
                                 <img 
                                     src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} 
                                     className="w-full h-full object-cover rounded-full border border-admin-card" 
@@ -883,23 +883,23 @@ const AuditModule = ({ logs, loading }) => (
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[13px] font-black text-primary lowercase tracking-tight">@{post.author?.username}</span>
-                                <span className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-50">{new Date(post.createdAt).toLocaleDateString()}</span>
+                                <span className="text-[12px] font-black text-primary lowercase tracking-tight line-clamp-1 max-w-[80px]">@{post.author?.username}</span>
+                                <span className="text-[8px] font-bold text-muted uppercase tracking-widest opacity-50">{new Date(post.createdAt).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        <div className="px-3 py-1 rounded-xl bg-surface-subtle border border-admin-border text-[9px] font-black text-muted uppercase tracking-widest">
+                        <div className="px-2 py-0.5 rounded-lg bg-surface-subtle border border-admin-border text-[8px] font-black text-muted uppercase tracking-widest">
                             {post.type}
                         </div>
                     </div>
 
                     {/* Media Body */}
-                    <div className="aspect-square bg-black relative overflow-hidden group/media">
+                    <div className="h-48 bg-black relative overflow-hidden group/media">
                         {post.mediaUrl ? (
                             <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover/media:scale-110" alt="" />
                         ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-muted/10 bg-surface-subtle/20 gap-3">
-                                <HiCollection size={64} />
-                                <span className="text-[11px] font-black uppercase tracking-[0.4em]">Artifact Registry</span>
+                            <div className="w-full h-full flex flex-col items-center justify-center text-muted/10 bg-surface-subtle/20 gap-2">
+                                <HiCollection size={40} />
+                                <span className="text-[9px] font-black uppercase tracking-[0.4em]">Artifact</span>
                             </div>
                         )}
                         
@@ -907,41 +907,41 @@ const AuditModule = ({ logs, loading }) => (
                         <div className="hidden lg:flex absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all items-center justify-center backdrop-blur-[4px]">
                             <button 
                                 onClick={() => onDelete(post._id)} 
-                                className="px-8 py-5 rounded-2xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 active:scale-95 transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center gap-4"
+                                className="px-5 py-3 rounded-xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 active:scale-95 transition-all transform translate-y-2 group-hover:translate-y-0 duration-500 flex items-center gap-2"
                             >
-                                <HiTrash size={22} />
-                                <span className="text-[11px] font-black uppercase tracking-[0.2em]">Terminate Artifact</span>
+                                <HiTrash size={18} />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Delete</span>
                             </button>
                         </div>
                     </div>
 
                     {/* Meta/Content */}
-                    <div className="p-6 flex-1 flex flex-col gap-5">
-                        <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-2 text-accent">
-                                <HiTrendingUp size={18} className="opacity-80" />
-                                <span className="text-[14px] font-black">{post.likes?.length || 0}</span>
+                    <div className="p-4 flex-1 flex flex-col gap-3">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5 text-accent">
+                                <HiTrendingUp size={14} className="opacity-80" />
+                                <span className="text-[12px] font-black">{post.likes?.length || 0}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-muted">
-                                <HiChatAlt2 size={18} className="opacity-80" />
-                                <span className="text-[14px] font-black">{post.comments?.length || 0}</span>
+                            <div className="flex items-center gap-1.5 text-muted">
+                                <HiChatAlt2 size={14} className="opacity-80" />
+                                <span className="text-[12px] font-black">{post.comments?.length || 0}</span>
                             </div>
                         </div>
 
                         {post.content && (
-                            <p className="text-[14px] font-medium text-muted leading-relaxed line-clamp-3 bg-surface-subtle/30 p-4 rounded-2xl border border-admin-border">
+                            <p className="text-[12px] font-medium text-muted leading-relaxed line-clamp-2 bg-surface-subtle/30 p-3 rounded-xl border border-admin-border">
                                 {post.content}
                             </p>
                         )}
                         
                         {/* Mobile Action Bar (Visible < 1024px) */}
-                        <div className="lg:hidden mt-auto pt-4 border-t border-admin-border">
+                        <div className="lg:hidden mt-auto pt-3 border-t border-admin-border">
                             <button 
                                 onClick={() => onDelete(post._id)} 
-                                className="w-full py-4 rounded-2xl bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
+                                className="w-full py-3 rounded-xl bg-error text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
                             >
-                                <HiTrash size={18} />
-                                Terminate Artifact
+                                <HiTrash size={16} />
+                                Delete
                             </button>
                         </div>
                     </div>

@@ -317,6 +317,14 @@
     .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
+@media (min-width: 1920px) {
+    .2xl\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (min-width: 2560px) {
+    .3xl\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
 /* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
