@@ -142,7 +142,9 @@
 }
 
 .admin-sidebar-v2.collapsed {
-    padding: 40px 16px;
+    /* No vertical padding here to keep flex flow stable */
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 @media (max-width: 1024px) {

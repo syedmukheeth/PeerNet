@@ -66,7 +66,8 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
             </AnimatePresence>
 
             <aside 
-                className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''} flex flex-col h-screen max-h-screen overflow-hidden`}
+                className={`admin-sidebar-v2 ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''} flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden`}
+                style={{ height: '100dvh' }}
             >
                 <div className="flex items-center justify-between p-6 shrink-0">
                     <div className="flex items-center gap-3 overflow-hidden">
@@ -94,7 +95,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </button>
                 </div>
 
-                <nav className="flex-1 overflow-y-auto px-5 custom-scrollbar min-h-0 flex-shrink">
+                <nav className="flex-1 overflow-y-auto px-5 custom-scrollbar min-h-0 basis-0">
                     <div className="space-y-6 py-4">
                         {groups.map(group => (
                             <div key={group.title}>
@@ -126,7 +127,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                     </div>
                 </nav>
 
-                <div className="p-6 border-t border-admin-border space-y-4 shrink-0 bg-admin-card mt-auto">
+                <div className="p-6 border-t border-admin-border space-y-4 shrink-0 bg-admin-card">
                     <InfrastructurePulse pulse={pulse} />
                     <Link 
                         to="/" 
