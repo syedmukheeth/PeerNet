@@ -51,6 +51,8 @@ export default function Layout() {
     const mainRef = useRef(null)
     const [showMore, setShowMore] = useState(false)
     const moreRef = useRef(null)
+    const mobileMenuBtnRef = useRef(null)
+    const mobilePopupRef = useRef(null)
 
     const navContainerVariants = {
         hidden: { opacity: 0 },
@@ -261,7 +263,16 @@ export default function Layout() {
 
     useEffect(() => {
         if (!showMore) return
-        const h = (e) => { if (moreRef.current && !moreRef.current.contains(e.target)) setShowMore(false) }
+        const h = (e) => { 
+            // Desktop check
+            if (moreRef.current && moreRef.current.contains(e.target)) return
+            
+            // Mobile check
+            if (mobileMenuBtnRef.current && mobileMenuBtnRef.current.contains(e.target)) return
+            if (mobilePopupRef.current && mobilePopupRef.current.contains(e.target)) return
+
+            setShowMore(false) 
+        }
         document.addEventListener('mousedown', h)
         return () => document.removeEventListener('mousedown', h)
     }, [showMore])
@@ -448,6 +459,7 @@ export default function Layout() {
                     <div className="flex items-center gap-3">
                         <div style={{ position: 'relative' }}>
                             <button 
+                                ref={mobileMenuBtnRef}
                                 className="mobile-header-btn bg-transparent border-none text-primary"
                                 onClick={() => setShowMore(!showMore)}
                             >
@@ -475,14 +487,15 @@ export default function Layout() {
                 <AnimatePresence>
                     {showMore && (
                         <motion.div 
+                            ref={mobilePopupRef}
                             className="mobile-more-popup"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
                         >
                             <div className="mobile-more-header">
-                                <span className="font-bold">Menu</span>
-                                <button onClick={() => setShowMore(false)} className="bg-transparent border-none text-primary">×</button>
+                                <span>Menu</span>
+                                <button onClick={() => setShowMore(false)} className="mobile-more-close">×</button>
                             </div>
                             <button className="mobile-more-item" onClick={() => { toggle(); setShowMore(false) }}>
                                 {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
