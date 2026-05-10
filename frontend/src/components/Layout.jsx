@@ -525,9 +525,9 @@ export default function Layout() {
             </header>
 
 
-            <main className={`main-col ${location.pathname.startsWith('/messages') ? 'h-full overflow-hidden' : ''} ${location.pathname.startsWith('/admin') ? 'main-col--admin' : ''}`} ref={mainRef}>
+            <main className={`main-col ${['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) ? 'h-full overflow-hidden' : ''} ${location.pathname.startsWith('/admin') ? 'main-col--admin' : ''}`} ref={mainRef}>
                 <div 
-                    className={`layout-container ${location.pathname.startsWith('/messages') ? 'h-full' : ''} ${(!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
+                    className={`layout-container ${['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) ? 'h-full' : ''} ${(!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
 
                     <AnimatePresence mode="wait">
@@ -542,7 +542,7 @@ export default function Layout() {
                                 damping: 30,
                                 opacity: { duration: 0.2 } 
                             }}
-                            className={`page-transition-wrapper ${location.pathname.startsWith('/messages') ? 'h-full' : ''}`}
+                            className={`page-transition-wrapper ${['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) ? 'h-full' : ''}`}
                         >
                             <Outlet />
                         </motion.div>

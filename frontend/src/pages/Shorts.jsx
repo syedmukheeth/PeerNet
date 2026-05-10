@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { HiHeart, HiOutlineHeart, HiVolumeOff, HiVolumeUp, HiChatAlt2, HiShare, HiArrowLeft, HiRefresh } from 'react-icons/hi'
+import { HiHeart, HiOutlineHeart, HiVolumeOff, HiVolumeUp, HiChatAlt2, HiShare, HiArrowLeft, HiRefresh, HiMoon, HiSun } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTheme } from '../context/ThemeContext'
 
 const fetchShorts = async ({ pageParam = null }) => {
     const params = { limit: 10, _t: Date.now() }
@@ -270,6 +271,7 @@ function ShortsItem({ short, isActive }) {
 export default function Shorts() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
+    const { isDark, toggle } = useTheme()
     const [currentIdx, setCurrentIdx] = useState(0)
     const containerRef = useRef()
     const observerRef = useRef()
@@ -365,6 +367,15 @@ export default function Shorts() {
                          transition={{ duration: 0.4 }}
                     >
                         <HiRefresh size={20} />
+                    </motion.button>
+
+                    <motion.button
+                        onClick={toggle}
+                        className="shorts-icon-btn"
+                        title="Toggle theme"
+                        whileTap={{ scale: 0.9 }}
+                    >
+                        {isDark ? <HiSun size={20} /> : <HiMoon size={20} />}
                     </motion.button>
                 </div>
 
