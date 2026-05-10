@@ -442,85 +442,141 @@ const StorageModule = ({ stats }) => {
     )
 }
 
+/**
+ * UserModule Component
+ * Provides a high-fidelity interface for identity management, 
+ * featuring responsive table-to-card transformation for mobile administrative access.
+ */
 const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-6">
-                    <div>
-                        <h3 className="text-xl font-black text-primary uppercase tracking-tighter">User Accounts</h3>
-                        <p className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mt-1 opacity-70">{users.length} members found</p>
-                    </div>
-                    <button className="hidden md:flex items-center gap-3 px-5 py-2.5 rounded-[20px] bg-accent text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all shadow-[0_8px_20px_rgba(var(--accent-rgb),0.25)] ring-1 ring-white/20">
-                        <HiShieldCheck size={14} />
-                        Create Account
-                    </button>
-                </div>
-                <div className="relative group w-full md:w-96">
-                    <HiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-all" />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border">
+        {/* Header Section */}
+        <div className="p-8 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="space-y-1">
+                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Identity Registry</h3>
+                <p className="text-[10px] font-black text-accent uppercase tracking-[0.3em] opacity-80">{users.length} verified clusters active</p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                <div className="relative group w-full sm:w-80">
+                    <HiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-all" size={18} />
                     <input 
                         type="text" 
                         placeholder="Search Identity Cluster..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="bg-black/20 border border-border/40 rounded-[22px] pl-14 pr-8 py-4 text-[13px] font-black text-primary placeholder:text-muted/40 focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none transition-all w-full backdrop-blur-md"
+                        className="bg-admin-card border border-admin-border rounded-2xl pl-14 pr-6 py-4 text-[13px] font-bold text-primary focus:border-accent/50 outline-none transition-all w-full backdrop-blur-xl shadow-inner"
                     />
                 </div>
+            </div>
         </div>
-        <div className="admin-table-wrap">
-            <table className="admin-table">
+
+        {/* Mobile Identity Cards (Visible < 768px) */}
+        <div className="md:hidden divide-y divide-admin-border bg-admin-card/50">
+            {users.filter(u => 
+                u.username.toLowerCase().includes(search.toLowerCase()) || 
+                u.email.toLowerCase().includes(search.toLowerCase())
+            ).map(user => (
+                <div key={user._id} className="p-6 space-y-6 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl overflow-hidden border border-admin-border bg-admin-card p-0.5">
+                            <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random`} className="w-full h-full object-cover rounded-[14px]" alt="" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="text-lg font-black text-primary tracking-tighter truncate">@{user.username}</div>
+                            <div className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-50 truncate">{user.email}</div>
+                        </div>
+                        <div className={`shrink-0 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${user.isVerified ? 'bg-success/10 border-success/20 text-success' : 'bg-muted/10 border-muted/20 text-muted'}`}>
+                            {user.isVerified ? 'Synchronized' : 'Pending'}
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                        {!user.isVerified && (
+                            <button 
+                                onClick={() => onVerify(user._id)} 
+                                className="py-4 rounded-2xl bg-success text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-success/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                            >
+                                <HiShieldCheck size={18} />
+                                Authorize
+                            </button>
+                        )}
+                        <button 
+                            onClick={() => onDelete(user._id)} 
+                            className={`py-4 rounded-2xl bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 flex items-center justify-center gap-2 active:scale-95 transition-all ${!user.isVerified ? '' : 'col-span-2'}`}
+                        >
+                            <HiTrash size={18} />
+                            Terminate
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        {/* Desktop Table Registry (Visible > 768px) */}
+        <div className="hidden md:block admin-table-wrap">
+            <table className="admin-table w-full">
                 <thead>
-                    <tr>
-                        <th scope="col">User Info</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Role</th>
-                        <th scope="col" className="text-right">Actions</th>
+                    <tr className="bg-surface-subtle/30">
+                        <th scope="col" className="pl-8">Principal Identity</th>
+                        <th scope="col">Status Registry</th>
+                        <th scope="col">Authority Level</th>
+                        <th scope="col" className="text-right pr-8">Operational Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-admin-border">
                     {users.filter(u => 
                         u.username.toLowerCase().includes(search.toLowerCase()) || 
                         u.email.toLowerCase().includes(search.toLowerCase())
                     ).map(user => (
-                        <tr key={user._id}>
-                            <td>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-surface-subtle shadow-lg">
-                                        <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random`} className="w-full h-full object-cover" alt="" />
+                        <tr key={user._id} className="group hover:bg-accent/[0.02] transition-colors">
+                            <td className="pl-8 py-5">
+                                <div className="flex items-center gap-5">
+                                    <div className="relative">
+                                        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-admin-border p-0.5 bg-admin-card shadow-sm">
+                                            <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random`} className="w-full h-full object-cover rounded-[14px]" alt="" />
+                                        </div>
+                                        {user.isVerified && (
+                                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-white rounded-full flex items-center justify-center border-2 border-admin-card shadow-lg">
+                                                <HiCheck size={8} />
+                                            </div>
+                                        )}
                                     </div>
-                                    <div>
-                                        <div className="text-sm font-black text-primary tracking-tight">@{user.username}</div>
-                                        <div className="text-[10px] font-bold text-muted uppercase opacity-40">{user.email}</div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[14px] font-black text-primary tracking-tight">@{user.username}</span>
+                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-50 tabular-nums">{user.email}</span>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-1.5 h-1.5 rounded-full ${user.isVerified ? 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-muted opacity-30'}`} />
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${user.isVerified ? 'text-success' : 'text-muted opacity-40'}`}>
-                                        {user.isVerified ? 'Verified' : 'Pending'}
+                                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${user.isVerified ? 'bg-success/5 border-success/20 text-success' : 'bg-muted/5 border-muted/20 text-muted opacity-60'}`}>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${user.isVerified ? 'bg-success animate-pulse' : 'bg-muted'}`} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest">
+                                        {user.isVerified ? 'Synchronized' : 'Pending Link'}
                                     </span>
                                 </div>
                             </td>
                             <td>
-                                <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${user.role === 'admin' ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-surface-subtle border-border text-muted'}`}>
+                                <span className={`inline-flex px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border ${user.role === 'admin' ? 'bg-accent/10 border-accent/30 text-accent' : 'bg-surface-subtle border-admin-border text-muted/60'}`}>
                                     {user.role}
                                 </span>
                             </td>
-                            <td className="text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                    <button 
-                                        onClick={() => onVerify(user._id)} 
-                                        aria-label={`Verify ${user.username}`}
-                                        className="p-2.5 rounded-xl bg-surface-subtle text-muted hover:text-success hover:bg-success/10 transition-all border border-transparent hover:border-success/20 group/btn"
-                                    >
-                                        <HiShieldCheck size={18} className="group-hover/btn:scale-110 transition-transform" />
-                                    </button>
+                            <td className="text-right pr-8">
+                                <div className="flex items-center justify-end gap-3 opacity-100 xl:opacity-40 xl:group-hover:opacity-100 transition-opacity">
+                                    {!user.isVerified && (
+                                        <button 
+                                            onClick={() => onVerify(user._id)} 
+                                            title="Authorize Identity"
+                                            className="w-11 h-11 rounded-2xl bg-surface-subtle border border-admin-border text-muted hover:text-success hover:bg-success/10 hover:border-success/30 transition-all flex items-center justify-center group/act"
+                                        >
+                                            <HiShieldCheck size={20} className="group-hover/act:scale-110 transition-transform" />
+                                        </button>
+                                    )}
                                     <button 
                                         onClick={() => onDelete(user._id)} 
-                                        aria-label={`Delete ${user.username}`}
-                                        className="p-2.5 rounded-xl bg-surface-subtle text-muted hover:text-error hover:bg-error/10 transition-all border border-transparent hover:border-error/20 group/btn"
+                                        title="Terminate Identity"
+                                        className="w-11 h-11 rounded-2xl bg-surface-subtle border border-admin-border text-muted hover:text-error hover:bg-error/10 hover:border-error/30 transition-all flex items-center justify-center group/act"
                                     >
-                                        <HiTrash size={18} className="group-hover/btn:scale-110 transition-transform" />
+                                        <HiTrash size={20} className="group-hover/act:scale-110 transition-transform" />
                                     </button>
                                 </div>
                             </td>
@@ -528,93 +584,129 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
                     ))}
                 </tbody>
             </table>
-            {users.filter(u => u.username.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).length === 0 && (
-                <div className="p-20 text-center space-y-4">
-                    <div className="text-muted/20 flex justify-center"><HiUsers size={48} /></div>
-                    <p className="text-[11px] font-black text-muted uppercase tracking-widest">No matching entities in cluster</p>
-                </div>
-            )}
         </div>
+        
+        {/* Empty State */}
+        {users.filter(u => u.username.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+            <div className="p-20 text-center space-y-4">
+                <div className="text-muted/20 flex justify-center"><HiUsers size={48} /></div>
+                <p className="text-[11px] font-black text-muted uppercase tracking-widest">No matching identities in registry</p>
+            </div>
+        )}
     </motion.div>
 )
 
 const CommentModule = ({ comments, onDelete, search, setSearch }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Comments</h3>
-                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">Review and remove comments</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border">
+        {/* Header Section */}
+        <div className="p-8 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="space-y-1">
+                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Communication Feed</h3>
+                <p className="text-[10px] font-black text-accent uppercase tracking-[0.3em] opacity-80">{comments.length} entries in storage</p>
             </div>
-            <div className="relative group">
-                <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
+            
+            <div className="relative group w-full md:w-80">
+                <HiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-all" size={18} />
                 <input 
                     type="text" 
-                    placeholder="Filter comments..." 
+                    placeholder="Search comments..." 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="bg-surface-subtle border border-border rounded-2xl pl-12 pr-6 py-3.5 text-[13px] font-bold text-primary focus:border-accent outline-none transition-all w-full md:w-80"
+                    className="bg-admin-card border border-admin-border rounded-2xl pl-14 pr-6 py-4 text-[13px] font-bold text-primary focus:border-accent/50 outline-none transition-all w-full backdrop-blur-xl shadow-inner"
                 />
             </div>
         </div>
-        <div className="admin-table-wrap">
-            <table className="admin-table">
+
+        {/* Mobile Comment Cards */}
+        <div className="md:hidden divide-y divide-admin-border bg-admin-card/50">
+            {comments.map(comment => (
+                <div key={comment._id} className="p-6 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden border border-admin-border bg-admin-card p-0.5">
+                            <img src={comment.author?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.author?.username}&background=random`} className="w-full h-full object-cover rounded-[10px]" alt="" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="text-[13px] font-black text-primary tracking-tight truncate">@{comment.author?.username}</div>
+                            <div className="text-[9px] font-bold text-muted uppercase tracking-widest opacity-40 tabular-nums">PID::{comment.post?._id?.slice(-6)}</div>
+                        </div>
+                    </div>
+                    <p className="text-[13px] text-muted leading-relaxed font-medium bg-surface-subtle/50 p-4 rounded-2xl border border-admin-border">
+                        {comment.content || comment.body}
+                    </p>
+                    <button 
+                        onClick={() => onDelete(comment._id)} 
+                        className="w-full py-4 rounded-2xl bg-error/10 text-error text-[10px] font-black uppercase tracking-[0.2em] border border-error/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                    >
+                        <HiTrash size={16} />
+                        Purge Communication
+                    </button>
+                </div>
+            ))}
+        </div>
+
+        {/* Desktop Comment Table */}
+        <div className="hidden md:block admin-table-wrap">
+            <table className="admin-table w-full">
                 <thead>
-                    <tr>
-                        <th scope="col">Author</th>
-                        <th scope="col">Comment Text</th>
-                        <th scope="col">Post ID</th>
-                        <th scope="col" className="text-right">Actions</th>
+                    <tr className="bg-surface-subtle/30">
+                        <th scope="col" className="pl-8">Author</th>
+                        <th scope="col">Content Fragment</th>
+                        <th scope="col">Cluster Link</th>
+                        <th scope="col" className="text-right pr-8">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-admin-border">
                     {comments.map(comment => (
-                        <tr key={comment._id} className="group">
-                            <td>
+                        <tr key={comment._id} className="group hover:bg-accent/[0.01] transition-colors">
+                            <td className="pl-8 py-5">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-9 h-9 rounded-xl overflow-hidden bg-surface-subtle border border-white/5">
-                                        <img src={comment.author?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.author?.username}&background=random`} className="w-full h-full object-cover" alt="" />
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden border border-admin-border p-0.5 bg-admin-card shadow-sm">
+                                        <img src={comment.author?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.author?.username}&background=random`} className="w-full h-full object-cover rounded-[10px]" alt="" />
                                     </div>
-                                    <span className="text-[11px] font-black text-primary tracking-tight lowercase">@{comment.author?.username}</span>
+                                    <span className="text-[13px] font-black text-primary tracking-tight">@{comment.author?.username}</span>
                                 </div>
                             </td>
                             <td>
-                                <p className="text-[12px] font-medium text-muted leading-relaxed line-clamp-1 max-w-sm group-hover:text-primary transition-colors">
+                                <p className="text-[13px] font-medium text-muted leading-relaxed line-clamp-1 max-w-md group-hover:text-primary transition-colors">
                                     {comment.content || comment.body}
                                 </p>
                             </td>
                             <td>
-                                <span className="text-[10px] font-black text-muted/30 uppercase tracking-widest tabular-nums">ID::{comment.post?._id?.slice(-6) || 'N/A'}</span>
+                                <span className="text-[10px] font-black text-muted/30 uppercase tracking-widest tabular-nums">POST::{comment.post?._id?.slice(-8)}</span>
                             </td>
-                            <td className="text-right">
+                            <td className="text-right pr-8">
                                 <button 
                                     onClick={() => onDelete(comment._id)} 
-                                    aria-label={`Purge comment by ${comment.author?.username}`}
-                                    className="p-3 rounded-2xl bg-error/5 text-error opacity-0 group-hover:opacity-100 transition-all border border-error/10 hover:bg-error hover:text-white transform translate-x-2 group-hover:translate-x-0 group/btn"
+                                    className="w-10 h-10 rounded-2xl bg-surface-subtle border border-admin-border text-muted hover:text-error hover:bg-error/10 hover:border-error/30 transition-all flex items-center justify-center group/act mx-auto mr-0"
                                 >
-                                    <HiTrash size={18} className="group-hover/btn:scale-110 transition-transform" />
+                                    <HiTrash size={18} className="group-hover/act:scale-110 transition-transform" />
                                 </button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            {comments.length === 0 && (
-                <div className="p-20 text-center space-y-4">
-                    <div className="text-muted/10 flex justify-center"><HiTerminal size={40} /></div>
-                    <p className="text-[11px] font-black text-muted uppercase tracking-widest opacity-30">No communications found in cluster</p>
-                </div>
-            )}
         </div>
+
+        {/* Empty State */}
+        {comments.length === 0 && (
+            <div className="p-20 text-center space-y-4">
+                <div className="text-muted/10 flex justify-center"><HiChatAlt2 size={48} /></div>
+                <p className="text-[11px] font-black text-muted uppercase tracking-widest">No communications found in cluster</p>
+            </div>
+        )}
     </motion.div>
 )
 
 const AuditModule = ({ logs, loading }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-6 border-b border-border flex items-center justify-between">
-            <div>
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight">Activity Log</h3>
-                <p className="text-[10px] font-bold text-primary uppercase tracking-widest mt-1 opacity-70">A complete record of all actions taken</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border">
+        {/* Header Section */}
+        <div className="p-8 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div className="space-y-1">
+                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Activity Ledger</h3>
+                <p className="text-[10px] font-black text-accent uppercase tracking-[0.3em] opacity-80">{logs.length} operational records</p>
             </div>
+            
             <div className="flex items-center gap-4">
                 <button 
                     onClick={() => {
@@ -626,111 +718,164 @@ const AuditModule = ({ logs, loading }) => (
                         a.click()
                         toast.success('Audit trail exported successfully')
                     }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-subtle border border-border text-[10px] font-black uppercase tracking-widest text-muted hover:text-primary transition-all shadow-sm"
+                    className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-admin-card border border-admin-border text-[10px] font-black uppercase tracking-widest text-primary hover:text-accent hover:border-accent/30 transition-all shadow-inner"
                 >
-                    <HiTerminal size={14} />
-                    Export Epoch
+                    <HiTerminal size={16} />
+                    Export Registry
                 </button>
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                    <span className="text-[10px] font-black text-success uppercase tracking-widest">Live Registry</span>
-                </div>
             </div>
         </div>
-        <div className="admin-table-wrap">
-            <table className="admin-table">
+
+        {/* Mobile Audit Cards */}
+        <div className="md:hidden divide-y divide-admin-border bg-admin-card/50">
+            {logs.map(log => (
+                <div key={log._id} className="p-6 space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <HiClock size={12} className="text-muted opacity-40" />
+                            <span className="text-[10px] font-black text-muted uppercase tracking-widest tabular-nums opacity-60">
+                                {new Date(log.createdAt).toLocaleTimeString()}
+                            </span>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-lg bg-surface-subtle border border-admin-border text-[8px] font-black text-muted uppercase tracking-[0.2em]">
+                            {log.targetType}
+                        </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent text-[10px] font-black border border-accent/20">
+                            {log.adminId?.username?.charAt(0).toUpperCase() || 'S'}
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[12px] font-black text-primary">@{log.adminId?.username || 'system'}</span>
+                            <span className="text-[10px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
+                        </div>
+                    </div>
+                    
+                    <p className="text-[11px] font-bold text-muted/60 uppercase bg-black/10 p-3 rounded-xl border border-white/5 truncate">
+                        {log.details}
+                    </p>
+                </div>
+            ))}
+        </div>
+
+        {/* Desktop Audit Table */}
+        <div className="hidden md:block admin-table-wrap">
+            <table className="admin-table w-full">
                 <thead>
-                    <tr>
-                        <th scope="col">Event Timestamp</th>
+                    <tr className="bg-surface-subtle/30">
+                        <th scope="col" className="pl-8">Temporal Vector</th>
                         <th scope="col">Auth Actor</th>
-                        <th scope="col">Operation Node</th>
-                        <th scope="col" className="text-right">System Context</th>
+                        <th scope="col">Operation Context</th>
+                        <th scope="col" className="text-right pr-8">Context Hash</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-admin-border">
                     {logs.map(log => (
-                        <tr key={log._id} className="group hover:bg-white/[0.01] transition-all">
-                            <td>
-                                <span className="text-[10px] font-black text-muted uppercase tracking-widest tabular-nums opacity-60">
-                                    {new Date(log.createdAt).toLocaleTimeString()}
+                        <tr key={log._id} className="group hover:bg-accent/[0.01] transition-colors">
+                            <td className="pl-8 py-5">
+                                <span className="text-[11px] font-black text-muted uppercase tracking-widest tabular-nums opacity-60">
+                                    {new Date(log.createdAt).toLocaleString()}
                                 </span>
                             </td>
                             <td>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-7 h-7 rounded-lg overflow-hidden bg-accent/10 flex items-center justify-center text-accent text-[10px] font-black border border-accent/20">
+                                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-accent/10 flex items-center justify-center text-accent text-[10px] font-black border border-accent/20">
                                         {log.adminId?.username?.charAt(0).toUpperCase() || 'S'}
                                     </div>
-                                    <span className="text-[11px] font-black text-primary tracking-tight lowercase">@{log.adminId?.username || 'system'}</span>
+                                    <span className="text-[13px] font-black text-primary tracking-tight">@{log.adminId?.username || 'system'}</span>
                                 </div>
                             </td>
                             <td>
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
-                                    <span className="text-[9px] text-muted opacity-40 truncate max-w-[180px] font-bold uppercase">{log.details}</span>
+                                    <span className="text-[12px] font-black text-accent uppercase tracking-tighter">{log.action}</span>
+                                    <span className="text-[10px] text-muted opacity-50 truncate max-w-xs font-bold uppercase">{log.details}</span>
                                 </div>
                             </td>
-                            <td className="text-right">
-                                <span className="px-2.5 py-1 rounded-lg bg-surface-subtle border border-border text-[9px] font-black text-muted uppercase tracking-[0.2em]">{log.targetType}</span>
+                            <td className="text-right pr-8">
+                                <span className="inline-flex px-3 py-1.5 rounded-xl bg-surface-subtle border border-admin-border text-[9px] font-black text-muted uppercase tracking-[0.2em]">
+                                    {log.targetType}
+                                </span>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            {logs.length === 0 && (
-                <div className="p-20 text-center space-y-4">
-                    <div className="text-muted/10 flex justify-center"><HiTerminal size={40} /></div>
-                    <p className="text-[11px] font-black text-muted uppercase tracking-widest opacity-30">No operational records found in audit trail</p>
-                </div>
-            )}
         </div>
+
+        {/* Empty State */}
+        {logs.length === 0 && (
+            <div className="p-20 text-center space-y-4">
+                <div className="text-muted/10 flex justify-center"><HiTerminal size={48} /></div>
+                <p className="text-[11px] font-black text-muted uppercase tracking-widest">Registry stream empty</p>
+            </div>
+        )}
     </motion.div>
 )
 
-const PostModule = ({ posts, onDelete, contentType, setContentType, search, setSearch }) => (
+/**
+ * PostModule Component
+ * Manages the global content feed, allowing administrators to filter by type
+ * (Image, Video, Text) and search through the operational database.
+ * 
+ * @param {Array} posts - Filtered list of post objects
+ * @param {Function} onDelete - Handler for content termination
+ * @param {String} contentType - Current active filter state
+ * @param {Function} setContentType - State setter for type filtering
+ */const PostModule = ({ posts, onDelete, contentType, setContentType, search, setSearch }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-        <div className="flex flex-col md:flex-row gap-5 items-center">
-            <div className="flex-1 flex items-center justify-between bg-surface-subtle/50 p-2 rounded-2xl border border-white/5 w-full backdrop-blur-md">
+        {/* Navigation & Search Header */}
+        <div className="flex flex-col lg:flex-row gap-6 items-center">
+            {/* Premium Segmented Controls */}
+            <div className="flex-1 flex items-center gap-1.5 bg-admin-card p-2 rounded-[24px] border border-admin-border w-full backdrop-blur-xl shadow-inner">
                 {['all', 'image', 'video', 'text'].map(type => (
                     <button 
                         key={type}
                         onClick={() => setContentType(type)}
-                        className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${contentType === type ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-primary hover:bg-white/10'}`}
+                        className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-[18px] transition-all duration-300 ${
+                            contentType === type 
+                            ? 'bg-accent text-white shadow-xl shadow-accent/40 scale-[1.02]' 
+                            : 'text-primary hover:bg-surface-subtle hover:text-accent'
+                        }`}
                     >
                         {type}
                     </button>
                 ))}
             </div>
-            <div className="relative group w-full md:w-96">
-                <HiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" />
+
+            {/* Global Search */}
+            <div className="relative group w-full lg:w-96">
+                <HiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-accent transition-colors" size={18} />
                 <input 
                     type="text" 
                     placeholder="Search global feed..." 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="bg-surface-subtle/50 border border-white/5 rounded-2xl pl-14 pr-6 py-3.5 text-[13px] font-bold text-primary focus:border-accent/50 outline-none transition-all w-full backdrop-blur-md"
+                    className="bg-admin-card border border-admin-border rounded-[24px] pl-16 pr-8 py-5 text-[14px] font-bold text-primary focus:border-accent/50 focus:bg-accent/[0.02] outline-none transition-all w-full backdrop-blur-xl"
                 />
             </div>
         </div>
         
+        {/* Responsive Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {posts.map(post => (
-                <div key={post._id} className="admin-surface-el group overflow-hidden flex flex-col h-full hover:border-accent/20 transition-colors">
-                    {/* IG Style Header */}
-                    <div className="p-4 flex items-center justify-between border-b border-white/5">
+                <div key={post._id} className="admin-surface-el group overflow-hidden flex flex-col h-full hover:border-accent/20 transition-all duration-500 hover:shadow-2xl hover:shadow-accent/[0.05]">
+                    {/* Header */}
+                    <div className="p-5 flex items-center justify-between border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 p-[2px] bg-gradient-to-tr from-[#6559CA] via-[#E1306C] to-[#FCAF45]">
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-admin-border p-[2px] bg-gradient-to-tr from-accent to-accent/20">
                                 <img 
                                     src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} 
-                                    className="w-full h-full object-cover rounded-full border border-black" 
+                                    className="w-full h-full object-cover rounded-full border border-admin-card" 
                                     alt="" 
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[12px] font-black text-primary lowercase tracking-tight">@{post.author?.username}</span>
-                                <span className="text-[9px] font-bold text-muted uppercase tracking-widest opacity-50">{new Date(post.createdAt).toLocaleDateString()}</span>
+                                <span className="text-[13px] font-black text-primary lowercase tracking-tight">@{post.author?.username}</span>
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-50">{new Date(post.createdAt).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        <div className="px-2 py-1 rounded-md bg-surface-subtle border border-white/5 text-[9px] font-black text-muted uppercase tracking-widest">
+                        <div className="px-3 py-1 rounded-xl bg-surface-subtle border border-admin-border text-[9px] font-black text-muted uppercase tracking-widest">
                             {post.type}
                         </div>
                     </div>
@@ -738,60 +883,67 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
                     {/* Media Body */}
                     <div className="aspect-square bg-black relative overflow-hidden group/media">
                         {post.mediaUrl ? (
-                            <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover/media:scale-105" alt="" />
+                            <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover/media:scale-110" alt="" />
                         ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center text-muted/10 bg-surface-subtle/20 gap-3">
-                                <HiCollection size={48} />
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Text Entry</span>
+                                <HiCollection size={64} />
+                                <span className="text-[11px] font-black uppercase tracking-[0.4em]">Artifact Registry</span>
                             </div>
                         )}
                         
-                        {/* Instant Action Overlay */}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[4px]">
+                        {/* Desktop Hover Overlay */}
+                        <div className="hidden lg:flex absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all items-center justify-center backdrop-blur-[4px]">
                             <button 
                                 onClick={() => onDelete(post._id)} 
-                                className="px-6 py-4 rounded-2xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 active:scale-95 transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center gap-3"
+                                className="px-8 py-5 rounded-2xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 active:scale-95 transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center gap-4"
                             >
-                                <HiTrash size={20} />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Delete Post</span>
+                                <HiTrash size={22} />
+                                <span className="text-[11px] font-black uppercase tracking-[0.2em]">Terminate Artifact</span>
                             </button>
                         </div>
                     </div>
 
                     {/* Meta/Content */}
-                    <div className="p-5 flex-1 flex flex-col">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="flex items-center gap-1.5 text-accent">
-                                <HiTrendingUp size={16} className="opacity-80" />
-                                <span className="text-[12px] font-black">{post.likes?.length || 0}</span>
+                    <div className="p-6 flex-1 flex flex-col gap-5">
+                        <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-2 text-accent">
+                                <HiTrendingUp size={18} className="opacity-80" />
+                                <span className="text-[14px] font-black">{post.likes?.length || 0}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-muted">
-                                <HiCollection size={16} className="opacity-40" />
-                                <span className="text-[12px] font-black">{post.comments?.length || 0}</span>
+                            <div className="flex items-center gap-2 text-muted">
+                                <HiChatAlt2 size={18} className="opacity-80" />
+                                <span className="text-[14px] font-black">{post.comments?.length || 0}</span>
                             </div>
                         </div>
+
+                        {post.content && (
+                            <p className="text-[14px] font-medium text-muted leading-relaxed line-clamp-3 bg-surface-subtle/30 p-4 rounded-2xl border border-admin-border">
+                                {post.content}
+                            </p>
+                        )}
                         
-                        <p className="text-[13px] text-primary/80 line-clamp-3 leading-relaxed font-medium mb-4">
-                            {post.content}
-                        </p>
-                        
-                        <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-                            <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-30">ID: {post._id?.substring(0,8)}...</span>
-                            <button className="text-[10px] font-black text-accent uppercase tracking-widest hover:underline">Inspect Details</button>
+                        {/* Mobile Action Bar (Visible < 1024px) */}
+                        <div className="lg:hidden mt-auto pt-4 border-t border-admin-border">
+                            <button 
+                                onClick={() => onDelete(post._id)} 
+                                className="w-full py-4 rounded-2xl bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
+                            >
+                                <HiTrash size={18} />
+                                Terminate Artifact
+                            </button>
                         </div>
                     </div>
                 </div>
             ))}
         </div>
-
+        
+        {/* Empty State */}
         {posts.length === 0 && (
-            <div className="admin-surface-el p-32 flex flex-col items-center justify-center text-center space-y-6">
-                <div className="w-20 h-20 rounded-full bg-accent/5 flex items-center justify-center text-accent/20 animate-pulse">
-                    <HiCollection size={40} />
-                </div>
+            <div className="admin-surface-el p-32 text-center space-y-6">
+                <div className="text-muted/10 flex justify-center"><HiCollection size={80} /></div>
                 <div className="space-y-2">
-                    <h4 className="text-sm font-black text-primary uppercase tracking-widest">No Content Found</h4>
-                    <p className="text-[11px] font-bold text-muted uppercase tracking-[0.2em] opacity-30">Archive cluster is empty or search returned zero nodes</p>
+                    <h3 className="text-xl font-black text-primary uppercase tracking-tighter">No Active Artifacts</h3>
+                    <p className="text-[11px] font-black text-muted uppercase tracking-widest opacity-50">Global feed synchronized with zero results</p>
                 </div>
             </div>
         )}
@@ -799,55 +951,99 @@ const PostModule = ({ posts, onDelete, contentType, setContentType, search, setS
 )
 
 const ReportModule = ({ reports, onResolve }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el">
-        <div className="p-6 border-b border-border flex items-center justify-between bg-error/[0.02]">
-            <div>
-                <h3 className="text-xl font-black text-primary uppercase tracking-tight flex items-center gap-3">
-                    <HiFlag className="text-error" /> Reports
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border border-error/20">
+        {/* Header Section */}
+        <div className="p-8 border-b border-error/20 bg-gradient-to-r from-error/[0.03] to-transparent flex items-center justify-between">
+            <div className="space-y-1">
+                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter flex items-center gap-3">
+                    <HiFlag className="text-error" /> Integrity Queue
                 </h3>
-                <p className="text-[10px] font-bold text-error uppercase tracking-widest mt-1 opacity-60">{reports.length} pending reports</p>
+                <p className="text-[10px] font-black text-error uppercase tracking-[0.3em] opacity-80">{reports.length} security flags pending</p>
             </div>
-            <HiShieldCheck className="text-error/20" size={32} />
+            <div className="w-12 h-12 rounded-2xl bg-error/10 flex items-center justify-center text-error border border-error/20">
+                <HiShieldCheck size={24} />
+            </div>
         </div>
-        <div className="admin-table-wrap">
-            <table className="admin-table">
+
+        {/* Mobile Report Cards */}
+        <div className="md:hidden divide-y divide-error/10 bg-error/[0.02]">
+            {reports.map(report => (
+                <div key={report._id} className="p-6 space-y-5 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-surface-subtle border border-admin-border flex items-center justify-center text-muted font-black text-[10px]">
+                                {report.reporterId?.username?.[0]?.toUpperCase()}
+                            </div>
+                            <span className="text-[12px] font-black text-primary">@{report.reporterId?.username}</span>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-error/10 border border-error/20 text-error text-[8px] font-black uppercase tracking-widest">
+                            {report.reason}
+                        </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <div className="text-[9px] font-black text-muted uppercase tracking-widest opacity-40">Targeted Content:</div>
+                        <p className="text-[13px] text-muted leading-relaxed font-medium bg-black/20 p-4 rounded-2xl border border-white/5 italic">
+                            "{report.targetId?.content || report.targetId?.body || 'Content Unavailable'}"
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <button 
+                            onClick={() => onResolve(report._id, 'dismissed')} 
+                            className="py-4 rounded-2xl bg-surface-subtle text-muted text-[10px] font-black uppercase tracking-[0.2em] border border-admin-border active:scale-95 transition-all"
+                        >
+                            Dismiss
+                        </button>
+                        <button 
+                            onClick={() => onResolve(report._id, 'resolved')} 
+                            className="py-4 rounded-2xl bg-error text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 active:scale-95 transition-all"
+                        >
+                            Enforce
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        {/* Desktop Report Table */}
+        <div className="hidden md:block admin-table-wrap">
+            <table className="admin-table w-full">
                 <thead>
-                    <tr>
-                        <th scope="col">Origin Node</th>
-                        <th scope="col">Violation Classification</th>
-                        <th scope="col">Target Artifact</th>
-                        <th scope="col" className="text-right">Moderation protocol</th>
+                    <tr className="bg-error/[0.03]">
+                        <th scope="col" className="pl-8">Origin Node</th>
+                        <th scope="col">Classification</th>
+                        <th scope="col">Target Fragment</th>
+                        <th scope="col" className="text-right pr-8">Resolution Protocol</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-error/10">
                     {reports.map(report => (
-                        <tr key={report._id} className="bg-error/[0.01]">
-                            <td>
-                                <span className="text-[11px] font-black text-primary">@{report.reporterId?.username}</span>
+                        <tr key={report._id} className="group hover:bg-error/[0.01] transition-colors">
+                            <td className="pl-8 py-5">
+                                <span className="text-[13px] font-black text-primary">@{report.reporterId?.username}</span>
                             </td>
                             <td>
-                                <span className="px-2.5 py-1 rounded-lg bg-error/10 border border-error/20 text-error text-[9px] font-black uppercase tracking-widest">
+                                <span className="inline-flex px-3 py-1.5 rounded-xl bg-error/5 border border-error/20 text-error text-[9px] font-black uppercase tracking-widest">
                                     {report.reason}
                                 </span>
                             </td>
                             <td>
-                                <div className="text-[11px] font-medium text-muted line-clamp-1 max-w-xs">
+                                <p className="text-[13px] font-medium text-muted leading-relaxed line-clamp-1 max-w-md italic opacity-60">
                                     {report.targetId?.content || report.targetId?.body || 'Content Unavailable'}
-                                </div>
+                                </p>
                             </td>
-                            <td className="text-right">
-                                <div className="flex justify-end gap-3">
+                            <td className="text-right pr-8">
+                                <div className="flex items-center justify-end gap-3">
                                     <button 
                                         onClick={() => onResolve(report._id, 'dismissed')} 
-                                        aria-label="Dismiss violation report"
-                                        className="px-5 py-2.5 rounded-xl bg-surface-subtle text-[9px] font-black uppercase tracking-[0.2em] hover:bg-border transition-all border border-white/5"
+                                        className="px-4 py-2 rounded-xl bg-surface-subtle text-muted text-[9px] font-black uppercase tracking-[0.2em] hover:bg-border transition-all border border-admin-border"
                                     >
                                         Dismiss
                                     </button>
                                     <button 
                                         onClick={() => onResolve(report._id, 'resolved')} 
-                                        aria-label="Resolve violation report"
-                                        className="px-5 py-2.5 rounded-xl bg-error text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 hover:scale-[1.05] active:scale-95 transition-all border border-white/10"
+                                        className="px-6 py-2 rounded-xl bg-error text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 hover:scale-[1.02] active:scale-95 transition-all"
                                     >
                                         Resolve
                                     </button>
@@ -855,14 +1051,17 @@ const ReportModule = ({ reports, onResolve }) => (
                             </td>
                         </tr>
                     ))}
-                    {reports.length === 0 && (
-                        <tr>
-                            <td colSpan="4" className="py-20 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em]">Queue Cleared</td>
-                        </tr>
-                    )}
                 </tbody>
             </table>
         </div>
+
+        {/* Empty State */}
+        {reports.length === 0 && (
+            <div className="p-20 text-center space-y-4">
+                <div className="text-error/10 flex justify-center"><HiCheck size={48} /></div>
+                <p className="text-[11px] font-black text-muted uppercase tracking-widest">Queue Status: Optimal (0 Flags)</p>
+            </div>
+        )}
     </motion.div>
 )
 
@@ -1018,6 +1217,11 @@ export default function Admin() {
         }
     }, [])
 
+    /**
+     * Data Initialization & Polling
+     * Orchestrates the retrieval of system-wide metrics, user databases, 
+     * and security logs from the central infrastructure.
+     */
     const init = useCallback(async () => {
         setLoading(true)
         await Promise.all([
@@ -1118,6 +1322,13 @@ export default function Admin() {
         }
     }
 
+    /**
+     * Module Orchestrator
+     * Dynamically renders the appropriate administrative interface based
+     * on the active navigation context.
+     * 
+     * @returns {React.Component} The active module interface
+     */
     const renderModule = () => {
         switch (activeTab) {
             case 'dashboard':
