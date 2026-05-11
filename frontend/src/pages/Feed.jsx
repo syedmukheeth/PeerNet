@@ -259,8 +259,9 @@ export default function Feed() {
                                             </div>
                                             <div className="skeleton size-6 rounded-md" />
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2.5">
                                             <div className="skeleton h-4 w-1/4 rounded-md" />
+                                            <div className="skeleton h-3.5 w-full rounded-md" />
                                             <div className="skeleton h-3.5 w-full rounded-md" />
                                             <div className="skeleton h-3.5 w-2/3 rounded-md" />
                                         </div>
