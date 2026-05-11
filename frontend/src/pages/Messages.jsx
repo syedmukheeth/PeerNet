@@ -218,6 +218,7 @@ export default function Messages() {
     const viewportRef = useRef(null)
     const markReadMutation = useMarkRead(convoId)
     const prevMsgCount = useRef(0)
+    const isInitialLoad = useRef(true)
 
     const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
 
