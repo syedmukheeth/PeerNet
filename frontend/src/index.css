@@ -2399,25 +2399,39 @@ textarea:focus-visible {
   filter: none !important;
 }
 
-/* Primary */
+/* Primary - Instagram Style Blue */
 .btn-primary {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.3);
+  background: #0095f6 !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: #1877f2 !important;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.4);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: #1877f2 !important;
+  opacity: 0.8;
 }
 
 /* Secondary */
 .btn-secondary {
-  background: var(--surface-1);
-  color: var(--text-1);
-  border: 1px solid var(--border-md);
+  background: var(--card-alt) !important;
+  color: var(--text-1) !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 600 !important;
+}
+
+/* Following Button - Subtle Grey */
+.following-btn {
+  background: var(--card-alt) !important;
+  color: var(--text-1) !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 600 !important;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -11694,13 +11708,14 @@ textarea:focus-visible {
 
   .profile-actions-row .btn {
     flex: 1 !important;
-    background: var(--card-alt) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--text-1) !important;
-    height: 36px !important;
-    font-size: 13px !important;
+    height: 40px !important;
+    font-size: 14px !important;
     border-radius: 8px !important;
     font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
 

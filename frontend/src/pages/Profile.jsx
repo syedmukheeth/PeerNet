@@ -189,7 +189,7 @@ export default function Profile() {
                             <div className="profile-actions-row">
                                 {isMe ? (
                                     <>
-                                        <button className="btn btn-secondary btn-sm px-6 h-9 rounded-lg font-semibold" onClick={() => setEditProfile(true)}>
+                                        <button className="btn btn-secondary btn-sm flex-1 h-9 rounded-lg font-semibold" onClick={() => setEditProfile(true)}>
                                             Edit Profile
                                         </button>
                                         <button className="btn btn-secondary btn-sm p-2 rounded-lg" onClick={() => navigate('/settings')}>
@@ -199,13 +199,13 @@ export default function Profile() {
                                 ) : (
                                     <>
                                         <motion.button
-                                            className={`btn btn-sm min-w-[100px] h-9 rounded-lg font-bold ${following ? 'btn-secondary' : 'btn-primary'}`}
+                                            className={`btn btn-sm flex-1 h-9 rounded-lg font-bold ${following ? 'following-btn' : 'btn-primary'}`}
                                             onClick={handleFollow}
                                             whileTap={{ scale: 0.96 }}>
                                             {following ? 'Following' : 'Follow'}
                                         </motion.button>
                                         <motion.button
-                                            className="btn btn-secondary btn-sm px-6 h-9 rounded-lg font-bold flex items-center gap-2"
+                                            className="btn btn-secondary btn-sm flex-1 h-9 rounded-lg font-bold flex items-center justify-center gap-2"
                                             onClick={handleMessage}
                                             disabled={messaging}
                                             whileTap={{ scale: 0.96 }}>
