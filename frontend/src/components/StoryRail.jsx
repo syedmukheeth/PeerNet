@@ -327,8 +327,11 @@ export default function StoryRail() {
                 {loading ? (
                     [...Array(6)].map((_, i) => (
                         <div key={i} className="story-item px-2">
-                            <div className="skeleton skeleton-circle w-[66px] h-[66px]" />
-                            <div className="skeleton skeleton-text s w-12 h-2.5 mt-2" />
+                            <div className="relative">
+                                <div className="skeleton rounded-full w-[72px] h-[72px]" />
+                                <div className="absolute inset-[-4px] border-2 border-white/5 rounded-full" />
+                            </div>
+                            <div className="skeleton w-14 h-2.5 mt-3 rounded-full opacity-40" />
                         </div>
                     ))
                 ) : (

@@ -7871,13 +7871,13 @@ textarea:focus-visible {
    ======================================================================================================================================================================================================================================== */
 
 @keyframes peernet-shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(150%) skewX(-20deg); }
 }
 
 @keyframes peernet-pulse-glow {
   0%, 100% { opacity: 1; filter: brightness(1); }
-  50% { opacity: 0.8; filter: brightness(1.2); }
+  50% { opacity: 0.9; }
 }
 
 .skeleton {
@@ -7887,27 +7887,26 @@ textarea:focus-visible {
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   pointer-events: none;
-  animation: peernet-pulse-glow 2.5s infinite ease-in-out;
+  /* Removed pulse to reduce visual noise, using shimmer only */
 }
 
-/* The Premium Shimmer Sweep */
+/* The Premium Shimmer Sweep — Neutral Diagonal */
 .skeleton::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
   background: linear-gradient(
-    90deg,
+    110deg,
     transparent 0%,
-    rgba(124, 58, 237, 0) 20%,
-    rgba(124, 58, 237, 0.08) 50%,
-    rgba(124, 58, 237, 0) 80%,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(255, 255, 255, 0) 70%,
     transparent 100%
   );
-  animation: peernet-shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateX(-100%);
+  animation: peernet-shimmer 1.2s infinite linear;
   z-index: 2;
   pointer-events: none;
 }

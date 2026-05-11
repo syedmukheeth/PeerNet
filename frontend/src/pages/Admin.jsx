@@ -942,15 +942,15 @@ const AuditModule = ({ logs, loading }) => (
                     <div key={i} className="admin-surface-el p-4 space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="skeleton w-8 h-8 rounded-full" />
-                            <div className="space-y-1.5">
-                                <div className="skeleton h-2.5 w-16 rounded" />
-                                <div className="skeleton h-2 w-12 rounded opacity-40" />
+                            <div className="flex flex-col gap-2">
+                                <div className="skeleton h-2 w-16 rounded-full" />
+                                <div className="skeleton h-1.5 w-12 rounded-full opacity-40" />
                             </div>
                         </div>
-                        <div className="skeleton h-32 w-full rounded-xl" />
-                        <div className="space-y-2">
-                            <div className="skeleton h-3 w-full rounded" />
-                            <div className="skeleton h-3 w-2/3 rounded" />
+                        <div className="skeleton h-32 w-full rounded-2xl" />
+                        <div className="space-y-2.5">
+                            <div className="skeleton h-2 w-full rounded-full" />
+                            <div className="skeleton h-2 w-2/3 rounded-full opacity-40" />
                         </div>
                     </div>
                 ))

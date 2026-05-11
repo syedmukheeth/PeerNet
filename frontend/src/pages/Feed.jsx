@@ -237,33 +237,33 @@ export default function Feed() {
                     </div>
 
                     {loading && (
-                        <div key="feed-skeleton" className="l-stack l-stack-lg pt-4 px-2">
+                        <div key="feed-skeleton" className="l-stack l-stack-lg pt-4 px-0">
                             {[1, 2].map(id => (
-                                <div key={id} className="l-post-card p-0 overflow-hidden">
-                                    <div className="post-card-header">
+                                <div key={id} className="l-post-card p-0 overflow-hidden border-white/5">
+                                    <div className="post-card-header px-4 py-3">
                                         <div className="post-card-user">
-                                            <div className="skeleton size-10 rounded-full" />
-                                            <div className="space-y-2">
-                                                <div className="skeleton h-3.5 w-32 rounded-md" />
-                                                <div className="skeleton h-3 w-20 rounded-md" />
+                                            <div className="skeleton w-10 h-10 rounded-full" />
+                                            <div className="flex flex-col gap-2">
+                                                <div className="skeleton h-3 w-28 rounded-full" />
+                                                <div className="skeleton h-2 w-20 rounded-full opacity-40" />
                                             </div>
                                         </div>
+                                        <div className="skeleton w-8 h-4 rounded-lg opacity-20" />
                                     </div>
                                     <div className="skeleton w-full aspect-square md:aspect-[4/5] rounded-none" />
                                     <div className="p-4 space-y-4">
-                                        <div className="flex justify-between">
+                                        <div className="flex justify-between items-center">
                                             <div className="flex gap-4">
-                                                <div className="skeleton size-6 rounded-md" />
-                                                <div className="skeleton size-6 rounded-md" />
-                                                <div className="skeleton size-6 rounded-md" />
+                                                <div className="skeleton w-6 h-6 rounded-md opacity-60" />
+                                                <div className="skeleton w-6 h-6 rounded-md opacity-60" />
+                                                <div className="skeleton w-6 h-6 rounded-md opacity-60" />
                                             </div>
-                                            <div className="skeleton size-6 rounded-md" />
+                                            <div className="skeleton w-6 h-6 rounded-md opacity-60" />
                                         </div>
                                         <div className="space-y-2.5">
-                                            <div className="skeleton h-4 w-1/4 rounded-md" />
-                                            <div className="skeleton h-3.5 w-full rounded-md" />
-                                            <div className="skeleton h-3.5 w-full rounded-md" />
-                                            <div className="skeleton h-3.5 w-2/3 rounded-md" />
+                                            <div className="skeleton h-3 w-1/4 rounded-full" />
+                                            <div className="skeleton h-3 w-full rounded-full opacity-40" />
+                                            <div className="skeleton h-3 w-2/3 rounded-full opacity-40" />
                                         </div>
                                     </div>
                                 </div>
