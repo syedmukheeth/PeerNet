@@ -28,6 +28,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [showHeart, setShowHeart] = useState(false)
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
+    const isAdmin = user?.role === 'admin'
 
     // Sync liked state from server data, but only when no local override is active
     useEffect(() => {
@@ -190,7 +191,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 5 }}
                                 >
-                                    {isOwner ? (
+                                    {(isOwner || isAdmin) ? (
                                         <>
                                             <button className="post-card-menu-item" onClick={() => { setMenuOpen(false); setEditOpen(true) }}>
                                                 <HiPencil size={16} /> <span>Edit</span>

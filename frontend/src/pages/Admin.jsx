@@ -242,12 +242,26 @@ const Sparkline = ({ data = [], color = 'var(--accent)' }) => {
     )
 }
 
-const StatCard = ({ label, value, sub, icon, chartData, accent }) => (
+const StatCard = ({ label, value, sub, icon, chartData, accent, loading }) => (
     <div className="admin-stat-card-v2 group">
-        <div className="flex items-start justify-between mb-8">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${accent ? 'bg-error/10 text-error shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'bg-accent/10 text-accent shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]'} group-hover:scale-110 group-hover:rotate-3`}>
-                {React.cloneElement(icon, { size: 22 })}
+        {loading ? (
+            <div className="space-y-6">
+                <div className="flex justify-between items-start">
+                    <div className="skeleton w-12 h-12 rounded-2xl" />
+                    <div className="skeleton w-24 h-6 rounded-lg opacity-20" />
+                </div>
+                <div className="space-y-3">
+                    <div className="skeleton h-8 w-2/3 rounded-xl" />
+                    <div className="skeleton h-3 w-1/2 rounded-md opacity-40" />
+                </div>
+                <div className="skeleton h-12 w-full rounded-2xl opacity-10" />
             </div>
+        ) : (
+            <>
+                <div className="flex items-start justify-between mb-8">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${accent ? 'bg-error/10 text-error shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'bg-accent/10 text-accent shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]'} group-hover:scale-110 group-hover:rotate-3`}>
+                        {React.cloneElement(icon, { size: 22 })}
+                    </div>
             {chartData && (
                 <div className="w-20 h-10 opacity-30 group-hover:opacity-100 transition-opacity duration-700">
                     <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
@@ -488,7 +502,24 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
 
         {/* Mobile Cards */}
         <div className="md:hidden divide-y divide-admin-border">
-            {users.filter(u =>
+            {loading ? (
+                Array(5).fill(0).map((_, i) => (
+                    <div key={i} className="p-4 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="skeleton w-12 h-12 rounded-xl" />
+                            <div className="flex-1 space-y-2">
+                                <div className="skeleton h-3.5 w-1/3 rounded" />
+                                <div className="skeleton h-2 w-1/2 rounded opacity-50" />
+                            </div>
+                            <div className="skeleton h-5 w-16 rounded-full" />
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="skeleton h-10 flex-1 rounded-xl" />
+                            <div className="skeleton h-10 flex-1 rounded-xl" />
+                        </div>
+                    </div>
+                ))
+            ) : users.filter(u =>
                 u.username.toLowerCase().includes(search.toLowerCase()) ||
                 u.email.toLowerCase().includes(search.toLowerCase())
             ).map(user => (
@@ -546,7 +577,29 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
-                    {users.filter(u =>
+                    {loading ? (
+                        Array(6).fill(0).map((_, i) => (
+                            <tr key={i}>
+                                <td className="pl-8 py-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="skeleton w-10 h-10 rounded-xl" />
+                                        <div className="space-y-2">
+                                            <div className="skeleton h-3 w-24 rounded" />
+                                            <div className="skeleton h-2 w-32 rounded opacity-50" />
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><div className="skeleton h-6 w-24 rounded-full" /></td>
+                                <td><div className="skeleton h-5 w-16 rounded-lg opacity-40" /></td>
+                                <td className="text-right pr-8">
+                                    <div className="flex justify-end gap-2">
+                                        <div className="skeleton w-20 h-8 rounded-xl" />
+                                        <div className="skeleton w-8 h-8 rounded-xl" />
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    ) : users.filter(u =>
                         u.username.toLowerCase().includes(search.toLowerCase()) ||
                         u.email.toLowerCase().includes(search.toLowerCase())
                     ).map(user => (
@@ -631,7 +684,7 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
     </motion.div>
 )
 
-const CommentModule = ({ comments, onDelete, search, setSearch }) => (
+const CommentModule = ({ comments, onDelete, search, setSearch, loading }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border">
         {/* Header Section */}
         <div className="p-8 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -654,7 +707,20 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
 
         {/* Mobile Comment Cards */}
         <div className="md:hidden divide-y divide-admin-border bg-admin-card/50">
-            {comments.map(comment => (
+            {loading ? (
+                Array(6).fill(0).map((_, i) => (
+                    <div key={i} className="p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="skeleton w-10 h-10 rounded-xl" />
+                            <div className="space-y-1.5">
+                                <div className="skeleton h-3 w-24 rounded" />
+                                <div className="skeleton h-2 w-32 rounded opacity-40" />
+                            </div>
+                        </div>
+                        <div className="skeleton h-16 w-full rounded-2xl" />
+                    </div>
+                ))
+            ) : comments.map(comment => (
                 <div key={comment._id} className="p-6 space-y-4 animate-in fade-in slide-in-from-bottom-2">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl overflow-hidden border border-admin-border bg-admin-card p-0.5">
@@ -691,7 +757,21 @@ const CommentModule = ({ comments, onDelete, search, setSearch }) => (
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
-                    {comments.map(comment => (
+                    {loading ? (
+                        Array(8).fill(0).map((_, i) => (
+                            <tr key={i}>
+                                <td className="pl-8 py-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="skeleton w-10 h-10 rounded-xl" />
+                                        <div className="skeleton h-3 w-24 rounded" />
+                                    </div>
+                                </td>
+                                <td><div className="skeleton h-4 w-64 rounded-md" /></td>
+                                <td><div className="skeleton h-3 w-32 rounded opacity-30" /></td>
+                                <td className="text-right pr-8"><div className="skeleton w-10 h-10 rounded-2xl mx-auto mr-0" /></td>
+                            </tr>
+                        ))
+                    ) : comments.map(comment => (
                         <tr key={comment._id} className="group hover:bg-accent/[0.01] transition-colors">
                             <td className="pl-8 py-5">
                                 <div className="flex items-center gap-4">
@@ -806,7 +886,16 @@ const AuditModule = ({ logs, loading }) => (
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-admin-border">
-                    {logs.map(log => (
+                    {loading ? (
+                        Array(10).fill(0).map((_, i) => (
+                            <tr key={i}>
+                                <td className="pl-8 py-5"><div className="skeleton h-3 w-32 rounded opacity-40" /></td>
+                                <td><div className="skeleton h-3 w-24 rounded opacity-40" /></td>
+                                <td><div className="skeleton h-3 w-48 rounded opacity-40" /></td>
+                                <td className="text-right pr-8"><div className="skeleton h-3 w-20 ml-auto rounded opacity-20" /></td>
+                            </tr>
+                        ))
+                    ) : logs.map(log => (
                         <tr key={log._id} className="group hover:bg-accent/[0.01] transition-colors">
                             <td className="pl-8 py-5">
                                 <span className="text-[11px] font-black text-muted uppercase tracking-widest tabular-nums opacity-60">
@@ -857,7 +946,7 @@ const AuditModule = ({ logs, loading }) => (
  * @param {Function} onDelete - Handler for content termination
  * @param {String} contentType - Current active filter state
  * @param {Function} setContentType - State setter for type filtering
- */const PostModule = ({ posts, onDelete, contentType, setContentType, search, setSearch }) => (
+ */const PostModule = ({ posts, onDelete, contentType, setContentType, search, setSearch, loading }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
         {/* Navigation & Search Header */}
         <div className="flex flex-col lg:flex-row gap-6 items-center">
@@ -893,7 +982,24 @@ const AuditModule = ({ logs, loading }) => (
         
         {/* High-Density Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-            {posts.map(post => (
+            {loading ? (
+                Array(10).fill(0).map((_, i) => (
+                    <div key={i} className="admin-surface-el p-4 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="skeleton w-8 h-8 rounded-full" />
+                            <div className="space-y-1.5">
+                                <div className="skeleton h-2.5 w-16 rounded" />
+                                <div className="skeleton h-2 w-12 rounded opacity-40" />
+                            </div>
+                        </div>
+                        <div className="skeleton h-32 w-full rounded-xl" />
+                        <div className="space-y-2">
+                            <div className="skeleton h-3 w-full rounded" />
+                            <div className="skeleton h-3 w-2/3 rounded" />
+                        </div>
+                    </div>
+                ))
+            ) : posts.map(post => (
                 <div key={post._id} className="admin-surface-el group overflow-hidden flex flex-col h-full hover:border-accent/20 transition-all duration-500 hover:shadow-2xl hover:shadow-accent/[0.05]">
                     {/* Header */}
                     <div className="p-4 flex items-center justify-between border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent">
@@ -985,7 +1091,7 @@ const AuditModule = ({ logs, loading }) => (
     </motion.div>
 )
 
-const ReportModule = ({ reports, onResolve }) => (
+const ReportModule = ({ reports, onResolve, loading }) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border border-error/20">
         {/* Header Section */}
         <div className="p-8 border-b border-error/20 bg-gradient-to-r from-error/[0.03] to-transparent flex items-center justify-between">
@@ -1002,7 +1108,20 @@ const ReportModule = ({ reports, onResolve }) => (
 
         {/* Mobile Report Cards */}
         <div className="md:hidden divide-y divide-error/10 bg-error/[0.02]">
-            {reports.map(report => (
+            {loading ? (
+                Array(4).fill(0).map((_, i) => (
+                    <div key={i} className="p-6 space-y-4">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <div className="skeleton w-8 h-8 rounded-lg" />
+                                <div className="skeleton h-3 w-20 rounded" />
+                            </div>
+                            <div className="skeleton h-5 w-16 rounded-full" />
+                        </div>
+                        <div className="skeleton h-20 w-full rounded-2xl" />
+                    </div>
+                ))
+            ) : reports.map(report => (
                 <div key={report._id} className="p-6 space-y-5 animate-in fade-in slide-in-from-bottom-2">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -1053,7 +1172,21 @@ const ReportModule = ({ reports, onResolve }) => (
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-error/10">
-                    {reports.map(report => (
+                    {loading ? (
+                        Array(6).fill(0).map((_, i) => (
+                            <tr key={i}>
+                                <td className="pl-8 py-5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="skeleton w-8 h-8 rounded-lg" />
+                                        <div className="skeleton h-3 w-24 rounded" />
+                                    </div>
+                                </td>
+                                <td><div className="skeleton h-5 w-20 rounded-full" /></td>
+                                <td><div className="skeleton h-4 w-48 rounded-md" /></td>
+                                <td className="text-right pr-8"><div className="skeleton h-8 w-24 ml-auto rounded-xl" /></td>
+                            </tr>
+                        ))
+                    ) : reports.map(report => (
                         <tr key={report._id} className="group hover:bg-error/[0.01] transition-colors">
                             <td className="pl-8 py-5">
                                 <span className="text-[13px] font-black text-primary">@{report.reporterId?.username}</span>
@@ -1376,6 +1509,7 @@ export default function Admin() {
                                 sub="Verified Users" 
                                 icon={<HiUsers />} 
                                 chartData={stats?.charts?.userGrowth?.map(d => d.count)}
+                                loading={loading}
                             />
                             <StatCard 
                                 label="Feed Velocity" 
@@ -1383,6 +1517,7 @@ export default function Admin() {
                                 sub="Broadcast Objects" 
                                 icon={<HiCollection />} 
                                 chartData={[4, 8, 5, 9, 12, 10, 15, 8, 14, 18]}
+                                loading={loading}
                             />
                             <StatCard 
                                 label="Security Queue" 
@@ -1390,12 +1525,14 @@ export default function Admin() {
                                 sub="Pending Violations" 
                                 icon={<HiFlag />} 
                                 accent={reports.length > 0}
+                                loading={loading}
                             />
                             <StatCard 
                                 label="System Health" 
                                 value="99.9%" 
                                 sub="Uptime Velocity" 
                                 icon={<HiTrendingUp />} 
+                                loading={loading}
                             />
                         </div>
                         <AnalyticsModule stats={stats} analytics={analytics} />
@@ -1426,6 +1563,7 @@ export default function Admin() {
                         setContentType={setContentType}
                         search={search}
                         setSearch={setSearch}
+                        loading={loading}
                     />
                 )
             case 'comments':
@@ -1435,6 +1573,7 @@ export default function Admin() {
                         onDelete={handleDeleteComment} 
                         search={search}
                         setSearch={setSearch}
+                        loading={loading}
                     />
                 )
             case 'reports':
@@ -1442,13 +1581,13 @@ export default function Admin() {
                     <ReportModule 
                         reports={reports} 
                         onResolve={handleResolveReport} 
-                        search={search}
+                        loading={loading}
                     />
                 )
             case 'infrastructure':
                 return <InfrastructureModule pulse={pulse} />
             case 'audit':
-                return <AuditModule logs={logs} />
+                return <AuditModule logs={logs} loading={loading} />
             case 'settings':
                 return (
                     <div className="space-y-12">

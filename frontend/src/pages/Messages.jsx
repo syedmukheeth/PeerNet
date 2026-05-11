@@ -633,7 +633,7 @@ export default function Messages() {
                                         <div key="chat-skeleton" className="zn-chat-skeleton">
                                             {[1, 2, 3, 4, 5].map(i => (
                                                 <div key={i} className={`zn-chat-skeleton-row${i % 2 === 0 ? ' self' : ''}`}>
-                                                    <div className="skeleton zn-chat-skeleton-bubble" />
+                                                    <div className="skeleton zn-chat-skeleton-bubble" style={{ width: i % 3 === 0 ? '180px' : i % 2 === 0 ? '120px' : '240px' }} />
                                                 </div>
                                             ))}
                                         </div>

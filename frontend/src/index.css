@@ -7901,14 +7901,15 @@ textarea:focus-visible {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0) 20%,
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0) 80%,
+    rgba(124, 58, 237, 0) 20%,
+    rgba(124, 58, 237, 0.08) 50%,
+    rgba(124, 58, 237, 0) 80%,
     transparent 100%
   );
-  animation: peernet-shimmer 1.2s infinite linear;
+  animation: peernet-shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(-100%);
-  z-index: 1;
+  z-index: 2;
+  pointer-events: none;
 }
 
 [data-theme="light"] .skeleton {
@@ -7963,15 +7964,16 @@ textarea:focus-visible {
 }
 
 /* Glass Enhancement for Skeletons */
-.skeleton::after {
+.skeleton::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
   pointer-events: none;
+  z-index: 1;
 }
 
 /* Legacy support handled above */
