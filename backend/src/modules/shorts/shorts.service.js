@@ -119,6 +119,14 @@ const unlikeShort = async (shortId, userId) => {
     const like = await Like.findOneAndDelete({ user: userId, targetId: shortId, targetModel: 'Short' });
     if (!like) throw new ApiError(404, 'Not liked');
     await Short.findByIdAndUpdate(shortId, { $inc: { likesCount: -1 } });
+    
+    // Sync with Notifications: Remove the like alert
+    await notificationService.removeNotification({
+        sender: userId,
+        entityId: shortId,
+        type: 'like'
+    });
+
     return { liked: false };
 };
 

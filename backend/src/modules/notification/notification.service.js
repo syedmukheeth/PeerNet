@@ -281,7 +281,10 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
         // GHOST DETECTION: A notification is a ghost only if its target entity (Post/Comment/Short) 
         // was once there (entityId exists) but is no longer in our database (hydrated entity missing).
         const hasEntity = n.entityId;
-        const entityFound = n.entityId && entitiesMap.has(n.entityId.toString());
+        const entityIdStr = (n.entityId && typeof n.entityId === 'object' && n.entityId._id) 
+            ? n.entityId._id.toString() 
+            : n.entityId?.toString();
+        const entityFound = entityIdStr && entitiesMap.has(entityIdStr);
         
         const isGhost = hasEntity && !entityFound && (n.type === 'like' || n.type === 'comment' || n.type === 'reply');
         

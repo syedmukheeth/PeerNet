@@ -178,6 +178,14 @@ const unlikeComment = async (commentId, userId) => {
     const like = await Like.findOneAndDelete({ user: userId, targetId: commentId, targetModel: 'Comment' });
     if (!like) throw new ApiError(404, 'Like not found');
     await Comment.findByIdAndUpdate(commentId, { $inc: { likesCount: -1 } });
+    
+    // Sync with Notifications: Remove the like alert
+    await notificationService.removeNotification({
+        sender: userId,
+        entityId: commentId,
+        type: 'like'
+    });
+
     return { liked: false };
 };
 

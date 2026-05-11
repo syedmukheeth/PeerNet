@@ -117,6 +117,13 @@ const unfollow = async (followerId, followingId) => {
     const redis = getRedis();
     await redis.del([`user:${followerId}`, `user:${followingId}`]);
 
+    // Sync with Notifications: Remove the follow alert
+    await notificationService.removeNotification({
+        recipient: followingId,
+        sender: followerId,
+        type: 'follow'
+    });
+
     return { message: 'Unfollowed successfully' };
 };
 

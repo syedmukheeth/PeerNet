@@ -91,7 +91,7 @@ export default function Profile() {
     const handleMessage = async () => {
         setMessaging(true)
         try {
-            const { data } = await api.post(`conversations`, { targetUserId: id }, { baseURL: CHAT_BASE_URL })
+            const { data } = await api.post(``, { targetUserId: id }, { baseURL: CHAT_BASE_URL })
             navigate(`/messages/${data.data._id}`)
         } catch (err) {
             toast.error(err.response?.data?.message || 'Could not open chat')
@@ -182,7 +182,7 @@ export default function Profile() {
                 <div className="profile-info-col">
                     <div className="profile-info-main">
                         <div className="profile-header-top">
-                            <div className="flex items-center gap-2">
+                            <div className="profile-username-group flex items-center gap-2">
                                 <h1 className="profile-username font-light">@{profile.username}</h1>
                                 {profile.isVerified && <HiBadgeCheck className="text-accent text-[20px]" />}
                             </div>
@@ -233,7 +233,7 @@ export default function Profile() {
 
                         <div className="profile-bio-v2">
                             <div className="font-bold text-[15px] text-text-1">{profile.fullName}</div>
-                            <div className="text-[14px] leading-relaxed whitespace-pre-wrap mt-1 text-text-2">{profile.bio || 'Social Media Enthusiast'}</div>
+                            <div className="text-[14px] leading-relaxed whitespace-pre-wrap mt-1 text-text-2">{profile.bio}</div>
                             {profile.website && (
                                 <a href={profile.website} target="_blank" rel="noreferrer" className="profile-link-v2 mt-2 inline-flex items-center gap-1 text-accent font-medium hover:underline">
                                     <HiLink size={14} />

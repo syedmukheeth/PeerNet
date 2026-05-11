@@ -11461,18 +11461,20 @@ textarea:focus-visible {
     height: 80px !important;
   }
 
-  .profile-info-col {
+  .profile-info-col,
+  .profile-info-main {
+    display: contents !important;
+  }
+
+  .profile-header-top {
+    display: contents !important;
+  }
+
+  .profile-username-group {
     grid-area: main !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    padding: 0 !important;
-  }
-
-  .profile-header-top {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
     gap: 4px !important;
   }
 
@@ -11481,9 +11483,13 @@ textarea:focus-visible {
     font-weight: 700 !important;
   }
 
-  /* Hide desktop actions in the 'main' area, we'll place them in the 'actions' area */
-  .profile-header-top .profile-actions-row {
-    display: none !important;
+  /* Ensure actions are visible and part of the grid */
+  .profile-actions-row {
+    grid-area: actions !important;
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 8px !important;
   }
 
   /* Bio area - Full Width */
@@ -11525,8 +11531,8 @@ textarea:focus-visible {
     text-transform: lowercase !important;
   }
 
-  /* Actions area - Re-injecting buttons at the bottom */
-  .profile-page-wrap .profile-actions-row {
+  /* Actions area refinement */
+  .profile-actions-row {
     grid-area: actions !important;
     display: flex !important;
     gap: 8px !important;
