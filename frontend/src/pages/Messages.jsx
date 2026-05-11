@@ -217,7 +217,8 @@ export default function Messages() {
     const [showChatMenu, setShowChatMenu] = useState(false)
     const viewportRef = useRef(null)
     const markReadMutation = useMarkRead(convoId)
-    const prevMsgCount = useRef(messages.length)
+    const prevMsgCount = useRef(0)
+    const isInitialLoad = useRef(true)
 
     const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
 
@@ -308,18 +309,27 @@ export default function Messages() {
     }, [])
 
     useEffect(() => {
-        if (!loadingMsgs) {
-            scrollToBottom(messages.length <= (prevMsgCount.current || 0))
+        if (!loadingMsgs && messages.length > 0) {
+            // If it's the first time we have messages for this convoId, scroll instant
+            if (isInitialLoad.current) {
+                scrollToBottom(true)
+                // Fallback for slow layout/animations
+                setTimeout(() => scrollToBottom(true), 50)
+                setTimeout(() => scrollToBottom(true), 250)
+                isInitialLoad.current = false
+            } else if (messages.length > prevMsgCount.current) {
+                // New messages arrived, scroll smooth
+                scrollToBottom(false)
+            }
             prevMsgCount.current = messages.length
         }
     }, [messages, loadingMsgs, scrollToBottom])
 
+    // Reset initial load flag when convo changes
     useEffect(() => {
-        if (convoId && !loadingMsgs) {
-            const timer = setTimeout(() => scrollToBottom(true), 100)
-            return () => clearTimeout(timer)
-        }
-    }, [convoId, loadingMsgs, scrollToBottom])
+        isInitialLoad.current = true
+        prevMsgCount.current = 0
+    }, [convoId])
 
     useEffect(() => {
         const draft = getDraft()
