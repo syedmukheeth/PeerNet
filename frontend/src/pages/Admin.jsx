@@ -73,9 +73,11 @@ const AdminSidebar = ({ activeTab, setActiveTab, pulse, reports = [], isOpen, se
                 <div className="p-6 border-b border-admin-border/30">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
-                                <span className="text-white font-black text-xs">PN</span>
-                            </div>
+                            <Link to="/" className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-purple-600/20 p-[1px] shadow-2xl shadow-accent/20 shrink-0 hover:scale-105 transition-transform group/logo">
+                                <div className="w-full h-full bg-admin-card rounded-[inherit] flex items-center justify-center overflow-hidden border border-white/5">
+                                    <img src="/logo.png" className="w-8 h-8 object-contain group-hover/logo:scale-110 transition-transform" alt="Logo" />
+                                </div>
+                            </Link>
                             <div className={`transition-all duration-500 sidebar-brand-text ${isCollapsed ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0'}`}>
                                 <span className="text-[10px] font-black text-accent uppercase tracking-[0.4em] block">Admin</span>
                                 <span className="text-lg font-black text-primary uppercase tracking-tighter">PeerNet</span>
