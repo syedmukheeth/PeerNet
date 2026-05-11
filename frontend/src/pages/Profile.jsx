@@ -381,6 +381,6 @@ export default function Profile() {
                     />
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     )
 }
