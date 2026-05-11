@@ -283,8 +283,8 @@ export default function PostDetail() {
                             <div className="skeleton size-8 rounded-full flex-shrink-0" />
                             <div className="flex-1 space-y-2.5 pt-1">
                                 <div className="skeleton h-3.5 w-1/4 rounded-md" />
-                                <div className="skeleton h-3.5 w-full rounded-md opacity-40" />
-                                <div className="skeleton h-3.5 w-2/3 rounded-md opacity-20" />
+                                <div className="skeleton h-3.5 w-full rounded-md" />
+                                <div className="skeleton h-3.5 w-2/3 rounded-md" />
                             </div>
                         </div>
                     ))}

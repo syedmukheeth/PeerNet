@@ -112,7 +112,7 @@ export default function Profile() {
 
 
     if (loading) return (
-        <div key="profile-skeleton" className="profile-page-wrap animate-pulse">
+        <div key="profile-skeleton" className="profile-page-wrap">
             <div className="profile-header px-6 md:px-12 py-10 md:py-16">
                 <div className="profile-avatar-col">
                     <div className="skeleton skeleton-circle w-[120px] h-[120px] md:w-[150px] md:h-[150px]" />
@@ -122,7 +122,7 @@ export default function Profile() {
                         <div className="skeleton h-10 w-48 rounded-xl" />
                         <div className="flex gap-3">
                             <div className="skeleton h-10 w-28 rounded-xl" />
-                            <div className="skeleton h-10 w-28 rounded-xl opacity-50" />
+                            <div className="skeleton h-10 w-28 rounded-xl" />
                         </div>
                     </div>
                     <div className="flex gap-10 mb-8">
@@ -132,21 +132,21 @@ export default function Profile() {
                     </div>
                     <div className="space-y-4">
                         <div className="skeleton h-6 w-40 rounded-lg" />
-                        <div className="skeleton h-4 w-full max-w-sm rounded-md opacity-40" />
-                        <div className="skeleton h-4 w-32 rounded-md opacity-30" />
+                        <div className="skeleton h-4 w-full max-w-sm rounded-md" />
+                        <div className="skeleton h-4 w-32 rounded-md" />
                     </div>
                 </div>
             </div>
             <div className="profile-tabs border-t border-white/5 py-4">
                 <div className="flex justify-center gap-12">
                     <div className="skeleton h-8 w-24 rounded-lg" />
-                    <div className="skeleton h-8 w-24 rounded-lg opacity-40" />
-                    <div className="skeleton h-8 w-24 rounded-lg opacity-30" />
+                    <div className="skeleton h-8 w-24 rounded-lg" />
+                    <div className="skeleton h-8 w-24 rounded-lg" />
                 </div>
             </div>
             <div className="profile-grid px-4 md:px-6 mt-8">
                 {[...Array(9)].map((_, i) => (
-                    <div key={i} className="skeleton aspect-square rounded-xl opacity-[0.4]" />
+                    <div key={i} className="skeleton aspect-square rounded-xl" />
                 ))}
             </div>
         </div>

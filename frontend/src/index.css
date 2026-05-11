@@ -7879,34 +7879,42 @@ textarea:focus-visible {
    ======================================================================================================================================================================================================================================== */
 .skeleton,
 .skeleton-item {
-  background: var(--surface-2);
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.03) 25%,
-      rgba(255, 255, 255, 0.08) 37%,
-      rgba(255, 255, 255, 0.03) 63%);
+  background-color: var(--surface-2);
+  background-image: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(255, 255, 255, 0.03) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
   background-size: 200% 100%;
-  animation: peernet-skeleton 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: peernet-skeleton 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   border-radius: var(--r-md);
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-sm);
   pointer-events: none;
 }
 
-[data-theme="light"] .skeleton {
-  background: #f3f4f6;
-  background: linear-gradient(90deg,
-      rgba(0, 0, 0, 0.03) 25%,
-      rgba(0, 0, 0, 0.06) 37%,
-      rgba(0, 0, 0, 0.03) 63%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+[data-theme="light"] .skeleton,
+[data-theme="light"] .skeleton-item {
+  background-color: var(--surface-2);
+  background-image: linear-gradient(
+    110deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.02) 20%,
+    rgba(0, 0, 0, 0.05) 40%,
+    rgba(0, 0, 0, 0.02) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  border: 1px solid var(--border-sm);
 }
 
 @keyframes peernet-skeleton {
   0% {
     background-position: 200% 0;
   }
-
   100% {
     background-position: -200% 0;
   }
@@ -12267,23 +12275,7 @@ textarea:focus-visible {
   border-color: var(--accent, rgba(99, 102, 241, 0.5));
 }
 
-/* ---- SKELETON ---- */
-.skeleton {
-  background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s infinite;
-  border-radius: 8px;
-}
 
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
 
 /* ---- PAGE TRANSITION ---- */
 .zn-page-transition {
@@ -13752,7 +13744,6 @@ body:has(.zn-messages-root) .content-wrap {
   height: 11px;
   width: 25%;
   border-radius: 6px;
-  opacity: 0.5;
 }
 
 /* Results list */

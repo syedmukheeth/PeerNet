@@ -117,10 +117,10 @@ export default function Settings() {
 
     if (!mounted || !user) {
         return (
-            <div className="settings-page p-6 max-w-2xl mx-auto space-y-12 animate-pulse">
+            <div className="settings-page p-6 max-w-2xl mx-auto space-y-12">
                 <div className="space-y-4">
                     <div className="skeleton h-8 w-32 rounded-lg" />
-                    <div className="skeleton h-4 w-64 rounded-md opacity-50" />
+                    <div className="skeleton h-4 w-64 rounded-md" />
                 </div>
                 <div className="space-y-8">
                     {[1, 2, 3].map(i => (

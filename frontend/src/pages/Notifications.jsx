@@ -188,7 +188,7 @@ export default function Notifications() {
         <div className="min-h-screen bg-bg">
             <div className="l-main-col pt-10">
                 <header className="px-5 mb-8">
-                    <div className="skeleton h-8 w-40 rounded-lg opacity-40" />
+                    <div className="skeleton h-8 w-40 rounded-lg" />
                 </header>
                 <div className="space-y-1 px-1">
                     {[...Array(12)].map((_, i) => (
@@ -196,7 +196,7 @@ export default function Notifications() {
                             <div className="skeleton size-12 rounded-full flex-shrink-0" />
                             <div className="flex-1 space-y-2">
                                 <div className="skeleton h-3.5 w-[70%] rounded-full" />
-                                <div className="skeleton h-2.5 w-[30%] rounded-full opacity-30" />
+                                <div className="skeleton h-2.5 w-[30%] rounded-full" />
                             </div>
                             <div className="skeleton w-20 h-8 rounded-lg" />
                         </div>

@@ -81,11 +81,11 @@ function RightPanel() {
                 <div className="flex flex-col sp-suggestions-list">
                     {loading ? (
                         [...Array(5)].map((_, i) => (
-                            <div key={i} className="sp-suggestion-row opacity-50">
+                            <div key={i} className="sp-suggestion-row">
                                 <div className="skeleton skeleton-circle w-8 h-8" />
                                 <div className="sp-suggestion-info">
                                     <div className="skeleton skeleton-text m h-3" />
-                                    <div className="skeleton skeleton-text s h-2 opacity-50" />
+                                    <div className="skeleton skeleton-text s h-2" />
                                 </div>
                                 <div className="skeleton w-12 h-6 rounded-md" />
                             </div>
@@ -245,7 +245,7 @@ export default function Feed() {
                                             <div className="skeleton size-10 rounded-full" />
                                             <div className="space-y-2">
                                                 <div className="skeleton h-3.5 w-32 rounded-md" />
-                                                <div className="skeleton h-3 w-20 rounded-md opacity-40" />
+                                                <div className="skeleton h-3 w-20 rounded-md" />
                                             </div>
                                         </div>
                                     </div>

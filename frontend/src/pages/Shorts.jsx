@@ -306,20 +306,20 @@ export default function Shorts() {
 
     if (status === 'pending') return (
         <div className="shorts-viewer-overlay">
-            <div className="shorts-phone-wrapper skeleton !bg-surface-2 overflow-hidden">
+            <div className="shorts-phone-wrapper skeleton overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
                 <div className="absolute bottom-12 left-6 right-20 space-y-4 z-10">
                     <div className="skeleton h-6 w-1/3 rounded-md" />
                     <div className="space-y-2">
-                        <div className="skeleton h-4 w-full rounded-md opacity-40" />
-                        <div className="skeleton h-4 w-2/3 rounded-md opacity-20" />
+                        <div className="skeleton h-4 w-full rounded-md" />
+                        <div className="skeleton h-4 w-2/3 rounded-md" />
                     </div>
                 </div>
                 <div className="absolute right-4 bottom-28 space-y-8 z-10">
                     {[...Array(4)].map((_, i) => (
                         <div key={i} className="flex flex-col items-center gap-2">
                             <div className="skeleton size-12 rounded-full" />
-                            <div className="skeleton h-2 w-6 rounded-sm opacity-20" />
+                            <div className="skeleton h-2 w-6 rounded-sm" />
                         </div>
                     ))}
                 </div>

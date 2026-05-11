@@ -74,7 +74,7 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                                             <div className="skeleton skeleton-circle w-12 h-12" />
                                             <div className="flex-1 space-y-2">
                                                 <div className="skeleton h-4 w-24 rounded" />
-                                                <div className="skeleton h-3 w-32 rounded opacity-50" />
+                                                <div className="skeleton h-3 w-32 rounded" />
                                             </div>
                                         </div>
                                     ))}
