@@ -297,6 +297,10 @@ export default function StoryRail() {
     const [loading, setLoading] = useState(true)
 
     const loadStories = async () => {
+        if (!user) {
+            setLoading(false)
+            return
+        }
         setLoading(true)
         try {
             const { data } = await api.get('/stories')
@@ -325,13 +329,13 @@ export default function StoryRail() {
         <div className="story-rail-wrap">
             <div className="story-rail">
                 {loading ? (
-                    [...Array(6)].map((_, i) => (
+                    [...Array(8)].map((_, i) => (
                         <div key={i} className="story-item px-2">
                             <div className="relative">
-                                <div className="skeleton rounded-full w-[72px] h-[72px]" />
+                                <div className="skeleton rounded-full w-[76px] h-[76px]" />
                                 <div className="absolute inset-[-4px] border-2 border-white/5 rounded-full" />
                             </div>
-                            <div className="skeleton w-14 h-2.5 mt-3 rounded-full opacity-40" />
+                            <div className="skeleton w-14 h-2 mt-3 rounded-full opacity-30" />
                         </div>
                     ))
                 ) : (

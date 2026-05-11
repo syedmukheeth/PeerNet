@@ -1877,6 +1877,9 @@ textarea:focus-visible {
   overflow: hidden;
   margin-bottom: 32px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
 }
 
 .glass-card {
@@ -2009,13 +2012,19 @@ textarea:focus-visible {
 .post-card-media-wrap {
   position: relative;
   width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 300px;
   background: #000;
   /* Solid black backdrop to contain any aspect ratio */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  /* Allow the container to be as tall as needed by the content, capped at 80vh */
+}
+@media (min-width: 768px) {
+  .post-card-media-wrap {
+    aspect-ratio: 4 / 5;
+  }
 }
 
 .post-card-media {

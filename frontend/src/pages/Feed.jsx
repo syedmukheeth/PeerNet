@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import PostCard from '../components/PostCard'
-import StoryRail from '../components/StoryRail'
+
+// Lazy load heavy components
+const PostCard = lazy(() => import('../components/PostCard'))
+const StoryRail = lazy(() => import('../components/StoryRail'))
 
 import { optimizeAvatarUrl } from '../utils/cloudinary'
 import { useAuth } from '../context/AuthContext'
@@ -25,7 +27,10 @@ function RightPanel() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        if (!user) return
+        if (!user) {
+            setLoading(false)
+            return
+        }
         setLoading(true)
         api.get('/users/search', { params: { q: 'a', limit: 6 } })
             .then(({ data }) => {
@@ -154,6 +159,7 @@ function RightPanel() {
 
 /* ── Feed ─────────────────────────────────────────────────── */
 export default function Feed() {
+    const { user } = useAuth()
     const queryClient = useQueryClient()
 
     const {
@@ -171,14 +177,15 @@ export default function Feed() {
             return res.data
         },
         getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
-        staleTime: 30_000,         // 30s — don't refetch so often it wipes optimistic like state
+        staleTime: 30_000,
         refetchOnMount: 'always',
+        enabled: !!user,
     })
 
+    const isLoading = status === 'pending'
     const posts = data
         ? data.pages.flatMap((page) => (Array.isArray(page?.data) ? page.data : []))
         : []
-    const loading = status === 'pending' || isFetchingNextPage
 
     const onLikeToggle = (postId, liked, likesCount) => {
         queryClient.setQueryData(['feed'], (oldData) => {
@@ -225,32 +232,31 @@ export default function Feed() {
 
                 {/* ── Feed column ───────────── */}
                 <div className="l-main-col l-stack">
-                    <StoryRail />
-                    
-                    <div className="l-stack l-stack-lg mt-2">
-                        {posts.filter(Boolean).map(post => (
-                            <PostCard key={post?._id || post?.id} post={post}
-                                onLikeToggle={onLikeToggle}
-                                onDelete={onDelete}
-                                onUpdate={onUpdate} />
-                        ))}
+                    <div style={{ minHeight: '144px' }}>
+                        <Suspense fallback={<div className="h-[144px] w-full" />}>
+                            <StoryRail />
+                        </Suspense>
                     </div>
+                    
+                    <div className="feed-posts">
+                        <Suspense fallback={null}>
+                            {posts.filter(Boolean).map((post) => (
+                                <PostCard key={post._id} post={post} onLikeToggle={onLikeToggle} onDelete={onDelete} onUpdate={onUpdate} />
+                            ))}
+                        </Suspense>
 
-                    {loading && (
-                        <div key="feed-skeleton" className="l-stack l-stack-lg pt-4 px-0">
-                            {[1, 2].map(id => (
-                                <div key={id} className="l-post-card p-0 overflow-hidden border-white/5">
-                                    <div className="post-card-header px-4 py-3">
-                                        <div className="post-card-user">
-                                            <div className="skeleton w-10 h-10 rounded-full" />
+                        {(isLoading || isFetchingNextPage) && (
+                            <div className="flex flex-col gap-8 pb-20">
+                                {[...Array(3)].map((_, i) => (
+                                    <div key={i} className="l-post-card p-0 overflow-hidden border-white/5">
+                                        <div className="p-4 flex items-center gap-3">
+                                            <div className="skeleton rounded-full w-10 h-10" />
                                             <div className="flex flex-col gap-2">
                                                 <div className="skeleton h-3 w-28 rounded-full" />
                                                 <div className="skeleton h-2 w-20 rounded-full opacity-40" />
                                             </div>
                                         </div>
-                                        <div className="skeleton w-8 h-4 rounded-lg opacity-20" />
-                                    </div>
-                                    <div className="skeleton w-full aspect-square md:aspect-[4/5] rounded-none" />
+                                        <div className="skeleton w-full aspect-square md:aspect-[4/5] rounded-none" />
                                     <div className="p-4 space-y-4">
                                         <div className="flex justify-between items-center">
                                             <div className="flex gap-4">
@@ -272,7 +278,7 @@ export default function Feed() {
                     )}
 
 
-                    {!loading && posts.length === 0 && (
+                    {!isLoading && posts.length === 0 && (
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -293,7 +299,7 @@ export default function Feed() {
                         </motion.div>
                     )}
 
-                    {hasNextPage && !loading && posts.length > 0 && (
+                    {hasNextPage && !isLoading && posts.length > 0 && (
                         <div className="flex justify-center py-8">
                             <motion.button className="btn btn-secondary px-8"
                                 onClick={() => fetchNextPage()}
@@ -303,6 +309,7 @@ export default function Feed() {
                         </div>
                     )}
                 </div>
+            </div>
 
                 {/* ── Right panel ───────────── */}
                 <aside className="l-side-panel">
