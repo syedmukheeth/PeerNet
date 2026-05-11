@@ -113,40 +113,40 @@ export default function Profile() {
 
     if (loading) return (
         <div key="profile-skeleton" className="profile-page-wrap">
-            <div className="profile-header px-6 md:px-12 py-10 md:py-16">
-                <div className="profile-avatar-col">
-                    <div className="skeleton skeleton-circle w-[120px] h-[120px] md:w-[150px] md:h-[150px]" />
+            <header className="profile-header-v2">
+                <div className="profile-avatar-wrap">
+                    <div className="skeleton w-[80px] h-[80px] md:w-[150px] md:h-[150px] rounded-full" />
                 </div>
                 <div className="profile-info-col">
-                    <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-                        <div className="skeleton h-10 w-48 rounded-xl" />
-                        <div className="flex gap-3">
-                            <div className="skeleton h-10 w-28 rounded-xl" />
-                            <div className="skeleton h-10 w-28 rounded-xl" />
+                    <div className="profile-info-main">
+                        <div className="profile-header-top">
+                            <div className="skeleton h-8 w-40 md:w-64 rounded-xl" />
+                        </div>
+                        <div className="profile-stats-v2 mt-6 hidden md:flex">
+                            <div className="skeleton h-5 w-20 rounded-md" />
+                            <div className="skeleton h-5 w-20 rounded-md" />
+                            <div className="skeleton h-5 w-20 rounded-md" />
+                        </div>
+                        <div className="profile-bio-v2 mt-6 space-y-3">
+                            <div className="skeleton h-5 w-32 rounded-lg" />
+                            <div className="skeleton h-4 w-full max-w-[300px] rounded-md opacity-60" />
+                            <div className="skeleton h-4 w-24 rounded-md opacity-40" />
                         </div>
                     </div>
-                    <div className="flex gap-10 mb-8">
-                        <div className="skeleton h-5 w-20 rounded-md" />
-                        <div className="skeleton h-5 w-20 rounded-md" />
-                        <div className="skeleton h-5 w-20 rounded-md" />
-                    </div>
-                    <div className="space-y-4">
-                        <div className="skeleton h-6 w-40 rounded-lg" />
-                        <div className="skeleton h-4 w-full max-w-sm rounded-md" />
-                        <div className="skeleton h-4 w-32 rounded-md" />
-                    </div>
                 </div>
-            </div>
-            <div className="profile-tabs border-t border-white/5 py-4">
+            </header>
+
+            <div className="profile-tabs border-t border-white/5 py-4 mt-8">
                 <div className="flex justify-center gap-12">
-                    <div className="skeleton h-8 w-24 rounded-lg" />
-                    <div className="skeleton h-8 w-24 rounded-lg" />
-                    <div className="skeleton h-8 w-24 rounded-lg" />
+                    <div className="skeleton h-8 w-24 rounded-lg opacity-40" />
+                    <div className="skeleton h-8 w-24 rounded-lg opacity-20" />
+                    <div className="skeleton h-8 w-24 rounded-lg opacity-20" />
                 </div>
             </div>
-            <div className="profile-grid px-4 md:px-6 mt-8">
+
+            <div className="profile-grid px-0 mt-2">
                 {[...Array(9)].map((_, i) => (
-                    <div key={i} className="skeleton aspect-square rounded-xl" />
+                    <div key={i} className="skeleton aspect-square rounded-none" />
                 ))}
             </div>
         </div>
@@ -161,188 +161,190 @@ export default function Profile() {
     const avatar = profile.avatarUrl || `https://ui-avatars.com/api/?name=${profile.username}&size=200&background=6366F1&color=fff`
 
     return (
-        <div className="profile-page-wrap fade-in">
+        <motion.div 
+            className="profile-page-wrap"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+        >
             {/* ── Header ── */}
             <header className="profile-header-v2">
                 <div className="profile-avatar-wrap">
-                    <div className={`avatar-ring ${hasStory ? 'has-stories' : ''}`} onClick={() => hasStory && setViewerOpen(true)}>
+                    <div className={`avatar-ring ${hasStory ? 'has-stories' : ''} cursor-pointer group`} onClick={() => hasStory && setViewerOpen(true)}>
                         <img 
                             src={profile.avatarUrl || `https://ui-avatars.com/api/?name=${profile.username}&background=6366F1&color=fff`} 
-                            className="profile-avatar-img" 
+                            className="profile-avatar-img transition-transform group-hover:scale-105" 
                             alt={profile.username} 
                         />
                     </div>
                 </div>
 
                 <div className="profile-info-col">
-
-                {/* Desktop/Tablet Header Structure */}
-                <div className="profile-info-main">
-                    {/* Row 1: Username + Actions */}
-                    <div className="profile-header-top">
-                        <div className="flex items-center gap-2">
-                            <h1 className="profile-username">{profile.username}</h1>
-                            {profile.isVerified && <HiBadgeCheck className="text-accent text-[20px]" />}
+                    <div className="profile-info-main">
+                        <div className="profile-header-top">
+                            <div className="flex items-center gap-2">
+                                <h1 className="profile-username font-light">@{profile.username}</h1>
+                                {profile.isVerified && <HiBadgeCheck className="text-accent text-[20px]" />}
+                            </div>
+                            <div className="profile-actions-row">
+                                {isMe ? (
+                                    <>
+                                        <button className="btn btn-secondary btn-sm px-6 h-9 rounded-lg font-semibold" onClick={() => setEditProfile(true)}>
+                                            Edit Profile
+                                        </button>
+                                        <button className="btn btn-secondary btn-sm p-2 rounded-lg" onClick={() => navigate('/settings')}>
+                                            <HiCog size={20} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <motion.button
+                                            className={`btn btn-sm min-w-[100px] h-9 rounded-lg font-bold ${following ? 'btn-secondary' : 'btn-primary'}`}
+                                            onClick={handleFollow}
+                                            whileTap={{ scale: 0.96 }}>
+                                            {following ? 'Following' : 'Follow'}
+                                        </motion.button>
+                                        <motion.button
+                                            className="btn btn-secondary btn-sm px-6 h-9 rounded-lg font-bold flex items-center gap-2"
+                                            onClick={handleMessage}
+                                            disabled={messaging}
+                                            whileTap={{ scale: 0.96 }}>
+                                            {messaging ? <span className="spinner-sm" /> : 'Message'}
+                                        </motion.button>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                        <div className="profile-actions-row">
-                            {isMe ? (
-                                <>
-                                    <button className="btn btn-secondary btn-sm px-5" onClick={() => setEditProfile(true)}>
-                                        Edit Profile
-                                    </button>
-                                    <button className="btn btn-secondary btn-sm" onClick={() => navigate('/settings')}>
-                                        <HiCog size={18} />
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <motion.button
-                                        className={`btn btn-sm min-w-[100px] ${following ? 'btn-secondary' : 'btn-primary'}`}
-                                        onClick={handleFollow}
-                                        whileTap={{ scale: 0.95 }}>
-                                        {following ? 'Following' : 'Follow'}
-                                    </motion.button>
-                                    <motion.button
-                                        className="btn btn-secondary btn-sm px-4 flex items-center gap-2"
-                                        onClick={handleMessage}
-                                        disabled={messaging}
-                                        whileTap={{ scale: 0.95 }}>
-                                        {messaging ? <span className="spinner-sm" /> : 'Message'}
-                                    </motion.button>
-                                </>
+
+                        <div className="profile-stats-v2">
+                            <div className="profile-stat-item">
+                                <span className="stat-value">{posts.length}</span>
+                                <span className="stat-label">posts</span>
+                            </div>
+                            <div className="profile-stat-item cursor-pointer group" onClick={() => setShowFollowers(true)}>
+                                <span className="stat-value group-hover:text-accent transition-colors">{profile.followersCount || 0}</span>
+                                <span className="stat-label">followers</span>
+                            </div>
+                            <div className="profile-stat-item cursor-pointer group" onClick={() => setShowFollowing(true)}>
+                                <span className="stat-value group-hover:text-accent transition-colors">{profile.followingCount || 0}</span>
+                                <span className="stat-label">following</span>
+                            </div>
+                        </div>
+
+                        <div className="profile-bio-v2">
+                            <div className="font-bold text-[15px] text-text-1">{profile.fullName}</div>
+                            <div className="text-[14px] leading-relaxed whitespace-pre-wrap mt-1 text-text-2">{profile.bio || 'Social Media Enthusiast'}</div>
+                            {profile.website && (
+                                <a href={profile.website} target="_blank" rel="noreferrer" className="profile-link-v2 mt-2 inline-flex items-center gap-1 text-accent font-medium hover:underline">
+                                    <HiLink size={14} />
+                                    {profile.website.replace(/^https?:\/\//, '')}
+                                </a>
                             )}
                         </div>
-                    </div>
-
-                    {/* Row 2: Stats */}
-                    <div className="profile-stats-v2">
-                        <div className="profile-stat-item">
-                            <span className="stat-value">{posts.length}</span>
-                            <span className="stat-label">posts</span>
-                        </div>
-                        <div className="profile-stat-item cursor-pointer" onClick={() => setShowFollowers(true)}>
-                            <span className="stat-value">{profile.followersCount || 0}</span>
-                            <span className="stat-label">followers</span>
-                        </div>
-                        <div className="profile-stat-item cursor-pointer" onClick={() => setShowFollowing(true)}>
-                            <span className="stat-value">{profile.followingCount || 0}</span>
-                            <span className="stat-label">following</span>
-                        </div>
-                    </div>
-
-                    {/* Row 3: Bio */}
-                    <div className="profile-bio-v2">
-                        <div className="font-bold text-[15px]">{profile.fullName}</div>
-                        <div className="text-[14px] leading-relaxed whitespace-pre-wrap mt-1">{profile.bio}</div>
-                        {profile.website && (
-                            <a href={profile.website} target="_blank" rel="noreferrer" className="profile-link-v2">
-                                <HiPlus size={12} className="rotate-45" />
-                                {profile.website.replace(/^https?:\/\//, '')}
-                            </a>
-                        )}
-                    </div>
                     </div>
                 </div>
             </header>
 
             {/* ── Tabs ── */}
-            <div className="profile-tabs">
+            <div className="profile-tabs border-t border-white/5 mt-10">
                 {[
-                    { key: 'posts', icon: <HiViewGrid />, label: 'Posts' },
-                    { key: 'shorts', icon: <HiFilm />, label: 'Shorts' },
-                    ...(isMe ? [{ key: 'saved', icon: <HiBookmark />, label: 'Saved' }] : []),
+                    { key: 'posts', icon: <HiViewGrid />, label: 'POSTS' },
+                    { key: 'shorts', icon: <HiFilm />, label: 'SHORTS' },
+                    ...(isMe ? [{ key: 'saved', icon: <HiBookmark />, label: 'SAVED' }] : []),
                 ].map(({ key, icon, label }) => (
-                    <button key={key} onClick={() => setTab(key)}
+                    <button key={key} 
+                        onClick={() => {
+                            setTab(key)
+                            if (key === 'saved' && savedPosts.length === 0) setSavedLoading(true)
+                        }}
                         className={`profile-tab-btn ${tab === key ? 'active' : ''}`}>
-                        {icon}
-                        <span>{label}</span>
+                        <span className="flex items-center gap-2">
+                            {icon}
+                            <span className="text-[12px] tracking-widest font-semibold">{label}</span>
+                        </span>
                     </button>
                 ))}
             </div>
 
-            {/* ── Grid ── */}
-            {(() => {
-                let displayPosts = []
-                let emptyIcon = '📷'
-                let emptyTitle = 'No posts yet'
-                let emptyDesc = isMe ? 'Share your first photo or video' : ''
-                let isLoading = false
+            {/* ── Grid Content ── */}
+            <div className="profile-content-min-h min-h-[400px] mt-1">
+                {(() => {
+                    let displayPosts = []
+                    let emptyIcon = <HiViewGrid />
+                    let emptyTitle = 'No posts yet'
+                    let emptyDesc = isMe ? 'When you share photos, they will appear here.' : ''
+                    let gridLoading = false
 
-                if (tab === 'posts') {
-                    displayPosts = posts // Show all posts including videos in main grid
-                } else if (tab === 'shorts') {
-                    displayPosts = posts.filter(p => p.mediaType === 'video')
-                    emptyIcon = '🎬'
-                    emptyTitle = 'No Shorts yet'
-                    emptyDesc = isMe ? 'Share your first video' : ''
-                } else if (tab === 'saved') {
-                    displayPosts = savedPosts
-                    isLoading = savedLoading
-                    emptyIcon = '🔖'
-                    emptyTitle = isMe ? 'Nothing saved yet' : 'Private'
-                    emptyDesc = isMe ? 'Save posts to view them here' : ''
-                }
+                    if (tab === 'posts') {
+                        displayPosts = posts
+                    } else if (tab === 'shorts') {
+                        displayPosts = posts.filter(p => p.mediaType === 'video')
+                        emptyIcon = <HiFilm />
+                        emptyTitle = 'No Shorts yet'
+                    } else if (tab === 'saved') {
+                        displayPosts = savedPosts
+                        gridLoading = savedLoading
+                        emptyIcon = <HiBookmark />
+                        emptyTitle = 'Saved'
+                        emptyDesc = isMe ? 'Only you can see what you\'ve saved.' : 'Private'
+                    }
 
-                if (isLoading) return (
-                    <div key="saved-posts-skeleton" className="profile-grid">
-                        {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="skeleton aspect-square" />
-                        ))}
-                    </div>
-                )
-
-                return (
-                    <>
-                        <div className="profile-grid">
-                            {displayPosts.map((p, i) => (
-                                <motion.div
-                                    key={p._id}
-                                    className="profile-grid-item"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ 
-                                        duration: 0.3,
-                                        delay: Math.min(i * 0.03, 0.3) 
-                                    }}
-                                >
-                                    <Link to={`/posts/${p._id}`} className="w-full h-full block relative">
-                                        {p.mediaType === 'video'
-                                            ? <video 
-                                                src={p.mediaUrl} 
-                                                className="w-full h-full object-cover"
-                                                muted 
-                                                playsInline
-                                            />
-                                            : <img 
-                                                src={p.mediaUrl} 
-                                                alt="" 
-                                                loading="lazy" 
-                                                className="w-full h-full object-cover"
-                                            />
-                                        }
-                                        <div className="profile-grid-overlay">
-                                            <span className="flex items-center gap-2">
-                                                <HiHeart /> {p.likesCount || 0}
-                                            </span>
-                                            <span className="flex items-center gap-2">
-                                                <HiChat /> {p.commentsCount || 0}
-                                            </span>
-                                        </div>
-                                    </Link>
-                                </motion.div>
+                    if (gridLoading) return (
+                        <div className="profile-grid px-0">
+                            {[...Array(9)].map((_, i) => (
+                                <div key={`skel-${i}`} className="skeleton aspect-square rounded-none" />
                             ))}
                         </div>
-                        {displayPosts.length === 0 && (
-                            <div className="empty-state-wrap pb-20">
-                                <div className="empty-state-icon">{emptyIcon}</div>
-                                <h2 className="t-h2">{emptyTitle}</h2>
-                                {emptyDesc && <p className="t-body text-muted max-w-[280px] mx-auto">{emptyDesc}</p>}
+                    )
+
+                    if (displayPosts.length === 0) return (
+                        <div className="flex flex-col items-center justify-center py-24 text-center">
+                            <div className="w-16 h-16 rounded-full border border-text-1 flex items-center justify-center text-3xl mb-4 opacity-50">
+                                {emptyIcon}
                             </div>
-                        )}
-                    </>
-                )
-            })()}
+                            <h2 className="text-3xl font-light text-text-1">{emptyTitle}</h2>
+                            <p className="text-text-2 mt-2 max-w-[300px]">{emptyDesc}</p>
+                        </div>
+                    )
+
+                    return (
+                        <div className="profile-grid px-0">
+                            {displayPosts.map((p, i) => (
+                                <Link 
+                                    key={p._id} 
+                                    to={`/posts/${p._id}`} 
+                                    className="profile-grid-item block relative group"
+                                >
+                                    {p.mediaType === 'video' ? (
+                                        <video 
+                                            src={p.mediaUrl} 
+                                            className="w-full h-full object-cover"
+                                            muted 
+                                            playsInline
+                                        />
+                                    ) : (
+                                        <img 
+                                            src={p.mediaUrl} 
+                                            alt="" 
+                                            loading="lazy" 
+                                            className="w-full h-full object-cover"
+                                        />
+                                    )}
+                                    <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-8 text-white font-bold">
+                                        <span className="flex items-center gap-2"><HiHeart className="text-2xl" /> {p.likesCount || 0}</span>
+                                        <span className="flex items-center gap-2"><HiChatAlt2 className="text-2xl" /> {p.commentsCount || 0}</span>
+                                    </div>
+                                    {p.mediaType === 'video' && (
+                                        <div className="absolute top-3 right-3 text-white text-xl drop-shadow-md">
+                                            <HiFilm />
+                                        </div>
+                                    )}
+                                </Link>
+                            ))}
+                        </div>
+                    )
+                })()}
+            </div>
 
             <UserListModal
                 isOpen={showFollowers}
