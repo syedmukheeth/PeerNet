@@ -969,13 +969,22 @@ const AuditModule = ({ logs, loading }) => (
                                 <span className="text-[8px] font-bold text-muted uppercase tracking-widest opacity-50">{new Date(post.createdAt).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        <div className="px-2 py-0.5 rounded-lg bg-surface-subtle border border-admin-border text-[8px] font-black text-muted uppercase tracking-widest">
-                            {post.type}
+                        <div className="flex items-center gap-2">
+                            <div className="hidden xs:block px-2 py-1 rounded-lg bg-surface-subtle border border-admin-border text-[8px] font-black text-muted uppercase tracking-widest">
+                                {post.type}
+                            </div>
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); onDelete(post._id); }}
+                                className="w-8 h-8 rounded-xl bg-error/5 text-error border border-error/10 flex items-center justify-center hover:bg-error hover:text-white transition-all group/del shadow-sm hover:shadow-error/20"
+                                title="Purge Content"
+                            >
+                                <HiTrash size={14} className="group-hover/del:scale-110 transition-transform" />
+                            </button>
                         </div>
                     </div>
 
-                    {/* Media Body - Compact Height */}
-                    <div className="h-32 bg-black relative overflow-hidden group/media">
+                    {/* Media Body - Pro Aspect Ratio */}
+                    <div className="aspect-[4/5] bg-black relative overflow-hidden group/media">
                         {post.mediaUrl ? (
                             <img src={post.mediaUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover/media:scale-110" alt="" />
                         ) : (
@@ -984,17 +993,6 @@ const AuditModule = ({ logs, loading }) => (
                                 <span className="text-[9px] font-black uppercase tracking-[0.4em]">Artifact</span>
                             </div>
                         )}
-                        
-                        {/* Desktop Hover Overlay */}
-                        <div className="hidden lg:flex absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all items-center justify-center backdrop-blur-[4px]">
-                            <button 
-                                onClick={() => onDelete(post._id)} 
-                                className="px-5 py-3 rounded-xl bg-error text-white shadow-2xl shadow-error/40 hover:scale-110 active:scale-95 transition-all transform translate-y-2 group-hover:translate-y-0 duration-500 flex items-center gap-2"
-                            >
-                                <HiTrash size={18} />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Delete</span>
-                            </button>
-                        </div>
                     </div>
 
                     {/* Meta/Content */}
@@ -1011,21 +1009,10 @@ const AuditModule = ({ logs, loading }) => (
                         </div>
 
                         {post.content && (
-                            <p className="text-[12px] font-medium text-muted leading-relaxed line-clamp-2 bg-surface-subtle/30 p-3 rounded-xl border border-admin-border">
+                            <p className="text-[12px] font-medium text-muted leading-relaxed line-clamp-3 bg-surface-subtle/30 p-3 rounded-xl border border-admin-border">
                                 {post.content}
                             </p>
                         )}
-                        
-                        {/* Mobile Action Bar (Visible < 1024px) */}
-                        <div className="lg:hidden mt-auto pt-3 border-t border-admin-border">
-                            <button 
-                                onClick={() => onDelete(post._id)} 
-                                className="w-full py-3 rounded-xl bg-error text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-error/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
-                            >
-                                <HiTrash size={16} />
-                                Delete
-                            </button>
-                        </div>
                     </div>
                 </div>
             ))}
