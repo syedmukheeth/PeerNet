@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api, { CHAT_BASE_URL } from '../api/axios'
 import toast from 'react-hot-toast'
-import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChat, HiBadgeCheck, HiChatAlt2, HiCog, HiPlus } from 'react-icons/hi'
+import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChatAlt2, HiBadgeCheck, HiCog, HiDotsHorizontal, HiLink } from 'react-icons/hi'
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
@@ -30,7 +30,7 @@ export default function Profile() {
     const [storyGroupData, setStoryGroupData] = useState(null)
     const [viewerOpen, setViewerOpen] = useState(false)
 
-    const isMe = me?._id === id
+    const isMe = me?._id === id || id === 'me'
 
     useEffect(() => {
         const fetchAll = async () => {
