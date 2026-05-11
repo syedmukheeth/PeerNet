@@ -13155,6 +13155,54 @@ textarea:focus-visible {
   min-height: 0;
 }
 
+/* Chat Menu Dropdown */
+.zn-chat-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 200px;
+  background: var(--surface-el);
+  border: 1px solid var(--border-md);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+  /* Even higher than header */
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transform: translateZ(20px);
+}
+
+.zn-chat-menu button {
+  background: none;
+  border: none;
+  color: var(--text-1);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zn-chat-menu button:hover {
+  background: var(--hover);
+  color: var(--accent);
+}
+
+.zn-menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  background: rgba(0, 0, 0, 0.1);
+}
+
 /* Tablet — side-by-side layout */
 @media (min-width: 768px) and (max-width: 1263px) {
   .zn-messages-root {
@@ -13229,56 +13277,6 @@ textarea:focus-visible {
     height: calc(56px + env(safe-area-inset-top, 0px)) !important;
     align-items: center !important;
   }
-
-
-  /* Chat Menu Dropdown */
-  .zn-chat-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-    width: 200px;
-    background: var(--surface-el);
-    border: 1px solid var(--border-md);
-    border-radius: 12px;
-    padding: 6px;
-    box-shadow: var(--shadow-lg);
-    z-index: 2000;
-    /* Even higher than header */
-    display: flex;
-    flex-direction: column;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    transform: translateZ(20px);
-  }
-
-  .zn-chat-menu button {
-    background: none;
-    border: none;
-    color: var(--text-1);
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .zn-chat-menu button:hover {
-    background: var(--hover);
-    color: var(--accent);
-  }
-
-  .zn-menu-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1050;
-    background: rgba(0, 0, 0, 0.1);
-  }
-
 
 
   /* Default: show only sidebar (list) */
