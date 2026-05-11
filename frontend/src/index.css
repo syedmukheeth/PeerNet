@@ -2012,29 +2012,19 @@ textarea:focus-visible {
 .post-card-media-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  min-height: 300px;
+  min-height: 200px;
   background: #000;
-  /* Solid black backdrop to contain any aspect ratio */
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-}
-@media (min-width: 768px) {
-  .post-card-media-wrap {
-    aspect-ratio: 4 / 5;
-  }
 }
 
 .post-card-media {
   width: 100%;
   height: auto;
-  max-height: 80vh;
-  /* Professional cap for vertical media */
+  max-height: 75vh;
   display: block;
   object-fit: contain;
-  /* CRITICAL: Do not crop any part of the user's content */
   background: #000;
 }
 
