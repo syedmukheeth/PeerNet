@@ -265,8 +265,8 @@ export default function Messages() {
         const uniqueMessages = []
         const seenIds = new Set()
         
-        // We want newest first for column-reverse
-        const sorted = [...messages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        // We want oldest first for standard column flow
+        const sorted = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
 
         sorted.forEach(m => {
             if (!seenIds.has(m._id)) {
@@ -277,8 +277,8 @@ export default function Messages() {
 
         uniqueMessages.forEach((m, idx) => {
             const senderId = m.sender?._id || m.sender
-            const prev = uniqueMessages[idx + 1] // In reversed array, "prev" in time is next in array
-            const next = uniqueMessages[idx - 1] // In reversed array, "next" in time is prev in array
+            const prev = uniqueMessages[idx - 1] 
+            const next = uniqueMessages[idx + 1] 
             
             const isSameAsPrev = prev && (prev.sender?._id || prev.sender) === senderId
             const isSameAsNext = next && (next.sender?._id || next.sender) === senderId
@@ -289,17 +289,18 @@ export default function Messages() {
 
             let pos = 'single'
             if (isSameAsPrev && isSameAsNext && !isTimeGap) pos = 'middle'
-            else if (isSameAsPrev && !isTimeGap) pos = 'bottom'
-            else if (isSameAsNext) pos = 'top'
+            else if (isSameAsPrev && !isTimeGap) pos = 'top'
+            else if (isSameAsNext) pos = 'bottom'
 
             groups.push({ type: 'message', value: m, id: m._id, pos, isNewGroup: !isSameAsPrev || isTimeGap })
 
-            // Date divider - in reversed flow, we add it AFTER the oldest message of that day
+            // Date divider
             const date = new Date(m.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
-            const nextDate = prev ? new Date(prev.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }) : ''
+            const prevDate = prev ? new Date(prev.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }) : ''
             
-            if (date !== nextDate) {
-                groups.push({ type: 'date', value: date, id: `date-${date}` })
+            if (date !== prevDate) {
+                // Insert divider before the current message
+                groups.splice(groups.length - 1, 0, { type: 'date', value: date, id: `date-${m._id}` })
             }
         })
         return groups
@@ -308,16 +309,18 @@ export default function Messages() {
     const scrollToBottom = useCallback((instant = false) => {
         if (viewportRef.current) {
             viewportRef.current.scrollTo({
-                top: 0, // In column-reverse, 0 is the bottom
+                top: viewportRef.current.scrollHeight,
                 behavior: instant ? 'auto' : 'smooth'
             })
         }
     }, [])
 
     useEffect(() => {
-        if (!loadingMsgs && messages.length > prevMsgCount.current) {
-            // Only scroll smooth for new messages, otherwise column-reverse keeps us at bottom
-            if (prevMsgCount.current > 0) {
+        if (!loadingMsgs && messages.length > 0) {
+            if (isInitialLoad.current) {
+                scrollToBottom(true)
+                isInitialLoad.current = false
+            } else if (messages.length > prevMsgCount.current) {
                 scrollToBottom(false)
             }
             prevMsgCount.current = messages.length
