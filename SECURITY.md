@@ -4,8 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| Latest  | ✅ |
-| < 1.0   | ❌ |
+| 1.0.x   | ✅ (Active) |
+| < 1.0   | ❌ (Deprecated) |
 
 ## Reporting a Vulnerability
 
@@ -25,16 +25,19 @@ Instead, report it privately:
 
 ### Response Timeline
 
-- **Acknowledgement:** Within 48 hours
-- **Status Update:** Within 7 days
-- **Fix/Patch:** As soon as possible depending on severity
+- **Acknowledgement:** Within 24-48 hours
+- **Status Update:** Weekly until resolved
+- **Fix/Patch:** Prioritized based on severity (Critical/High/Medium)
 
 ## Security Best Practices Used
 
-- JWT authentication with refresh tokens
-- Rate limiting on all API endpoints
-- Input sanitization (NoSQL injection protection)
-- CORS restrictions
+- **JWT Authentication**: Secure stateless authentication with short-lived access tokens and rotated refresh tokens.
+- **Role-Based Access Control (RBAC)**: Strict access levels for Users, Moderation, and Global Administrators.
+- **Rate Limiting**: Intelligent throttling on sensitive endpoints (Login, Register, Stories) to prevent brute-force attacks.
+- **Input Sanitization**: Multi-layer protection against NoSQL injection and XSS (Cross-Site Scripting).
+- **CORS Management**: Strict origin filtering to prevent unauthorized cross-domain requests.
+- **Socket Security**: Authenticated websocket handshakes for secure real-time messaging.
+- **Asset Integrity**: Cloudinary signed uploads and delivery for media security.
 - HTTPS enforced in production
 
 ## If Credentials Were Leaked (e.g. in Git History)
