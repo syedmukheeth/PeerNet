@@ -218,7 +218,6 @@ export default function Messages() {
     const viewportRef = useRef(null)
     const markReadMutation = useMarkRead(convoId)
     const prevMsgCount = useRef(0)
-    const isInitialLoad = useRef(true)
 
     const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
 
@@ -260,13 +259,15 @@ export default function Messages() {
 
     const groupedMessages = useMemo(() => {
         const groups = []
-        let lastDate = ''
         
         // DEDUPLICATE MESSAGES BY ID
         const uniqueMessages = []
         const seenIds = new Set()
         
-        filteredMessages.forEach(m => {
+        // We want newest first for column-reverse
+        const sorted = [...messages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+        sorted.forEach(m => {
             if (!seenIds.has(m._id)) {
                 seenIds.add(m._id)
                 uniqueMessages.push(m)
@@ -274,20 +275,16 @@ export default function Messages() {
         })
 
         uniqueMessages.forEach((m, idx) => {
-            const date = new Date(m.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
-            if (date !== lastDate) {
-                groups.push({ type: 'date', value: date, id: `date-${date}` })
-                lastDate = date
-            }
-
-            const prev = filteredMessages[idx - 1]
-            const next = filteredMessages[idx + 1]
             const senderId = m.sender?._id || m.sender
+            const prev = uniqueMessages[idx + 1] // In reversed array, "prev" in time is next in array
+            const next = uniqueMessages[idx - 1] // In reversed array, "next" in time is prev in array
+            
             const isSameAsPrev = prev && (prev.sender?._id || prev.sender) === senderId
             const isSameAsNext = next && (next.sender?._id || next.sender) === senderId
-            const prevTime = prev ? new Date(prev.createdAt).getTime() : 0
+            
             const currTime = new Date(m.createdAt).getTime()
-            const isTimeGap = (currTime - prevTime) > 15 * 60 * 1000
+            const prevTime = prev ? new Date(prev.createdAt).getTime() : 0
+            const isTimeGap = prev && (currTime - prevTime) > 15 * 60 * 1000
 
             let pos = 'single'
             if (isSameAsPrev && isSameAsNext && !isTimeGap) pos = 'middle'
@@ -295,30 +292,31 @@ export default function Messages() {
             else if (isSameAsNext) pos = 'top'
 
             groups.push({ type: 'message', value: m, id: m._id, pos, isNewGroup: !isSameAsPrev || isTimeGap })
+
+            // Date divider - in reversed flow, we add it AFTER the oldest message of that day
+            const date = new Date(m.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
+            const nextDate = prev ? new Date(prev.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }) : ''
+            
+            if (date !== nextDate) {
+                groups.push({ type: 'date', value: date, id: `date-${date}` })
+            }
         })
         return groups
-    }, [filteredMessages])
+    }, [messages])
 
     const scrollToBottom = useCallback((instant = false) => {
         if (viewportRef.current) {
             viewportRef.current.scrollTo({
-                top: viewportRef.current.scrollHeight,
-                behavior: instant ? 'instant' : 'smooth'
+                top: 0, // In column-reverse, 0 is the bottom
+                behavior: instant ? 'auto' : 'smooth'
             })
         }
     }, [])
 
     useEffect(() => {
-        if (!loadingMsgs && messages.length > 0) {
-            // If it's the first time we have messages for this convoId, scroll instant
-            if (isInitialLoad.current) {
-                scrollToBottom(true)
-                // Fallback for slow layout/animations
-                setTimeout(() => scrollToBottom(true), 50)
-                setTimeout(() => scrollToBottom(true), 250)
-                isInitialLoad.current = false
-            } else if (messages.length > prevMsgCount.current) {
-                // New messages arrived, scroll smooth
+        if (!loadingMsgs && messages.length > prevMsgCount.current) {
+            // Only scroll smooth for new messages, otherwise column-reverse keeps us at bottom
+            if (prevMsgCount.current > 0) {
                 scrollToBottom(false)
             }
             prevMsgCount.current = messages.length

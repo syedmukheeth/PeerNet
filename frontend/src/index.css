@@ -9505,9 +9505,8 @@ textarea:focus-visible {
   padding: 20px 20px 40px;
   /* Increased bottom padding for last message comfort */
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse; /* PRO-LEVEL: Keeps scroll at bottom natively */
   justify-content: flex-start;
-  scroll-behavior: smooth;
 }
 
 /* Ensure empty space at top for short conversations if desired, 
