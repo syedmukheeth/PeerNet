@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-    HiUsers, HiCollection, HiTrash, HiRefresh, HiArrowRight,
-    HiKey, HiDatabase, HiGlobe, HiSearch, HiChatAlt2, HiFlag, 
-    HiTrendingUp, HiCog, HiShieldCheck, HiCheck, HiBan, HiSpeakerphone,
-    HiCubeTransparent, HiServer, HiLightningBolt, HiFingerPrint,
-    HiClock, HiDotsVertical, HiX, HiAdjustments, HiChevronRight, HiChevronLeft, HiTerminal, HiDatabase as HiHardDrive,
-    HiHome, HiOutlineLogout as HiExit, HiMenu
+    HiUsers, HiCollection, HiTrash, HiRefresh,
+    HiDatabase, HiGlobe, HiSearch, HiChatAlt2, HiFlag, 
+    HiTrendingUp, HiShieldCheck, HiCheck,
+    HiServer, HiLightningBolt,
+    HiClock, HiChevronRight, HiChevronLeft, HiTerminal, HiDatabase as HiHardDrive,
+    HiOutlineLogout as HiExit, HiMenu
 } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -154,8 +154,8 @@ const InfrastructurePulse = ({ pulse }) => {
 
     useEffect(() => {
         if (pulse) {
-            setLoad(pulse.load || load)
-            setLatency(pulse.latency || latency)
+            setLoad(prev => pulse.load || prev)
+            setLatency(prev => pulse.latency || prev)
         }
     }, [pulse])
 
@@ -262,25 +262,27 @@ const StatCard = ({ label, value, sub, icon, chartData, accent, loading }) => (
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${accent ? 'bg-error/10 text-error shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'bg-accent/10 text-accent shadow-[0_0_20px_rgba(var(--accent-rgb),0.1)]'} group-hover:scale-110 group-hover:rotate-3`}>
                         {React.cloneElement(icon, { size: 22 })}
                     </div>
-            {chartData && (
-                <div className="w-20 h-10 opacity-30 group-hover:opacity-100 transition-opacity duration-700">
-                    <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
+                    {chartData && (
+                        <div className="w-20 h-10 opacity-30 group-hover:opacity-100 transition-opacity duration-700">
+                            <Sparkline data={chartData} color={accent ? 'var(--error)' : 'var(--accent)'} />
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
-        
-        <div>
-            <div className="flex items-center gap-2 mb-1 opacity-40">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{label}</span>
-            </div>
-            <div className="text-4xl font-black text-primary tracking-tighter mb-4 group-hover:text-accent transition-colors duration-500">
-                {value}
-            </div>
-            <div className="flex items-center gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full ${accent ? 'bg-error animate-pulse' : 'bg-success shadow-[0_0_10px_rgba(34,197,94,0.4)]'}`} />
-                <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{sub}</span>
-            </div>
-        </div>
+                
+                <div>
+                    <div className="flex items-center gap-2 mb-1 opacity-40">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">{label}</span>
+                    </div>
+                    <div className="text-4xl font-black text-primary tracking-tighter mb-4 group-hover:text-accent transition-colors duration-500">
+                        {value}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${accent ? 'bg-error animate-pulse' : 'bg-success shadow-[0_0_10px_rgba(34,197,94,0.4)]'}`} />
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{sub}</span>
+                    </div>
+                </div>
+            </>
+        )}
     </div>
 )
 
@@ -288,7 +290,7 @@ const StatCard = ({ label, value, sub, icon, chartData, accent, loading }) => (
 
 // --- High-Fidelity Modules ---
 
-const AnalyticsModule = ({ stats, analytics }) => {
+const AnalyticsModule = ({ stats }) => {
     const chartData = stats?.charts?.userGrowth || []
     const pathData = chartData.length > 0 
         ? chartData.map((d, i) => `${(i / (chartData.length - 1)) * 1000},${300 - (d.count * 10)}`).join(' L ')
@@ -425,55 +427,6 @@ const InfrastructureModule = ({ pulse }) => (
         </div>
     </motion.div>
 )
-
-const StorageModule = ({ stats }) => {
-    const storage = stats?.storage || { usedMB: 2400, maxMB: 10240, percentage: 24 }
-    return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard label="Total Files" value={((stats?.totalPosts || 0) + (stats?.totalStories || 0)).toLocaleString()} sub="FILES & DATA" icon={<HiDatabase />} />
-                <StatCard label="Bandwidth" value={stats?.bandwidthUsage || '0 GB'} sub="DATA USAGE" icon={<HiTrendingUp />} />
-                <StatCard label="Disk Usage" value={`${(storage.usedMB / 1024).toFixed(1)} GB`} sub={`${storage.percentage}% CAPACITY`} icon={<HiHardDrive />} />
-                <StatCard label="Health Score" value={`${stats?.health?.synchronicity || '100'}%`} sub="SYSTEM STABILITY" icon={<HiShieldCheck />} />
-            </div>
-
-            <div className="admin-surface-el p-10">
-                <div className="flex items-center justify-between mb-10">
-                    <h3 className="text-xl font-black text-primary uppercase tracking-tight">Cloud Buckets</h3>
-                    <div className="flex gap-2">
-                        <span className="px-3 py-1 rounded-full bg-success/10 text-success text-[10px] font-black uppercase tracking-widest border border-success/20">Optimized</span>
-                    </div>
-                </div>
-                
-                <div className="space-y-10">
-                    {[
-                        { name: 'Media Storage (Production)', type: 'S3 Standard', size: `${(storage.usedMB * 0.7).toFixed(0)} MB`, usage: storage.percentage, color: 'var(--accent)' },
-                        { name: 'Static Assets (CDN)', type: 'CloudFront Edge', size: '120 MB', usage: 15, color: 'var(--success)' },
-                        { name: 'Database Backups', type: 'Glacier Deep Archive', size: `${(storage.usedMB * 0.3).toFixed(0)} MB`, usage: Math.min(100, storage.percentage + 10), color: 'var(--warning)' }
-                    ].map(bucket => (
-                        <div key={bucket.name} className="group cursor-pointer">
-                            <div className="flex justify-between items-end mb-4">
-                                <div>
-                                    <h4 className="text-sm font-black text-primary uppercase tracking-tight group-hover:text-accent transition-colors">{bucket.name}</h4>
-                                    <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-1 opacity-40">{bucket.type} • {bucket.size}</p>
-                                </div>
-                                <span className="text-[13px] font-black text-primary tabular-nums">{bucket.usage}%</span>
-                            </div>
-                            <div className="h-2 w-full bg-surface-subtle rounded-full overflow-hidden border border-border/50">
-                                <motion.div 
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${bucket.usage}%` }}
-                                    style={{ background: bucket.color }}
-                                    className="h-full rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)]"
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </motion.div>
-    )
-}
 
 /**
  * UserModule Component
@@ -1138,7 +1091,7 @@ const ReportModule = ({ reports, onResolve, loading }) => (
                     <div className="space-y-2">
                         <div className="text-[9px] font-black text-muted uppercase tracking-widest opacity-40">Targeted Content:</div>
                         <p className="text-[13px] text-muted leading-relaxed font-medium bg-black/20 p-4 rounded-2xl border border-white/5 italic">
-                            "{report.targetId?.content || report.targetId?.body || 'Content Unavailable'}"
+                            &quot;{report.targetId?.content || report.targetId?.body || 'Content Unavailable'}&quot;
                         </p>
                     </div>
 
@@ -1243,7 +1196,6 @@ export default function Admin() {
     const [users, setUsers] = useState([])
     const [posts, setPosts] = useState([])
     const [comments, setComments] = useState([])
-    const [feedback, setFeedback] = useState([])
     const [reports, setReports] = useState([])
     const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(true)
@@ -1309,14 +1261,6 @@ export default function Admin() {
         }
     }, [])
 
-    const fetchFeedback = useCallback(async () => {
-        try {
-            const { data } = await api.get('/admin/feedback')
-            if (data.success) setFeedback(data.items)
-        } catch {
-            toast.error('Feedback queue inaccessible')
-        }
-    }, [])
 
     const fetchReports = useCallback(async () => {
         try {
@@ -1347,35 +1291,6 @@ export default function Admin() {
     }
 
 
-
-    const handleModerationAction = async (report, action) => {
-        const targetId = report.targetId?._id || report.targetId
-        const userId = report.targetId?.author?._id || report.targetId?._id
-
-        try {
-            if (action === 'remove') {
-                const endpoint = report.targetType === 'Post' ? `/admin/posts/${targetId}` : 
-                               report.targetType === 'Comment' ? `/admin/comments/${targetId}` : 
-                               `/admin/stories/${targetId}`
-                await api.delete(endpoint)
-                await handleResolveReport(report._id, 'resolved', 'Content removed by admin')
-            } else if (action === 'warn') {
-                const message = prompt('Enter warning message for the user:', 'Your content has been flagged for violating community guidelines.')
-                if (!message) return
-                await api.post(`/admin/users/${userId}/warn`, { message })
-                toast.success('Warning sent')
-            } else if (action === 'ban') {
-                if (!window.confirm('Are you sure you want to BAN this user?')) return
-                await api.patch(`/admin/users/${userId}/status`, { status: 'banned', reason: 'Repeated violations' })
-                await handleResolveReport(report._id, 'resolved', 'User banned')
-            } else if (action === 'approve') {
-                await handleResolveReport(report._id, 'dismissed', 'Content approved after review')
-            }
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Moderation action failed')
-        }
-    }
-
     const fetchAnalytics = useCallback(async () => {
         try {
             const { data } = await api.get('/admin/analytics')
@@ -1398,12 +1313,11 @@ export default function Admin() {
             fetchUsers(), 
             fetchPosts(contentType), 
             fetchComments(),
-            fetchFeedback(), 
             fetchReports(), 
             fetchLogs()
         ])
         setLoading(false)
-    }, [fetchStats, fetchAnalytics, fetchUsers, fetchPosts, fetchComments, fetchFeedback, fetchReports, fetchLogs, contentType])
+    }, [fetchStats, fetchAnalytics, fetchUsers, fetchPosts, fetchComments, fetchReports, fetchLogs, contentType])
 
     useEffect(() => {
         init()
