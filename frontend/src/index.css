@@ -11656,8 +11656,11 @@ textarea:focus-visible {
   }
 
   .profile-header-top {
+    display: contents !important;
+  }
+
+  .profile-username-group {
     display: none !important;
-    /* Username is usually in the top fixed header on mobile */
   }
 
   /* Bio below Avatar/Stats */
@@ -11689,6 +11692,7 @@ textarea:focus-visible {
   }
 
   .profile-actions-row .btn {
+    flex: 1 !important;
     background: var(--card-alt) !important;
     border: 1px solid var(--border) !important;
     color: var(--text-1) !important;
