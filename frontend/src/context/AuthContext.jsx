@@ -48,10 +48,7 @@ export const AuthProvider = ({ children }) => {
     }, [fetchMe])
 
     const login = async (identifier, password) => {
-        console.log(`[AUTH CONTEXT] Login attempt for: ${identifier}`);
         const { data } = await api.post('/auth/login', { email: identifier, password }, { withCredentials: true })
-        
-        console.log('[AUTH CONTEXT] Login request successful, storing tokens...');
         localStorage.setItem('accessToken', data.data.accessToken)
         localStorage.setItem('refreshToken', data.data.refreshToken)
         _setUser(data.data.user)

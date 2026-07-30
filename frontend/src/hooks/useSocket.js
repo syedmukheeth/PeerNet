@@ -3,11 +3,14 @@ import { io } from 'socket.io-client'
 import { SOCKET_URL } from '../api/axios'
 
 /**
- * useSocket Hook - Big Tech Grade Socket Management
- * Handles singleton connection, auto-refresh on token change, 
- * and robust error handling.
+ * Shares a single socket.io connection across the app and keeps it
+ * authenticated when the access token is refreshed.
  */
 let socketInstance = null
+
+const log = (...args) => {
+    if (import.meta.env.DEV) console.log('[SOCKET]', ...args)
+}
 
 export const useSocket = (user) => {
     const [socket, setSocket] = useState(null)
@@ -15,7 +18,7 @@ export const useSocket = (user) => {
     useEffect(() => {
         if (!user) {
             if (socketInstance) {
-                console.log('[SOCKET] User logged out, disconnecting...')
+                log('user logged out, disconnecting')
                 socketInstance.disconnect()
                 socketInstance = null
                 setSocket(null)
@@ -28,7 +31,7 @@ export const useSocket = (user) => {
             if (!token) return
 
             if (!socketInstance) {
-                console.log('[SOCKET] Initializing singleton connection...')
+                log('opening connection')
                 socketInstance = io(SOCKET_URL, {
                     auth: { token },
                     transports: ['polling', 'websocket'],
@@ -40,16 +43,16 @@ export const useSocket = (user) => {
                 })
 
                 socketInstance.on('connect', () => {
-                    console.log('[SOCKET] Connected:', socketInstance.id)
+                    log('connected', socketInstance.id)
                     setSocket(socketInstance)
                 })
 
                 socketInstance.on('disconnect', (reason) => {
-                    console.log('[SOCKET] Disconnected:', reason)
+                    log('disconnected', reason)
                 })
 
                 socketInstance.on('connect_error', (err) => {
-                    console.error('[SOCKET] Connect error:', err.message)
+                    log('connect error', err.message)
                 })
 
                 setSocket(socketInstance)
@@ -65,17 +68,12 @@ export const useSocket = (user) => {
 
         connect()
 
-        // Nuclear Fix: Listen for token refreshes to re-authenticate
         const handleRefresh = (e) => {
-            console.log('[SOCKET] Token refreshed, re-authenticating socket...')
-            if (socketInstance) {
-                const newToken = e.detail?.accessToken || localStorage.getItem('accessToken')
-                socketInstance.auth.token = newToken
-                
-                // Force a disconnect and reconnect to ensure the server sees the new token
-                // and places the user in the correct room.
-                socketInstance.disconnect().connect()
-            }
+            if (!socketInstance) return
+            log('token refreshed, re-authenticating')
+            socketInstance.auth.token = e.detail?.accessToken || localStorage.getItem('accessToken')
+            // Reconnect so the server re-reads the token and re-joins the user's rooms
+            socketInstance.disconnect().connect()
         }
 
         window.addEventListener('peernet:token-refreshed', handleRefresh)

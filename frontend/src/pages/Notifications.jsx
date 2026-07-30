@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
@@ -8,7 +8,7 @@ import {
     HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiDotsHorizontal
 } from 'react-icons/hi'
 
-// Premium Time Formatter (IG Style)
+// Compact relative time, e.g. "3h", "2d"
 const formatTime = (date) => {
     const now = new Date();
     const then = new Date(date);
@@ -36,7 +36,7 @@ function SectionHeader({ label }) {
     )
 }
 
-function NotifRow({ n, index, onNavigate }) {
+function NotifRow({ n, onNavigate }) {
     const cfg = typeConfig[n.type] || typeConfig.like
     const avatar = n.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${n.sender?.username}&background=6366F1&color=fff`
     const [isFollowed, setIsFollowed] = useState(n.sender?.isFollowing || false)
@@ -51,17 +51,14 @@ function NotifRow({ n, index, onNavigate }) {
         try {
             if (originalState) await api.delete(`/users/${n.sender?._id}/follow`)
             else await api.post(`/users/${n.sender?._id}/follow`)
-        } catch (err) { setIsFollowed(originalState) }
+        } catch { setIsFollowed(originalState) }
         finally { setActionLoading(false) }
     }
 
     const navTarget = n.targetUrl || (n.type === 'follow' ? `/profile/${n.sender?._id}` : `/posts/${n.targetId || n.entityId?._id || n.entityId}`)
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.015, duration: 0.3 }}
+        <div
             className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}
             onClick={() => onNavigate(navTarget)}
         >
@@ -102,7 +99,7 @@ function NotifRow({ n, index, onNavigate }) {
                     </div>
                 )}
             </div>
-        </motion.div>
+        </div>
     )
 }
 
@@ -113,40 +110,42 @@ export default function Notifications() {
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
-    const [skip, setSkip] = useState(0)
+    // Held in a ref, not state: the paging cursor must not re-create loadNotifs,
+    // or the mount effect would refetch page 0 on every page load.
+    const skipRef = useRef(0)
     const LIMIT = 50
     const socket = useSocket(user)
 
-    const loadNotifs = async (isMore = false) => {
+    const loadNotifs = useCallback(async (isMore = false) => {
         if (isMore) setLoadingMore(true)
         else setLoading(true)
-        
+
         try {
-            const currentSkip = isMore ? skip + LIMIT : 0
+            const currentSkip = isMore ? skipRef.current + LIMIT : 0
             const { data } = await api.get(`/notifications?limit=${LIMIT}&skip=${currentSkip}`)
             const newNotifs = data.data || []
-            
+
             if (newNotifs.length < LIMIT) setHasMore(false)
-            
+            skipRef.current = currentSkip
+
             if (isMore) {
                 setNotifs(prev => [...prev, ...newNotifs])
-                setSkip(currentSkip)
             } else {
                 setNotifs(newNotifs)
-                setSkip(0)
                 if (newNotifs.some(n => !n.isRead)) {
                     await api.patch('/notifications/read')
                     window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
                 }
             }
-        } catch (err) { console.error("Notification load failed", err) }
-        finally { 
+        } catch (err) {
+            console.error('Notification load failed', err)
+        } finally {
             setLoading(false)
             setLoadingMore(false)
         }
-    }
+    }, [])
 
-    useEffect(() => { loadNotifs() }, [])
+    useEffect(() => { loadNotifs(false) }, [loadNotifs])
 
     useEffect(() => {
         if (!socket) return
@@ -230,7 +229,7 @@ export default function Notifications() {
                         </div>
                         <h2 className="text-xl font-bold text-primary mb-2">No notifications yet</h2>
                         <p className="text-muted text-[14.5px] max-w-[260px] leading-relaxed">
-                            When someone likes or comments on your posts, you'll see them here.
+                            When someone likes or comments on your posts, you&apos;ll see them here.
                         </p>
                     </motion.div>
                 ) : (
@@ -238,19 +237,19 @@ export default function Notifications() {
                         {categorized.today.length > 0 && (
                             <div className="mb-4">
                                 <SectionHeader label="Today" />
-                                {categorized.today.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
+                                {categorized.today.map((n) => <NotifRow key={n._id} n={n} onNavigate={navigate} />)}
                             </div>
                         )}
                         {categorized.thisWeek.length > 0 && (
                             <div className="mb-4">
                                 <SectionHeader label="This Week" />
-                                {categorized.thisWeek.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
+                                {categorized.thisWeek.map((n) => <NotifRow key={n._id} n={n} onNavigate={navigate} />)}
                             </div>
                         )}
                         {categorized.earlier.length > 0 && (
                             <div className="mb-4">
                                 <SectionHeader label="Earlier" />
-                                {categorized.earlier.map((n, i) => <NotifRow key={n._id} n={n} index={i} onNavigate={navigate} />)}
+                                {categorized.earlier.map((n) => <NotifRow key={n._id} n={n} onNavigate={navigate} />)}
                             </div>
                         )}
                     </div>

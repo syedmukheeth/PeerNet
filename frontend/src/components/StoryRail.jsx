@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiPlus, HiX, HiDotsVertical, HiPlay, HiPause, HiTrash } from 'react-icons/hi'
@@ -255,20 +255,9 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
 
 // ── Story Item Circle ─────────────────────────────────────────
-function StoryCircle({ label, avatar, seen, onClick, isAdd, index, hasStory }) {
+function StoryCircle({ label, avatar, seen, onClick, isAdd, hasStory }) {
     return (
-        <motion.div
-            className="story-item"
-            onClick={onClick}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ 
-                type: "spring",
-                stiffness: 400,
-                damping: 30,
-                delay: index * 0.05 
-            }}
-        >
+        <div className="story-item" onClick={onClick}>
             <div className="story-avatar-container">
                 <div className={`story-ring-vibrant ${seen ? 'seen' : ''} ${(!hasStory && !isAdd) || (isAdd && !hasStory) ? 'hidden-ring' : ''}`}>
                     <div className="story-avatar-inner">
@@ -284,7 +273,7 @@ function StoryCircle({ label, avatar, seen, onClick, isAdd, index, hasStory }) {
             <span className={`story-label-ig ${seen ? 'seen' : ''}`}>
                 {isAdd ? 'Your story' : label}
             </span>
-        </motion.div>
+        </div>
     )
 }
 
@@ -296,7 +285,7 @@ export default function StoryRail() {
     const [showCreate, setShowCreate] = useState(false)
     const [loading, setLoading] = useState(true)
 
-    const loadStories = async () => {
+    const loadStories = useCallback(async () => {
         if (!user) {
             setLoading(false)
             return
@@ -307,9 +296,9 @@ export default function StoryRail() {
             setStories(data.data || [])
         } catch { /* silent */ }
         finally { setLoading(false) }
-    }
+    }, [user])
 
-    useEffect(() => { loadStories() }, [])
+    useEffect(() => { loadStories() }, [loadStories])
 
     const groups = Object.values(
         stories.reduce((acc, s) => {
@@ -345,7 +334,6 @@ export default function StoryRail() {
                         isAdd={true}
                         seen={hasUserStory ? groups[userGroupIdx].stories.every(s => s.viewedByMe) : false}
                         hasStory={hasUserStory}
-                        index={0}
                         onClick={() => {
                             if (hasUserStory) setViewerGroup({ groups, startIdx: userGroupIdx })
                             else setShowCreate(true)
@@ -363,7 +351,6 @@ export default function StoryRail() {
                             avatar={optimizeAvatarUrl(rawAvatarUrl)}
                             seen={g.stories.every(s => s.viewedByMe)}
                             hasStory={true}
-                            index={i + 1}
                             onClick={() => setViewerGroup({ groups, startIdx: i })}
                         />
                     )

@@ -2,75 +2,34 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import logo from '../assets/logo.png'
 
+/**
+ * Brief brand frame shown once per session while the app boots.
+ * Kept short on purpose — it sits in front of the first paint.
+ */
 export default function SplashScreen({ onDone }) {
-    const [phase, setPhase] = useState('logo') // 'logo' | 'out'
+    const [visible, setVisible] = useState(true)
 
     useEffect(() => {
-        const t1 = setTimeout(() => setPhase('out'), 1800)
-        const t2 = setTimeout(() => onDone?.(), 2400)
-        return () => { clearTimeout(t1); clearTimeout(t2) }
+        const hide = setTimeout(() => setVisible(false), 700)
+        const done = setTimeout(() => onDone?.(), 1000)
+        return () => { clearTimeout(hide); clearTimeout(done) }
     }, [onDone])
 
     return (
         <AnimatePresence>
-            {phase !== 'done' && (
+            {visible && (
                 <motion.div
                     key="splash"
                     className="splash-screen"
                     initial={{ opacity: 1 }}
-                    animate={{ 
-                        opacity: phase === 'out' ? 0 : 1, 
-                        scale: phase === 'out' ? 1.05 : 1 
-                    }}
-                    exit={{ opacity: 0, scale: 1.1 }}
-                    transition={{ duration: 0.65, ease: [0.4, 0, 0.2, 1] }}
-                    onAnimationComplete={() => { if (phase === 'out') setPhase('done') }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
                 >
-                    {/* Background orbs */}
-                    <div className="splash-orb splash-orb-1" />
-                    <div className="splash-orb splash-orb-2" />
-                    <div className="splash-orb splash-orb-3" />
-
-                    {/* Logo */}
-                    <motion.div
-                        className="splash-logo-wrap"
-                        initial={{ scale: 0.6, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-                    >
-                        <img src={logo} alt="PeerNet" className="splash-logo-img" />
-                    </motion.div>
-
-                    {/* Brand name */}
-                    <motion.div
-                        className="splash-brand"
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, duration: 0.4 }}
-                    >
-                        PeerNet
-                    </motion.div>
-
-                    {/* Tagline */}
-                    <motion.p
-                        className="splash-tagline t-h3"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.7, duration: 0.4 }}
-                        style={{ letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7 }}
-                    >
-                        Connect · Share · Discover
-                    </motion.p>
-
-                    {/* Bottom Meta logo (Instagram-style) */}
-                    <motion.div
-                        className="splash-meta"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1.0, duration: 0.4 }}
-                    >
-                        Built by <span>Syed Mukheeth</span>
-                    </motion.div>
+                    <div className="splash-logo-wrap">
+                        <img src={logo} alt="" className="splash-logo-img" />
+                    </div>
+                    <div className="splash-brand">PeerNet</div>
                 </motion.div>
             )}
         </AnimatePresence>

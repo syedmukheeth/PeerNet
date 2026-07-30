@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^18.3.12",
@@ -44,6 +45,7 @@
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.11.0",
     "jsdom": "^28.1.0",
+    "tailwindcss": "^4.3.3",
     "vite": "^7.0.0",
     "vitest": "^4.0.18"
   }

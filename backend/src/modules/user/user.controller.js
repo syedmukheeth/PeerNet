@@ -64,6 +64,14 @@ const searchUsers = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+const getSuggestions = async (req, res, next) => {
+    try {
+        const limit = Math.min(Number(req.query.limit) || 5, 20);
+        const users = await userService.getSuggestions(req.user.id, { limit });
+        res.json({ success: true, data: users });
+    } catch (err) { next(err); }
+};
+
 const getUserPosts = async (req, res, next) => {
     try {
         const { limit, cursor } = parsePagination(req.query);
@@ -76,5 +84,5 @@ module.exports = {
     getProfile, getMe, updateProfile,
     follow, unfollow,
     getFollowers, getFollowing,
-    searchUsers, getUserPosts,
+    searchUsers, getSuggestions, getUserPosts,
 };

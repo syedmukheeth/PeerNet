@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiX, HiEmojiHappy, HiCamera, HiTrash } from 'react-icons/hi'
-import { FiAlignLeft, FiAlignCenter, FiAlignRight, FiVideo } from 'react-icons/fi'
+import { FiAlignLeft, FiAlignCenter, FiAlignRight } from 'react-icons/fi'
 import EmojiPicker from 'emoji-picker-react'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -131,7 +131,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
 
-            toast.success('Story shared! ✨')
+            toast.success('Story posted')
             onSuccess?.()
             onClose()
         } catch (err) {

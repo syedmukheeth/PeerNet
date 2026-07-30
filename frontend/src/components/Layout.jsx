@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
     HiHome, HiSearch, HiFilm, HiChatAlt2,
-    HiBell, HiLogout, HiPlusCircle, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal, HiPlus
+    HiBell, HiLogout, HiLogin, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal, HiPlus
 } from 'react-icons/hi'
 import {
     HiOutlineHome, HiOutlineSearch, HiOutlineFilm, HiOutlineChatAlt2,
@@ -54,26 +54,6 @@ export default function Layout() {
     const mobileMenuBtnRef = useRef(null)
     const mobilePopupRef = useRef(null)
 
-    const navContainerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    }
-
-    const navItemVariants = {
-        hidden: { opacity: 0, x: -20 },
-        visible: { 
-            opacity: 1, 
-            x: 0,
-            transition: { type: 'spring', damping: 25, stiffness: 300 }
-        }
-    }
-
     useEffect(() => {
         if (mainRef.current) {
             mainRef.current.scrollTo({ top: 0, behavior: 'instant' })
@@ -116,13 +96,9 @@ export default function Layout() {
         return () => window.removeEventListener('peernet:sync-counts', handleSync)
     }, [syncAllCounts])
 
-    // Update display count when path changes (to clear badge if entering messages)
+    // Clear the badge when entering messages, restore it on the way out
     useEffect(() => {
-        if (location.pathname.startsWith('/messages')) {
-            setMsgCount(0)
-        } else {
-            setMsgCount(msgRef.current)
-        }
+        setMsgCount(location.pathname.startsWith('/messages') ? 0 : msgRef.current)
     }, [location.pathname])
 
     const showNotifToast = useCallback((notif) => {
@@ -210,7 +186,7 @@ export default function Layout() {
         }
         socket.on('new_message', onMsg)
         return () => socket.off('new_message', onMsg)
-    }, [socket, user, location.pathname, showMsgToast])
+    }, [socket, user, location.pathname, showMsgToast, queryClient])
 
     useEffect(() => {
         if (!socket || !user) return
@@ -285,166 +261,141 @@ export default function Layout() {
                 {/* Top: Branding */}
                 <div className="sidebar-logo-row">
                     <Link to="/" className="sidebar-brand">
-                        <motion.img 
-                            src={logoImg} 
-                            alt="PeerNet" 
-                            className="sidebar-brand-img"
-                            whileHover={{ rotate: -5, scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                        />
+                        <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
                         <span className="peernetLogo">PeerNet</span>
                     </Link>
                 </div>
 
                 {/* Middle: Main Navigation */}
-                <motion.nav 
-                    className="sidebar-nav"
-                    variants={navContainerVariants}
-                    initial="hidden"
-                    animate="visible"
-                >
+                <nav className="sidebar-nav">
                     {links.map(({ to, icon: Icon, activeIcon: ActiveIcon, label, exact, badge, msgBadge }) => (
-                        <motion.div key={to} variants={navItemVariants}>
-                            <NavLink 
-                                to={to} 
-                                end={exact} 
-                                className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
-                                onMouseEnter={() => {
-                                    if (to === '/messages') {
-                                        queryClient.prefetchQuery({ queryKey: ['convos'] })
-                                        const lastId = localStorage.getItem('zn_last_convo_id')
-                                        if (lastId) {
-                                            queryClient.prefetchQuery({ queryKey: ['messages', lastId] })
-                                        }
+                        <NavLink
+                            key={to}
+                            to={to}
+                            end={exact}
+                            className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
+                            onMouseEnter={() => {
+                                if (to === '/messages') {
+                                    queryClient.prefetchQuery({ queryKey: ['convos'] })
+                                    const lastId = localStorage.getItem('zn_last_convo_id')
+                                    if (lastId) {
+                                        queryClient.prefetchQuery({ queryKey: ['messages', lastId] })
                                     }
-                                }}
-                            >
-                                {({ isActive }) => (
-                                    <motion.div 
-                                        className="flex items-center gap-4 w-full"
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                                    >
-                                        <div className="ig-icon-wrap">
-                                            {isActive ? <ActiveIcon className="ig-icon" /> : <Icon className="ig-icon" />}
-                                            {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
-                                            {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
-                                        </div>
-                                        <span className={`ig-label ${isActive ? 'font-black' : ''}`}>{label}</span>
-                                    </motion.div>
-                                )}
-                            </NavLink>
-                        </motion.div>
-                    ))}
-                    
-                    <motion.div variants={navItemVariants}>
-                        <div 
-                            className="ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer" 
-                            onClick={() => setShowCreate(true)}
-                            role="button"
+                                }
+                            }}
                         >
-                            <motion.div 
-                                className="flex items-center gap-4 w-full"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                            >
-                                <div className="ig-icon-wrap">
-                                    <HiOutlinePlusCircle className="ig-icon" />
-                                </div>
-                                <span className="ig-label">Create</span>
-                            </motion.div>
-                        </div>
-                    </motion.div>
+                            {({ isActive }) => (
+                                <>
+                                    <div className="ig-icon-wrap">
+                                        {isActive ? <ActiveIcon className="ig-icon" /> : <Icon className="ig-icon" />}
+                                        {badge && unreadCount > 0 && <span className="ig-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                        {msgBadge && msgCount > 0 && <span className="ig-badge ig-badge--msg">{msgCount > 9 ? '9+' : msgCount}</span>}
+                                    </div>
+                                    <span className={`ig-label ${isActive ? 'font-bold' : ''}`}>{label}</span>
+                                </>
+                            )}
+                        </NavLink>
+                    ))}
+
+                    {user && (
+                        <button className="ig-link" onClick={() => setShowCreate(true)} type="button">
+                            <div className="ig-icon-wrap">
+                                <HiOutlinePlusCircle className="ig-icon" />
+                            </div>
+                            <span className="ig-label">Create</span>
+                        </button>
+                    )}
 
                     {user?.role === 'admin' && (
-                        <motion.div variants={navItemVariants}>
-                            <NavLink 
-                                to="/admin" 
-                                className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
-                            >
-                                {({ isActive }) => (
-                                    <motion.div 
-                                        className="flex items-center gap-4 w-full"
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                                    >
-                                        <div className="ig-icon-wrap">
-                                            {isActive ? <HiShieldCheck className="ig-icon text-accent" /> : <HiOutlineShieldCheck className="ig-icon" />}
-                                        </div>
-                                        <span className={`ig-label ${isActive ? 'font-black' : ''}`}>Admin Console</span>
-                                    </motion.div>
-                                )}
-                            </NavLink>
-                        </motion.div>
+                        <NavLink
+                            to="/admin"
+                            className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
+                        >
+                            {({ isActive }) => (
+                                <>
+                                    <div className="ig-icon-wrap">
+                                        {isActive ? <HiShieldCheck className="ig-icon text-accent" /> : <HiOutlineShieldCheck className="ig-icon" />}
+                                    </div>
+                                    <span className={`ig-label ${isActive ? 'font-bold' : ''}`}>Admin Console</span>
+                                </>
+                            )}
+                        </NavLink>
                     )}
-                </motion.nav>
+                </nav>
 
                 {/* Bottom: Profile & Settings */}
                 <div className="sidebar-footer">
-                    {/* Profile Mini Card */}
-                    <motion.div 
-                        className="sidebar-profile-card"
-                        onClick={() => navigate(`/profile/${user?._id}`)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <img src={avatarUrl} className="profile-card-avatar" alt="" />
-                        <div className="profile-card-info">
-                            <span className="profile-card-name">{user?.username}</span>
-                            <span className="profile-card-role">{user?.role === 'admin' ? 'Admin' : 'Creator'}</span>
-                        </div>
-                    </motion.div>
+                    {user ? (
+                        <button
+                            type="button"
+                            className="sidebar-profile-card"
+                            onClick={() => navigate(`/profile/${user._id}`)}
+                        >
+                            <img src={avatarUrl} className="profile-card-avatar" alt="" />
+                            <div className="profile-card-info">
+                                <span className="profile-card-name">{user.username}</span>
+                                <span className="profile-card-role">{user.fullName || `@${user.username}`}</span>
+                            </div>
+                        </button>
+                    ) : (
+                        <Link to="/login" className="ig-link">
+                            <div className="ig-icon-wrap"><HiLogin className="ig-icon" /></div>
+                            <span className="ig-label">Log in</span>
+                        </Link>
+                    )}
 
                     <div className="sidebar-more-wrap" ref={moreRef}>
-                        <div 
-                            className={`ig-link w-full justify-start border-none bg-transparent text-left cursor-pointer ${showMore ? 'ig-link--active' : ''}`} 
+                        <button
+                            type="button"
+                            className={`ig-link ${showMore ? 'ig-link--active' : ''}`}
                             onClick={() => setShowMore(!showMore)}
-                            role="button"
-                            tabIndex={0}
+                            aria-expanded={showMore}
+                            aria-label="More options"
                         >
-                            <motion.div 
-                                className="flex items-center gap-4 w-full"
-                                whileHover={{ x: 4 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                            >
-                                <div className="ig-icon-wrap">
-                                    <HiMenu className="ig-icon" />
-                                </div>
-                                <span className="ig-label">More</span>
-                            </motion.div>
-                        </div>
+                            <div className="ig-icon-wrap">
+                                <HiMenu className="ig-icon" />
+                            </div>
+                            <span className="ig-label">More</span>
+                        </button>
 
                         <AnimatePresence>
                             {showMore && (
-                                <motion.div 
-                                    className="ig-more-popup desktop-only" 
-                                    initial={{ opacity: 0, y: 12, scale: 0.95 }} 
-                                    animate={{ opacity: 1, y: 0, scale: 1 }} 
-                                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                                    transition={{ duration: 0.2 }}
+                                <motion.div
+                                    className="ig-more-popup desktop-only"
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 8 }}
+                                    transition={{ duration: 0.15 }}
                                 >
                                     <button className="ig-more-item" onClick={() => { toggle(); setShowMore(false) }}>
-                                        {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
-                                        <span>Appearance</span>
+                                        {isDark ? <HiSun size={20} /> : <HiMoon size={20} />}
+                                        <span>{isDark ? 'Light mode' : 'Dark mode'}</span>
                                     </button>
-                                    <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
-                                        <HiCog size={20} /> <span>Settings</span>
-                                    </NavLink>
+                                    {user && (
+                                        <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                            <HiCog size={20} /> <span>Settings</span>
+                                        </NavLink>
+                                    )}
                                     {user?.role === 'admin' && (
                                         <NavLink to="/admin" className="ig-more-item" onClick={() => setShowMore(false)}>
                                             <HiShieldCheck size={20} /> <span>Admin Console</span>
                                         </NavLink>
                                     )}
-                                    <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
-                                        <HiSwitchHorizontal size={20} /> <span>Accounts</span>
-                                    </button>
+                                    {user && (
+                                        <button className="ig-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
+                                            <HiSwitchHorizontal size={20} /> <span>Switch account</span>
+                                        </button>
+                                    )}
                                     <div className="ig-more-divider" />
-                                    <button className="ig-more-item text-error" onClick={handleLogout}>
-                                        <HiLogout size={20} /> <span>Log out</span>
-                                    </button>
+                                    {user ? (
+                                        <button className="ig-more-item text-error" onClick={handleLogout}>
+                                            <HiLogout size={20} /> <span>Log out</span>
+                                        </button>
+                                    ) : (
+                                        <Link to="/login" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                            <HiLogin size={20} /> <span>Log in</span>
+                                        </Link>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -455,32 +406,32 @@ export default function Layout() {
 
 
 
-                <header className="mobile-top-header">
-                    <div className="flex items-center gap-3">
-                        <div style={{ position: 'relative' }}>
-                            <button 
-                                ref={mobileMenuBtnRef}
-                                className="mobile-header-btn bg-transparent border-none text-primary"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowMore(!showMore);
-                                }}
-                            >
-                                <HiMenu size={24} />
-                            </button>
-                    </div>
-                    <Link to="/" className="flex items-center gap-2 text-decoration-none">
+            <header className="mobile-top-header">
+                <div className="flex items-center gap-3">
+                    <button
+                        ref={mobileMenuBtnRef}
+                        className="mobile-header-btn"
+                        aria-label="Open menu"
+                        aria-expanded={showMore}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setShowMore(!showMore)
+                        }}
+                    >
+                        <HiMenu size={24} />
+                    </button>
+                    <Link to="/" className="flex items-center gap-2 no-underline">
                         <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
-                        <span className="mobile-peernet-logo text-lg font-black logo-gradient-text">PeerNet</span>
+                        <span className="mobile-peernet-logo text-lg font-bold text-primary">PeerNet</span>
                     </Link>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
-                    <Link to="/notifications" className="relative text-primary p-1">
+                    <Link to="/notifications" className="relative text-primary p-1" aria-label="Notifications">
                         <HiOutlineBell size={24} />
                         {unreadCount > 0 && <span className="mobile-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
                     </Link>
-                    <Link to="/messages" className="relative text-primary p-1">
+                    <Link to="/messages" className="relative text-primary p-1" aria-label="Messages">
                         <HiOutlineChatAlt2 size={24} />
                         {msgCount > 0 && <span className="mobile-badge">{msgCount > 9 ? '9+' : msgCount}</span>}
                     </Link>
@@ -489,36 +440,47 @@ export default function Layout() {
                 {/* Mobile More Popup (Absolute positioned to the top left) */}
                 <AnimatePresence>
                     {showMore && (
-                        <motion.div 
+                        <motion.div
                             ref={mobilePopupRef}
                             className="mobile-more-popup"
-                            initial={{ opacity: 0, x: -20 }}
+                            initial={{ opacity: 0, x: -12 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
+                            exit={{ opacity: 0, x: -12 }}
+                            transition={{ duration: 0.15 }}
                         >
                             <div className="mobile-more-header">
                                 <span>Menu</span>
-                                <button onClick={() => setShowMore(false)} className="mobile-more-close">×</button>
+                                <button onClick={() => setShowMore(false)} className="mobile-more-close" aria-label="Close menu">×</button>
                             </div>
                             <button className="mobile-more-item" onClick={() => { toggle(); setShowMore(false) }}>
-                                {isDark ? <HiSun size={20} className="text-accent" /> : <HiMoon size={20} />} 
-                                <span>Appearance</span>
+                                {isDark ? <HiSun size={20} /> : <HiMoon size={20} />}
+                                <span>{isDark ? 'Light mode' : 'Dark mode'}</span>
                             </button>
-                            <NavLink to="/settings" className="mobile-more-item" onClick={() => setShowMore(false)}>
-                                <HiCog size={20} /> <span>Settings</span>
-                            </NavLink>
+                            {user && (
+                                <NavLink to="/settings" className="mobile-more-item" onClick={() => setShowMore(false)}>
+                                    <HiCog size={20} /> <span>Settings</span>
+                                </NavLink>
+                            )}
                             {user?.role === 'admin' && (
                                 <NavLink to="/admin" className="mobile-more-item" onClick={() => setShowMore(false)}>
                                     <HiShieldCheck size={20} /> <span>Admin Console</span>
                                 </NavLink>
                             )}
-                            <button className="mobile-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
-                                <HiSwitchHorizontal size={20} /> <span>Accounts</span>
-                            </button>
+                            {user && (
+                                <button className="mobile-more-item" onClick={() => { setShowMore(false); setShowSwitcher(true) }}>
+                                    <HiSwitchHorizontal size={20} /> <span>Switch account</span>
+                                </button>
+                            )}
                             <div className="mobile-more-divider" />
-                            <button className="mobile-more-item text-error" onClick={handleLogout}>
-                                <HiLogout size={20} /> <span>Log out</span>
-                            </button>
+                            {user ? (
+                                <button className="mobile-more-item text-error" onClick={handleLogout}>
+                                    <HiLogout size={20} /> <span>Log out</span>
+                                </button>
+                            ) : (
+                                <Link to="/login" className="mobile-more-item" onClick={() => setShowMore(false)}>
+                                    <HiLogin size={20} /> <span>Log in</span>
+                                </Link>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -530,25 +492,11 @@ export default function Layout() {
                     className={`layout-container ${['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) ? 'h-full' : ''} ${(!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
 
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={location.pathname.split('/')[1] || 'root'}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -12 }}
-                            transition={{ 
-                                type: "spring", 
-                                stiffness: 300, 
-                                damping: 30,
-                                opacity: { duration: 0.2 } 
-                            }}
-                            className={`page-transition-wrapper ${['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) ? 'h-full' : ''}`}
-                        >
-                            <Outlet />
-                        </motion.div>
-                    </AnimatePresence>
+                    <div className={['/messages', '/shorts'].some(p => location.pathname.startsWith(p)) ? 'h-full' : ''}>
+                        <Outlet />
+                    </div>
 
-                    {/* Aesthetic Site Footer */}
+                    {/* Site footer */}
                     {!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p)) && (
                         <footer className="site-footer">
                             <div className="site-footer__inner">
@@ -594,15 +542,23 @@ export default function Layout() {
                     <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                         {({ isActive }) => isActive ? <HiSearch size={28} /> : <HiOutlineSearch size={28} />}
                     </NavLink>
-                    <button className="mobile-nav-item text-primary bg-transparent border-none" onClick={() => setShowCreate(true)}>
-                        <HiPlus size={30} className="border-2 border-primary rounded-lg p-0.5" />
-                    </button>
+                    {user && (
+                        <button className="mobile-nav-item" onClick={() => setShowCreate(true)} aria-label="Create post">
+                            <HiPlus size={30} className="border-2 border-primary rounded-lg p-0.5" />
+                        </button>
+                    )}
                     <NavLink to="/shorts" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                         {({ isActive }) => isActive ? <HiFilm size={28} /> : <HiOutlineFilm size={28} />}
                     </NavLink>
-                    <NavLink to={`/profile/${user?._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                        <img src={avatarUrl} className={`w-7 h-7 rounded-full border-2 ${location.pathname.includes(`/profile/${user?._id}`) ? 'border-primary' : 'border-transparent'}`} alt="" />
-                    </NavLink>
+                    {user ? (
+                        <NavLink to={`/profile/${user._id}`} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+                            <img src={avatarUrl} className={`w-7 h-7 rounded-full border-2 ${location.pathname.includes(`/profile/${user._id}`) ? 'border-primary' : 'border-transparent'}`} alt="" />
+                        </NavLink>
+                    ) : (
+                        <NavLink to="/login" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} aria-label="Log in">
+                            <HiLogin size={28} />
+                        </NavLink>
+                    )}
                 </nav>
             )}
 

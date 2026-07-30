@@ -157,12 +157,28 @@ const searchUsers = async (q, { limit = 20, skip = 0 }) => {
         .skip(skip);
 };
 
-module.exports = { 
-    getProfile, 
-    updateProfile, 
-    follow, 
-    unfollow, 
-    getFollowers, 
-    getFollowing, 
-    searchUsers 
+/**
+ * Accounts the user does not already follow, most-followed first.
+ * Used by the "Suggested for you" panel.
+ */
+const getSuggestions = async (userId, { limit = 5 }) => {
+    const following = await Follower.find({ follower: userId }).select('following').lean();
+    const exclude = following.map((f) => f.following);
+    exclude.push(userId);
+
+    return User.find({ _id: { $nin: exclude }, status: 'active' })
+        .select('username fullName avatarUrl isVerified followersCount')
+        .sort({ followersCount: -1, createdAt: -1 })
+        .limit(limit);
+};
+
+module.exports = {
+    getProfile,
+    updateProfile,
+    follow,
+    unfollow,
+    getFollowers,
+    getFollowing,
+    searchUsers,
+    getSuggestions,
 };

@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
 import { HiSearch, HiBadgeCheck, HiX } from 'react-icons/hi'
 import toast from 'react-hot-toast'
@@ -127,25 +126,13 @@ export default function Search() {
             )}
 
             {/* ── Results ── */}
-            <AnimatePresence>
-                {!loading && hasQuery && results.length > 0 && (
-                    <motion.div
-                        className="ig-search-results"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        {results.map((u, i) => {
+            {!loading && hasQuery && results.length > 0 && (
+                    <div className="ig-search-results">
+                        {results.map((u) => {
                             const isFollowing = following[u._id] !== undefined ? following[u._id] : u.isFollowing
                             const avatar = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
                             return (
-                                <motion.div
-                                    key={u._id}
-                                    className="ig-result-row"
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.035, duration: 0.18 }}
-                                >
+                                <div key={u._id} className="ig-result-row">
                                     <Link to={`/profile/${u._id}`} className="ig-result-user">
                                         <div className="ig-result-avatar-wrap">
                                             <img src={avatar} className="ig-result-avatar" alt={u.username} />
@@ -168,49 +155,39 @@ export default function Search() {
                                         </div>
                                     </Link>
                                     {u._id !== me?._id && (
-                                        <motion.button
+                                        <button
                                             className={`ig-follow-btn ${isFollowing ? 'following' : ''}`}
                                             onClick={() => handleFollow(u._id, isFollowing)}
-                                            whileTap={{ scale: 0.94 }}
                                         >
                                             {isFollowing ? 'Following' : 'Follow'}
-                                        </motion.button>
+                                        </button>
                                     )}
-                                </motion.div>
+                                </div>
                             )
                         })}
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
 
             {/* ── No Results ── */}
             {hasQuery && !loading && results.length === 0 && (
-                <motion.div
-                    className="ig-search-empty"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
+                <div className="ig-search-empty">
                     <div className="ig-empty-icon-wrap">
                         <HiSearch size={26} />
                     </div>
                     <p className="ig-empty-title">No results</p>
-                    <p className="ig-empty-sub">No account found for "<strong>{q}</strong>"</p>
-                </motion.div>
+                    <p className="ig-empty-sub">No account found for &ldquo;<strong>{q}</strong>&rdquo;</p>
+                </div>
             )}
 
             {/* ── Initial Empty State ── */}
             {!hasQuery && !loading && (
-                <motion.div
-                    className="ig-search-empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                >
+                <div className="ig-search-empty">
                     <div className="ig-empty-icon-wrap">
                         <HiSearch size={26} />
                     </div>
-                    <p className="ig-empty-title">Search PeerNet</p>
-                    <p className="ig-empty-sub">Find creators, friends,<br />and community leaders</p>
-                </motion.div>
+                    <p className="ig-empty-title">Search for people</p>
+                    <p className="ig-empty-sub">Type a username or name to find accounts.</p>
+                </div>
             )}
         </div>
     )

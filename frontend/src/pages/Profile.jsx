@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api, { CHAT_BASE_URL } from '../api/axios'
 import toast from 'react-hot-toast'
-import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChatAlt2, HiBadgeCheck, HiCog, HiDotsHorizontal, HiLink } from 'react-icons/hi'
+import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChatAlt2, HiBadgeCheck, HiCog, HiLink, HiUser } from 'react-icons/hi'
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
@@ -100,17 +100,6 @@ export default function Profile() {
         }
     }
 
-    const handleToggleVerify = async () => {
-        try {
-            const { data } = await api.patch(`/admin/users/${id}/verify`)
-            setProfile(p => ({ ...p, isVerified: data.data.isVerified }))
-            toast.success(data.message)
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Action failed')
-        }
-    }
-
-
     if (loading) return (
         <div key="profile-skeleton" className="profile-page-wrap">
             <header className="profile-header-v2">
@@ -153,20 +142,14 @@ export default function Profile() {
     )
     if (!profile) return (
         <div className="empty-state-wrap">
-            <div className="empty-state-icon">🕵️‍♂️</div>
+            <div className="empty-state-icon"><HiUser /></div>
             <h2 className="t-h2">User not found</h2>
+            <p className="text-muted mt-2">This account may have been removed.</p>
         </div>
     )
 
-    const avatar = profile.avatarUrl || `https://ui-avatars.com/api/?name=${profile.username}&size=200&background=6366F1&color=fff`
-
     return (
-        <motion.div 
-            className="profile-page-wrap"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-        >
+        <div className="profile-page-wrap">
             {/* ── Header ── */}
             <header className="profile-header-v2">
                 <div className="profile-avatar-wrap">
@@ -218,7 +201,7 @@ export default function Profile() {
 
                         <div className="profile-stats-v2">
                             <div className="profile-stat-item">
-                                <span className="stat-value">{posts.length}</span>
+                                <span className="stat-value">{profile.postsCount ?? posts.length}</span>
                                 <span className="stat-label">posts</span>
                             </div>
                             <div className="profile-stat-item cursor-pointer group" onClick={() => setShowFollowers(true)}>
@@ -309,7 +292,7 @@ export default function Profile() {
 
                     return (
                         <div className="profile-grid px-0">
-                            {displayPosts.map((p, i) => (
+                            {displayPosts.map((p) => (
                                 <Link 
                                     key={p._id} 
                                     to={`/posts/${p._id}`} 
@@ -381,6 +364,6 @@ export default function Profile() {
                     />
                 )}
             </AnimatePresence>
-        </motion.div>
+        </div>
     )
 }

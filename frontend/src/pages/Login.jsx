@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useMultiAccount } from '../context/MultiAccountContext'
-import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
 import logo from '../assets/logo.png'
@@ -19,10 +18,7 @@ export default function Login() {
 
     // ── Redirect if already logged in ────────────────────────────────
     useEffect(() => {
-        if (authUser) {
-            console.log('[LOGIN] User already authenticated, redirecting to home...');
-            navigate('/');
-        }
+        if (authUser) navigate('/')
     }, [authUser, navigate]);
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -31,13 +27,9 @@ export default function Login() {
         if (e) e.preventDefault()
         if (loading) return
 
-        console.group('[LOGIN FLOW]');
-        console.log('Identifier:', form.identifier);
-        
         setLoading(true)
         try {
             const user = await login(form.identifier, form.password)
-            console.log('Login Result: SUCCESS', user._id);
             saveCurrentAccount(user)
             toast.success('Welcome back!')
             navigate('/')
@@ -50,12 +42,10 @@ export default function Login() {
             } else {
                 msg = err.message;
             }
-            console.error('Login Result: FAILED', err);
             // Deduplicate toasts using a unique ID
             toast.error(msg, { id: 'login-error' })
-        } finally { 
+        } finally {
             setLoading(false)
-            console.groupEnd()
         }
     }
 
@@ -89,17 +79,11 @@ export default function Login() {
 
     return (
         <div className="auth-page">
-            <div className="auth-orb auth-orb-1" />
-            <div className="auth-orb auth-orb-2" />
-
             <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 2 }}>
                 <ThemeToggle />
             </div>
 
-            <motion.div className="auth-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}>
+            <div className="auth-card">
                 <div className="auth-logo-wrap">
                     <img src={logo} alt="PeerNet" className="auth-logo-img" />
                     <div className="auth-logo-text">PeerNet</div>
@@ -108,15 +92,15 @@ export default function Login() {
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label className="text-zinc-500 text-xs font-black uppercase tracking-widest mb-1 ml-1">Username or Email</label>
-                        <input className="obsidian-input" type="text" placeholder="Username or Email"
+                        <label className="auth-label">Username or Email</label>
+                        <input className="input-field" type="text" placeholder="Username or Email"
                             value={form.identifier} onChange={set('identifier')} required disabled={loading} />
                     </div>
                     <div className="input-group">
-                        <label className="text-zinc-500 text-xs font-black uppercase tracking-widest mb-1 ml-1">Password</label>
+                        <label className="auth-label">Password</label>
                         <div className="relative">
                             <input 
-                                className="obsidian-input w-full" 
+                                className="input-field w-full" 
                                 type={showPassword ? 'text' : 'password'} 
                                 placeholder="••••••••"
                                 style={{ paddingRight: '45px' }}
@@ -135,13 +119,10 @@ export default function Login() {
                             </button>
                         </div>
                     </div>
-                    <motion.button className="btn btn-primary w-full" type="submit"
-                        disabled={loading}
-                        style={{ height: 46, marginTop: 4 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}>
-                        {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Sign In'}
-                    </motion.button>
+                    <button className="btn btn-primary w-full" type="submit" disabled={loading}
+                        style={{ height: 46, marginTop: 4 }}>
+                        {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Sign in'}
+                    </button>
                 </form>
 
                 <div className="auth-divider">
@@ -159,21 +140,19 @@ export default function Login() {
                         />
                     </div>
 
-                    <motion.button
+                    <button
                         className="btn btn-secondary w-full"
                         onClick={handleGuestLogin}
                         disabled={loading}
-                        style={{ height: 40, marginTop: 12, fontSize: '13px' }}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}>
-                        {loading ? <span className="spinner" style={{ width: 14, height: 14 }} /> : 'Try as Guest'}
-                    </motion.button>
+                        style={{ height: 40, marginTop: 12, fontSize: '13px' }}>
+                        {loading ? <span className="spinner" style={{ width: 14, height: 14 }} /> : 'Try as guest'}
+                    </button>
                 </div>
 
                 <p className="auth-switch">
                     No account? <Link to="/register">Sign up</Link>
                 </p>
-            </motion.div>
+            </div>
         </div>
     )
 }

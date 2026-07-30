@@ -20,7 +20,6 @@ const applyInterceptors = (instance) => {
     instance.interceptors.request.use((config) => {
         const token = localStorage.getItem('accessToken')
         if (token) config.headers.Authorization = `Bearer ${token}`
-        console.log(`[AXIOS] Outgoing (${instance.defaults.baseURL}) ->`, config.url)
         return config
     })
 
@@ -56,7 +55,7 @@ const applyInterceptors = (instance) => {
                     localStorage.setItem('accessToken', accessToken)
                     localStorage.setItem('refreshToken', refreshToken)
 
-                    // Nuclear Fix: Notify other hooks (like useSocket) that the token has changed
+                    // Let useSocket re-authenticate its connection with the new token
                     window.dispatchEvent(new CustomEvent('peernet:token-refreshed', { detail: { accessToken } }))
 
                     queue.forEach((p) => p.resolve(accessToken))

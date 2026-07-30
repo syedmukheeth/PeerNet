@@ -16,7 +16,6 @@ const stateCache = {
  * Hook for managing conversations list
  */
 export const useConvos = () => {
-    const queryClient = useQueryClient()
     return useQuery({
         queryKey: ['conversations'],
         queryFn: async () => {

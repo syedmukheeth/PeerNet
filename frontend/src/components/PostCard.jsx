@@ -146,13 +146,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
 
     return (
         <>
-            <motion.div 
-                className="l-post-card"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.3 }}
-            >
+            <article className="l-post-card">
                 
                 {/* ── Post Header ────────────────── */}
                 <header className="post-card-header">
@@ -289,7 +283,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         </Link>
                     )}
                 </footer>
-            </motion.div>
+            </article>
             {editOpen && (
                 <EditPostModal
                     post={{ ...post, caption }}
