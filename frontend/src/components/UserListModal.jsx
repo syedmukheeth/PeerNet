@@ -19,13 +19,10 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                 setUsers(list.map(u => typeof u === 'string' ? { _id: u, username: 'Peer' } : u).filter(Boolean))
             })
             .catch(err => {
-                console.error("Failed to fetch user list:", err)
+                console.error('Failed to fetch user list:', err)
                 setUsers([])
             })
-            .finally(() => {
-                // Artificial delay for premium feel
-                setTimeout(() => setLoading(false), 400)
-            })
+            .finally(() => setLoading(false))
     }, [isOpen, userId, type])
 
     return (

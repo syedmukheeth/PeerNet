@@ -7,7 +7,7 @@ import {
     HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
     HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
     HiBadgeCheck,
-    HiOutlineChat
+    HiOutlineChat, HiPhotograph
 } from 'react-icons/hi'
 import { FiSend } from 'react-icons/fi'
 import toast from 'react-hot-toast'
@@ -307,11 +307,11 @@ export default function PostDetail() {
     if (notFound || !post) {
         return (
             <div className="empty-state-wrap">
-                <div className="empty-state-icon">🕵️‍♂️</div>
-                <h2 className="t-h2">Content Not Found</h2>
-                <p className="t-body text-muted max-w-[300px]">This content might have been deleted or the link is incorrect.</p>
-                <Link to="/" className="btn btn-primary btn-premium px-6 py-2.5">
-                    Go Home
+                <div className="empty-state-icon"><HiPhotograph /></div>
+                <h2 className="t-h2">Post not found</h2>
+                <p className="t-body text-muted max-w-[320px]">It may have been deleted, or the link is wrong.</p>
+                <Link to="/" className="btn btn-primary px-6 no-underline">
+                    Back to feed
                 </Link>
             </div>
         )

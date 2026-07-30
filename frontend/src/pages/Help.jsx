@@ -1,93 +1,71 @@
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { HiQuestionMarkCircle, HiSupport, HiShieldCheck, HiMail } from 'react-icons/hi'
+import FeedbackModal from '../components/FeedbackModal'
+
+const faqs = [
+    {
+        q: 'How do I post a story?',
+        a: 'Tap your avatar at the start of the story rail on the home feed, then pick a photo or write a text story. Stories disappear after 24 hours.',
+    },
+    {
+        q: 'What are Shorts?',
+        a: 'Shorts is the vertical video feed, reachable from the film icon in the navigation. Any post you upload as a video also shows up under the Shorts tab on your profile.',
+    },
+    {
+        q: 'Who can see my posts?',
+        a: 'Posts are visible to anyone with a link to them. Saved posts are private to you. Direct messages are only visible to the people in the conversation.',
+    },
+    {
+        q: 'How do I change my display name or avatar?',
+        a: 'Open your profile and choose Edit Profile. Name, bio, website and avatar can all be changed there.',
+    },
+    {
+        q: 'How do I switch between accounts?',
+        a: 'Open More in the sidebar (or the menu on mobile) and choose Switch account. Accounts you have signed into on this device are listed there.',
+    },
+    {
+        q: 'How do I delete a post?',
+        a: 'Open the post, use the menu in the top-right of the post card, and choose Delete. This cannot be undone.',
+    },
+]
 
 export default function Help() {
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { 
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    }
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 15 },
-        visible: { opacity: 1, y: 0 }
-    }
-
-    const faqs = [
-        {
-            q: "How do I create a story?",
-            a: "Tap the plus icon in the Story Rail on your home feed to capture or upload a new story. Stories disappear after 24 hours."
-        },
-        {
-            q: "What are PeerNet Shorts?",
-            a: "Shorts are our immersive vertical video experience. You can browse them by clicking the film icon in the navigation bar."
-        },
-        {
-            q: "How do I change my privacy settings?",
-            a: "Go to Settings > Privacy to manage who can see your profile, comment on your posts, and message you."
-        }
-    ]
+    const [showFeedback, setShowFeedback] = useState(false)
 
     return (
-        <motion.div 
-            className="max-w-4xl mx-auto py-12 px-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
+        <div className="static-page">
             <Helmet>
-                <title>Help Center | PeerNet</title>
+                <title>Help | PeerNet</title>
             </Helmet>
 
-            <motion.div className="mb-12 text-center" variants={itemVariants}>
-                <h1 className="t-h1 mb-4">How can we help?</h1>
-                <p className="text-muted text-lg">Search our help center or browse common questions below.</p>
-            </motion.div>
+            <header className="static-page__header">
+                <h1 className="static-page__title">Help</h1>
+                <p className="static-page__lead">Answers to the questions that come up most often.</p>
+            </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-                {[
-                    { icon: HiSupport, label: "Account Support", color: "text-blue-500" },
-                    { icon: HiShieldCheck, label: "Safety & Privacy", color: "text-green-500" },
-                    { icon: HiQuestionMarkCircle, label: "Platform Basics", color: "text-purple-500" },
-                ].map((item, idx) => (
-                    <motion.div 
-                        key={idx} 
-                        variants={itemVariants}
-                        className="l-card-premium p-6 text-center border border-white/5 cursor-pointer hover:border-accent/30 transition-colors"
-                    >
-                        <item.icon className={`w-10 h-10 mx-auto mb-4 ${item.color}`} />
-                        <h3 className="font-bold">{item.label}</h3>
-                    </motion.div>
-                ))}
-            </div>
-
-            <motion.section variants={itemVariants} className="mb-16">
-                <h2 className="t-h2 mb-8 font-bold border-b border-white/10 pb-4">Frequently Asked Questions</h2>
-                <div className="space-y-6">
-                    {faqs.map((faq, idx) => (
-                        <div key={idx} className="l-card-premium p-6 bg-white/[0.02] border border-white/5">
-                            <h4 className="font-bold text-primary mb-2 flex items-center gap-2">
-                                <span className="text-accent font-black">Q:</span> {faq.q}
-                            </h4>
-                            <p className="text-secondary text-sm leading-relaxed">
-                                <span className="text-muted font-bold mr-1">A:</span> {faq.a}
-                            </p>
+            <section className="static-page__section">
+                <dl className="faq-list">
+                    {faqs.map((faq) => (
+                        <div key={faq.q} className="faq-item">
+                            <dt className="faq-item__q">{faq.q}</dt>
+                            <dd className="faq-item__a">{faq.a}</dd>
                         </div>
                     ))}
-                </div>
-            </motion.section>
+                </dl>
+            </section>
 
-            <motion.section variants={itemVariants} className="l-card-premium p-8 bg-accent/5 border border-accent/20 rounded-2xl text-center">
-                <HiMail className="w-12 h-12 mx-auto mb-4 text-accent" />
-                <h2 className="t-h2 mb-2 font-bold">Still need help?</h2>
-                <p className="text-muted mb-6">Our support team is available 24/7 to assist you.</p>
-                <a href="mailto:support@peernet.com" className="btn btn-primary px-8 py-3 no-underline inline-block">
-                    Contact Support
-                </a>
-            </motion.section>
-        </motion.div>
+            <section className="static-page__section">
+                <h2>Still stuck?</h2>
+                <p>
+                    Report the problem and it goes straight to the maintainer, along with the page you
+                    were on.
+                </p>
+                <button className="btn btn-primary" onClick={() => setShowFeedback(true)}>
+                    Report a problem
+                </button>
+            </section>
+
+            {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+        </div>
     )
 }

@@ -87,14 +87,10 @@ export default function App() {
               <Route path="search" element={<Search />} />
               <Route path="profile/:id" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
-              <Route path="privacy" element={<Privacy />} />
-              <Route path="terms" element={<Terms />} />
-              <Route path="about" element={<About />} />
-              <Route path="help" element={<Help />} />
               <Route path="admin" element={<AdminRoute><Admin /></AdminRoute>} />
             </Route>
-            
-            {/* Public/Shared routes (can be viewed without login) */}
+
+            {/* Public/shared routes — viewable without logging in */}
             <Route element={<Layout />}>
               <Route path="/posts/:id" element={<PostDetail />} />
               <Route path="/about" element={<About />} />
@@ -102,6 +98,10 @@ export default function App() {
               <Route path="/legal/privacy" element={<Privacy />} />
               <Route path="/legal/terms" element={<Terms />} />
             </Route>
+
+            {/* Old paths kept working */}
+            <Route path="/privacy" element={<Navigate to="/legal/privacy" replace />} />
+            <Route path="/terms" element={<Navigate to="/legal/terms" replace />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

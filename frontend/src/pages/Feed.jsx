@@ -1,6 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 
@@ -10,13 +9,8 @@ const StoryRail = lazy(() => import('../components/StoryRail'))
 
 import { optimizeAvatarUrl } from '../utils/cloudinary'
 import { useAuth } from '../context/AuthContext'
-import { HiBadgeCheck } from 'react-icons/hi'
+import { HiBadgeCheck, HiCamera } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
-
-const pageVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.25 } },
-}
 
 /* ── Right Panel ─────────────────────────────────────────── */
 function RightPanel() {
@@ -32,12 +26,9 @@ function RightPanel() {
             return
         }
         setLoading(true)
-        api.get('/users/search', { params: { q: 'a', limit: 6 } })
-            .then(({ data }) => {
-                const others = (data.data || []).filter(u => u._id !== user._id)
-                setSuggestions(others.slice(0, 5))
-            })
-            .catch(() => { })
+        api.get('/users/suggestions', { params: { limit: 5 } })
+            .then(({ data }) => setSuggestions(data.data || []))
+            .catch(() => setSuggestions([]))
             .finally(() => setLoading(false))
     }, [user])
 
@@ -66,13 +57,13 @@ function RightPanel() {
                         {user?.username}
                         {user?.isVerified && <HiBadgeCheck className="text-accent" />}
                     </div>
-                    <div className="sp-fullname">{user?.fullName || 'PeerNet Creator'}</div>
+                    {user?.fullName && <div className="sp-fullname">{user.fullName}</div>}
                 </div>
-                <button 
+                <button
                     onClick={() => navigate(`/profile/${user?._id}`)}
                     className="sp-action-link"
                 >
-                    Switch
+                    View profile
                 </button>
             </div>
 
@@ -95,41 +86,38 @@ function RightPanel() {
                                 <div className="skeleton w-12 h-6 rounded-md" />
                             </div>
                         ))
-                    ) : suggestions.map((u, idx) => {
+                    ) : suggestions.map((u) => {
                         const av = optimizeAvatarUrl(u.avatarUrl ||
                             `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`)
                         const isFollowed = followed[u._id]
+                        const followers = u.followersCount || 0
                         return (
-                            <motion.div 
-                                key={u._id} 
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.05 * idx }}
-                                className="sp-suggestion-row"
-                            >
-                                <img 
-                                    src={av} 
-                                    className="sp-suggestion-avatar" 
-                                    alt="" 
+                            <div key={u._id} className="sp-suggestion-row">
+                                <img
+                                    src={av}
+                                    className="sp-suggestion-avatar"
+                                    alt=""
                                     onClick={() => navigate(`/profile/${u._id}`)}
                                 />
                                 <div className="sp-suggestion-info ml-1">
-                                     <div 
-                                         className="sp-suggestion-username cursor-pointer hover:underline"
-                                         onClick={() => navigate(`/profile/${u._id}`)}
-                                     >
-                                         {u.username}
-                                         {u.isVerified && <HiBadgeCheck className="text-accent" />}
-                                     </div>
-                                     <div className="sp-suggestion-subtext text-[11px] opacity-60">PeerNet Recommended</div>
-                                 </div>
-                                 <button 
-                                     onClick={() => handleFollow(u)} 
-                                     className={`sp-btn-follow text-xs font-bold ${isFollowed ? 'text-muted' : 'text-accent hover:text-accent-hover'}`}
-                                 >
-                                     {isFollowed ? 'Following' : 'Follow'}
-                                 </button>
-                            </motion.div>
+                                    <div
+                                        className="sp-suggestion-username cursor-pointer hover:underline"
+                                        onClick={() => navigate(`/profile/${u._id}`)}
+                                    >
+                                        {u.username}
+                                        {u.isVerified && <HiBadgeCheck className="text-accent" />}
+                                    </div>
+                                    <div className="sp-suggestion-subtext">
+                                        {u.fullName || `${followers} follower${followers === 1 ? '' : 's'}`}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleFollow(u)}
+                                    className={`sp-btn-follow text-xs font-bold ${isFollowed ? 'text-muted' : 'text-accent hover:text-accent-hover'}`}
+                                >
+                                    {isFollowed ? 'Following' : 'Follow'}
+                                </button>
+                            </div>
                         )
                     })}
                 </div>
@@ -227,7 +215,7 @@ export default function Feed() {
     }
 
     return (
-        <motion.div variants={pageVariants} initial="initial" animate="animate">
+        <div>
             <div className="l-feed-grid">
 
                 {/* ── Feed column ───────────── */}
@@ -248,68 +236,59 @@ export default function Feed() {
                         {(isLoading || isFetchingNextPage) && (
                             <div className="flex flex-col gap-8 pb-20">
                                 {[...Array(3)].map((_, i) => (
-                                    <div key={i} className="l-post-card p-0 overflow-hidden border-white/5">
+                                    <div key={i} className="l-post-card p-0 overflow-hidden">
                                         <div className="p-4 flex items-center gap-3">
                                             <div className="skeleton rounded-full w-10 h-10" />
                                             <div className="flex flex-col gap-2">
                                                 <div className="skeleton h-3 w-28 rounded-full" />
-                                                <div className="skeleton h-2 w-20 rounded-full opacity-40" />
+                                                <div className="skeleton h-2 w-20 rounded-full" />
                                             </div>
                                         </div>
                                         <div className="skeleton w-full aspect-square md:aspect-[4/5] rounded-none" />
-                                    <div className="p-4 space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <div className="flex gap-4">
-                                                <div className="skeleton w-6 h-6 rounded-md opacity-60" />
-                                                <div className="skeleton w-6 h-6 rounded-md opacity-60" />
-                                                <div className="skeleton w-6 h-6 rounded-md opacity-60" />
+                                        <div className="p-4 flex flex-col gap-4">
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex gap-4">
+                                                    <div className="skeleton w-6 h-6 rounded-md" />
+                                                    <div className="skeleton w-6 h-6 rounded-md" />
+                                                    <div className="skeleton w-6 h-6 rounded-md" />
+                                                </div>
+                                                <div className="skeleton w-6 h-6 rounded-md" />
                                             </div>
-                                            <div className="skeleton w-6 h-6 rounded-md opacity-60" />
-                                        </div>
-                                        <div className="space-y-2.5">
-                                            <div className="skeleton h-3 w-1/4 rounded-full" />
-                                            <div className="skeleton h-3 w-full rounded-full opacity-40" />
-                                            <div className="skeleton h-3 w-2/3 rounded-full opacity-40" />
+                                            <div className="flex flex-col gap-2.5">
+                                                <div className="skeleton h-3 w-1/4 rounded-full" />
+                                                <div className="skeleton h-3 w-full rounded-full" />
+                                                <div className="skeleton h-3 w-2/3 rounded-full" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-
-                    {!isLoading && posts.length === 0 && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="empty-state-premium bg-surface-el/40 backdrop-blur-xl border border-white/5 rounded-[32px] p-16 text-center shadow-2xl"
-                        >
-                            <div className="empty-state-visual mb-8">
-                                <div className="visual-circle w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center mx-auto border border-accent/20">
-                                    <span className="text-5xl animate-bounce">✨</span>
-                                </div>
+                                ))}
                             </div>
-                            <h2 className="text-2xl font-black mb-3 tracking-tight">Your feed is waiting...</h2>
-                            <p className="text-muted text-[15px] mb-10 max-w-sm mx-auto leading-relaxed">
-                                Join the community, follow your peers, and start your journey on PeerNet today.
-                            </p>
-                            <Link to="/search" className="btn btn-primary px-10 py-3.5 rounded-2xl font-bold no-underline inline-flex items-center gap-2 shadow-lg shadow-accent/20">
-                                Discover Creators ↗
-                            </Link>
-                        </motion.div>
-                    )}
+                        )}
 
-                    {hasNextPage && !isLoading && posts.length > 0 && (
-                        <div className="flex justify-center py-8">
-                            <motion.button className="btn btn-secondary px-8"
-                                onClick={() => fetchNextPage()}
-                                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                                Load more
-                            </motion.button>
-                        </div>
-                    )}
+                        {!isLoading && posts.length === 0 && (
+                            <div className="feed-empty">
+                                <div className="feed-empty__icon">
+                                    <HiCamera size={28} />
+                                </div>
+                                <h2 className="feed-empty__title">No posts yet</h2>
+                                <p className="feed-empty__text">
+                                    Posts from people you follow show up here. Find some accounts to follow to get started.
+                                </p>
+                                <Link to="/search" className="btn btn-primary no-underline">
+                                    Find people to follow
+                                </Link>
+                            </div>
+                        )}
+
+                        {hasNextPage && !isLoading && posts.length > 0 && (
+                            <div className="flex justify-center py-8">
+                                <button className="btn btn-secondary px-8" onClick={() => fetchNextPage()}>
+                                    Load more
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
 
                 {/* ── Right panel ───────────── */}
                 <aside className="l-side-panel">
@@ -317,6 +296,6 @@ export default function Feed() {
                 </aside>
 
             </div>
-        </motion.div>
+        </div>
     )
 }

@@ -195,13 +195,13 @@ export default function CreatePostModal({ onClose }) {
                                 {/* Upload / Preview */}
                                 {!preview ? (
                                     <div
-                                        className={`premium-upload-zone ${dragOver ? 'drag-over' : ''}`}
+                                        className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
                                         onClick={() => inputRef.current.click()}
                                         onDragOver={onDragOver}
                                         onDragLeave={onDragLeave}
                                         onDrop={onDrop}
                                     >
-                                        <div className="premium-upload-icon-ring">
+                                        <div className="upload-zone__icon">
                                             <HiCloudUpload />
                                         </div>
                                         <div>
@@ -216,14 +216,14 @@ export default function CreatePostModal({ onClose }) {
                                         <input ref={inputRef} type="file" accept="image/*,video/*" hidden onChange={handleFile} />
                                     </div>
                                 ) : (
-                                    <div className="premium-media-preview-wrap">
+                                    <div className="media-preview">
                                         {isVideo ? (
                                             <video src={preview} controls playsInline autoPlay muted loop />
                                         ) : (
                                             <img src={preview} alt="Preview" />
                                         )}
                                         <button 
-                                            className="premium-remove-media"
+                                            className="media-preview__remove"
                                             onClick={() => { setFile(null); setPreview(null) }}
                                             title="Remove Media"
                                         >
@@ -233,16 +233,16 @@ export default function CreatePostModal({ onClose }) {
                                 )}
 
                                 {/* Caption & Tools */}
-                                <div className="premium-caption-section">
+                                <div className="caption-section">
                                     <textarea
                                         ref={textareaRef}
-                                        className="premium-caption-field"
+                                        className="caption-field"
                                         placeholder="Write a caption..."
                                         value={caption}
                                         onChange={e => setCaption(e.target.value.slice(0, MAX_CHARS))}
                                     />
 
-                                    <div className="premium-caption-tools">
+                                    <div className="caption-tools">
                                         <div style={{ display: 'flex', gap: 12 }}>
                                             <div className="hashtags-helper" onClick={() => addHashtag('#peernet')}>#peernet</div>
                                             <div className="hashtags-helper" onClick={() => addHashtag('#community')}>#community</div>

@@ -4,7 +4,7 @@ import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5'
 import {
     HiDotsVertical, HiPaperClip, HiEmojiHappy,
     HiReply, HiPencil, HiTrash, HiSearch,
-    HiX, HiCheckCircle, HiCheck, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiHome
+    HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import EmojiPicker from 'emoji-picker-react'
@@ -60,7 +60,7 @@ const ConvoItem = ({ c, isActive, user, onClick }) => {
 /**
  * MESSAGE BUBBLE
  */
-const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQuery, pos, isNewGroup }) => {
+const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQuery, isNewGroup }) => {
     const reactions = useMemo(() => {
         const raw = m.reactions || []
         const map = {}
@@ -87,11 +87,7 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
     }
 
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.9, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+        <div
             className={`zn-row${isSelf ? ' self' : ' peer'}${isNewGroup ? ' new-group' : ''}${reactions.length > 0 ? ' has-reactions' : ''}`}
         >
             <div className="zn-bubble-container">
@@ -177,7 +173,7 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                     </div>
                 </div>
             </div>
-        </motion.div>
+        </div>
     )
 }
 
@@ -216,7 +212,7 @@ export default function Messages() {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const [showChatMenu, setShowChatMenu] = useState(false)
     const viewportRef = useRef(null)
-    const markReadMutation = useMarkRead(convoId)
+    const { mutate: markRead } = useMarkRead(convoId)
     const prevMsgCount = useRef(0)
     const isInitialLoad = useRef(true)
 
@@ -228,11 +224,11 @@ export default function Messages() {
             const isFromPeer = lastMsg.sender?._id !== user?._id && lastMsg.sender !== 'me'
             
             if (isFromPeer && lastMsg.status !== 'seen') {
-                markReadMutation.mutate()
+                markRead()
                 socket?.emit('mark_seen', { conversationId: convoId })
             }
         }
-    }, [convoId, messages, socket, user?._id])
+    }, [convoId, messages, socket, user?._id, markRead])
 
     // Join/Leave room
     useEffect(() => {
@@ -252,11 +248,6 @@ export default function Messages() {
             })
             .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0) || new Date(b.updatedAt) - new Date(a.updatedAt))
     }, [convos, searchQuery, user?._id])
-
-    const filteredMessages = useMemo(() => {
-        if (!chatSearchQuery.trim()) return messages
-        return messages.filter(m => m.body?.toLowerCase().includes(chatSearchQuery.toLowerCase()))
-    }, [messages, chatSearchQuery])
 
     const groupedMessages = useMemo(() => {
         const groups = []
@@ -459,7 +450,6 @@ export default function Messages() {
                 </div>
 
                 <div className="zn-sidebar-scroll">
-                    <AnimatePresence mode="popLayout">
                         {loadingConvos ? (
                             <div key="skeleton" className="zn-skeleton-list">
                                 {[...Array(8)].map((_, i) => (
@@ -473,60 +463,34 @@ export default function Messages() {
                                 ))}
                             </div>
                         ) : filteredConvos.length > 0 ? (
-                            <motion.div
-                                key="list"
-                                initial="hidden"
-                                animate="visible"
-                                variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-                            >
+                            <div key="list">
                                 {filteredConvos.map(c => (
-                                    <motion.div
+                                    <ConvoItem
                                         key={c._id}
-                                        variants={{
-                                            hidden: { opacity: 0, x: -10 },
-                                            visible: { opacity: 1, x: 0 }
-                                        }}
-                                    >
-                                        <ConvoItem
-                                            c={c} isActive={convoId === c._id} user={user}
-                                            onClick={() => navigate(`/messages/${c._id}`)}
-                                            onPin={() => pinMutation.mutate(c._id)}
-                                            onMute={() => muteMutation.mutate(c._id)}
-                                            onArchive={() => archiveMutation.mutate(c._id)}
-                                        />
-                                    </motion.div>
+                                        c={c} isActive={convoId === c._id} user={user}
+                                        onClick={() => navigate(`/messages/${c._id}`)}
+                                        onPin={() => pinMutation.mutate(c._id)}
+                                        onMute={() => muteMutation.mutate(c._id)}
+                                        onArchive={() => archiveMutation.mutate(c._id)}
+                                    />
                                 ))}
-                            </motion.div>
+                            </div>
                         ) : (
-                            <motion.div
-                                key="empty"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="zn-empty-state"
-                            >
+                            <div key="empty" className="zn-empty-state">
                                 <div className="zn-empty-icon">
                                     <HiMail size={36} />
                                 </div>
                                 <p className="zn-empty-title">No chats found</p>
                                 <p className="zn-empty-sub">Search for a user or start a conversation.</p>
-                            </motion.div>
+                            </div>
                         )}
-                    </AnimatePresence>
                 </div>
             </aside>
 
             {/* CHAT MAIN AREA */}
             <main className="zn-chat-main">
-                <AnimatePresence mode="wait">
                     {convoId ? (
-                        <motion.div
-                            key={`chat-${convoId}`}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.2 }}
-                            className="zn-chat-inner"
-                        >
+                        <div key={`chat-${convoId}`} className="zn-chat-inner">
                             {/* Chat Header */}
                             <header className="zn-chat-header">
                                 <div className="zn-chat-header-left">
@@ -656,7 +620,6 @@ export default function Messages() {
                                                         item.value.sender?._id === user?._id ||
                                                         item.value.sender === user?._id
                                                     }
-                                                    pos={item.pos}
                                                     isNewGroup={item.isNewGroup}
                                                     onReply={setReplyingTo}
                                                     onEdit={(msg) => { setEditingId(msg._id); setEditingText(msg.body) }}
@@ -666,10 +629,10 @@ export default function Messages() {
                                             )
                                         ))
                                     ) : (
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="zn-empty-chat">
+                                        <div className="zn-empty-chat">
                                             <HiMail size={28} className="zn-empty-chat-icon" />
                                             <p>Beginning of your conversation with {peer?.username || 'your contact'}.</p>
-                                        </motion.div>
+                                        </div>
                                     )}
                                 </AnimatePresence>
                                 <div className="zn-viewport-spacer" />
@@ -744,22 +707,16 @@ export default function Messages() {
                                     </div>
                                 </div>
                             </footer>
-                        </motion.div>
+                        </div>
                     ) : (
-                        <motion.div
-                            key="select-convo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="zn-select-convo"
-                        >
+                        <div key="select-convo" className="zn-select-convo">
                             <div className="zn-select-convo-icon">
                                 <HiMail size={40} />
                             </div>
-                            <h2 className="zn-select-convo-title">Your Messages</h2>
-                            <p className="zn-select-convo-sub">Send private messages to your friends.</p>
-                        </motion.div>
+                            <h2 className="zn-select-convo-title">Your messages</h2>
+                            <p className="zn-select-convo-sub">Pick a conversation, or start a new one.</p>
+                        </div>
                     )}
-                </AnimatePresence>
             </main>
 
             {/* Edit Message Modal */}

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useMultiAccount } from '../context/MultiAccountContext'
-import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
 import logo from '../assets/logo.png'
@@ -60,40 +59,33 @@ export default function Register() {
     }
 
     const fields = [
-        { k: 'fullName', label: 'Full Name', placeholder: 'Your Name', type: 'text' },
-        { k: 'username', label: 'Interstellar Username', placeholder: 'e.g. stargazer_01', type: 'text' },
-        { k: 'email', label: 'Email Address', placeholder: 'you@universe.com', type: 'email' },
-        { k: 'password', label: 'Quantum Password', placeholder: 'Min 8 characters', type: 'password' },
+        { k: 'fullName', label: 'Full name', placeholder: 'Your name', type: 'text' },
+        { k: 'username', label: 'Username', placeholder: 'e.g. alex_r', type: 'text' },
+        { k: 'email', label: 'Email address', placeholder: 'you@example.com', type: 'email' },
+        { k: 'password', label: 'Password', placeholder: 'At least 8 characters', type: 'password' },
     ]
 
     return (
         <div className="auth-page">
-            <div className="auth-orb auth-orb-1" />
-            <div className="auth-orb auth-orb-2" />
-
             <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 2 }}>
                 <ThemeToggle />
             </div>
 
-            <motion.div className="auth-card"
-                initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.4 }}>
-                
+            <div className="auth-card">
                 <div className="auth-logo-wrap">
                     <img src={logo} alt="PeerNet" className="auth-logo-img" />
                     <div className="auth-logo-text">PeerNet</div>
                 </div>
-                
-                <p className="auth-sub">Initialize your digital presence</p>
+
+                <p className="auth-sub">Create your account</p>
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     {fields.map(({ k, label, placeholder, type }) => (
                         <div key={k} className="input-group">
-                            <label className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1 ml-1">{label}</label>
+                            <label className="auth-label">{label}</label>
                             <div style={{ position: 'relative' }}>
                                 <input 
-                                    className="obsidian-input w-full" 
+                                    className="input-field w-full" 
                                     type={k === 'password' ? (showPassword ? 'text' : 'password') : type} 
                                     placeholder={placeholder}
                                     value={form[k]} 
@@ -129,16 +121,12 @@ export default function Register() {
                         </span>
                     </div>
 
-                    <motion.button className="btn btn-primary w-full" type="submit"
-                        disabled={loading}
-                        style={{ height: 48 }}
-                        whileHover={{ y: -1 }}
-                        whileTap={{ scale: 0.98 }}>
-                        {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Establish Account'}
-                    </motion.button>
+                    <button className="btn btn-primary w-full" type="submit" disabled={loading} style={{ height: 48 }}>
+                        {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : 'Create account'}
+                    </button>
                 </form>
 
-                <div className="auth-divider"><span>SECURE AUTH</span></div>
+                <div className="auth-divider"><span>OR</span></div>
 
                 <div className="auth-social-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -151,14 +139,14 @@ export default function Register() {
                         />
                     </div>
                     <button className="btn btn-secondary w-full text-xs" onClick={handleGuestLogin} disabled={loading}>
-                        Continue as Guest
+                        Try as guest
                     </button>
                 </div>
 
                 <p className="auth-switch">
-                    Existing user? <Link to="/login" className="t-accent">Access Portal</Link>
+                    Already have an account? <Link to="/login">Sign in</Link>
                 </p>
-            </motion.div>
+            </div>
         </div>
     )
 }

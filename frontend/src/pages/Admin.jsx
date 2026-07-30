@@ -302,7 +302,7 @@ const AnalyticsModule = ({ stats }) => {
     const areaPath = `${svgPath} V 300 H 0 Z`
     
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+        <motion.div className="space-y-10">
             <div className="grid grid-cols-1 2xl:grid-cols-3 gap-8">
                 <div className="2xl:col-span-2 admin-surface-el p-8 md:p-12">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
@@ -401,7 +401,7 @@ const AnalyticsModule = ({ stats }) => {
 }
 
 const InfrastructureModule = ({ pulse }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+    <motion.div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard label="Memory Heap" value={pulse?.system?.heapUsed || '0 MB'} sub="NODEJS ALLOCATION" icon={<HiServer />} />
             <StatCard label="Processing" value={`${pulse?.system?.cpuSeconds || 0}s`} sub="CPU EXECUTION TIME" icon={<HiLightningBolt />} />
@@ -436,7 +436,7 @@ const InfrastructureModule = ({ pulse }) => (
  * featuring responsive table-to-card transformation for mobile administrative access.
  */
 const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border">
+    <motion.div className="admin-surface-el overflow-hidden border-0 md:border">
         {/* Header */}
         <div className="p-6 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-0.5">
@@ -640,7 +640,7 @@ const UserModule = ({ users, onVerify, onDelete, loading, search, setSearch }) =
 )
 
 const CommentModule = ({ comments, onDelete, search, setSearch, loading }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border">
+    <motion.div className="admin-surface-el overflow-hidden border-0 md:border">
         {/* Header Section */}
         <div className="p-8 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="space-y-1">
@@ -769,7 +769,7 @@ const CommentModule = ({ comments, onDelete, search, setSearch, loading }) => (
 )
 
 const AuditModule = ({ logs, loading }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border">
+    <motion.div className="admin-surface-el overflow-hidden border-0 md:border">
         {/* Header Section */}
         <div className="p-8 border-b border-admin-border bg-gradient-to-r from-accent/[0.02] to-transparent flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="space-y-1">
@@ -902,10 +902,10 @@ const AuditModule = ({ logs, loading }) => (
  * @param {String} contentType - Current active filter state
  * @param {Function} setContentType - State setter for type filtering
  */const PostModule = ({ posts, onDelete, contentType, setContentType, search, setSearch, loading }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+    <motion.div className="space-y-8">
         {/* Navigation & Search Header */}
         <div className="flex flex-col lg:flex-row gap-6 items-center">
-            {/* Premium Segmented Controls */}
+            {/* Segmented controls */}
             <div className="flex-1 flex items-center gap-1.5 bg-admin-card p-2 rounded-[24px] border border-admin-border w-full backdrop-blur-xl shadow-inner">
                 {['all', 'image', 'video', 'text'].map(type => (
                     <button 
@@ -1034,7 +1034,7 @@ const AuditModule = ({ logs, loading }) => (
 )
 
 const ReportModule = ({ reports, onResolve, loading }) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-surface-el overflow-hidden border-0 md:border border-error/20">
+    <motion.div className="admin-surface-el overflow-hidden border-0 md:border border-error/20">
         {/* Header Section */}
         <div className="p-8 border-b border-error/20 bg-gradient-to-r from-error/[0.03] to-transparent flex items-center justify-between">
             <div className="space-y-1">
@@ -1639,19 +1639,7 @@ export default function Admin() {
 
 
                     {/* Module Render */}
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={activeTab}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                            >
-                                {renderModule()}
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
+                    <div>{renderModule()}</div>
 
                     <footer className="mt-20 py-10 border-t border-white/5 opacity-40">
                         <div className="max-w-[1700px] mx-auto">

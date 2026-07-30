@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiX, HiBadgeCheck, HiUser } from 'react-icons/hi'
-import api from '../api/axios'
+import api, { chatApi } from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
-export default function ShareModal({ isOpen, onClose }) {
+export default function ShareModal({ isOpen, onClose, postId }) {
     const { user: currentUser } = useAuth()
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [sentStatus, setSentStatus] = useState({})
+    const [sendingTo, setSendingTo] = useState(null)
 
     useEffect(() => {
         if (!isOpen || !currentUser) return
@@ -18,25 +19,29 @@ export default function ShareModal({ isOpen, onClose }) {
         setSentStatus({})
         api.get(`/users/${currentUser._id}/following`)
             .then(({ data }) => setUsers(data.data || []))
-            .catch(() => toast.error('Failed to load friends'))
+            .catch(() => toast.error('Could not load the people you follow'))
             .finally(() => setLoading(false))
     }, [isOpen, currentUser])
 
-    const handleSend = (u) => {
-        // Ideally this creates a message in the chat system.
-        // For now we simulate the interaction seamlessly.
-        setSentStatus(prev => ({ ...prev, [u._id]: true }))
-        toast.success(`Sent to ${u.username}`, {
-            icon: '🚀',
-            style: {
-                borderRadius: '10px',
-                background: 'var(--surface)',
-                color: 'var(--text-1)',
-                border: '1px solid var(--border-md)'
-            }
-        })
-        
-        // Let UI remain open so they can send to multiple people like IG.
+    // Sends the post as a direct message: open (or reuse) the conversation,
+    // then post a message containing the link.
+    const handleSend = async (u) => {
+        if (!postId) return
+        setSendingTo(u._id)
+        try {
+            const { data } = await chatApi.post('', { targetUserId: u._id })
+            const conversationId = data.data?._id
+            if (!conversationId) throw new Error('No conversation returned')
+            await chatApi.post(`/${conversationId}/messages`, {
+                body: `${window.location.origin}/posts/${postId}`,
+            })
+            setSentStatus(prev => ({ ...prev, [u._id]: true }))
+            toast.success(`Sent to ${u.username}`)
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Could not send')
+        } finally {
+            setSendingTo(null)
+        }
     }
 
     return (
@@ -86,8 +91,8 @@ export default function ShareModal({ isOpen, onClose }) {
                             ) : users.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-3)' }}>
                                     <div style={{ fontSize: 38, marginBottom: 12, display: 'flex', justifyContent: 'center' }}><HiUser /></div>
-                                    <p style={{ fontWeight: 600, color: 'var(--text-2)' }}>No friends found</p>
-                                    <p style={{ fontSize: '13px', marginTop: 4 }}>Follow some users to share posts with them!</p>
+                                    <p style={{ fontWeight: 600, color: 'var(--text-2)' }}>Nobody to share with yet</p>
+                                    <p style={{ fontSize: '13px', marginTop: 4 }}>You can share posts with accounts you follow.</p>
                                 </div>
                             ) : (
                                 users.map(u => {
@@ -114,9 +119,9 @@ export default function ShareModal({ isOpen, onClose }) {
                                                 )}
                                             </div>
 
-                                            <button 
+                                            <button
                                                 onClick={() => !isSent && handleSend(u)}
-                                                disabled={isSent}
+                                                disabled={isSent || sendingTo === u._id}
                                                 style={{
                                                     background: isSent ? 'transparent' : 'var(--accent)',
                                                     color: isSent ? 'var(--text-3)' : '#fff',
@@ -125,11 +130,11 @@ export default function ShareModal({ isOpen, onClose }) {
                                                     borderRadius: '8px',
                                                     fontWeight: 600,
                                                     fontSize: '13px',
+                                                    minWidth: 72,
                                                     cursor: isSent ? 'default' : 'pointer',
-                                                    transition: 'all 0.2s'
                                                 }}
                                             >
-                                                {isSent ? 'Sent' : 'Send'}
+                                                {isSent ? 'Sent' : sendingTo === u._id ? 'Sending…' : 'Send'}
                                             </button>
                                         </div>
                                     )

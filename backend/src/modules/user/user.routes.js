@@ -13,6 +13,10 @@ router.get('/me', authenticate, userController.getMe);
 // GET /api/v1/users/search?q=
 router.get('/search', authenticate, userController.searchUsers);
 
+// GET /api/v1/users/suggestions?limit=
+// Must stay above '/:id' or Express will treat "suggestions" as an id
+router.get('/suggestions', authenticate, userController.getSuggestions);
+
 // GET /api/v1/users/:id
 router.get('/:id', authenticate, userController.getProfile);
 
