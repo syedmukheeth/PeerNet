@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api, { CHAT_BASE_URL } from '../api/axios'

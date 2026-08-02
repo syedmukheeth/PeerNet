@@ -1,5 +1,7 @@
 # ─── Stage 1: Frontend Builder ─────────────────────────────────────────────
-FROM node:20-alpine AS frontend-builder
+# Node 22: react-router 8 declares engines node >=22.22.0 and ships ESM only.
+# The backend stages below stay on 20, which is what backend/package.json pins.
+FROM node:22-alpine AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci

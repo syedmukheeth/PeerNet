@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'

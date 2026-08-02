@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { HiX, HiBadgeCheck, HiUser } from 'react-icons/hi'
 import api from '../api/axios'
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'

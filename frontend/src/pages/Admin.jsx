@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
     HiUsers, HiCollection, HiTrash, HiRefresh,

@@ -68,21 +68,22 @@ an existing key, so root wins on any conflict. Put real secrets in root `.env`.
 listed explicitly. Do not reintroduce a `.vercel.app` wildcard: with credentials
 enabled that lets any Vercel account call the API.
 
-## react-router: do not run `npm audit fix --force`
+## React 19 and react-router 8
 
-The frontend stays on `react-router-dom@7.18.2`. `npm audit` reports
-GHSA-qwww-vcr4-c8h2 against it and offers 7.11.0 as the fix. Taking that offer
-makes things worse:
+The frontend runs React 19 and `react-router` 8. Two consequences:
 
-- 7.18.2 carries one advisory, GHSA-qwww-vcr4-c8h2, which only applies to RSC
-  mode. It needs server actions and framework mode. This app is a Vite SPA
-  built on `BrowserRouter` with no loaders, no actions and no server runtime,
-  so the vulnerable code is never reached.
-- 7.11.0 carries four advisories, including an open redirect leading to XSS and
-  an unauthenticated denial of service through route matching. Those are plain
-  client-side routing bugs and would be reachable here.
+- There is no `react-router-dom`. v8 removed that package. Import everything
+  from `react-router`. Only `RouterProvider` and `HydratedRouter` live at
+  `react-router/dom`, and this app uses neither: routing is declarative,
+  built on `BrowserRouter` and `Routes`, with no loaders, actions or `meta`.
+- The frontend needs Node >= 22.22.0. `frontend/package.json` pins that in
+  `engines`, the frontend-builder stage of the root `Dockerfile` is on
+  `node:22-alpine`, and `.github/workflows/ci.yml` runs Node 22. The backend
+  is unaffected and stays on Node 20.
 
-The real patch is `react-router@8.3.0`, which requires React >= 19.2.7. Taking
-it means upgrading React 18 to 19 first. Until that happens, 7.18.2 is the
-most-patched version reachable, and the two Dependabot alerts are dismissed as
-not affected rather than fixed.
+The upgrade was driven by GHSA-qwww-vcr4-c8h2, which affected react-router
+7.12.0 through 8.2.0. Do not "fix" that advisory by downgrading to 7.11.0 if
+it ever resurfaces: 7.11.0 carries four advisories of its own, including an
+open redirect leading to XSS and an unauthenticated denial of service through
+route matching, and unlike the RSC-mode-only advisory those are reachable from
+a plain SPA.

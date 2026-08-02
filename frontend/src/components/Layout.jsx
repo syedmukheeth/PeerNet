@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'

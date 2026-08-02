@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { HiX, HiPlus, HiCheckCircle } from 'react-icons/hi'
 import { useMultiAccount } from '../context/MultiAccountContext'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 export default function AccountSwitcherModal({ onClose }) {
     const { accounts, switchAccount } = useMultiAccount()

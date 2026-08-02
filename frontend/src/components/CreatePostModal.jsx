@@ -8,7 +8,7 @@ import {
     HiCloudUpload,
     HiTrash
 } from 'react-icons/hi'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'

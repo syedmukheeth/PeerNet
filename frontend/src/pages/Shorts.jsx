@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import api from '../api/axios'
 import { HiHeart, HiOutlineHeart, HiVolumeOff, HiVolumeUp, HiChatAlt2, HiShare, HiArrowLeft, HiRefresh, HiMoon, HiSun } from 'react-icons/hi'
 import { timeago } from '../utils/timeago'

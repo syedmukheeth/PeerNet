@@ -1,5 +1,5 @@
 import { useState, useCallback, Suspense, lazy } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router'
 import { HelmetProvider } from 'react-helmet-async'
 import { useAuth } from './context/AuthContext'
 import Layout from './components/Layout'

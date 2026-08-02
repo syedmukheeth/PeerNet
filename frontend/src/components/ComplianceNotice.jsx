@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiInformationCircle } from 'react-icons/hi'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 export default function ComplianceNotice() {
     const [isVisible, setIsVisible] = useState(false)

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
 import api from '../api/axios'

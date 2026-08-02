@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5'
 import {
     HiDotsVertical, HiPaperClip, HiEmojiHappy,
