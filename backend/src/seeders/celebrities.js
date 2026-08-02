@@ -127,7 +127,7 @@ const seed = async () => {
 
     for (let i = 0; i < celebrities.length; i++) {
         const c = celebrities[i];
-        // Upsert — don't crash if already exists
+        // Upsert, don't crash if already exists
         let user = await User.findOne({ email: c.email });
         if (!user) {
             user = await User.create({

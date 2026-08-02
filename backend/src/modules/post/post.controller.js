@@ -11,11 +11,20 @@ const getFeed = async (req, res, next) => {
         
         // Attach diagnostic tier header
         const tier = result.data?.[0]?.logicTier || 'cache-zset';
-        const dbCount = result.data?.[0]?._dbCount || 0;
-        const dbName = result.data?.[0]?._dbName || 'unknown';
         res.setHeader('X-PeerNet-Feed-Tier', tier);
-        
-        res.json({ success: true, _debug: { tier, dbCount, dbName }, ...result });
+
+        // _debug carries the database name and document counts, so it stays out
+        // of production responses.
+        const body = { success: true, ...result };
+        if (process.env.NODE_ENV !== 'production') {
+            body._debug = {
+                tier,
+                dbCount: result.data?.[0]?._dbCount || 0,
+                dbName: result.data?.[0]?._dbName || 'unknown',
+            };
+        }
+
+        res.json(body);
     } catch (err) { next(err); }
 };
 
@@ -28,7 +37,9 @@ const createPost = async (req, res, next) => {
 
 const getPost = async (req, res, next) => {
     try {
-        const post = await postService.getPost(req.params.id, req.user._id);
+        // The route is behind optionalAuth, so req.user is absent for a logged
+        // out visitor. getPost treats a missing viewer as "no like or save state".
+        const post = await postService.getPost(req.params.id, req.user?._id);
         res.json({ success: true, data: post });
     } catch (err) { next(err); }
 };

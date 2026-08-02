@@ -2,19 +2,38 @@
 
 const User = require('./User');
 const Follower = require('./Follower');
-const { getRedis } = require('../../config/redis');
+const { getRedisOptional } = require('../../config/redis');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 const notificationService = require('../notification/notification.service');
 
 const USER_CACHE_TTL = 600; // 10 min
 
+// Fields that belong to the account owner and must not be returned when someone
+// else views the profile. The cached copy stays complete; stripping happens on
+// the way out so the same cache entry serves both the owner and other viewers.
+const PRIVATE_PROFILE_FIELDS = [
+    'email',
+    'lastLogin',
+    'lastSeen',
+    'status',
+    'categoryAffinity',
+    'avatarPublicId',
+    '__v',
+];
+
+const stripPrivateFields = (profile) => {
+    const visible = { ...profile };
+    PRIVATE_PROFILE_FIELDS.forEach((field) => delete visible[field]);
+    return visible;
+};
+
 const getProfile = async (targetUserId, requestingUserId) => {
-    const redis = getRedis();
+    const redis = getRedisOptional();
     const cacheKey = `user:${targetUserId}`;
-    
+
     let profileData;
-    const cached = await redis.get(cacheKey);
+    const cached = redis ? await redis.get(cacheKey) : null;
     if (cached) {
         profileData = JSON.parse(cached);
         // Clean up previously incorrectly cached isFollowing
@@ -23,7 +42,7 @@ const getProfile = async (targetUserId, requestingUserId) => {
         const user = await User.findById(targetUserId).select('-passwordHash');
         if (!user) throw new ApiError(404, 'User not found');
         profileData = user.toJSON();
-        await redis.setEx(cacheKey, USER_CACHE_TTL, JSON.stringify(profileData));
+        if (redis) await redis.setEx(cacheKey, USER_CACHE_TTL, JSON.stringify(profileData));
     }
 
     let isFollowing = false;
@@ -32,7 +51,10 @@ const getProfile = async (targetUserId, requestingUserId) => {
         isFollowing = Boolean(relation);
     }
 
-    return { ...profileData, isFollowing };
+    const isOwnProfile = requestingUserId && requestingUserId.toString() === targetUserId.toString();
+    const visibleProfile = isOwnProfile ? profileData : stripPrivateFields(profileData);
+
+    return { ...visibleProfile, isFollowing };
 };
 
 const updateProfile = async (userId, updates, avatarFile) => {
@@ -66,8 +88,8 @@ const updateProfile = async (userId, updates, avatarFile) => {
     await user.save();
 
     // Invalidate cache
-    const redis = getRedis();
-    await redis.del(`user:${userId}`);
+    const redis = getRedisOptional();
+    if (redis) await redis.del(`user:${userId}`);
 
     return user.toJSON();
 };
@@ -92,8 +114,8 @@ const follow = async (followerId, followingId) => {
     ]);
 
     // Invalidate cached profiles
-    const redis = getRedis();
-    await redis.del([`user:${followerId}`, `user:${followingId}`]);
+    const redis = getRedisOptional();
+    if (redis) await redis.del([`user:${followerId}`, `user:${followingId}`]);
 
     // Notify via Direct Notification Service (Reliable Real-Time)
     await notificationService.createNotification({
@@ -114,8 +136,8 @@ const unfollow = async (followerId, followingId) => {
         User.findByIdAndUpdate(followingId, { $inc: { followersCount: -1 } }),
     ]);
 
-    const redis = getRedis();
-    await redis.del([`user:${followerId}`, `user:${followingId}`]);
+    const redis = getRedisOptional();
+    if (redis) await redis.del([`user:${followerId}`, `user:${followingId}`]);
 
     // Sync with Notifications: Remove the follow alert
     await notificationService.removeNotification({

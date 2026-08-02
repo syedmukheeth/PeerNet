@@ -99,7 +99,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 setLikesCount(likesCount + 1)
                 onLikeToggle?.(post._id, true, likesCount + 1)
             } else {
-                // genuine error — revert local override
+                // genuine error, revert local override
                 localLiked.current = !newLiked
                 localCount.current = likesCount
                 setLiked(!newLiked)

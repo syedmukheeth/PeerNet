@@ -6,11 +6,11 @@
    Fonts are loaded via <link> in index.html.
 
    Layer map:
-   1) Tokens        — :root / [data-theme] custom properties
-   2) @theme        — exposes those tokens to Tailwind's utility generator
-   3) Base          — reset and element defaults
-   4) Components    — .btn, .skeleton, .l-*, page modules
-   5) Responsive    — breakpoint overrides
+   1) Tokens        : :root / [data-theme] custom properties
+   2) @theme        : exposes those tokens to Tailwind's utility generator
+   3) Base          : reset and element defaults
+   4) Components    : .btn, .skeleton, .l-*, page modules
+   5) Responsive    : breakpoint overrides
    ============================================================================ */
 
 /* Tailwind reads these to generate bg-*, text-*, border-* utilities.
@@ -484,7 +484,7 @@ textarea:focus-visible {
 /* Mobile State: Bottom Nav (< 768px) */
 @media (max-width: 767px) {
 
-  /* MUST come after the show rules above — hides mobile chrome when chat is fullscreen */
+  /* MUST come after the show rules above, hides mobile chrome when chat is fullscreen */
   body:has(.zn-messages-root.chat-active) .mobile-top-header,
   body:has(.zn-messages-root.chat-active) .mobile-nav,
   html body.chat-active-mode .mobile-top-header,
@@ -2023,7 +2023,7 @@ textarea:focus-visible {
 }
 
 /* The wide Instagram-style gutter only fits once the sidebar and the 150px
-   avatar still leave room for the stats row — below 1024px it squeezes the
+   avatar still leave room for the stats row, below 1024px it squeezes the
    info column until its contents overflow. */
 @media (min-width: 1024px) {
   .profile-header-v2 {
@@ -3225,7 +3225,7 @@ textarea:focus-visible {
 }
 
 /* ============================================================================
-   STATIC PAGES — About, Help, Privacy, Terms
+   STATIC PAGES: About, Help, Privacy, Terms
    ============================================================================ */
 .static-page {
   max-width: 720px;
@@ -5399,7 +5399,7 @@ textarea:focus-visible {
     --sidebar-actual-w: var(--sidebar-w);
   }
 
-  /* Sidebar stays FULL WIDTH — same as desktop */
+  /* Sidebar stays FULL WIDTH, same as desktop */
   .sidebar {
     padding: 24px 0;
     align-items: stretch; /* full-width items */
@@ -5413,7 +5413,7 @@ textarea:focus-visible {
     margin-bottom: 32px;
   }
 
-  /* Show logo, labels and profile info — same as desktop */
+  /* Show logo, labels and profile info, same as desktop */
   .peernetLogo,
   .ig-label,
   .profile-card-info,
@@ -5497,7 +5497,7 @@ textarea:focus-visible {
 @media (max-width: 767px) {
 
   /* Hide the desktop sidebar completely. It was previously only moved offscreen
-     with opacity 0, which left its links in the accessibility tree — screen
+     with opacity 0, which left its links in the accessibility tree, screen
      readers announced the whole nav twice. Mobile uses .mobile-nav and
      .mobile-more-popup instead, so the element can go entirely. */
   .sidebar {
@@ -7772,7 +7772,7 @@ textarea:focus-visible {
   background: rgba(0, 0, 0, 0.1);
 }
 
-/* Tablet — side-by-side layout */
+/* Tablet: side-by-side layout */
 @media (min-width: 768px) and (max-width: 1263px) {
   .zn-messages-root {
     height: 100dvh;

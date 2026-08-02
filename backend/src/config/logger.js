@@ -57,7 +57,7 @@ try {
     fs.unlinkSync(testFile);
     fileTransportsOk = true;
 } catch {
-    // Filesystem not writable — console-only logging
+    // Filesystem not writable, console-only logging
 }
 
 if (fileTransportsOk) {
@@ -88,7 +88,7 @@ if (fileTransportsOk) {
 // ── Logger ────────────────────────────────────────────────────────────────────
 // IMPORTANT: Do NOT use Winston's exceptionHandlers / rejectionHandlers with
 // file transports.  Winston automatically calls process.exit(1) after writing
-// to those handlers — which terminates Render before the server ever starts.
+// to those handlers, which terminates Render before the server ever starts.
 // Uncaught exceptions and unhandled rejections are handled in server.js instead.
 const logger = winston.createLogger({
     level: logLevel,

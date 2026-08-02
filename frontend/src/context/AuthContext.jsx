@@ -15,7 +15,7 @@ const writeCache = (u) => {
 }
 
 export const AuthProvider = ({ children }) => {
-    // Restore from cache instantly — eliminates the white-screen flash
+    // Restore from cache instantly, eliminates the white-screen flash
     const [user, setUser] = useState(() => readCached())
     // Only show the full-page spinner on very first load (no cached user)
     const [loading, setLoading] = useState(() => !readCached())

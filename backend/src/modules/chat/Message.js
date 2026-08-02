@@ -33,7 +33,8 @@ const messageSchema = new mongoose.Schema(
 );
 
 // Indexes
+// clientSideId is already indexed by its unique+sparse field option, declaring
+// it again here made Mongoose warn about a duplicate index on every boot.
 messageSchema.index({ conversation: 1, createdAt: -1 });
-messageSchema.index({ clientSideId: 1 });
 
 module.exports = mongoose.model('Message', messageSchema);

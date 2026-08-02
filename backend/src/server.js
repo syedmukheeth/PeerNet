@@ -1,8 +1,15 @@
 'use strict';
 
 const path = require('path');
+// dotenv never overwrites a variable that is already set, so the repo root .env
+// wins over backend/.env for any key both files define.
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 require('dotenv').config();
+
+// Runs before the requires below because config/kafka.js reads KAFKA_BROKER at
+// module load time.
+const { validateEnv } = require('./config/env');
+validateEnv();
 
 const http = require('http');
 const createApp = require('./app');
@@ -23,41 +30,41 @@ const bootstrap = async () => {
     await connectDB();
 
     // ── 2. Connect Redis (OPTIONAL) ──────────────────────────────────────────
-    try {
-        logger.info('Connecting to Redis...');
-        await connectRedis();
-    } catch (err) {
-        logger.warn(`Redis unavailable: ${err.message} — continuing standalone`);
-    }
+    // connectRedis never throws and retries in the background, so a Redis
+    // outage degrades caching instead of blocking boot.
+    logger.info('Connecting to Redis...');
+    await connectRedis();
 
     // ── 3. Build Server ──────────────────────────────────────────────────────
     const app = createApp();
     const httpServer = http.createServer(app);
 
     // ── 4. Non-Blocking Service Initialization ──────────────────────────────
-    const initServices = async () => {
+    // Each step is isolated so that one failing dependency cannot skip the ones
+    // after it. Wrapping the whole block in a single try previously meant a
+    // Redis outage during socket setup silently cancelled the story cleanup cron.
+    const runStep = async (name, fn) => {
         try {
-            if (isKafkaEnabled) {
-                logger.info('Initializing Kafka Producer...');
-                await initProducer();
-            }
-            
-            logger.info('Starting Background Workers...');
-            await Promise.all([
-                initFeedWorker(),
-                initNotificationWorker()
-            ]);
-            
-            logger.info('Init: Socket.io setup...');
-            await initSocket(httpServer);
-            
-            logger.info('Init: Cron jobs setup...');
-            scheduleStoryCleanup();
-            
-            logger.info('🚀 ALL background services initialized');
+            logger.info(`Init: ${name}...`);
+            await fn();
         } catch (err) {
-            logger.error(`Non-fatal startup error in background services: ${err.message}`);
+            logger.error(`Init: ${name} failed (non-fatal): ${err.message}`);
         }
+    };
+
+    const initServices = async () => {
+        if (isKafkaEnabled) {
+            await runStep('Kafka producer', initProducer);
+        }
+
+        await runStep('Background workers', () =>
+            Promise.all([initFeedWorker(), initNotificationWorker()]));
+
+        await runStep('Socket.io', () => initSocket(httpServer));
+
+        await runStep('Cron jobs', scheduleStoryCleanup);
+
+        logger.info('🚀 Background service initialization complete');
     };
 
     // ── 5. Start listening IMMEDIATELY ───────────────────────────────────────
@@ -68,7 +75,7 @@ const bootstrap = async () => {
 
     // ── 6. Graceful shutdown ──────────────────────────────────────────────────
     const shutdown = (signal) => {
-        logger.info(`${signal} received — shutting down`);
+        logger.info(`${signal} received, shutting down`);
         httpServer.close(async () => {
             logger.info('HTTP server closed');
             await disconnectProducer();
@@ -92,5 +99,7 @@ const bootstrap = async () => {
 
 bootstrap().catch((err) => {
     logger.error(`FATAL BOOTSTRAP FAILURE: ${err.message}`);
-    process.exit(1);
+    // logger transports flush asynchronously, so give them a tick before exiting
+    // or the reason for the crash never reaches the Render logs.
+    setTimeout(() => process.exit(1), 100);
 });

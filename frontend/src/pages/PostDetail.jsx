@@ -402,7 +402,7 @@ export default function PostDetail() {
                 {/* ── RIGHT: info + comments ───────────────── */}
                 <div className="post-detail-info">
 
-                    {/* Header — desktop only, hidden on mobile */}
+                    {/* Header, desktop only, hidden on mobile */}
                     <div className="post-detail-header post-detail-header--desktop" ref={menuRef}>
                         <Link to={`/profile/${author._id}`}>
                             <img src={avatar} className="post-detail-avatar" alt="" />

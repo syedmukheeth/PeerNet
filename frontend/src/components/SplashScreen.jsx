@@ -4,7 +4,7 @@ import logo from '../assets/logo.png'
 
 /**
  * Brief brand frame shown once per session while the app boots.
- * Kept short on purpose — it sits in front of the first paint.
+ * Kept short on purpose, it sits in front of the first paint.
  */
 export default function SplashScreen({ onDone }) {
     const [visible, setVisible] = useState(true)

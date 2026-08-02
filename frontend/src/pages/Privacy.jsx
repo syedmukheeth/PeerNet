@@ -17,8 +17,8 @@ export default function Privacy() {
                 <p>
                     When you create an account we store your username, email address and password (as a
                     hash, never in plain text). If you sign in with Google we store the email and
-                    display name Google returns. Anything you choose to add to your profile — full name,
-                    bio, website, avatar — is stored as you entered it.
+                    display name Google returns. Anything you choose to add to your profile (full name,
+                    bio, website, avatar) is stored as you entered it.
                 </p>
                 <p>
                     Posts, comments, stories, likes, follows and direct messages are stored so the app
@@ -30,7 +30,7 @@ export default function Privacy() {
             <section className="static-page__section">
                 <h2>Who can see it</h2>
                 <p>
-                    Your profile, posts and comments are public — anyone with a link can view them.
+                    Your profile, posts and comments are public. Anyone with a link can view them.
                     Saved posts are visible only to you. Direct messages are visible to the people in
                     the conversation.
                 </p>
@@ -56,7 +56,7 @@ export default function Privacy() {
                 <p>
                     You can edit or clear your profile fields, and delete your own posts, comments and
                     conversations, at any time from the app. To delete your account and the data
-                    attached to it, use the Report Bug link in the footer and ask — requests are handled
+                    attached to it, use the Report Bug link in the footer and ask. Requests are handled
                     manually.
                 </p>
             </section>

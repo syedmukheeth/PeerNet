@@ -90,7 +90,7 @@ export default function App() {
               <Route path="admin" element={<AdminRoute><Admin /></AdminRoute>} />
             </Route>
 
-            {/* Public/shared routes — viewable without logging in */}
+            {/* Public/shared routes, viewable without logging in */}
             <Route element={<Layout />}>
               <Route path="/posts/:id" element={<PostDetail />} />
               <Route path="/about" element={<About />} />

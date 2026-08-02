@@ -1,5 +1,5 @@
 /**
- * Lightweight timeago formatter — avoids CommonJS/ESM issues with timeago.js
+ * Lightweight timeago formatter, avoids CommonJS/ESM issues with timeago.js
  */
 export function timeago(date) {
     if (!date) return ''

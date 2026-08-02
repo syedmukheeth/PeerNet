@@ -52,7 +52,7 @@ if (isKafkaEnabled) {
         kafka = ghostKafka; // Fallback to ghost on init failure
     }
 } else {
-    logger.warn('Kafka: DISBALED. Activating Ghost Kafka (Mock Mode).');
+    logger.warn('Kafka: disabled, using in-process mock (KAFKA_BROKER is not set)');
     kafka = ghostKafka;
     // We still define a producer stub for internal logic
     producer = kafka.producer();

@@ -194,7 +194,7 @@ export const useMessageActions = (convoId) => {
 
 /**
  * Hook for conversation management (Pin, Mute, Archive)
- * These run as local-only state toggles — backend endpoints are not yet implemented.
+ * These run as local-only state toggles, backend endpoints are not yet implemented.
  * When backend support is added, swap mutationFn back to an API call.
  */
 export const useConvoActions = () => {
@@ -206,7 +206,7 @@ export const useConvoActions = () => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] })
     }
 
-    // Local-only toggle — no API call, no error
+    // Local-only toggle, no API call, no error
     const localMutate = (type) => ({
         mutate: (id) => toggleState(type, id),
         mutateAsync: async (id) => toggleState(type, id),

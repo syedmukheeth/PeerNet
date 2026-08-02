@@ -6,7 +6,7 @@ const ApiError = require('../utils/ApiError');
 const handler = (_req, _res, next, _options) =>
     next(new ApiError(429, 'Too many requests, please try again later'));
 
-// Bypass in local dev / test — real limits apply everywhere else
+// Bypass in local dev / test, real limits apply everywhere else
 const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 const skipLimiter = (_req, _res, next) => next();
 

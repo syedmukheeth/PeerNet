@@ -1,6 +1,6 @@
 const User = require('../src/modules/user/User');
 const Follower = require('../src/modules/user/Follower');
-const { getRedis } = require('../src/config/redis');
+const { getRedisOptional } = require('../src/config/redis');
 const { getProfile } = require('../src/modules/user/user.service');
 
 jest.mock('../src/modules/user/User', () => ({
@@ -12,7 +12,7 @@ jest.mock('../src/modules/user/Follower', () => ({
 }));
 
 jest.mock('../src/config/redis', () => ({
-    getRedis: jest.fn(),
+    getRedisOptional: jest.fn(),
 }));
 
 jest.mock('../src/config/kafka', () => ({
@@ -32,7 +32,7 @@ describe('user.service/getProfile', () => {
             setEx: jest.fn().mockResolvedValue('OK'),
             del: jest.fn().mockResolvedValue(1),
         };
-        getRedis.mockReturnValue(redisMock);
+        getRedisOptional.mockReturnValue(redisMock);
         Follower.findOne.mockResolvedValue(null);
     });
 
@@ -64,5 +64,21 @@ describe('user.service/getProfile', () => {
         });
 
         await expect(getProfile('missing_user')).rejects.toThrow('User not found');
+    });
+
+    it('still returns the profile when Redis is unavailable', async () => {
+        getRedisOptional.mockReturnValue(null);
+        const userDoc = {
+            toJSON: () => ({ _id: 'user_1', username: 'testuser' }),
+        };
+        User.findById.mockReturnValue({
+            select: jest.fn().mockResolvedValue(userDoc),
+        });
+
+        const profile = await getProfile('user_1', 'requester_1');
+
+        expect(profile.username).toBe('testuser');
+        expect(redisMock.get).not.toHaveBeenCalled();
+        expect(redisMock.setEx).not.toHaveBeenCalled();
     });
 });

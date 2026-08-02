@@ -354,7 +354,7 @@ export default function Profile() {
                 />
             )}
 
-            {/* Story viewer — only shown when profile has active stories */}
+            {/* Story viewer, only shown when profile has active stories */}
             <AnimatePresence>
                 {viewerOpen && storyGroupData && (
                     <StoryViewer

@@ -65,7 +65,7 @@ const hydrateFeed = async (userId) => {
     const user = await User.findById(userId).select('categoryAffinity').lean();
     const affinity = user?.categoryAffinity || new Map();
 
-    // 3. Fetch ALL posts from followed users — no date cutoff. On a small platform
+    // 3. Fetch ALL posts from followed users, no date cutoff. On a small platform
     //    you must show everything your connections ever posted.
     let posts = await Post.find({
         author: { $in: followingIds },
@@ -148,7 +148,7 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     // 2. Fetch all potential candidates (Followed + Discovery)
     const queryBase = { isArchived: { $ne: true } };
 
-    // Initial pool: ALL posts from followed users (+ self) — no date cutoff.
+    // Initial pool: ALL posts from followed users (+ self), no date cutoff.
     // Users should always see everything their connections posted, regardless of age.
     const followingQuery = {
         ...queryBase,
@@ -250,7 +250,7 @@ const _getDirectFeed = async (userId, limit, cursor) => {
     // 4. Slice to page size
     const paginated = ranked.slice(0, limit);
 
-    // 5. Populate author — lean() returns raw ObjectIds, PostCard needs username/avatarUrl/etc.
+    // 5. Populate author, lean() returns raw ObjectIds, PostCard needs username/avatarUrl/etc.
     const postIds = paginated.map(p => p._id);
     const populatedPosts = await Post.find({ _id: { $in: postIds } })
         .populate('author', 'username fullName avatarUrl isVerified')

@@ -5,36 +5,57 @@ const { createAdapter } = require('@socket.io/redis-adapter');
 const { createClient } = require('redis');
 const jwt = require('jsonwebtoken');
 const logger = require('./logger');
+const { isOriginAllowed } = require('./cors');
 
 let io;
 
 const initSocket = async (server) => {
     io = new Server(server, {
         cors: {
-            origin: '*', // Adjust to specific origins in production
+            // origin '*' is invalid alongside credentials and would expose the
+            // socket to any site, so reuse the same whitelist as the REST API.
+            origin: (origin, callback) => {
+                if (!origin || isOriginAllowed(origin)) return callback(null, true);
+                logger.warn(`[SOCKET-CORS-REJECTED] Origin: ${origin}`);
+                callback(null, false);
+            },
             methods: ['GET', 'POST'],
             credentials: true,
         },
     });
 
     // ── 1. Redis Adapter (for Horizontal Scaling) ───────────────────────────
-    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    const isTLS = redisUrl.startsWith('rediss://');
-    
-    const clientOptions = {
-        url: redisUrl,
-        socket: isTLS ? { tls: true, rejectUnauthorized: false } : {},
-    };
+    // Redis powers cross-instance fan-out. Without it a single instance still
+    // serves sockets correctly, so every Redis step below is best effort.
+    const redisUrl = process.env.REDIS_URL;
+    let pubClient = null;
 
-    const pubClient = createClient(clientOptions);
-    const subClient = pubClient.duplicate();
+    if (!redisUrl) {
+        logger.warn('Socket.io: REDIS_URL is not set, running single-instance without cross-instance fan-out');
+    } else {
+        const isTLS = redisUrl.startsWith('rediss://');
+        const clientOptions = {
+            url: redisUrl,
+            socket: isTLS
+                ? { tls: true, rejectUnauthorized: false, connectTimeout: 5000, reconnectStrategy: false }
+                : { connectTimeout: 5000, reconnectStrategy: false },
+        };
 
-    try {
-        await Promise.all([pubClient.connect(), subClient.connect()]);
-        io.adapter(createAdapter(pubClient, subClient));
-        logger.info('Socket.io: Redis Adapter attached');
-    } catch (err) {
-        logger.error(`Socket.io: Redis Adapter failed: ${err.message}`);
+        const candidate = createClient(clientOptions);
+        const subClient = candidate.duplicate();
+        // Without an error listener a failed connection becomes an unhandled
+        // 'error' event and takes the process down.
+        candidate.on('error', () => {});
+        subClient.on('error', () => {});
+
+        try {
+            await Promise.all([candidate.connect(), subClient.connect()]);
+            io.adapter(createAdapter(candidate, subClient));
+            pubClient = candidate;
+            logger.info('Socket.io: Redis Adapter attached');
+        } catch (err) {
+            logger.warn(`Socket.io: Redis Adapter unavailable: ${err.message}, continuing single-instance`);
+        }
     }
 
     // ── 2. JWT Middleware ──────────────────────────────────────────────────
@@ -102,10 +123,25 @@ const initSocket = async (server) => {
         }
     }, 5000); // 5-second pulse
 
-    // ── 4. Global Redis Notification Relay (Cross-Service Bridge) ────────────
+    // ── 5. Global Redis Notification Relay (Cross-Service Bridge) ────────────
+    // Only possible when the adapter connected. Previously this ran
+    // unconditionally, so a Redis outage threw here and aborted the rest of
+    // startup, which silently skipped the story cleanup cron.
+    if (!pubClient) {
+        logger.warn('Socket.io: Redis relay disabled, notifications are delivered in-process only');
+        return io;
+    }
+
     const relayClient = pubClient.duplicate();
-    await relayClient.connect();
-    
+    relayClient.on('error', (err) => logger.debug(`Socket.io relay error: ${err.message}`));
+
+    try {
+        await relayClient.connect();
+    } catch (err) {
+        logger.warn(`Socket.io: Redis relay unavailable: ${err.message}`);
+        return io;
+    }
+
     // Subscribe to notification and message channels
     await relayClient.subscribe(['peernet:notifications', 'peernet:messages'], (message, channel) => {
         try {

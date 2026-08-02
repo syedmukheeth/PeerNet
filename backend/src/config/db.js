@@ -11,7 +11,7 @@ const logger = require('./logger');
  *   2. The DB_NAME environment variable
  *   3. Hard default: "PeerNet"
  *
- * This means ANY valid MongoDB URI works — Render, Atlas, local — without
+ * This means ANY valid MongoDB URI works (Render, Atlas, local) without
  * crashing on startup. No hard-coded path check is enforced.
  */
 const resolveDbName = (uri) => {
@@ -21,7 +21,7 @@ const resolveDbName = (uri) => {
         const fromUri = url.pathname.replace(/^\//, '').split('?')[0];
         if (fromUri) return fromUri;
     } catch {
-        // Malformed URI — fall through to env / default
+        // Malformed URI, fall through to env / default
     }
     return process.env.DB_NAME || 'PeerNet';
 };
@@ -46,7 +46,7 @@ const connectDB = async () => {
     logger.info(`Connecting to MongoDB: ${safeUri} (db: ${dbName})`);
 
     await mongoose.connect(uri, {
-        dbName,                         // explicit db — works even if URI path is "/"
+        dbName,                         // explicit db, works even if URI path is "/"
         serverSelectionTimeoutMS: 30000, // how long the driver waits for a server
         socketTimeoutMS: 60000, // send/receive timeout per socket
         connectTimeoutMS: 30000, // how long to wait for a new connection
@@ -58,7 +58,7 @@ const connectDB = async () => {
     logger.info(`MongoDB connected: ${host} / ${name}`);
 
     mongoose.connection.on('disconnected', () =>
-        logger.warn('MongoDB disconnected — driver will auto-reconnect'),
+        logger.warn('MongoDB disconnected, driver will auto-reconnect'),
     );
     mongoose.connection.on('reconnected', () =>
         logger.info('MongoDB reconnected'),
