@@ -18,7 +18,7 @@ const PostDetail = lazy(() => import('./pages/PostDetail'))
 const Settings = lazy(() => import('./pages/Settings'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Terms = lazy(() => import('./pages/Terms'))
-const Admin = lazy(() => import('./pages/Admin'))
+const Admin = lazy(() => import('./pages/admin/AdminPage'))
 const About = lazy(() => import('./pages/About'))
 const Help = lazy(() => import('./pages/Help'))
 

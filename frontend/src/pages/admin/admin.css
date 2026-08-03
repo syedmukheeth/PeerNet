@@ -5,7 +5,11 @@
     --admin-surface-subtle: rgba(255, 255, 255, 0.03);
     --admin-border: rgba(255, 255, 255, 0.06);
     --admin-border-md: rgba(255, 255, 255, 0.12);
-    --admin-accent: #7c3aed;
+    /* Was #7c3aed (violet) - a second accent competing with the app's blue.
+       Aliased to the single accent so the console matches the rest of the
+       app; every rule below already reads --admin-accent, so this one change
+       retints the whole console. */
+    --admin-accent: var(--accent);
     --admin-text-primary: #fafafa;
     --admin-text-secondary: #a1a1aa;
     --admin-text-muted: #52525b;
@@ -88,7 +92,7 @@
 .admin-surface-el {
     background: var(--admin-card);
     border: 1px solid var(--admin-border);
-    border-radius: 32px;
+    border-radius: var(--r-2xl);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
@@ -98,10 +102,26 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
+.admin-surface-el-v2 {
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--r-2xl);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.admin-glass-v2 {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--r-2xl);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
 .admin-stat-card-v2 {
     background: var(--admin-card);
     border: 1px solid var(--admin-border);
-    border-radius: 32px;
+    border-radius: var(--r-2xl);
     padding: 32px;
     transition: all 0.3s ease;
     display: flex;
@@ -214,7 +234,9 @@
 }
 
 .sidebar-nav-item.active {
-    background: linear-gradient(135deg, var(--admin-accent), #9333ea);
+    /* Was a violet two-stop gradient (--admin-accent, #9333ea). Reuses the
+       app's own accent-gradient token instead of a bespoke admin-only pair. */
+    background: var(--accent-gradient);
     color: white;
     border-color: rgba(255, 255, 255, 0.1);
     box-shadow: 0 12px 24px rgba(var(--accent-rgb), 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
@@ -233,7 +255,7 @@
 .admin-table-wrap {
     width: 100%;
     overflow-x: auto;
-    border-radius: 24px;
+    border-radius: var(--r-xl);
 }
 
 .admin-table {
