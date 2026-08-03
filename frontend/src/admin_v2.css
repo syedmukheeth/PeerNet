@@ -9,12 +9,17 @@
     --admin-text-primary: #fafafa;
     --admin-text-secondary: #a1a1aa;
     --admin-text-muted: #52525b;
-    
-    --success: #10b981;
-    --error: #ef4444;
-    --warning: #f59e0b;
-    --accent-rgb: 124, 58, 237;
 }
+
+/* This file ships in the lazily loaded /admin chunk but its rules stay in the
+   document for the rest of the session. Everything below must therefore stay
+   namespaced (--admin-*) or scoped to .admin-root-v2. Never redefine a global
+   token or a Tailwind utility name here: it silently reskins the whole app the
+   moment someone visits /admin.
+
+   Previously leaked from this block: --success/--error/--warning (identical
+   values already exist globally) and --accent-rgb, which turned every accent
+   glow in the app violet. */
 
 [data-theme='light'] {
     --admin-bg: #fafafa; /* Higher contrast off-white */
@@ -49,18 +54,26 @@
     overflow-anchor: none;
 }
 
-/* Sidebar Width Management */
-:root {
-    --sidebar-w: 280px;
-}
-
-.admin-sidebar-v2.collapsed {
-    --sidebar-w: 88px;
+/* Sidebar width management.
+   The widths live on .admin-root-v2, not :root, because the global --sidebar-w
+   (244px, index.css) belongs to the main app shell.
+   .admin-main-col is a SIBLING of .admin-sidebar-v2, not a descendant, so the
+   collapsed width has to reach it through a sibling combinator. Setting a
+   custom property on the collapsed aside never propagates sideways, which is
+   why collapsing used to shrink the sidebar while the main column kept its
+   full-width margin. */
+.admin-root-v2 {
+    --admin-sidebar-w: 280px;
+    --admin-sidebar-collapsed-w: 88px;
 }
 
 @media (min-width: 1025px) {
     .admin-main-col {
-        margin-left: var(--sidebar-w);
+        margin-left: var(--admin-sidebar-w);
+    }
+
+    .admin-sidebar-v2.collapsed ~ .admin-main-col {
+        margin-left: var(--admin-sidebar-collapsed-w);
     }
 }
 
@@ -118,7 +131,7 @@
 
 /* --- Sidebar --- */
 .admin-sidebar-v2 {
-    width: 280px;
+    width: var(--admin-sidebar-w, 280px);
     height: 100dvh;
     position: fixed;
     top: 0;
@@ -134,7 +147,7 @@
 }
 
 .admin-sidebar-v2.collapsed {
-    width: 88px;
+    width: var(--admin-sidebar-collapsed-w, 88px);
 }
 
 .admin-sidebar-v2.collapsed .sidebar-brand-text,
@@ -256,13 +269,17 @@
     background: var(--admin-surface-subtle);
 }
 
-/* --- Utilities --- */
-.text-primary { color: var(--admin-text-primary); }
-.text-secondary { color: var(--admin-text-secondary); }
-.text-muted { color: var(--admin-text-muted); }
+/* --- Utilities ---
+   These names all collide with real Tailwind utilities that index.css generates
+   from its @theme block, so they are scoped to the console. Unscoped, they
+   retinted every .text-primary / .text-muted in Layout, Feed, Profile,
+   Notifications, PostDetail and Shorts for the rest of the session. */
+.admin-root-v2 .text-primary { color: var(--admin-text-primary); }
+.admin-root-v2 .text-secondary { color: var(--admin-text-secondary); }
+.admin-root-v2 .text-muted { color: var(--admin-text-muted); }
 
-.bg-surface-subtle { background: var(--admin-surface-subtle); }
-.border-subtle { border-color: var(--admin-border); }
+.admin-root-v2 .bg-surface-subtle { background: var(--admin-surface-subtle); }
+.admin-root-v2 .border-subtle { border-color: var(--admin-border); }
 
 .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -314,32 +331,28 @@
     box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
 }
 
-/* Responsive Grids */
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.gap-4 { gap: 16px; }
-.gap-6 { gap: 24px; }
-.gap-8 { gap: 32px; }
-
+/* Responsive grids.
+   .grid, .grid-cols-1 and .gap-4/6/8 used to be redeclared here with values
+   identical to Tailwind's, so they are simply gone: Tailwind already emits them.
+   The rules below are NOT identical to Tailwind, they move the breakpoint
+   (xl fires at 1536 rather than 1280, 2xl at 1920 rather than 1536), so they
+   stay, scoped to the console. Every one of them is only used inside /admin.
+   .3xl\:grid-cols-6 was unreferenced and has been dropped. */
 @media (min-width: 640px) {
-    .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .admin-root-v2 .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1024px) {
-    .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .admin-root-v2 .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .admin-root-v2 .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1536px) {
-    .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .admin-root-v2 .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1920px) {
-    .\32 xl\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-}
-
-@media (min-width: 2560px) {
-    .\33 xl\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .admin-root-v2 .\32 xl\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
 .custom-scrollbar::-webkit-scrollbar {

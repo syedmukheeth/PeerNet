@@ -50,12 +50,25 @@ const userSchema = new mongoose.Schema(
         categoryAffinity: { type: Map, of: Number, default: {} },
         isOnline: { type: Boolean, default: false },
         lastSeen: { type: Date, default: Date.now },
+
+        // Guest sessions are temporary. expiresAt is set 24h ahead at creation
+        // and swept by jobs/guestCleanup.job.js.
+        isGuest: { type: Boolean, default: false },
+        expiresAt: { type: Date, default: null },
     },
     { timestamps: true },
 );
 
 // Compound text index for search
 userSchema.index({ username: 'text', fullName: 'text' });
+
+// Lookup index for the guest sweep. Deliberately NOT a Mongo TTL index
+// ({ expireAfterSeconds: 0 }) the way Story does it: the TTL monitor deletes the
+// document with no application hook, which would orphan every post, comment,
+// like and follow the guest created and permanently leave the admins it
+// auto-followed with an inflated followersCount. The cascade in
+// user/userPurge.service.js is the only correct way to remove a user.
+userSchema.index({ isGuest: 1, expiresAt: 1 });
 
 // Instance method: compare raw password against stored hash
 userSchema.methods.matchPassword = async function (rawPassword) {

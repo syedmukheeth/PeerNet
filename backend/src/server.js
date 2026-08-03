@@ -17,6 +17,7 @@ const connectDB = require('./config/db');
 const { connectRedis } = require('./config/redis');
 const logger = require('./config/logger');
 const { scheduleStoryCleanup } = require('./jobs/storyCleanup.job');
+const { scheduleGuestCleanup } = require('./jobs/guestCleanup.job');
 const { initSocket } = require('./config/socket');
 const { initProducer, disconnectProducer, isKafkaEnabled } = require('./config/kafka');
 const { initFeedWorker } = require('./workers/feed.worker');
@@ -62,7 +63,12 @@ const bootstrap = async () => {
 
         await runStep('Socket.io', () => initSocket(httpServer));
 
-        await runStep('Cron jobs', scheduleStoryCleanup);
+        await runStep('Story cleanup cron', scheduleStoryCleanup);
+
+        // Its own step, not folded into the one above: scheduleGuestCleanup
+        // awaits a backfill first, and a backfill failure must not take the
+        // story cleanup cron down with it.
+        await runStep('Guest cleanup cron', scheduleGuestCleanup);
 
         logger.info('🚀 Background service initialization complete');
     };

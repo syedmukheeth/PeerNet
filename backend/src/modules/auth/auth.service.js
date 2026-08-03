@@ -10,6 +10,7 @@ const {
     refreshTokenTTL,
 } = require('../../utils/jwt.utils');
 const ApiError = require('../../utils/ApiError');
+const { GUEST_TTL_MS } = require('../user/guest.constants');
 
 const REFRESH_PREFIX = 'refresh_blacklist:';
 
@@ -202,20 +203,27 @@ const guestLogin = async () => {
         email,
         fullName,
         passwordHash,
-        bio: 'This is a temporary guest account.'
+        bio: 'This is a temporary guest account.',
+        // Guest sessions are temporary. jobs/guestCleanup.job.js sweeps these
+        // hourly and cascades the delete through everything they created.
+        isGuest: true,
+        expiresAt: new Date(Date.now() + GUEST_TTL_MS),
     });
 
     // AUTO-FOLLOW ADMINS: Ensure guest sees content immediately
     try {
         const Follower = require('../user/Follower');
-        const admins = await User.find({ role: 'admin' });
-        for (const admin of admins) {
-            const isFollowing = await Follower.exists({ follower: user._id, following: admin._id });
-            if (!isFollowing) {
-                await Follower.create({ follower: user._id, following: admin._id });
-                await User.findByIdAndUpdate(user._id, { $inc: { followingCount: 1 } });
-                await User.findByIdAndUpdate(admin._id, { $inc: { followersCount: 1 } });
-            }
+        const admins = await User.find({ role: 'admin' }).select('_id').lean();
+        if (admins.length) {
+            // The account is new, so there is nothing to check for existing
+            // follows. ordered: false means one duplicate cannot abort the rest.
+            const adminIds = admins.map((a) => a._id);
+            await Follower.insertMany(
+                adminIds.map((id) => ({ follower: user._id, following: id })),
+                { ordered: false },
+            );
+            await User.updateOne({ _id: user._id }, { $inc: { followingCount: adminIds.length } });
+            await User.updateMany({ _id: { $in: adminIds } }, { $inc: { followersCount: 1 } });
         }
     } catch (err) {
         logger.error('Failed to auto-follow admins for guest', err);

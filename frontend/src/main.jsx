@@ -5,7 +5,8 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import { MultiAccountProvider } from './context/MultiAccountContext'
 import { ThemeProvider } from './context/ThemeContext'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './lib/queryClient'
 import App from './App'
 import './index.css'
 
@@ -20,16 +21,6 @@ window.addEventListener('error', (e) => {
 }, true);
 
 import { GoogleOAuthProvider } from '@react-oauth/google'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-})
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 

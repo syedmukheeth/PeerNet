@@ -1,5 +1,5 @@
 import { useState, useCallback, Suspense, lazy } from 'react'
-import { Routes, Route, Navigate } from 'react-router'
+import { Routes, Route, Navigate, useSearchParams } from 'react-router'
 import { HelmetProvider } from 'react-helmet-async'
 import { useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
@@ -45,12 +45,17 @@ const AdminRoute = ({ children }) => {
 
 const GuestRoute = ({ children }) => {
   const { user, loading } = useAuth()
+  const [params] = useSearchParams()
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
       <div className="spinner" style={{ width: 40, height: 40 }} />
     </div>
   )
-  return !user ? children : <Navigate to="/" replace />
+  // ?addAccount=1 lets a signed-in user reach the sign-in form to add a second
+  // account. Without it the switcher's "Log into an existing account" bounced
+  // straight back to the feed, so adding an account was impossible.
+  if (user && params.get('addAccount') !== '1') return <Navigate to="/" replace />
+  return children
 }
 
 export default function App() {

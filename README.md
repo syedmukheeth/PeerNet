@@ -311,6 +311,27 @@ This runs both the backend API and the Vite frontend concurrently:
 - **Backend API** → `http://localhost:3000`
 - **API Docs** → `http://localhost:3000/api-docs` *(if Swagger is configured)*
 
+#### 5. Run the tests
+```bash
+npm test
+```
+
+This runs Jest for the backend and Vitest for the frontend.
+
+> **Heads up — the first backend test run downloads ~538 MB.**
+> Some backend suites run against a real in-memory MongoDB via
+> `mongodb-memory-server`, which needs a `mongod` binary. The version is pinned
+> in `backend/package.json` under `config.mongodbMemoryServer.version`, and the
+> binary is fetched once, either by the postinstall hook during
+> `npm run install:all` or on the first `npm test`, whichever comes first. You
+> will see `Downloading MongoDB 8.2.6` while it happens.
+>
+> It is cached afterwards in `backend/node_modules/.cache/mongodb-binaries`, so
+> later runs take about 10 seconds. Deleting `node_modules` throws the cache
+> away and the download repeats. To keep it somewhere more durable, point
+> `MONGOMS_DOWNLOAD_DIR` at a path outside the project. CI caches the same
+> directory with `actions/cache`, keyed on the pinned `mongod` version.
+
 ---
 
 ### Method 2 — Docker (Full production stack)

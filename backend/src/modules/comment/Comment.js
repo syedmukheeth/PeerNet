@@ -16,6 +16,9 @@ const commentSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
+// author has no single-field index from its field options, and the user purge
+// queries by it directly.
+commentSchema.index({ author: 1 });
 commentSchema.index({ post: 1, createdAt: -1 });
 commentSchema.index({ short: 1, createdAt: -1 });
 commentSchema.index({ parentComment: 1 });

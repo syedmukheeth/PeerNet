@@ -1,0 +1,306 @@
+/* ============================================================================
+   PeerNet design tokens
+
+   Every custom property the app themes on lives here, and only here. The values
+   used to be spread across four blocks in index.css: dark at line 61, shared
+   aliases at 133, a second :root at 4990, and light at 7949 - roughly three
+   thousand lines after its dark counterpart, which made it impossible to tell
+   whether a token was deliberately shared or accidentally inherited.
+
+   Layout of this file:
+     1. @theme        exposes tokens to Tailwind's utility generator
+     2. Primitives    values that do not change with the theme
+     3. Dark          the default palette
+     4. Light         immediately after dark, so the two can be read together
+     5. Aliases       older names kept alive, pointing at the canonical token
+
+   Theming works off a data-theme attribute on <html>, set by
+   context/ThemeContext.jsx and pre-applied by the flash guard in index.html.
+   It is NOT Tailwind's dark: variant, and must not be changed to one.
+   ============================================================================ */
+
+/* Tailwind reads these to generate bg-*, text-*, border-* utilities.
+   `inline` keeps the var() reference intact so utilities follow the
+   light/dark switch on [data-theme] instead of freezing at :root. */
+@theme inline {
+  --color-primary: var(--text-1);
+  --color-secondary: var(--text-2);
+  --color-muted: var(--text-3);
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+
+  --color-error: var(--error);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-el: var(--surface-el);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-hover: var(--hover);
+  --color-card: var(--card);
+  --color-hover: var(--hover);
+
+  --color-border: var(--border);
+  --color-border-md: var(--border-md);
+  --color-border-sm: var(--border);
+  --color-border-subtle: var(--border-md);
+  --color-subtle: var(--border-md);
+
+  /* Admin console surfaces */
+  --color-admin-card: var(--surface-el);
+  --color-admin-border: var(--border);
+  --color-admin-surface-subtle: var(--surface-subtle);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Syne', 'Inter', sans-serif;
+}
+
+/* ── 2. Primitives: identical in every theme ──────────────────────────────── */
+
+:root {
+  /* Radii */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-2xl: 32px;
+  --r-full: 9999px;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* Layout */
+  --sidebar-w: 244px;
+  --sidebar-collapsed-w: 72px;
+  --sidebar-actual-w: var(--sidebar-w);
+  --feed-max: 580px;
+  --right-panel-w: 320px;
+  --v4-nav-w: 76px;
+  --v4-convo-w: 360px;
+  --zn-list-w: 360px;
+
+  /* Motion. lib/motion.js mirrors these numerically so CSS and framer-motion
+     animations stay in agreement. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --trans-smooth: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  --trans-spring: 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Stacking order */
+  --z-below: -1;
+  --z-base: 1;
+  --z-docked: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-overlay: 1000;
+  --z-modal: 1100;
+  --z-toast: 9999;
+}
+
+/* ── 3. Dark theme (the default) ──────────────────────────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --card: #0a0a0a;
+  --surface-el: #121212;
+  --hover: #1c1c1c;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-md: rgba(255, 255, 255, 0.12);
+  --border-lg: rgba(255, 255, 255, 0.18);
+
+  --text-1: #ffffff;
+  --text-2: #a1a1aa;
+  --text-3: #71717a;
+
+  --accent: #0095f6;
+  --accent-2: #00376b;
+  --accent-hover: #1877f2;
+  --accent-gradient: linear-gradient(135deg, #0095f6, #00376b);
+  --accent-gradient-hover: linear-gradient(135deg, #1877f2, #002d5a);
+  --accent-subtle: rgba(0, 149, 246, 0.12);
+  --accent-low: rgba(0, 149, 246, 0.06);
+  --accent-ring: rgba(0, 149, 246, 0.35);
+
+  --logo-gradient: linear-gradient(135deg, #0095f6, #0ea5e9, #6366f1);
+  --story-ring: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+
+  --input-bg: #121212;
+  --overlay: rgba(0, 0, 0, 0.85);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 12px 48px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 24px 72px rgba(0, 0, 0, 0.8);
+  --shadow-xl: 0 32px 128px rgba(0, 0, 0, 0.9);
+  --shadow-accent: 0 0 40px rgba(0, 149, 246, 0.2);
+  --text-glow: none;
+
+  --glass-bg: rgba(0, 0, 0, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(25px);
+
+  --surface-1: #121212;
+  --surface-2: #18181b;
+  --surface-subtle: rgba(255, 255, 255, 0.04);
+  --surface-overlay: rgba(20, 20, 24, 0.85);
+  --surface-rgb: 0, 0, 0;
+  --text-1-rgb: 255, 255, 255;
+  --accent-rgb: 0, 149, 246;
+  --border-rgb: 255, 255, 255;
+
+  /* Messaging */
+  --zn-footer-bg: rgba(0, 0, 0, 0.6);
+  --zn-composer-bg: rgba(24, 24, 27, 0.7);
+  --zn-composer-border: rgba(255, 255, 255, 0.1);
+  --zn-composer-text: #ffffff;
+  --zn-bubble-peer: #18181b;
+  --zn-bubble-peer-text: #f4f4f5;
+  --zn-action-bar-bg: rgba(9, 9, 11, 0.96);
+  --zn-search-bg: rgba(255, 255, 255, 0.05);
+}
+
+/* ── 4. Light theme ───────────────────────────────────────────────────────── */
+/* Declares the same token names as dark, in the same order, with two
+   deliberate omissions: --accent-alpha and --accent-glow are derived from
+   --accent-rgb in section 5, and light redefines --accent-rgb, so they
+   re-resolve on their own. */
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --surface-el: #fafafa;
+  --hover: #f4f4f5;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-md: rgba(0, 0, 0, 0.12);
+  --border-lg: rgba(0, 0, 0, 0.18);
+
+  --text-1: #09090b;
+  --text-2: #52525b;
+  --text-3: #71717a;
+
+  --accent: #0095f6;
+  --accent-2: #00376b;
+  --accent-hover: #1877f2;
+  --accent-gradient: linear-gradient(135deg, #0095f6, #00376b);
+  --accent-gradient-hover: linear-gradient(135deg, #1877f2, #002d5a);
+  --accent-subtle: rgba(0, 149, 246, 0.08);
+  --accent-low: rgba(0, 149, 246, 0.04);
+  --accent-ring: rgba(0, 149, 246, 0.25);
+
+  --logo-gradient: linear-gradient(135deg, #0095f6, #0ea5e9, #6366f1);
+  --story-ring: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+
+  --input-bg: #f8fafc;
+  --overlay: rgba(0, 0, 0, 0.4);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 32px 96px rgba(0, 0, 0, 0.15);
+  --shadow-accent: 0 0 24px rgba(0, 149, 246, 0.15);
+  --text-glow: none;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(25px);
+
+  --surface-1: #fafafa;
+  --surface-2: #f4f4f5;
+  --surface-subtle: rgba(0, 0, 0, 0.04);
+  --surface-overlay: rgba(255, 255, 255, 0.9);
+  --surface-rgb: 255, 255, 255;
+  --text-1-rgb: 9, 9, 11;
+  --accent-rgb: 0, 149, 246;
+  --border-rgb: 0, 0, 0;
+
+  /* Messaging */
+  --zn-footer-bg: rgba(255, 255, 255, 0.9);
+  --zn-composer-bg: #f4f4f7;
+  --zn-composer-border: rgba(0, 0, 0, 0.08);
+  --zn-composer-text: #09090b;
+  --zn-bubble-peer: #f4f4f5;
+  --zn-bubble-peer-text: #09090b;
+  --zn-action-bar-bg: rgba(255, 255, 255, 0.98);
+  --zn-search-bg: rgba(0, 0, 0, 0.04);
+}
+
+/* ── 5. Aliases ───────────────────────────────────────────────────────────── */
+/* Derived and legacy names, resolved through var() so they follow the theme.
+   Applied to every theme selector so they cannot go stale.
+
+   The --v4-* set came from a redesign pass that introduced a SECOND accent
+   colour, violet #8b5cf6, alongside the app's blue. Rather than delete the
+   names and break the several hundred rules that use them, they now point at
+   the one blue accent. Same story for the admin console, whose own violet
+   lives in pages/admin/admin.css. */
+
+:root,
+[data-theme="dark"],
+[data-theme="light"] {
+  /* Derived */
+  --accent-alpha: rgba(var(--accent-rgb), 0.1);
+  --accent-glow: 0 0 25px rgba(var(--accent-rgb), 0.4);
+
+  /* Surface and text aliases */
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface);
+  --bg-surface: var(--surface);
+  --bg-rgb: var(--surface-rgb);
+  --bg-card: var(--card);
+  --bg-hover: var(--hover);
+  --text-primary: var(--text-1);
+  --text-secondary: var(--text-2);
+  --text-muted: var(--text-3);
+
+  --border-subtle: 1px solid var(--border-md);
+  --border-sm: rgba(var(--border-rgb), 0.08);
+  --border-hover: rgba(var(--border-rgb), 0.2);
+
+  /* Deprecated. Do not use in new code, they only exist so old rules keep
+     resolving. Formerly violet, now folded onto the single blue accent. */
+  --v4-accent: var(--accent-gradient);
+  --v4-accent-solid: var(--accent);
+  --v4-bg: var(--bg);
+  --v4-card: var(--surface-el);
+  --v4-border: var(--border);
+  --v4-hover: var(--hover);
+  --v4-text-p: var(--text-1);
+  --v4-text-s: var(--text-2);
+
+  --zn-bg: var(--bg);
+  --zn-surface: var(--surface);
+  --zn-surface-raised: var(--surface-el);
+  --zn-border: var(--border);
+  --zn-accent: var(--accent);
+  --zn-accent-glow: var(--accent-ring);
+}

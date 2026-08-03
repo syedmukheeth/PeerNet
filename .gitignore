@@ -37,3 +37,6 @@ scratch/
 
 # Unused stubs
 frontend/src/App.css
+
+# Claude Code local state. worktrees/ holds full repo copies.
+.claude/

@@ -44,4 +44,9 @@ const reportSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+// The user purge deletes reports filed by a user, and clears resolvedBy when
+// the resolving admin is removed.
+reportSchema.index({ reporter: 1 });
+reportSchema.index({ resolvedBy: 1 });
+
 module.exports = mongoose.model('Report', reportSchema);

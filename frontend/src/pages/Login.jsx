@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useAuth } from '../context/AuthContext'
-import { useMultiAccount } from '../context/MultiAccountContext'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
 import logo from '../assets/logo.png'
@@ -13,13 +12,16 @@ export default function Login() {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const { login, loginGoogle, loginGuest, user: authUser } = useAuth()
-    const { saveCurrentAccount } = useMultiAccount()
     const navigate = useNavigate()
+    const [params] = useSearchParams()
+    // When adding a second account the user is deliberately signed in already,
+    // so the usual "you are logged in, go home" redirect has to stand down.
+    const isAddingAccount = params.get('addAccount') === '1'
 
     // ── Redirect if already logged in ────────────────────────────────
     useEffect(() => {
-        if (authUser) navigate('/')
-    }, [authUser, navigate]);
+        if (authUser && !isAddingAccount) navigate('/')
+    }, [authUser, isAddingAccount, navigate]);
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
@@ -29,8 +31,7 @@ export default function Login() {
 
         setLoading(true)
         try {
-            const user = await login(form.identifier, form.password)
-            saveCurrentAccount(user)
+            await login(form.identifier, form.password)
             toast.success('Welcome back!')
             navigate('/')
         } catch (err) {
@@ -53,8 +54,7 @@ export default function Login() {
     const handleGoogleSuccess = async (credentialResponse) => {
         setLoading(true)
         try {
-            const user = await loginGoogle(credentialResponse.credential)
-            saveCurrentAccount(user)
+            await loginGoogle(credentialResponse.credential)
             toast.success('Logged in with Google!')
             navigate('/')
         } catch (err) {
@@ -67,8 +67,7 @@ export default function Login() {
         if (loading) return
         setLoading(true)
         try {
-            const user = await loginGuest()
-            saveCurrentAccount(user)
+            await loginGuest()
             toast.success('Welcome, Guest!', { id: 'guest-success' })
             navigate('/')
         } catch (err) {

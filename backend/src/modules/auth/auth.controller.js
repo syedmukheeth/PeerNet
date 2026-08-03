@@ -30,9 +30,21 @@ const login = async (req, res, next) => {
     }
 };
 
+// The body token wins over the cookie, deliberately.
+//
+// The refreshToken cookie is ambient browser state: every login, register,
+// google and guest response overwrites it, so it always names whichever account
+// authenticated most recently. A client holding several sessions (the account
+// switcher) sends the token for the account it actually wants in the body, and
+// that explicit assertion has to beat the ambient one. With the old
+// cookie-first order, switching to any account whose 1h access token had
+// expired refreshed the WRONG session and silently bounced the user back to the
+// most recent account.
+//
+// Cookie-only callers send no body token and are unaffected.
 const refresh = async (req, res, next) => {
     try {
-        const oldToken = req.cookies.refreshToken || req.body.refreshToken;
+        const oldToken = req.body.refreshToken || req.cookies.refreshToken;
         const { accessToken, refreshToken } = await authService.refresh(oldToken);
         res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
         res.json({ success: true, data: { accessToken, refreshToken } });
@@ -43,7 +55,10 @@ const refresh = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        const token = req.cookies.refreshToken;
+        // Same reasoning as refresh, in reverse: reading only the cookie meant
+        // logging out of one account revoked whichever session happened to own
+        // the cookie, which is how stored accounts ended up dead in the list.
+        const token = req.body.refreshToken || req.cookies.refreshToken;
         await authService.logout(token);
         res.clearCookie('refreshToken', { ...COOKIE_OPTIONS, maxAge: 0 });
         res.json({ success: true, message: 'Logged out successfully' });

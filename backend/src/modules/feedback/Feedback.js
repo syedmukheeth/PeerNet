@@ -31,4 +31,7 @@ const feedbackSchema = new mongoose.Schema({
     }
 });
 
+// The user purge deletes a user's feedback by owner.
+feedbackSchema.index({ userId: 1 });
+
 module.exports = mongoose.model('Feedback', feedbackSchema);

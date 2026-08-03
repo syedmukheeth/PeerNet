@@ -1,84 +1,48 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback } from 'react'
-
-// Schema stored in localStorage under 'pn_accounts':
-// [{ id, username, fullName, avatarUrl, role, accessToken, refreshToken }]
-
-const ACCOUNTS_KEY = 'pn_accounts'
-
-const readAccounts = () => {
-    try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)) || [] } catch { return [] }
-}
-
-const writeAccounts = (accounts) => {
-    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts))
-}
+import { createContext, useContext, useCallback, useSyncExternalStore } from 'react'
+import * as accountStore from '../lib/accountStore'
 
 const MultiAccountContext = createContext(null)
 
 export const MultiAccountProvider = ({ children }) => {
-    const [accounts, setAccounts] = useState(() => readAccounts())
+    // A view over the store rather than its own copy of the state. The previous
+    // version seeded useState once at mount, so it drifted the moment anything
+    // outside React (the axios token rotation) touched localStorage.
+    const accounts = useSyncExternalStore(accountStore.subscribe, accountStore.readAccounts)
 
-    const _sync = (updated) => {
-        writeAccounts(updated)
-        setAccounts(updated)
-    }
-
-    // Save/update the current session into the accounts list
-    const saveCurrentAccount = useCallback((user) => {
-        const accessToken = localStorage.getItem('accessToken')
-        const refreshToken = localStorage.getItem('refreshToken')
-        if (!user || !accessToken) return
-
-        const existing = readAccounts()
-        const idx = existing.findIndex(a => a.id === user._id)
-        const entry = {
-            id: user._id,
-            username: user.username,
-            fullName: user.fullName,
-            avatarUrl: user.avatarUrl || '',
-            role: user.role,
-            accessToken,
-            refreshToken,
-        }
-        if (idx >= 0) {
-            existing[idx] = entry
-        } else {
-            existing.push(entry)
-        }
-        _sync(existing)
+    const saveCurrentAccount = useCallback((user, tokens) => {
+        accountStore.upsertAccount({
+            user,
+            accessToken: tokens?.accessToken,
+            refreshToken: tokens?.refreshToken,
+        })
+        if (user?._id) accountStore.setActiveId(user._id)
     }, [])
 
-    // Switch to an existing stored account
     const switchAccount = useCallback((accountId) => {
-        const existing = readAccounts()
-        const target = existing.find(a => a.id === accountId)
-        if (!target) return false
+        const target = accountStore.getAccount(accountId)
+        if (!target || !target.refreshToken) return false
 
-        localStorage.setItem('accessToken', target.accessToken)
-        localStorage.setItem('refreshToken', target.refreshToken)
-        // Force a full page reload so AuthContext re-validates the new session
+        // Mark the switch BEFORE touching anything, and drop the cached profile.
+        // Without this the app boots showing the previous user while holding the
+        // new user's tokens, and anything that pairs the two corrupts the list.
+        accountStore.beginSwitch(accountId)
+        accountStore.writeCachedUser(null)
+        accountStore.setSession({
+            accessToken: target.accessToken,
+            refreshToken: target.refreshToken,
+        })
+        accountStore.setActiveId(accountId)
+
+        // A full reload is deliberate. The QueryClient and the socket are module
+        // level singletons and 20-odd components hold state derived from `user`;
+        // reloading resets all of it for free and is provably complete.
         window.location.reload()
         return true
     }, [])
 
-    // Remove an account from the store
     const removeAccount = useCallback((accountId) => {
-        const updated = readAccounts().filter(a => a.id !== accountId)
-        _sync(updated)
-    }, [])
-
-    // Refresh stored tokens for the current active account (called after token refresh)
-    const refreshStoredAccount = useCallback((userId) => {
-        const accessToken = localStorage.getItem('accessToken')
-        const refreshToken = localStorage.getItem('refreshToken')
-        const existing = readAccounts()
-        const idx = existing.findIndex(a => a.id === userId)
-        if (idx >= 0) {
-            existing[idx].accessToken = accessToken
-            existing[idx].refreshToken = refreshToken
-            writeAccounts(existing)
-        }
+        accountStore.removeAccount(accountId)
     }, [])
 
     return (
@@ -87,7 +51,6 @@ export const MultiAccountProvider = ({ children }) => {
             saveCurrentAccount,
             switchAccount,
             removeAccount,
-            refreshStoredAccount,
         }}>
             {children}
         </MultiAccountContext.Provider>

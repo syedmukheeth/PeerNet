@@ -26,5 +26,7 @@ const notificationSchema = new mongoose.Schema(
 
 notificationSchema.index({ recipient: 1, createdAt: -1 });
 notificationSchema.index({ recipient: 1, isRead: 1 });
+// The user purge deletes by sender as well as recipient.
+notificationSchema.index({ sender: 1 });
 
 module.exports = mongoose.model('Notification', notificationSchema);

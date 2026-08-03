@@ -14,7 +14,6 @@ import {
 import { useTheme } from '../context/ThemeContext'
 import api, { chatApi } from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
-import { useMultiAccount } from '../context/MultiAccountContext'
 import CreatePostModal from './CreatePostModal'
 import FeedbackModal from './FeedbackModal'
 import AccountSwitcherModal from './AccountSwitcherModal'
@@ -35,7 +34,6 @@ const links = [
 export default function Layout() {
     const { user, logout } = useAuth()
     const { isDark, toggle } = useTheme()
-    const { saveCurrentAccount } = useMultiAccount()
     const navigate = useNavigate()
     const location = useLocation()
     const socket = useSocket(user)
@@ -230,9 +228,12 @@ export default function Layout() {
         }
     }, [socket, user, queryClient])
 
-    useEffect(() => {
-        if (user) saveCurrentAccount(user)
-    }, [user, saveCurrentAccount])
+    // There used to be an effect here that re-saved the cached user against
+    // whatever tokens were currently in localStorage. Across a switch reload it
+    // fired with the PREVIOUS user and the NEW account's tokens, overwriting
+    // that entry so two accounts pointed at one token and switching became a
+    // no-op. Recording a session now happens only where the user and the tokens
+    // arrive together: AuthContext's login/register/google/guest and fetchMe.
 
     const handleLogout = async () => { await logout(); navigate('/login') }
     const avatarUrl = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`

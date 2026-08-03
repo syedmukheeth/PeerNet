@@ -44,6 +44,15 @@ services:
         value: info
       - key: GEMINI_API_KEY
         sync: false
+      # Guest accounts expire 24h after creation and are cascade deleted by
+      # jobs/guestCleanup.job.js. Ships as a dry run: the job reports what it
+      # would remove and changes nothing. Flip to "false" only after checking
+      # the reported counts in the logs, and take a database snapshot first,
+      # because the purge is irreversible.
+      - key: GUEST_CLEANUP_DRY_RUN
+        value: "true"
+      - key: GUEST_CLEANUP_BATCH
+        value: "50"
   - type: web
     name: peernet-chat
     env: node

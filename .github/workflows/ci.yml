@@ -32,10 +32,65 @@ jobs:
       - name: Docker build check
         run: docker build -t peernet:test .
 
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    env:
+      # Pinned so the cache key is stable and the download is reproducible.
+      # Keep in sync with backend/package.json -> config.mongodbMemoryServer.version.
+      MONGOMS_VERSION: '8.2.6'
+      # Deliberately outside node_modules: `npm ci` deletes node_modules, which
+      # would throw away a restored cache before the tests ever saw it.
+      MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/mongodb-binaries
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Same 22 as the build job: the frontend suite needs react-router 8,
+          # which declares engines node >=22.22.0.
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Resolve mongodb-memory-server version
+        id: mms
+        run: |
+          version=$(node -p "require('./backend/package-lock.json').packages['node_modules/mongodb-memory-server'].version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # The mongod binary is ~538 MB. Without this, every run re-downloads it.
+      - name: Cache mongod binary
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.MONGOMS_DOWNLOAD_DIR }}
+          key: ${{ runner.os }}-mongod-${{ env.MONGOMS_VERSION }}-mms-${{ steps.mms.outputs.version }}
+
+      # Restored before install on purpose. mongodb-memory-server's postinstall
+      # hook fetches the binary, so a cache miss is paid here, where there is no
+      # timeout, rather than inside the 120s Jest hook budget in
+      # backend/__tests__/setup.js. On a cache hit the hook is a no-op, so
+      # MONGOMS_DISABLE_POSTINSTALL is intentionally left unset.
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix backend
+          npm ci --prefix frontend
+
+      - name: Test
+        run: npm test
+
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: lint-and-build
+    needs: [lint-and-build, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:

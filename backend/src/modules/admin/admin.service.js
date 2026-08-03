@@ -12,6 +12,7 @@ const Conversation = require('../chat/Conversation');
 const Message = require('../chat/Message');
 const AdminLog = require('./AdminLog');
 const Report = require('./Report');
+const { purgeUser } = require('../user/userPurge.service');
 const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 const logger = require('../../config/logger');
@@ -86,19 +87,22 @@ const getFeedback = async ({ limit = 20, skip = 0 }) => {
 };
 
 const deleteUser = async (adminId, userId, reason = '') => {
-    const user = await User.findByIdAndDelete(userId);
-    if (!user) throw new ApiError(404, 'User not found');
-    
-    // Cleanup assets
-    if (user.avatarPublicId) await deleteFromCloudinary(user.avatarPublicId);
+    // This used to be a bare findByIdAndDelete plus an avatar cleanup, which
+    // orphaned every post, comment, like, follow and message the user owned.
+    // purgeUser cascades and fixes the denormalised counters on the users they
+    // followed.
+    const result = await purgeUser(userId);
+    if (result.skipped) throw new ApiError(404, 'User not found');
 
-    // LOG ACTION
     await AdminLog.create({
         adminId,
         action: 'DELETE_USER',
         targetType: 'User',
         targetId: userId,
-        details: `Deleted user @${user.username}. Reason: ${reason}`
+        details:
+            `Deleted user @${result.username}. Reason: ${reason}. ` +
+            `Cascaded: ${result.posts} posts, ${result.shorts} shorts, ${result.comments} comments, ` +
+            `${result.likes} likes, ${result.follows} follows, ${result.messages} messages`,
     });
 };
 
