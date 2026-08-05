@@ -235,29 +235,34 @@ export default function Feed() {
 
                         {(isLoading || isFetchingNextPage) && (
                             <div className="flex flex-col gap-8 pb-20">
+                                {/* Mirrors PostCard's own layout classes so the two cannot drift apart. */}
                                 {[...Array(3)].map((_, i) => (
-                                    <div key={i} className="l-post-card p-0 overflow-hidden">
-                                        <div className="p-4 flex items-center gap-3">
-                                            <div className="skeleton rounded-full w-10 h-10" />
-                                            <div className="flex flex-col gap-2">
-                                                <div className="skeleton h-3 w-28 rounded-full" />
-                                                <div className="skeleton h-2 w-20 rounded-full" />
+                                    <div key={i} className="l-post-card" aria-hidden="true">
+                                        <div className="post-card-header">
+                                            <div className="post-card-user">
+                                                <div className="skeleton skeleton-circle shrink-0" style={{ width: 32, height: 32 }} />
+                                                <div className="skeleton rounded-full" style={{ width: 140, height: 14 }} />
                                             </div>
+                                            <div className="skeleton skeleton-circle" style={{ width: 28, height: 28 }} />
                                         </div>
-                                        <div className="skeleton w-full aspect-square md:aspect-[4/5] rounded-none" />
-                                        <div className="p-4 flex flex-col gap-4">
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex gap-4">
-                                                    <div className="skeleton w-6 h-6 rounded-md" />
-                                                    <div className="skeleton w-6 h-6 rounded-md" />
-                                                    <div className="skeleton w-6 h-6 rounded-md" />
-                                                </div>
-                                                <div className="skeleton w-6 h-6 rounded-md" />
+                                        <div className="skeleton w-full aspect-square rounded-none shrink-0" />
+                                        <div className="post-card-actions">
+                                            <div className="post-card-actions-left">
+                                                <div className="skeleton rounded-md" style={{ width: 26, height: 26 }} />
+                                                <div className="skeleton rounded-md" style={{ width: 24, height: 24 }} />
+                                                <div className="skeleton rounded-md" style={{ width: 22, height: 22 }} />
                                             </div>
-                                            <div className="flex flex-col gap-2.5">
-                                                <div className="skeleton h-3 w-1/4 rounded-full" />
-                                                <div className="skeleton h-3 w-full rounded-full" />
-                                                <div className="skeleton h-3 w-2/3 rounded-full" />
+                                            <div className="skeleton rounded-md" style={{ width: 24, height: 24 }} />
+                                        </div>
+                                        <div className="post-card-footer">
+                                            <div className="flex items-center" style={{ height: 22, marginBottom: 2 }}>
+                                                <div className="skeleton rounded-full" style={{ width: 96, height: 12 }} />
+                                            </div>
+                                            <div className="flex items-center" style={{ height: 20 }}>
+                                                <div className="skeleton rounded-full w-full" style={{ height: 12 }} />
+                                            </div>
+                                            <div className="flex items-center" style={{ height: 22, marginTop: 2 }}>
+                                                <div className="skeleton rounded-full" style={{ width: 150, height: 12 }} />
                                             </div>
                                         </div>
                                     </div>
