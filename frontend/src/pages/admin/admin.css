@@ -295,7 +295,7 @@
    These names all collide with real Tailwind utilities that index.css generates
    from its @theme block, so they are scoped to the console. Unscoped, they
    retinted every .text-primary / .text-muted in Layout, Feed, Profile,
-   Notifications, PostDetail and Shorts for the rest of the session. */
+   Notifications and PostDetail for the rest of the session. */
 .admin-root-v2 .text-primary { color: var(--admin-text-primary); }
 .admin-root-v2 .text-secondary { color: var(--admin-text-secondary); }
 .admin-root-v2 .text-muted { color: var(--admin-text-muted); }

@@ -1,7 +1,6 @@
 'use strict';
 
 const Post = require('./Post');
-const Short = require('../shorts/Short');
 const User = require('../user/User');
 const Like = require('./Like');
 const SavedPost = require('./SavedPost');
@@ -77,21 +76,7 @@ const getPost = async (postId, userId) => {
     if (cached) {
         post = JSON.parse(cached);
     } else {
-        // Try Post first
         post = await Post.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
-        
-        // If not found, try Short
-        if (!post) {
-            const short = await Short.findById(postId).populate('author', 'username fullName avatarUrl isVerified').lean();
-            if (short) {
-                post = {
-                    ...short,
-                    mediaUrl: short.videoUrl,
-                    mediaType: 'video',
-                    isShort: true
-                };
-            }
-        }
 
         if (!post || post.isArchived) throw new ApiError(404, 'Post not found');
         if (redis) await redis.setEx(cacheKey, POST_CACHE_TTL, JSON.stringify(post));
@@ -100,9 +85,8 @@ const getPost = async (postId, userId) => {
     let isLiked = false;
     let isSaved = false;
     if (userId) {
-        const targetModel = post.isShort ? 'Short' : 'Post';
         const [like, saved] = await Promise.all([
-            Like.findOne({ user: userId, targetId: postId, targetModel }),
+            Like.findOne({ user: userId, targetId: postId, targetModel: 'Post' }),
             SavedPost.findOne({ user: userId, post: postId }),
         ]);
         isLiked = Boolean(like);

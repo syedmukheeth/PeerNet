@@ -3,7 +3,6 @@
 const Notification = require('./Notification');
 const Post = require('../post/Post');
 const Comment = require('../comment/Comment');
-const Short = require('../shorts/Short');
 const User = require('../user/User');
 const Follower = require('../user/Follower');
 const { getRedisOptional } = require('../../config/redis');
@@ -26,12 +25,8 @@ const formatNotification = (notif, hydratedEntity = null) => {
 
     if (e) {
         // High-fidelity extraction logic
-        const getMedia = (target) => {
-            if (!target) return null;
-            // Support for Post media, Short thumbnailUrl, or raw videoUrl
-            return target.mediaUrl || target.thumbnailUrl || (target.mediaType === 'video' ? target.videoUrl : null);
-        };
-        
+        const getMedia = (target) => (target ? target.mediaUrl || null : null);
+
         if (obj.entityModel === 'Post') {
             if (!e) {
                 thumbnail = null;
@@ -42,21 +37,9 @@ const formatNotification = (notif, hydratedEntity = null) => {
                 targetId = e._id?.toString() || e.toString();
                 targetUrl = `/posts/${targetId}`;
             }
-        } else if (obj.entityModel === 'Short') {
-            if (!e) {
-                thumbnail = null;
-                targetId = obj.entityId?.toString();
-                targetUrl = `/shorts`;
-            } else {
-                thumbnail = e.thumbnailUrl || e.videoUrl || null;
-                targetId = e._id?.toString() || e.toString();
-                targetUrl = `/shorts`;
-            }
         } else if (obj.entityModel === 'Comment') {
-            // Reach through: use the populated parent (post or short object)
-            const parent = (e && e.post && typeof e.post === 'object') ? e.post
-                         : (e && e.short && typeof e.short === 'object') ? e.short
-                         : null;
+            // Reach through: use the populated parent post
+            const parent = (e && e.post && typeof e.post === 'object') ? e.post : null;
             if (parent) {
                 thumbnail = getMedia(parent);
                 targetId = parent._id?.toString();
@@ -67,8 +50,8 @@ const formatNotification = (notif, hydratedEntity = null) => {
             const parentId = (e && e.parentComment) ? (e.parentComment._id || e.parentComment).toString() : null;
             targetUrl = `/posts/${targetId}?commentId=${obj.entityId}${parentId ? `&parentId=${parentId}` : ''}`;
         } else {
-            // Fallback: use raw ObjectId stored in e.post or e.short if e exists but parent isn't hydrated
-            const rawParentId = e ? (e.post?.toString() || e.short?.toString()) : null;
+            // Fallback: use raw ObjectId stored in e.post if e exists but parent isn't hydrated
+            const rawParentId = e ? e.post?.toString() : null;
             targetUrl = rawParentId ? `/posts/${rawParentId}?commentId=${obj.entityId}` : '/';
         }
         }
@@ -132,10 +115,8 @@ const createNotification = async (data) => {
         // Manual Hydration for single creation
         let hydratedEntity = null;
         if (data.entityModel === 'Post') hydratedEntity = await Post.findById(data.entityId).lean();
-        else if (data.entityModel === 'Short') hydratedEntity = await Short.findById(data.entityId).lean();
         else if (data.entityModel === 'Comment') hydratedEntity = await Comment.findById(data.entityId)
             .populate({ path: 'post', strictPopulate: false })
-            .populate({ path: 'short', strictPopulate: false })
             .lean();
 
         const sender = await User.findById(data.sender).select('username avatarUrl isVerified').lean();
@@ -199,7 +180,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const hasMore = notifications.length > limit;
 
     // Stage 2: Entity ID collection
-    const grouped = { Post: [], Comment: [], Short: [] };
+    const grouped = { Post: [], Comment: [] };
     rawResults.forEach(n => {
         if (n.entityId && n.entityModel && grouped[n.entityModel]) {
             grouped[n.entityModel].push(n.entityId);
@@ -208,12 +189,10 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
 
     // Stage 3: Bulk Manual Hydration
     // For comments, also eagerly load the parent post so thumbnail can be extracted
-    const [posts, shorts, comments] = await Promise.all([
+    const [posts, comments] = await Promise.all([
         Post.find({ _id: { $in: grouped.Post } }).lean(),
-        Short.find({ _id: { $in: grouped.Short } }).lean(),
         Comment.find({ _id: { $in: grouped.Comment } })
-            .populate({ path: 'post', select: 'mediaUrl thumbnailUrl mediaType videoUrl author', strictPopulate: false })
-            .populate({ path: 'short', select: 'thumbnailUrl videoUrl author', strictPopulate: false })
+            .populate({ path: 'post', select: 'mediaUrl mediaType author', strictPopulate: false })
             .lean()
     ]);
 
@@ -221,34 +200,26 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const isUnpopulated = (val) => val && (!val._id || typeof val.author === 'undefined');
 
     const commentPostIds = [];
-    const commentShortIds = [];
     comments.forEach(c => {
         if (isUnpopulated(c.post)) commentPostIds.push(c.post.toString());
-        if (isUnpopulated(c.short)) commentShortIds.push(c.short.toString());
     });
 
-    const [extraPosts, extraShorts] = await Promise.all([
-        commentPostIds.length > 0 ? Post.find({ _id: { $in: commentPostIds } }).select('mediaUrl thumbnailUrl mediaType videoUrl author').lean() : [],
-        commentShortIds.length > 0 ? Short.find({ _id: { $in: commentShortIds } }).select('thumbnailUrl videoUrl author').lean() : []
-    ]);
+    const extraPosts = commentPostIds.length > 0
+        ? await Post.find({ _id: { $in: commentPostIds } }).select('mediaUrl mediaType author').lean()
+        : [];
 
     const extraPostsMap = new Map(extraPosts.map(p => [p._id.toString(), p]));
-    const extraShortsMap = new Map(extraShorts.map(s => [s._id.toString(), s]));
 
     // Patch comments: replace bare ObjectId with the fetched document
     comments.forEach(c => {
         if (isUnpopulated(c.post)) {
             c.post = extraPostsMap.get(c.post.toString()) || c.post;
         }
-        if (isUnpopulated(c.short)) {
-            c.short = extraShortsMap.get(c.short.toString()) || c.short;
-        }
     });
 
     // Lookup table
     const entitiesMap = new Map();
     posts.forEach(p => entitiesMap.set(p._id.toString(), p));
-    shorts.forEach(s => entitiesMap.set(s._id.toString(), s));
     comments.forEach(c => entitiesMap.set(c._id.toString(), c));
 
     // Stage 4: Formatted Stitching
@@ -278,7 +249,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const ghosts = [];
 
     formattedResults.forEach(n => {
-        // GHOST DETECTION: A notification is a ghost only if its target entity (Post/Comment/Short) 
+        // GHOST DETECTION: A notification is a ghost only if its target entity (Post/Comment)
         // was once there (entityId exists) but is no longer in our database (hydrated entity missing).
         const hasEntity = n.entityId;
         const entityIdStr = (n.entityId && typeof n.entityId === 'object' && n.entityId._id) 

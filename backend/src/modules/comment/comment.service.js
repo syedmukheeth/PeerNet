@@ -2,7 +2,6 @@
 
 const Comment = require('./Comment');
 const Post = require('../post/Post');
-const Short = require('../shorts/Short');
 const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
 const { checkToxicity } = require('../../config/ai.config');
@@ -11,23 +10,17 @@ const notificationService = require('../notification/notification.service');
 const addComment = async (postId, userId, { body, parentComment }) => {
     const trimmedBody = body.trim();
 
-    // 1. Resolve Target (Post or Short)
-    let post = await Post.findById(postId);
-    let targetModel = 'Post';
-    if (!post) {
-        post = await Short.findById(postId);
-        targetModel = 'Short';
-    }
-    if (!post) throw new ApiError(404, 'Post or Video not found');
+    // 1. Resolve Target
+    const post = await Post.findById(postId);
+    if (!post) throw new ApiError(404, 'Post not found');
 
     // 2. Duplicate Prevention
-    const dupQuery = {
+    const existing = await Comment.findOne({
         author: userId,
         body: trimmedBody,
         createdAt: { $gt: new Date(Date.now() - 5000) },
-        ...(targetModel === 'Post' ? { post: postId } : { short: postId })
-    };
-    const existing = await Comment.findOne(dupQuery);
+        post: postId,
+    });
     if (existing) throw new ApiError(409, 'Duplicate comment detected. Please wait a moment.');
 
     // 3. AI Toxicity Check
@@ -36,23 +29,18 @@ const addComment = async (postId, userId, { body, parentComment }) => {
         throw new ApiError(400, 'Comment rejected by AI Community Safety Filter');
     }
 
-    // 4. Create comment with CORRECT field (post vs short)
-    const commentData = {
+    // 4. Create comment
+    const comment = await Comment.create({
         author: userId,
         body: trimmedBody,
         parentComment: parentComment || null,
         isAiVerified: true,
         toxicityScore,
-        ...(targetModel === 'Post' ? { post: postId } : { short: postId })
-    };
-    const comment = await Comment.create(commentData);
+        post: postId,
+    });
 
-    // 5. Update count on the correct model
-    if (targetModel === 'Post') {
-        await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
-    } else {
-        await Short.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
-    }
+    // 5. Update count
+    await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
     // 6. Notify post/comment author
     if (parentComment) {
@@ -83,10 +71,9 @@ const addComment = async (postId, userId, { body, parentComment }) => {
 };
 
 const getComments = async (postId, { limit = 20, cursor = null }) => {
-    // Search both post AND short fields to handle both content types
     const query = {
         parentComment: null,
-        $or: [{ post: postId }, { short: postId }]
+        post: postId,
     };
     if (cursor) query.createdAt = { $lt: new Date(cursor) };
 
@@ -122,14 +109,11 @@ const deleteComment = async (commentId, userId) => {
     const comment = await Comment.findById(commentId);
     if (!comment) throw new ApiError(404, 'Comment not found');
 
-    // Auth: Either comment author OR the post/short owner can delete
+    // Auth: Either comment author OR the post owner can delete
     const isAuthor = comment.author.toString() === userId.toString();
     let isPostOwner = false;
     if (!isAuthor) {
-        // Check against whichever parent field is set
-        const parentId = comment.post || comment.short;
-        let parentDoc = await Post.findById(parentId).select('author').lean();
-        if (!parentDoc) parentDoc = await Short.findById(parentId).select('author').lean();
+        const parentDoc = await Post.findById(comment.post).select('author').lean();
         isPostOwner = parentDoc?.author?.toString() === userId.toString();
     }
 
@@ -139,11 +123,8 @@ const deleteComment = async (commentId, userId) => {
 
     await comment.deleteOne();
 
-    // Decrement count on the right model
     if (comment.post) {
         await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
-    } else if (comment.short) {
-        await Short.findByIdAndUpdate(comment.short, { $inc: { commentsCount: -1 } });
     }
 
     // Remove associated notification

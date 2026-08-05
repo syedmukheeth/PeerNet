@@ -8,8 +8,8 @@ const faqs = [
         a: 'Tap your avatar at the start of the story rail on the home feed, then pick a photo or write a text story. Stories disappear after 24 hours.',
     },
     {
-        q: 'What are Shorts?',
-        a: 'Shorts is the vertical video feed, reachable from the film icon in the navigation. Any post you upload as a video also shows up under the Shorts tab on your profile.',
+        q: 'Can I post a video?',
+        a: 'Yes. Choose a video when you create a post and it appears in the feed like any other post, with a film marker on your profile grid.',
     },
     {
         q: 'Who can see my posts?',

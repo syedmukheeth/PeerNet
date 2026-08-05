@@ -246,7 +246,7 @@ export default function Layout() {
         return () => document.removeEventListener('mousedown', h)
     }, [showMore])
 
-    const isMessagesOrShorts = ['/messages', '/shorts'].some(p => location.pathname.startsWith(p))
+    const isMessages = location.pathname.startsWith('/messages')
     const isAdmin = location.pathname.startsWith('/admin')
 
     return (
@@ -282,17 +282,17 @@ export default function Layout() {
                 onLogout={handleLogout}
             />
 
-            <main className={`main-col ${isMessagesOrShorts ? 'h-full overflow-hidden' : ''} ${isAdmin ? 'main-col--admin' : ''}`} ref={mainRef}>
+            <main className={`main-col ${isMessages ? 'h-full overflow-hidden' : ''} ${isAdmin ? 'main-col--admin' : ''}`} ref={mainRef}>
                 <div
-                    className={`layout-container ${isMessagesOrShorts ? 'h-full' : ''} ${(!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
+                    className={`layout-container ${isMessages ? 'h-full' : ''} ${(!['/messages', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
 
-                    <div className={isMessagesOrShorts ? 'h-full' : ''}>
+                    <div className={isMessages ? 'h-full' : ''}>
                         <Outlet />
                     </div>
 
                     {/* Site footer */}
-                    {!['/messages', '/shorts', '/admin'].some(p => location.pathname.startsWith(p)) && (
+                    {!['/messages', '/admin'].some(p => location.pathname.startsWith(p)) && (
                         <SiteFooter onReportBug={() => setShowFeedback(true)} />
                     )}
                 </div>

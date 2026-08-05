@@ -11,7 +11,6 @@ const initNotificationWorker = async () => {
         await consumer.connect();
         await consumer.subscribe({ topic: 'post_events', fromBeginning: false });
         await consumer.subscribe({ topic: 'comment_events', fromBeginning: false });
-        await consumer.subscribe({ topic: 'shorts_events', fromBeginning: false });
         await consumer.subscribe({ topic: 'user_events', fromBeginning: false });
 
         await consumer.run({

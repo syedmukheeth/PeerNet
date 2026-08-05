@@ -232,7 +232,6 @@ export default function Profile() {
             <div className="profile-tabs border-t border-white/5 mt-10">
                 {[
                     { key: 'posts', icon: <HiViewGrid />, label: 'POSTS' },
-                    { key: 'shorts', icon: <HiFilm />, label: 'SHORTS' },
                     ...(isMe ? [{ key: 'saved', icon: <HiBookmark />, label: 'SAVED' }] : []),
                 ].map(({ key, icon, label }) => (
                     <button key={key} 
@@ -260,10 +259,6 @@ export default function Profile() {
 
                     if (tab === 'posts') {
                         displayPosts = posts
-                    } else if (tab === 'shorts') {
-                        displayPosts = posts.filter(p => p.mediaType === 'video')
-                        emptyIcon = <HiFilm />
-                        emptyTitle = 'No Shorts yet'
                     } else if (tab === 'saved') {
                         displayPosts = savedPosts
                         gridLoading = savedLoading

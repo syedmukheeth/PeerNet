@@ -8,14 +8,12 @@ import {
     HiCloudUpload,
     HiTrash
 } from 'react-icons/hi'
-import { useNavigate } from 'react-router'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 
 export default function CreatePostModal({ onClose }) {
     const queryClient = useQueryClient()
-    const navigate = useNavigate()
     const [isTextMode, setIsTextMode] = useState(false)
     const [backgroundColor, setBackgroundColor] = useState('linear-gradient(135deg, #0f172a 0%, #334155 100%)')
 
@@ -94,25 +92,15 @@ export default function CreatePostModal({ onClose }) {
                 await queryClient.invalidateQueries({ queryKey: ['feed'] })
                 onClose()
             } else {
-                const isVideoUpload = isVideo
-                fd.append(isVideoUpload ? 'video' : 'media', file)
+                // Videos and images both go to /posts, which picks the Cloudinary
+                // resource type from the file's mimetype.
+                fd.append('media', file)
                 fd.append('caption', caption)
 
-                const config = { headers: { 'Content-Type': 'multipart/form-data' } }
-
-                if (isVideoUpload) {
-                    await api.post('/shorts', fd, config)
-                    toast.success('🎬 Video shared!')
-                    await queryClient.invalidateQueries({ queryKey: ['shorts'] })
-                    await queryClient.invalidateQueries({ queryKey: ['feed'] })
-                    onClose()
-                    navigate('/shorts')
-                } else {
-                    await api.post('/posts', fd, config)
-                    toast.success('✅ Post shared!')
-                    await queryClient.invalidateQueries({ queryKey: ['feed'] })
-                    onClose()
-                }
+                await api.post('/posts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+                toast.success(isVideo ? '🎬 Video shared!' : '✅ Post shared!')
+                await queryClient.invalidateQueries({ queryKey: ['feed'] })
+                onClose()
             }
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to share content')

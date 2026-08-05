@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const User = require('../user/User');
 const Post = require('../post/Post');
 const Story = require('../story/Story');
-const Short = require('../shorts/Short');
 const Feedback = require('../feedback/Feedback');
 const Comment = require('../comment/Comment');
 const Notification = require('../notification/Notification');
@@ -101,7 +100,7 @@ const deleteUser = async (adminId, userId, reason = '') => {
         targetId: userId,
         details:
             `Deleted user @${result.username}. Reason: ${reason}. ` +
-            `Cascaded: ${result.posts} posts, ${result.shorts} shorts, ${result.comments} comments, ` +
+            `Cascaded: ${result.posts} posts, ${result.comments} comments, ` +
             `${result.likes} likes, ${result.follows} follows, ${result.messages} messages`,
     });
 };
@@ -213,15 +212,16 @@ const deleteStory = async (storyId) => {
 };
 
 const getPlatformStats = async () => {
-    const [userCount, postCount, storyCount, shortsCount, feedbackCount] = await Promise.all([
+    const [userCount, postCount, videoCount, storyCount, feedbackCount] = await Promise.all([
         User.countDocuments(),
-        Post.countDocuments({ mediaType: { $ne: 'video' } }),
+        Post.countDocuments(),
+        Post.countDocuments({ mediaType: 'video' }),
         Story.countDocuments(),
-        Short.countDocuments() || Post.countDocuments({ mediaType: 'video' }),
         Feedback.countDocuments({ status: 'open' })
     ]);
-    
-    const calculatedBandwidth = (userCount * 0.15) + (postCount * 1.2) + (shortsCount * 8.5) + (storyCount * 3.2);
+
+    // Video posts carry far more bandwidth than image posts, so they are weighted apart.
+    const calculatedBandwidth = (userCount * 0.15) + ((postCount - videoCount) * 1.2) + (videoCount * 8.5) + (storyCount * 3.2);
     const bandwidthUsage = calculatedBandwidth > 1024 
         ? (calculatedBandwidth / 1024).toFixed(2) + ' TB' 
         : calculatedBandwidth.toFixed(2) + ' GB';
@@ -235,10 +235,10 @@ const getPlatformStats = async () => {
     const cpuUsed = cpuMetric?.values[0]?.value || 0;
         
     return { 
-        userCount, 
-        postCount, 
-        storyCount, 
-        shortsCount,
+        userCount,
+        postCount,
+        storyCount,
+        videoCount,
         openFeedback: feedbackCount,
         bandwidthUsage,
         system: {
@@ -434,16 +434,14 @@ const nukeUsers = async (requestingAdminId) => {
 const nukeContent = async () => {
     logger.warn('NUKE: Content purge initiated');
     
-    const [posts, shorts, stories, comments] = await Promise.all([
+    const [posts, stories, comments] = await Promise.all([
         Post.deleteMany({}),
-        Short.deleteMany({}),
         Story.deleteMany({}),
         Comment.deleteMany({})
     ]);
 
     return {
         posts: posts.deletedCount,
-        shorts: shorts.deletedCount,
         stories: stories.deletedCount,
         comments: comments.deletedCount
     };

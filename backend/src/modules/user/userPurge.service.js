@@ -5,7 +5,6 @@ const Follower = require('./Follower');
 const Post = require('../post/Post');
 const Like = require('../post/Like');
 const SavedPost = require('../post/SavedPost');
-const Short = require('../shorts/Short');
 const Story = require('../story/Story');
 const Comment = require('../comment/Comment');
 const Conversation = require('../chat/Conversation');
@@ -90,7 +89,6 @@ const purgeUser = async (userId) => {
 
     const counts = {
         posts: 0,
-        shorts: 0,
         stories: 0,
         comments: 0,
         likes: 0,
@@ -127,7 +125,6 @@ const purgeUser = async (userId) => {
     if (givenLikes.length) {
         const tally = tallyByModel(givenLikes);
         await applyTally(Post, 'likesCount', tally.Post);
-        await applyTally(Short, 'likesCount', tally.Short);
         await applyTally(Comment, 'likesCount', tally.Comment);
         const res = await Like.deleteMany({ user: userId });
         counts.likes += res.deletedCount;
@@ -135,17 +132,14 @@ const purgeUser = async (userId) => {
 
     // 4. Comments this user wrote on other people's content. Their own posts'
     //    comments are handled wholesale in step 5.
-    const ownComments = await Comment.find({ author: userId }).select('post short').lean();
+    const ownComments = await Comment.find({ author: userId }).select('post').lean();
     if (ownComments.length) {
         const commentIds = ownComments.map((c) => c._id);
         const postTally = new Map();
-        const shortTally = new Map();
         for (const c of ownComments) {
             if (c.post) postTally.set(String(c.post), (postTally.get(String(c.post)) || 0) + 1);
-            if (c.short) shortTally.set(String(c.short), (shortTally.get(String(c.short)) || 0) + 1);
         }
         await applyTally(Post, 'commentsCount', postTally);
-        await applyTally(Short, 'commentsCount', shortTally);
 
         // Replies other people left on these comments, and likes on all of them.
         const replyRes = await Comment.deleteMany({ parentComment: { $in: commentIds } });
@@ -193,32 +187,7 @@ const purgeUser = async (userId) => {
         counts.posts = res.deletedCount;
     }
 
-    // 6. Shorts, same shape. Video assets always use the video resource type.
-    const ownShorts = await Short.find({ author: userId }).select('videoPublicId').lean();
-    let shortIds = [];
-    if (ownShorts.length) {
-        shortIds = ownShorts.map((s) => s._id);
-
-        const shortComments = await Comment.find({ short: { $in: shortIds } }).select('_id').lean();
-        if (shortComments.length) {
-            const ids = shortComments.map((c) => c._id);
-            await Like.deleteMany({ targetModel: 'Comment', targetId: { $in: ids } });
-            const res = await Comment.deleteMany({ short: { $in: shortIds } });
-            counts.comments += res.deletedCount;
-        }
-
-        const likeRes = await Like.deleteMany({ targetModel: 'Short', targetId: { $in: shortIds } });
-        counts.likes += likeRes.deletedCount;
-
-        await destroyMedia(
-            ownShorts.map((s) => ({ publicId: s.videoPublicId, resourceType: 'video' })),
-        );
-
-        const res = await Short.deleteMany({ author: userId });
-        counts.shorts = res.deletedCount;
-    }
-
-    // 7. Stories authored, plus this user's view records on everyone else's.
+    // 6. Stories authored, plus this user's view records on everyone else's.
     const ownStories = await Story.find({ author: userId })
         .select('mediaPublicId mediaType')
         .lean();
@@ -234,10 +203,10 @@ const purgeUser = async (userId) => {
     }
     await Story.updateMany({ viewers: userId }, { $pull: { viewers: userId } });
 
-    // 8. This user's own bookmarks.
+    // 7. This user's own bookmarks.
     await SavedPost.deleteMany({ user: userId });
 
-    // 9. Chat. Conversations here are one to one, so a participant leaving means
+    // 8. Chat. Conversations here are one to one, so a participant leaving means
     //    the thread has no reason to exist.
     const convos = await Conversation.find({ participants: userId }).select('_id').lean();
     if (convos.length) {
@@ -280,27 +249,26 @@ const purgeUser = async (userId) => {
         },
     );
 
-    // 10. Notifications in both directions, plus any pointing at content that no
-    //     longer exists.
+    // 9. Notifications in both directions, plus any pointing at content that no
+    //    longer exists.
     const notifRes = await Notification.deleteMany({
         $or: [{ recipient: userId }, { sender: userId }],
     });
     counts.notifications = notifRes.deletedCount;
 
-    const orphanedEntityIds = [...postIds, ...shortIds];
-    if (orphanedEntityIds.length) {
-        const res = await Notification.deleteMany({ entityId: { $in: orphanedEntityIds } });
+    if (postIds.length) {
+        const res = await Notification.deleteMany({ entityId: { $in: postIds } });
         counts.notifications += res.deletedCount;
     }
 
-    // 11. Feedback and reports.
+    // 10. Feedback and reports.
     await Feedback.deleteMany({ userId });
     await Report.deleteMany({
         $or: [{ reporter: userId }, { targetType: 'User', targetId: userId }],
     });
     await Report.updateMany({ resolvedBy: userId }, { $unset: { resolvedBy: '' } });
 
-    // 12. Redis. Cache only, never a source of truth, and a client that exists
+    // 11. Redis. Cache only, never a source of truth, and a client that exists
     //     may still be closed and reject every command, so this is both
     //     null-checked and isolated: a Redis failure must not abort a purge that
     //     has already deleted rows from Mongo.
@@ -309,7 +277,7 @@ const purgeUser = async (userId) => {
         if (redis) {
             await redis.del([`feed:user:${userId}`, `user:${userId}`, `online:${userId}`]);
 
-            const contentIds = [...postIds, ...shortIds].map(String);
+            const contentIds = postIds.map(String);
             if (contentIds.length) {
                 await redis.del(contentIds.map((id) => `post:${id}`));
 
@@ -327,14 +295,14 @@ const purgeUser = async (userId) => {
         logger.warn(`[UserPurge] Redis cleanup skipped for ${userId}: ${err.message}`);
     }
 
-    // 13. Avatar.
+    // 12. Avatar.
     await destroyMedia([{ publicId: user.avatarPublicId, resourceType: 'image' }]);
 
-    // 14. The user row itself, last, so a crash anywhere above is recoverable.
+    // 13. The user row itself, last, so a crash anywhere above is recoverable.
     await User.findByIdAndDelete(userId);
 
     logger.info(
-        `[UserPurge] Removed @${user.username}: ${counts.posts} posts, ${counts.shorts} shorts, ` +
+        `[UserPurge] Removed @${user.username}: ${counts.posts} posts, ` +
             `${counts.comments} comments, ${counts.likes} likes, ${counts.follows} follows, ` +
             `${counts.messages} messages`,
     );

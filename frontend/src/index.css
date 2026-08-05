@@ -771,12 +771,6 @@ textarea:focus-visible {
   box-sizing: border-box;
 }
 
-/* Immersive layouts (Shorts) should fill the main column */
-.main-col:has(.shorts-viewer-overlay) .content-wrap {
-  padding: 0 !important;
-  max-width: none !important;
-}
-
 /* -- FEED LAYOUT - 2-col inside main col ---------------- */
 
 /* Center feed column */
@@ -2007,10 +2001,6 @@ textarea:focus-visible {
   overflow: hidden;
   position: relative;
   background: var(--hover);
-}
-
-.profile-grid.is-shorts .profile-grid-item {
-  aspect-ratio: 1 / 1.65;
 }
 
 .profile-grid-item img,
@@ -3986,11 +3976,6 @@ textarea:focus-visible {
 }
 
 /* =============================================================================
-   PeerNet - SHORTS EXPERIENCE
-   High-speed, vertical video discovery
-   ============================================================================= */
-
-/* =============================================================================
    INTEGRATED UTILITY BRIDGE (Tailwind Compatibility)
    ============================================================================= */
 
@@ -4002,272 +3987,8 @@ textarea:focus-visible {
 
 /* =============================================================================
    PeerNet - CSS Architecture Completion (Resolved Plan)
-   Shorts module + Admin hardening + utility bridge
+   Admin hardening + utility bridge
    ============================================================================= */
-
-/* Shorts Experience Module */
-.shorts-viewer-overlay {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  background:
-  radial-gradient(120% 90% at 50% 0%, rgba(124, 58, 237, 0.18) 0%, transparent 58%),
-  radial-gradient(90% 70% at 100% 100%, rgba(6, 182, 212, 0.12) 0%, transparent 62%),
-  var(--bg);
-  z-index: 10;
-}
-
-@media (max-width: 767px) {
-
-}
-
-.shorts-phone-wrapper {
-  position: relative;
-  width: min(100%, 430px);
-  height: min(calc(100dvh - 32px), 860px);
-  border-radius: 28px;
-  overflow: hidden;
-  background: #000;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.shorts-header-actions {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 50;
-  pointer-events: none;
-}
-
-.shorts-pill-btn,
-.shorts-icon-btn {
-  pointer-events: auto;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(10, 10, 12, 0.56);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: #fff;
-}
-
-.shorts-pill-btn {
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.shorts-icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.shorts-scroll-container {
-  height: 100%;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-}
-
-.shorts-scroll-container::-webkit-scrollbar {
-  display: none;
-}
-
-.shorts-item-root {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 100%;
-  overflow: hidden;
-  scroll-snap-align: start;
-  background: #000;
-}
-
-.shorts-video-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.01);
-  filter: saturate(1.08) contrast(1.02);
-}
-
-.shorts-ui-gradient {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background:
-  linear-gradient(180deg, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.04) 20%, rgba(0, 0, 0, 0.06) 58%, rgba(0, 0, 0, 0.72) 100%),
-  linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0%, transparent 36%, transparent 64%, rgba(0, 0, 0, 0.28) 100%);
-}
-
-.shorts-status-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 15;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: #fff;
-  background: radial-gradient(circle at 50% 25%, rgba(124, 58, 237, 0.26), rgba(0, 0, 0, 0.95) 60%);
-}
-
-.shorts-tap-zone {
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.heart-burst-overlay {
-  pointer-events: none;
-  user-select: none;
-  will-change: transform, opacity;
-  filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.45));
-}
-
-.shorts-side-actions {
-  position: absolute;
-  right: 12px;
-  bottom: 96px;
-  z-index: 11;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.shorts-author-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-}
-
-.shorts-action-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: #fff;
-  cursor: pointer;
-}
-
-.shorts-action-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
-  background: rgba(10, 10, 12, 0.45);
-  backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  transition: transform var(--trans-fast), border-color var(--trans-fast), background var(--trans-fast);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-}
-
-.shorts-action-btn:hover .shorts-action-icon {
-  transform: translateY(-1px) scale(1.04);
-  border-color: rgba(255, 255, 255, 0.28);
-}
-
-.shorts-action-btn.active .shorts-action-icon {
-  color: #f87171;
-  background: rgba(239, 68, 68, 0.18);
-  border-color: rgba(239, 68, 68, 0.45);
-}
-
-.shorts-action-label {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.92);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-}
-
-.shorts-bottom-info {
-  position: absolute;
-  bottom: 20px;
-  left: 14px;
-  right: 82px;
-  z-index: 11;
-  color: #fff;
-}
-
-.shorts-author-name {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 900;
-  margin-bottom: var(--s-1);
-  letter-spacing: -0.01em;
-  color: #fff;
-}
-
-.shorts-caption {
-  font-size: 14px;
-  line-height: 1.5;
-  opacity: 0.9;
-  margin-top: 6px;
-  color: rgba(255, 255, 255, 0.9);
-  text-wrap: pretty;
-}
-
-.shorts-progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.18);
-  z-index: 12;
-  cursor: pointer;
-}
-
-.shorts-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #06b6d4 0%, #6366f1 48%, #7c3aed 100%);
-  box-shadow: 0 0 12px rgba(124, 58, 237, 0.55);
-  position: relative;
-  border-radius: 0 999px 999px 0;
-}
-
-.shorts-progress-fill::after {
-  content: "";
-  position: absolute;
-  right: -3px;
-  top: -1px;
-  width: 8px;
-  height: 6px;
-  border-radius: 999px;
-  background: #fff;
-  opacity: 0.9;
-}
 
 /* Admin hardening */
 
@@ -5541,22 +5262,6 @@ textarea:focus-visible {
   .auth-card {
     padding: 32px 24px;
     border-radius: 16px;
-  }
-
-  /* Shorts mobile optimization */
-  .shorts-phone-wrapper {
-    width: 100%;
-    height: 100vh;
-    max-height: 100%;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-  }
-
-  .shorts-viewer-overlay {
-    position: relative;
-    height: 100%;
-    padding: 0;
   }
 
   /* Typography mobile */
