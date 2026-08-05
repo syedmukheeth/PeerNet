@@ -9,6 +9,7 @@ const Post = require('../modules/post/Post');
 const Follower = require('../modules/user/Follower');
 const connectDB = require('../config/db');
 const logger = require('../config/logger');
+const { assertSeedable } = require('./guard');
 
 const CELEB_PASSWORD = 'Celeb@1234';
 
@@ -119,6 +120,7 @@ const celebPosts = [
 ];
 
 const seed = async () => {
+    assertSeedable('celebrities.js');
     await connectDB();
     logger.info('Seeding celebrity accounts...');
 

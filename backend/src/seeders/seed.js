@@ -8,46 +8,55 @@ const User = require('../modules/user/User');
 const Post = require('../modules/post/Post');
 const connectDB = require('../config/db');
 const logger = require('../config/logger');
+const { assertSeedable } = require('./guard');
 
 const SEED_PASSWORD = 'Seed@1234';
 
 const seed = async () => {
+    assertSeedable('seed.js');
     await connectDB();
     logger.info('Seeding database...');
 
-    // Clean up
-    await Promise.all([User.deleteMany({}), Post.deleteMany({})]);
+    if (process.env.SEED_WIPE === 'yes') {
+        logger.warn('SEED_WIPE=yes: deleting every user and post.');
+        await Promise.all([User.deleteMany({}), Post.deleteMany({})]);
+    }
 
-    // Create admin
-    const adminHash = await bcrypt.hash(SEED_PASSWORD, 12);
-    await User.create({
-        username: 'admin',
-        email: 'admin@peernet.dev',
-        passwordHash: adminHash,
-        fullName: 'PeerNet Admin',
-        role: 'admin',
-    });
+    const passwordHash = await bcrypt.hash(SEED_PASSWORD, 12);
+    const accounts = [
+        { username: 'admin', email: 'admin@peernet.dev', fullName: 'PeerNet Admin', role: 'admin' },
+        { username: 'alice', email: 'alice@peernet.dev', fullName: 'Alice' },
+        { username: 'bob', email: 'bob@peernet.dev', fullName: 'Bob' },
+        { username: 'charlie', email: 'charlie@peernet.dev', fullName: 'Charlie' },
+        { username: 'diana', email: 'diana@peernet.dev', fullName: 'Diana' },
+        { username: 'eve', email: 'eve@peernet.dev', fullName: 'Eve' },
+    ];
 
-    // Create 5 sample users
-    const userHash = await bcrypt.hash(SEED_PASSWORD, 12);
-    const users = await User.insertMany([
-        { username: 'alice', email: 'alice@peernet.dev', passwordHash: userHash, fullName: 'Alice' },
-        { username: 'bob', email: 'bob@peernet.dev', passwordHash: userHash, fullName: 'Bob' },
-        { username: 'charlie', email: 'charlie@peernet.dev', passwordHash: userHash, fullName: 'Charlie' },
-        { username: 'diana', email: 'diana@peernet.dev', passwordHash: userHash, fullName: 'Diana' },
-        { username: 'eve', email: 'eve@peernet.dev', passwordHash: userHash, fullName: 'Eve' },
-    ]);
+    const users = [];
+    for (const account of accounts) {
+        let user = await User.findOne({ email: account.email });
+        if (user) {
+            logger.info(`Already exists: @${user.username}`);
+        } else {
+            user = await User.create({ ...account, passwordHash });
+            logger.info(`Created: @${user.username}`);
+        }
+        users.push(user);
+    }
 
-    // Create sample posts (using a placeholder public image)
-    await Post.insertMany(
-        users.map((u, i) => ({
-            author: u._id,
+    // Sample posts use a placeholder public image, so skip the admin account.
+    const authors = users.filter((u) => u.role !== 'admin');
+    for (let i = 0; i < authors.length; i++) {
+        const mediaPublicId = `peernet/posts/seed-${i + 1}`;
+        if (await Post.findOne({ mediaPublicId })) continue;
+        await Post.create({
+            author: authors[i]._id,
             mediaUrl: `https://picsum.photos/seed/${i + 1}/600/600`,
-            mediaPublicId: `peernet/posts/seed-${i + 1}`,
+            mediaPublicId,
             mediaType: 'image',
-            caption: `Hello from ${u.username}! Post #${i + 1} 🚀`,
-        })),
-    );
+            caption: `Hello from ${authors[i].username}! Post #${i + 1} 🚀`,
+        });
+    }
 
     logger.info('✅ Seeding complete.');
     logger.info(`Admin credentials: admin@peernet.dev / ${SEED_PASSWORD}`);
