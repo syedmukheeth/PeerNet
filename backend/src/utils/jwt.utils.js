@@ -1,7 +1,7 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 const signAccessToken = (payload) =>
     jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
@@ -9,7 +9,7 @@ const signAccessToken = (payload) =>
     });
 
 const signRefreshToken = (payload) => {
-    const jti = uuidv4();
+    const jti = randomUUID();
     const token = jwt.sign({ ...payload, jti }, process.env.JWT_REFRESH_SECRET, {
         expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
     });

@@ -1,5 +1,9 @@
 'use strict';
 
+// This runs before anything else in a seeder and has to report why it aborted
+// even when the logger is not wired up, so console is deliberate here.
+/* eslint-disable no-console */
+
 const path = require('path');
 
 // Mirrors server.js: root .env wins because dotenv never overwrites an existing

@@ -1,7 +1,7 @@
 'use strict';
 
 const { Kafka } = require('kafkajs');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const logger = require('./logger');
 
 const isKafkaEnabled = !!process.env.KAFKA_BROKER;
@@ -74,7 +74,7 @@ const initProducer = async () => {
  * High-performance event publishing.
  */
 const publishEvent = async (topic, type, payload) => {
-    const eventId = uuidv4();
+    const eventId = randomUUID();
     const message = {
         eventId,
         type,
@@ -87,7 +87,7 @@ const publishEvent = async (topic, type, payload) => {
             topic,
             messages: [
                 {
-                    key: payload.userId || payload.authorId || uuidv4(),
+                    key: payload.userId || payload.authorId || randomUUID(),
                     value: JSON.stringify(message),
                 },
             ],
