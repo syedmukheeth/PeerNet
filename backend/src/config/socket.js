@@ -1,5 +1,6 @@
 'use strict';
 
+const { monitorEventLoopDelay } = require('perf_hooks');
 const { Server } = require('socket.io');
 const { createAdapter } = require('@socket.io/redis-adapter');
 const { createClient } = require('redis');
@@ -124,25 +125,44 @@ const initSocket = async (server) => {
     });
 
     // ── 4. Infrastructure Heartbeat (Real-time Telemetry) ────────────────────
+    // Gated on an admin actually watching, not on any client being connected:
+    // this runs five countDocuments per tick and used to fire every 5 seconds
+    // for the entire life of the process as soon as one ordinary user was
+    // online. The interval is also unref'd and cleared on shutdown, so it no
+    // longer holds the event loop open.
     const adminService = require('../modules/admin/admin.service');
-    setInterval(async () => {
+    const PULSE_INTERVAL_MS = 5000;
+
+    // Real event-loop delay, sampled continuously. The dashboard's "latency"
+    // reading used to be Math.floor(Math.random() * 25) + 5, and "throughput"
+    // was likewise invented, so the admin console presented fabricated numbers
+    // as measurements.
+    const eventLoopMonitor = monitorEventLoopDelay({ resolution: 10 });
+    eventLoopMonitor.enable();
+
+    const heartbeat = setInterval(async () => {
         try {
-            if (io.engine.clientsCount > 0) {
-                const stats = await adminService.getPlatformStats();
-                // Merge real system stats with real-time network estimates
-                const pulse = {
-                    ...stats,
-                    latency: Math.floor(Math.random() * 25) + 5, // Tighter latency range
-                    throughput: (Math.random() * 1.5 + 0.5).toFixed(2),
-                    connectedClients: io.engine.clientsCount,
-                    timestamp: new Date()
-                };
-                io.to('admin:infrastructure').emit('infrastructure_pulse', pulse);
-            }
+            const watchers = io.sockets.adapter.rooms.get('admin:infrastructure');
+            if (!watchers || watchers.size === 0) return;
+
+            const stats = await adminService.getPlatformStats();
+            const latencyMs = Math.round(eventLoopMonitor.mean / 1e6);
+            eventLoopMonitor.reset();
+
+            const pulse = {
+                ...stats,
+                latency: latencyMs,
+                connectedClients: io.engine.clientsCount,
+                timestamp: new Date()
+            };
+            io.to('admin:infrastructure').emit('infrastructure_pulse', pulse);
         } catch (err) {
             logger.error(`Heartbeat Error: ${err.message}`);
         }
-    }, 5000); // 5-second pulse
+    }, PULSE_INTERVAL_MS);
+
+    heartbeat.unref?.();
+    io.on('close', () => clearInterval(heartbeat));
 
     // ── 5. Global Redis Notification Relay (Cross-Service Bridge) ────────────
     // Only possible when the adapter connected. Previously this ran
@@ -220,4 +240,15 @@ const getIO = () => {
     return io;
 };
 
-module.exports = { initSocket, getIO };
+/**
+ * Returns the io instance, or null if Socket.io never initialised.
+ *
+ * server.js treats socket init failure as non-fatal, so the REST handlers must
+ * not use getIO(). They call it after their database write has already
+ * succeeded, so a throw there turned a completed action into a 500 and the
+ * client retried something that had already happened. Real-time delivery is
+ * best-effort; the write is the part that matters.
+ */
+const getIOOptional = () => io || null;
+
+module.exports = { initSocket, getIO, getIOOptional };

@@ -172,6 +172,14 @@ export default function Layout() {
             // Invalidate conversations to update unread counts/previews
             queryClient.invalidateQueries({ queryKey: ['conversations'] })
 
+            // And the open thread. Only the conversation list was invalidated
+            // before, so a message arriving while you had that conversation on
+            // screen did not appear: useMessages has a 10s staleTime and
+            // refetchOnWindowFocus disabled, so nothing refetched it.
+            if (msg.conversationId) {
+                queryClient.invalidateQueries({ queryKey: ['messages', msg.conversationId] })
+            }
+
             if (!location.pathname.startsWith('/messages')) showMsgToast(msg)
         }
         socket.on('new_message', onMsg)

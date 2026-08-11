@@ -1,11 +1,17 @@
+'use strict';
+
 const feedbackService = require('./feedback.service');
 
-exports.createFeedback = async (req, res) => {
+/**
+ * Errors go to next(), not to a local 500 with err.message in the body: the
+ * previous version leaked internal error text to the client and, because it
+ * never called next(), nothing was ever logged. The response envelope also
+ * matches the rest of the API now ({ success, data }) rather than the
+ * { status: 'success' } shape used only here.
+ */
+exports.createFeedback = async (req, res, next) => {
     try {
         const { type, content } = req.body;
-        if (!content) {
-            return res.status(400).json({ message: 'Feedback content is required' });
-        }
 
         const feedback = await feedbackService.saveFeedback({
             userId: req.user._id,
@@ -14,12 +20,8 @@ exports.createFeedback = async (req, res) => {
             path: req.headers.referer || 'unknown'
         });
 
-        res.status(201).json({
-            status: 'success',
-            message: 'Feedback received successfully',
-            data: feedback
-        });
+        res.status(201).json({ success: true, data: feedback });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        next(err);
     }
 };

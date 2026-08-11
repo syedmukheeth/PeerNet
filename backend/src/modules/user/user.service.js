@@ -4,6 +4,7 @@ const User = require('./User');
 const Follower = require('./Follower');
 const { getRedisOptional } = require('../../config/redis');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
+const { clampedDecrement } = require('../../utils/counters.utils');
 const ApiError = require('../../utils/ApiError');
 const notificationService = require('../notification/notification.service');
 
@@ -114,10 +115,31 @@ const updateProfile = async (userId, updates, avatarFile) => {
 
     if (updates.email) {
         updates.email = updates.email.toLowerCase().trim();
-        const existing = await User.findOne({ email: updates.email, _id: { $ne: userId } });
-        if (existing) throw new ApiError(409, 'Email is already associated with another account');
+
+        if (updates.email !== user.email) {
+            // The email is the account's recovery identity and the key
+            // googleLogin matches on, so changing it is a credential change.
+            // It used to be a plain profile field: anyone with a stolen access
+            // token could point the account at their own address and keep it.
+            if (!updates.currentPassword) {
+                throw new ApiError(400, 'Your current password is required to change your email');
+            }
+
+            const withHash = await User.findById(userId).select('+passwordHash');
+            if (!(await withHash.matchPassword(updates.currentPassword))) {
+                throw new ApiError(401, 'Current password is incorrect');
+            }
+
+            const existing = await User.findOne({ email: updates.email, _id: { $ne: userId } });
+            if (existing) throw new ApiError(409, 'Email is already associated with another account');
+
+            // A newly set address has not been proven, so the account loses its
+            // verified state until it is.
+            user.isVerified = false;
+        }
     }
 
+    delete updates.currentPassword;
     Object.assign(user, updates);
     await user.save();
 
@@ -136,12 +158,17 @@ const follow = async (followerId, followingId) => {
     const target = await User.findById(followingId);
     if (!target) throw new ApiError(404, 'User not found');
 
-    const existing = await Follower.findOne({ follower: followerId, following: followingId });
-    if (existing) return { success: true, message: 'Already following' };
+    // Check-then-act would let two concurrent follows both pass the lookup and
+    // then increment the counters twice for one relationship. The unique index
+    // is the real guard: the counters are only touched when the insert is the
+    // one that actually created the row.
+    try {
+        await Follower.create({ follower: followerId, following: followingId });
+    } catch (err) {
+        if (err.code === 11000) return { success: true, message: 'Already following' };
+        throw err;
+    }
 
-    await Follower.create({ follower: followerId, following: followingId });
-
-    // Increment counters atomically
     await Promise.all([
         User.findByIdAndUpdate(followerId, { $inc: { followingCount: 1 } }),
         User.findByIdAndUpdate(followingId, { $inc: { followersCount: 1 } }),
@@ -166,8 +193,8 @@ const unfollow = async (followerId, followingId) => {
     if (!relation) return { success: true, message: 'Already unfollowed' };
 
     await Promise.all([
-        User.findByIdAndUpdate(followerId, { $inc: { followingCount: -1 } }),
-        User.findByIdAndUpdate(followingId, { $inc: { followersCount: -1 } }),
+        User.findByIdAndUpdate(followerId, clampedDecrement('followingCount')),
+        User.findByIdAndUpdate(followingId, clampedDecrement('followersCount')),
     ]);
 
     const redis = getRedisOptional();

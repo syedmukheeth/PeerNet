@@ -70,6 +70,19 @@ userSchema.index({ username: 'text', fullName: 'text' });
 // user/userPurge.service.js is the only correct way to remove a user.
 userSchema.index({ isGuest: 1, expiresAt: 1 });
 
+// Hot query paths that were previously collection scans:
+//   role      - the guest signup auto-follow and the admin user list
+//   status    - suggestions, the admin list, the ban sweep
+//   isPrivate - the feed's discovery exclusion set
+userSchema.index({ role: 1 });
+userSchema.index({ status: 1 });
+userSchema.index({ isPrivate: 1 });
+// "Suggested for you" sorts by followersCount, and the admin list and the
+// analytics aggregation both sort/match on createdAt.
+userSchema.index({ followersCount: -1 });
+userSchema.index({ createdAt: -1 });
+userSchema.index({ lastLogin: -1 });
+
 // Instance method: compare raw password against stored hash
 userSchema.methods.matchPassword = async function (rawPassword) {
     return bcrypt.compare(rawPassword, this.passwordHash);

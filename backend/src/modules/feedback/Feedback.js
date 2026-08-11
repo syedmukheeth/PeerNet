@@ -14,7 +14,9 @@ const feedbackSchema = new mongoose.Schema({
     content: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        // Unbounded before, on an endpoint any logged-in user can post to.
+        maxlength: 2000
     },
     path: {
         type: String, // URL where feedback was submitted

@@ -27,5 +27,8 @@ notificationSchema.index({ recipient: 1, createdAt: -1 });
 notificationSchema.index({ recipient: 1, isRead: 1 });
 // The user purge deletes by sender as well as recipient.
 notificationSchema.index({ sender: 1 });
+// removeNotification runs on every unlike, unfollow and delete and filters on
+// entityId plus type, and the dedup check on create does the same.
+notificationSchema.index({ entityId: 1, type: 1 });
 
 module.exports = mongoose.model('Notification', notificationSchema);

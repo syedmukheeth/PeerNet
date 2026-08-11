@@ -1,7 +1,7 @@
 'use strict';
 
 const User = require('../user/User');
-const { getRedisOptional } = require('../../config/redis');
+const RefreshToken = require('./RefreshToken');
 const logger = require('../../config/logger');
 const {
     signAccessToken,
@@ -12,48 +12,41 @@ const {
 const ApiError = require('../../utils/ApiError');
 const { GUEST_TTL_MS } = require('../user/guest.constants');
 
-const REFRESH_PREFIX = 'refresh_blacklist:';
+// ── Refresh token store (Mongo-backed, see RefreshToken.js) ───────────────────
 
-// ── In-memory fallback store (used when Redis is unavailable) ─────────────────
-// Stores: jti → { value: '0'|'1', expiresAt: Date }
-const memStore = new Map();
-
-/** Purge expired entries from memStore to avoid unbounded growth */
-const _purgeExpired = () => {
-    const now = Date.now();
-    for (const [key, entry] of memStore) {
-        if (entry.expiresAt <= now) memStore.delete(key);
-    }
+/** Records a newly issued refresh token so it can later be rotated or revoked. */
+const _issueToken = async (jti, userId) => {
+    await RefreshToken.create({
+        jti,
+        user: userId,
+        expiresAt: new Date(Date.now() + refreshTokenTTL() * 1000),
+    });
 };
 
-// ── Unified store helpers (Redis-first, mem fallback) ─────────────────────────
-
-const _setToken = async (jti, value) => {
-    const ttl = refreshTokenTTL(); // seconds
-    const redis = getRedisOptional();
-    if (redis) {
-        await redis.setEx(`${REFRESH_PREFIX}${jti}`, ttl, value);
-    } else {
-        _purgeExpired();
-        memStore.set(`${REFRESH_PREFIX}${jti}`, {
-            value,
-            expiresAt: Date.now() + ttl * 1000,
-        });
-    }
+/**
+ * Atomically consumes a refresh token, returning true only if this call is the
+ * one that revoked it.
+ *
+ * findOneAndUpdate matching on revokedAt: null is what makes rotation safe:
+ * two concurrent refreshes with the same token both reach the database, exactly
+ * one matches, and the loser is told the token was already used. The previous
+ * read-then-write version let both through.
+ */
+const _consumeToken = async (jti) => {
+    const consumed = await RefreshToken.findOneAndUpdate(
+        { jti, revokedAt: null },
+        { revokedAt: new Date() },
+        { new: true },
+    );
+    return consumed;
 };
 
-const _getToken = async (jti) => {
-    const redis = getRedisOptional();
-    if (redis) {
-        return redis.get(`${REFRESH_PREFIX}${jti}`);
-    }
-    const entry = memStore.get(`${REFRESH_PREFIX}${jti}`);
-    if (!entry) return null;
-    if (entry.expiresAt <= Date.now()) {
-        memStore.delete(`${REFRESH_PREFIX}${jti}`);
-        return null;
-    }
-    return entry.value;
+/** Revokes every outstanding refresh token for a user. */
+const _revokeAllForUser = async (userId) => {
+    await RefreshToken.updateMany(
+        { user: userId, revokedAt: null },
+        { revokedAt: new Date() },
+    );
 };
 
 // ── Auth operations ───────────────────────────────────────────────────────────
@@ -66,12 +59,26 @@ const register = async ({ username, email, password, fullName }) => {
     }
 
     const passwordHash = await User.hashPassword(password);
-    const user = await User.create({ username, email, passwordHash, fullName });
+
+    // The check above is advisory: two concurrent signups for the same address
+    // both pass it. The unique index is the real guard, so its error is caught
+    // and turned into the same message rather than a generic 409 from the
+    // global handler.
+    let user;
+    try {
+        user = await User.create({ username, email, passwordHash, fullName });
+    } catch (err) {
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyPattern || {})[0] === 'email' ? 'Email' : 'Username';
+            throw new ApiError(409, `${field} is already taken`);
+        }
+        throw err;
+    }
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
 
-    await _setToken(jti, '0'); // '0' = active (not blacklisted)
+    await _issueToken(jti, user._id);
 
     return { user, accessToken, refreshToken };
 };
@@ -94,13 +101,18 @@ const login = async ({ email: identifier, password }) => {
         throw new ApiError(401, 'Invalid credentials');
     }
 
+    if (user.status === 'banned' || user.status === 'suspended') {
+        logger.warn(`[AUTH SERVICE] Blocked login for ${user.status} account: ${identifier}`);
+        throw new ApiError(403, 'This account is not active');
+    }
+
     logger.info(`[AUTH SERVICE] Successful login for: ${identifier} (${user._id})`);
 
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
 
-    await _setToken(jti, '0');
+    await _issueToken(jti, user._id);
 
     const userObj = user.toJSON();
     return { user: userObj, accessToken, refreshToken };
@@ -116,17 +128,29 @@ const refresh = async (oldRefreshToken) => {
         throw new ApiError(401, 'Invalid or expired refresh token');
     }
 
-    const stored = await _getToken(decoded.jti);
-    if (stored === '1') throw new ApiError(401, 'Refresh token has been revoked');
+    // Fails closed. An unknown jti means the token was already rotated, was
+    // revoked at logout, or was never issued by this deployment, and all three
+    // must be refused. The old code only rejected an explicit '1' and treated
+    // "not found" as valid.
+    const consumed = await _consumeToken(decoded.jti);
+    if (!consumed) {
+        // A token presented twice is either a replay or a stolen token racing
+        // the legitimate client. Neither is recoverable from here, so every
+        // session for the user is dropped.
+        logger.warn(`Refresh token reuse detected for user ${decoded.userId}`);
+        await _revokeAllForUser(decoded.userId);
+        throw new ApiError(401, 'Refresh token has been revoked');
+    }
 
     // Look up user to get their current role (refresh token payload doesn't carry role)
-    const user = await User.findById(decoded.userId).select('role').lean();
+    const user = await User.findById(decoded.userId).select('role status').lean();
     if (!user) throw new ApiError(401, 'User no longer exists');
+    if (user.status === 'banned' || user.status === 'suspended') {
+        throw new ApiError(403, 'This account is not active');
+    }
 
-    // Rotate: blacklist old, issue new
-    await _setToken(decoded.jti, '1');
     const { token: newRefreshToken, jti: newJti } = signRefreshToken({ userId: decoded.userId });
-    await _setToken(newJti, '0');
+    await _issueToken(newJti, decoded.userId);
 
     const accessToken = signAccessToken({ userId: decoded.userId, role: user.role });
     return { accessToken, refreshToken: newRefreshToken };
@@ -136,7 +160,7 @@ const logout = async (refreshToken) => {
     if (!refreshToken) return;
     try {
         const decoded = verifyRefreshToken(refreshToken);
-        await _setToken(decoded.jti, '1');
+        await _consumeToken(decoded.jti);
     } catch {
         // Ignore invalid tokens on logout
     }
@@ -187,7 +211,7 @@ const googleLogin = async (token) => {
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
-    await _setToken(jti, '0');
+    await _issueToken(jti, user._id);
 
     const userObj = user.toJSON();
     // In case passwordHash is still there (though toJSON removes it)
@@ -238,7 +262,7 @@ const guestLogin = async () => {
 
     const accessToken = signAccessToken({ userId: user._id, role: user.role });
     const { token: refreshToken, jti } = signRefreshToken({ userId: user._id });
-    await _setToken(jti, '0');
+    await _issueToken(jti, user._id);
 
     const userObj = user.toJSON();
     delete userObj.passwordHash;

@@ -14,7 +14,7 @@ const storySchema = new mongoose.Schema(
             required: function() { return this.mediaType !== 'text'; } 
         },
         mediaType: { type: String, enum: ['image', 'video', 'text'], default: 'image' },
-        content: { type: String, trim: true },
+        content: { type: String, trim: true, maxlength: 1000 },
         backgroundColor: { type: String, default: '#000000' },
         
         // Premium Text Story metadata

@@ -135,13 +135,15 @@ module.exports = (io, socket) => {
         if (userId) {
             if (redis) await redis.del(`online:${userId}`);
 
-            // Check if user has other active connections
-            const userRoom = `user:${userId}`;
-            const room = io.sockets.adapter.rooms.get(userRoom);
-            
-            // If room doesn't exist or only this socket was in it (already removed by socket.io)
-            // Note: In disconnect handler, the socket might already be removed from room
-            if (!room || room.size === 0) {
+            // Check if the user has other active connections, across every
+            // instance. io.sockets.adapter.rooms is local state only, so with
+            // the Redis adapter attached a user connected on another replica
+            // (or in a second browser tab served by one) was marked offline as
+            // soon as any one of their sockets dropped. fetchSockets goes
+            // through the adapter and sees the whole cluster.
+            const remaining = await io.in(`user:${userId}`).fetchSockets();
+
+            if (remaining.length === 0) {
                 await User.findByIdAndUpdate(userId, { 
                     isOnline: false, 
                     lastSeen: new Date() 

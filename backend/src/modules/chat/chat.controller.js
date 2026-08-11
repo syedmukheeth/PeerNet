@@ -1,23 +1,32 @@
 'use strict';
 
 const chatService = require('./chat.service');
-const { getIO } = require('../../config/socket');
+const { getIOOptional } = require('../../config/socket');
 const { uploadToCloudinary } = require('../../utils/cloudinary.utils');
+const logger = require('../../config/logger');
 
 /**
- * Standard broadcast helper to keep REST and Socket events consistent
+ * Standard broadcast helper to keep REST and Socket events consistent.
+ *
+ * Best-effort: every caller reaches here after its database write has already
+ * committed. Using getIO(), which throws when Socket.io failed to initialise,
+ * meant a message that had been saved still returned 500 to the sender.
  */
 const broadcastToParticipants = (conversation, event, payload) => {
-    const io = getIO();
+    const io = getIOOptional();
+    if (!io) {
+        logger.warn(`Socket.io unavailable, skipping broadcast of ${event}`);
+        return;
+    }
     if (conversation && conversation.participants) {
         conversation.participants.forEach(p => {
             const pId = p._id ? p._id.toString() : p.toString();
-            io.to(`user:${pId}`).emit(event, payload);
+            io?.to(`user:${pId}`).emit(event, payload);
         });
     }
     // Also emit to the conversation room
     if (conversation._id) {
-        io.to(`chat:${conversation._id.toString()}`).emit(event, payload);
+        io?.to(`chat:${conversation._id.toString()}`).emit(event, payload);
     }
 };
 
@@ -94,8 +103,8 @@ const markSeen = async (req, res, next) => {
         const { conversationId } = req.params;
         await chatService.markAsSeen(conversationId, req.user.id);
         
-        const io = getIO();
-        io.to(`chat:${conversationId}`).emit('messages_seen', { conversationId, viewerId: req.user.id });
+        const io = getIOOptional();
+        io?.to(`chat:${conversationId}`).emit('messages_seen', { conversationId, viewerId: req.user.id });
         
         res.json({ success: true, message: 'Marked as seen' });
     } catch (err) {
@@ -109,8 +118,8 @@ const reactMessage = async (req, res, next) => {
         const { emoji } = req.body;
         const message = await chatService.reactToMessage(messageId, req.user.id, emoji);
         
-        const io = getIO();
-        io.to(`chat:${message.conversation.toString()}`).emit('message_reacted', {
+        const io = getIOOptional();
+        io?.to(`chat:${message.conversation.toString()}`).emit('message_reacted', {
             messageId,
             reactions: message.reactions,
             senderId: req.user.id
@@ -128,8 +137,8 @@ const editMessage = async (req, res, next) => {
         const { body } = req.body;
         const message = await chatService.updateMessage(messageId, req.user.id, body);
         
-        const io = getIO();
-        io.to(`chat:${message.conversation.toString()}`).emit('message_edited', message);
+        const io = getIOOptional();
+        io?.to(`chat:${message.conversation.toString()}`).emit('message_edited', message);
 
         res.json({ success: true, data: message });
     } catch (err) {
@@ -142,8 +151,8 @@ const deleteMessage = async (req, res, next) => {
         const { messageId } = req.params;
         const message = await chatService.deleteMessage(messageId, req.user.id);
         
-        const io = getIO();
-        io.to(`chat:${message.conversation.toString()}`).emit('message_deleted', { 
+        const io = getIOOptional();
+        io?.to(`chat:${message.conversation.toString()}`).emit('message_deleted', { 
             messageId: message._id,
             conversationId: message.conversation
         });
@@ -169,8 +178,8 @@ const deleteConversation = async (req, res, next) => {
         await chatService.deleteConversation(conversationId, req.user.id);
 
         // Notify the user who deleted it across all their connected devices to instantly remove it
-        const io = getIO();
-        io.to(`user:${req.user.id}`).emit('conversation_deleted', { conversationId });
+        const io = getIOOptional();
+        io?.to(`user:${req.user.id}`).emit('conversation_deleted', { conversationId });
 
         res.json({ success: true, message: 'Conversation deleted successfully' });
     } catch (err) {

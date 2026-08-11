@@ -12,5 +12,8 @@ const savedPostSchema = new mongoose.Schema(
 
 savedPostSchema.index({ user: 1, post: 1 }, { unique: true });
 savedPostSchema.index({ user: 1, createdAt: -1 });
+// Deleting a post clears every save of it, and the user purge does the same in
+// bulk. Neither had an index to work from.
+savedPostSchema.index({ post: 1 });
 
 module.exports = mongoose.model('SavedPost', savedPostSchema);

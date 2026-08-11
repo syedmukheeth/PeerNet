@@ -89,7 +89,9 @@ router.post('/login', authLimiter, validate(loginSchema), authController.login);
  *         description: Invalid or missing refresh token.
  */
 // POST /api/v1/auth/refresh (reads httpOnly cookie)
-router.post('/refresh', authController.refresh);
+// Rate limited like every other auth route. It was the only one without a
+// limiter, which left refresh-token grinding and free token rotation unmetered.
+router.post('/refresh', authLimiter, authController.refresh);
 
 /**
  * @swagger

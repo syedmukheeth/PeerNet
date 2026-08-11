@@ -12,6 +12,7 @@ const Message = require('../chat/Message');
 const Notification = require('../notification/Notification');
 const Feedback = require('../feedback/Feedback');
 const Report = require('../admin/Report');
+const RefreshToken = require('../auth/RefreshToken');
 const { getRedisOptional } = require('../../config/redis');
 const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const logger = require('../../config/logger');
@@ -256,14 +257,18 @@ const purgeUser = async (userId) => {
         counts.notifications += res.deletedCount;
     }
 
-    // 10. Feedback and reports.
+    // 10. Refresh tokens, so a purged user's outstanding sessions cannot be
+    //     rotated into new ones before they expire.
+    await RefreshToken.deleteMany({ user: userId });
+
+    // 11. Feedback and reports.
     await Feedback.deleteMany({ userId });
     await Report.deleteMany({
         $or: [{ reporter: userId }, { targetType: 'User', targetId: userId }],
     });
     await Report.updateMany({ resolvedBy: userId }, { $unset: { resolvedBy: '' } });
 
-    // 11. Redis. Cache only, never a source of truth, and a client that exists
+    // 12. Redis. Cache only, never a source of truth, and a client that exists
     //     may still be closed and reject every command, so this is both
     //     null-checked and isolated: a Redis failure must not abort a purge that
     //     has already deleted rows from Mongo.
@@ -290,7 +295,7 @@ const purgeUser = async (userId) => {
         logger.warn(`[UserPurge] Redis cleanup skipped for ${userId}: ${err.message}`);
     }
 
-    // 12. Avatar.
+    // 13. Avatar.
     await destroyMedia([{ publicId: user.avatarPublicId, resourceType: 'image' }]);
 
     // 13. The user row itself, last, so a crash anywhere above is recoverable.

@@ -149,12 +149,19 @@ export default function Notifications() {
 
     useEffect(() => {
         if (!socket) return
-        socket.on('new_notification', (notif) => {
+
+        const handleNotification = (notif) => {
             if (notif.sender?._id === user?._id) return
             setNotifs(prev => [notif, ...prev.filter(n => n._id !== notif._id)])
-        })
-        return () => socket.off('new_notification')
-    }, [socket, user])
+        }
+
+        socket.on('new_notification', handleNotification)
+        // Named handler, because socket.off('new_notification') with no second
+        // argument removes every listener for the event, including the one
+        // Layout registers for the global toast and the unread badge. Visiting
+        // this page once and leaving used to kill both until a full reload.
+        return () => socket.off('new_notification', handleNotification)
+    }, [socket, user?._id])
 
     const categorized = useMemo(() => {
         const now = new Date()

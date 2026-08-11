@@ -9,7 +9,7 @@
 // cookies. Every deployed frontend origin must be listed explicitly.
 const DEFAULT_ORIGINS = ['http://localhost:5173', 'http://localhost:3000'];
 
-const getAllowedOrigins = () => {
+const parseOrigins = () => {
     const configured = (process.env.ALLOWED_ORIGINS || '')
         .split(/[\s,]+/)
         .map((origin) => origin.trim().replace(/\/+$/, ''))
@@ -18,6 +18,13 @@ const getAllowedOrigins = () => {
     return configured.length ? configured : DEFAULT_ORIGINS;
 };
 
-const isOriginAllowed = (origin) => getAllowedOrigins().includes(origin);
+// Parsed once at module load, into a Set. This ran on every request and every
+// socket handshake before, re-splitting the env var and rebuilding the array
+// each time to answer a single membership question.
+const allowedOrigins = new Set(parseOrigins());
+
+const getAllowedOrigins = () => [...allowedOrigins];
+
+const isOriginAllowed = (origin) => allowedOrigins.has(origin);
 
 module.exports = { getAllowedOrigins, isOriginAllowed, DEFAULT_ORIGINS };

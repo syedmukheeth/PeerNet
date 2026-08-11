@@ -1,12 +1,17 @@
 'use strict';
 
 const authService = require('./auth.service');
+const { refreshTokenTTL } = require('../../utils/jwt.utils');
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Use 'none' only with HTTPS (Production)
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matches refresh token expiry)
+    // Derived from the token's own TTL. It was hard-coded to 7 days with a
+    // comment claiming it matched the refresh token, but JWT_REFRESH_EXPIRES_IN
+    // defaults to 30 days, so cookie-only clients were logged out at day 7 while
+    // holding a token that was still valid.
+    maxAge: refreshTokenTTL() * 1000,
 };
 
 const register = async (req, res, next) => {

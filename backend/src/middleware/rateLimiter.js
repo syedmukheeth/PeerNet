@@ -34,4 +34,24 @@ const uploadLimiter = isDev ? skipLimiter : rateLimit({
     handler,
 });
 
-module.exports = { globalLimiter, authLimiter, uploadLimiter };
+// The Gemini endpoints had no limiter at all, not even the upload one, and
+// optimize-caption accepted unbounded text. Every call costs money, so this is
+// deliberately tighter than uploadLimiter.
+const aiLimiter = isDev ? skipLimiter : rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: parseInt(process.env.AI_RATE_LIMIT_MAX, 10) || 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler,
+});
+
+// Write endpoints that create unbounded rows from a single logged-in user.
+const writeLimiter = isDev ? skipLimiter : rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: parseInt(process.env.WRITE_RATE_LIMIT_MAX, 10) || 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler,
+});
+
+module.exports = { globalLimiter, authLimiter, uploadLimiter, aiLimiter, writeLimiter };

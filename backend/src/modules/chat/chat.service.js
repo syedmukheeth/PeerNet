@@ -4,6 +4,8 @@ const Conversation = require('./Conversation');
 const Message = require('./Message');
 const ApiError = require('../../utils/ApiError');
 const { getRedisOptional } = require('../../config/redis');
+const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
+const logger = require('../../config/logger');
 
 const EDIT_WINDOW = 15 * 60 * 1000; // 15 minutes in milliseconds
 
@@ -47,14 +49,19 @@ const getOrCreateConversation = async (userId, targetUserId) => {
 /**
  * Get all conversations for a user with optimized unread counts
  */
-const getUserConversations = async (userId) => {
-    const conversations = await Conversation.find({ 
+const CONVERSATION_PAGE_SIZE = 50;
+
+const getUserConversations = async (userId, { limit = CONVERSATION_PAGE_SIZE } = {}) => {
+    // Bounded. This used to fetch every conversation a user had ever been part
+    // of, fully populated, on every inbox load.
+    const conversations = await Conversation.find({
         participants: userId,
         'metadata.deleted': { $ne: userId }
     })
         .populate('participants', 'username avatarUrl fullName isVerified isOnline')
         .populate('lastMessage')
-        .sort({ updatedAt: -1 });
+        .sort({ updatedAt: -1 })
+        .limit(Math.min(limit, CONVERSATION_PAGE_SIZE));
 
     return conversations.map(conv => {
         const obj = conv.toObject();
@@ -228,17 +235,44 @@ const deleteMessage = async (messageId, userId) => {
     }
 
     await Message.deleteOne({ _id: messageId });
+
+    // Free the attachment. Nothing else ever deleted it, so every deleted media
+    // message leaked its Cloudinary asset permanently.
+    if (message.mediaPublicId) {
+        await deleteFromCloudinary(
+            message.mediaPublicId,
+            message.mediaType === 'video' ? 'video' : 'image',
+        ).catch((err) => logger.warn(`Failed to delete chat media: ${err.message}`));
+    }
+
+    // Repoint the conversation's lastMessage. Deleting the newest message left
+    // the reference dangling, and populate('lastMessage') then resolved it to
+    // null, which the inbox renders as an empty conversation.
+    const conversation = await Conversation.findById(message.conversation).select('lastMessage');
+    if (conversation?.lastMessage?.toString() === messageId.toString()) {
+        const previous = await Message.findOne({ conversation: message.conversation })
+            .sort({ createdAt: -1 })
+            .select('_id')
+            .lean();
+        conversation.lastMessage = previous?._id || null;
+        await conversation.save();
+    }
+
     return message;
 };
 
 const getUnreadCount = async (userId) => {
-    const conversations = await Conversation.find({ 
+    // Projects only the counter map instead of hydrating full documents with
+    // their participants and last message just to sum one number.
+    const conversations = await Conversation.find({
         participants: userId,
         'metadata.deleted': { $ne: userId }
-    });
-    return conversations.reduce((acc, conv) => {
-        return acc + (conv.unreadCounts?.get(userId.toString()) || 0);
-    }, 0);
+    })
+        .select('unreadCounts')
+        .lean();
+
+    const key = userId.toString();
+    return conversations.reduce((acc, conv) => acc + (conv.unreadCounts?.[key] || 0), 0);
 };
 
 /**
