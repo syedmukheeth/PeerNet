@@ -38,7 +38,10 @@ npm run build --prefix frontend
 - Services throw `ApiError(status, message)`. Controllers `catch (err) { next(err) }`.
   The handler in `app.js` maps Mongoose CastError/ValidationError/duplicate-key
   onto real status codes, so do not hand-map those in controllers.
-- Responses are `{ success, data }` or `{ success, message }`.
+- Responses are `{ success, data }` or `{ success, message }`. Paginated
+  endpoints add `nextCursor` and `hasMore` as siblings of `data`, never inside
+  it. A scalar result still goes in `data` (`{ success, data: { count } }`),
+  never at the top level.
 - 4-space indent in backend, 4-space in frontend JSX.
 - No em dashes anywhere in code, comments, or user-facing copy.
 

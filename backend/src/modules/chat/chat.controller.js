@@ -166,7 +166,7 @@ const deleteMessage = async (req, res, next) => {
 const getUnreadCount = async (req, res, next) => {
     try {
         const count = await chatService.getUnreadCount(req.user.id);
-        res.json({ success: true, count });
+        res.json({ success: true, data: { count } });
     } catch (err) {
         next(err);
     }

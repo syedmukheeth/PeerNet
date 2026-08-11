@@ -37,7 +37,7 @@ const markAllRead = async (req, res, next) => {
 const getUnreadCount = async (req, res, next) => {
     try {
         const count = await notificationService.getUnreadCount(req.user._id);
-        res.json({ success: true, count });
+        res.json({ success: true, data: { count } });
     } catch (err) { 
         next(err); 
     }

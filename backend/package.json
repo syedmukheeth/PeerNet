@@ -44,7 +44,6 @@
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4",
     "mongoose": "^8.9.5",
-    "morgan": "^1.10.0",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
     "prom-client": "^15.1.3",

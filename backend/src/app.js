@@ -109,6 +109,12 @@ const createApp = () => {
     const syncPaths = ['/notifications/unread-count', '/api/v1/notifications/unread-count'];
     app.get(syncPaths, authenticate, notificationController.getUnreadCount);
 
+    // ── 📚 API Docs (development only) ────────────────────────────────────────
+    if (process.env.NODE_ENV !== 'production') {
+        require('./docs/swagger')(app);
+        logger.info('API docs available at /api-docs');
+    }
+
     // ── 🚀 API Routes ─────────────────────────────────────────────────────────
     app.use('/api/v1', routes);
 

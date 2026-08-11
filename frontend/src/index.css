@@ -8422,3 +8422,53 @@ body:has(.zn-messages-root) .content-wrap {
     animation: none !important;
   }
 }
+
+/* ============================================================================
+   REPORT MODAL
+   Built on components/ui/Modal, so the overlay, escape key, focus trap and
+   scroll lock all come from there. Only the form body is styled here.
+   ========================================================================== */
+
+.report-reason {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-2);
+    transition: background var(--trans-fast);
+}
+
+.report-reason:hover {
+    background: var(--hover);
+    color: var(--text-1);
+}
+
+.report-reason:focus-within {
+    background: var(--hover);
+    box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.report-reason input {
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.report-description {
+    width: 100%;
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--border-md);
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    color: var(--text-1);
+    font: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.report-description:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-ring);
+}

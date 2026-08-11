@@ -12,6 +12,7 @@ import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import { optimizeAvatarUrl, optimizeCloudinaryUrl } from '../utils/cloudinary'
 import EditPostModal from './EditPostModal'
+import ReportModal from './ReportModal'
 
 export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const { user } = useAuth()
@@ -24,6 +25,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [lastTap, setLastTap] = useState(0)
     const [menuOpen, setMenuOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
+    const [reportOpen, setReportOpen] = useState(false)
     const [caption, setCaption] = useState(post.caption || '')
     const [showHeart, setShowHeart] = useState(false)
     const menuRef = useRef(null)
@@ -195,7 +197,10 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                                             </button>
                                         </>
                                     ) : (
-                                        <button className="post-card-menu-item" onClick={() => { toast.success('Reported'); setMenuOpen(false) }}>
+                                        <button
+                                            className="post-card-menu-item"
+                                            onClick={() => { setMenuOpen(false); setReportOpen(true) }}
+                                        >
                                             Report
                                         </button>
                                     )}
@@ -293,6 +298,13 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         onUpdate?.(post._id, updated)
                         setEditOpen(false)
                     }}
+                />
+            )}
+            {reportOpen && (
+                <ReportModal
+                    targetType="Post"
+                    targetId={post._id}
+                    onClose={() => setReportOpen(false)}
                 />
             )}
         </>

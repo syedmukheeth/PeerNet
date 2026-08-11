@@ -65,12 +65,15 @@ export default function Layout() {
                 chatApi.get('unread-count')
             ])
 
-            setUnreadCount(notifRes.data.count || 0)
-            unreadRef.current = notifRes.data.count || 0
+            // Both endpoints return the standard { success, data } envelope now,
+            // rather than a bare top-level count.
+            const notifCount = notifRes.data.data?.count || 0
+            setUnreadCount(notifCount)
+            unreadRef.current = notifCount
 
             // If user is already on messages, don't show the global badge
             const isAtMessages = window.location.pathname.startsWith('/messages')
-            const count = msgRes.data.count || 0
+            const count = msgRes.data.data?.count || 0
             const displayCount = isAtMessages ? 0 : count
 
             setMsgCount(displayCount)
