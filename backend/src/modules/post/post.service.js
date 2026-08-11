@@ -1,9 +1,13 @@
 'use strict';
 
+const fs = require('fs/promises');
 const Post = require('./Post');
 const User = require('../user/User');
+const logger = require('../../config/logger');
 const Like = require('./Like');
 const SavedPost = require('./SavedPost');
+const Comment = require('../comment/Comment');
+const { clampedDecrement } = require('../../utils/counters.utils');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const { getRedisOptional } = require('../../config/redis');
 const ApiError = require('../../utils/ApiError');
@@ -18,9 +22,22 @@ const createPost = async (userId, { caption, location, tags, mediaType, backgrou
     let public_id = '';
     let finalMediaType = mediaType || 'image';
 
+    // Read the bytes before uploading: uploadToCloudinary unlinks the temp file
+    // as soon as it completes, and the auto-caption below needs them.
+    let mediaBuffer = null;
+
     if (finalMediaType !== 'text') {
         if (!file) throw new ApiError(400, 'Media file is required for image/video posts');
-        const isVideo = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
+        const isVideo = file.mimetype.startsWith('video/');
+
+        if (!isVideo && !caption) {
+            try {
+                mediaBuffer = await fs.readFile(file.path);
+            } catch (err) {
+                logger.warn(`Could not read upload for auto-captioning: ${err.message}`);
+            }
+        }
+
         const uploadResult = await uploadToCloudinary(file.path, {
             folder: 'peernet/posts',
             resource_type: isVideo ? 'video' : 'image',
@@ -39,8 +56,8 @@ const createPost = async (userId, { caption, location, tags, mediaType, backgrou
 
     // AI Auto-Captioning (Only for images, if no caption provided)
     let finalCaption = caption;
-    if (!finalCaption && finalMediaType === 'image' && file) { 
-        finalCaption = await generateCaption(file.path, file.mimetype);
+    if (!finalCaption && finalMediaType === 'image' && mediaBuffer) {
+        finalCaption = await generateCaption(mediaBuffer, file.mimetype);
     }
 
     const post = await Post.create({
@@ -60,7 +77,7 @@ const createPost = async (userId, { caption, location, tags, mediaType, backgrou
     publishEvent('post_events', 'POST_CREATED', {
         postId: post._id,
         authorId: userId,
-        body: post.body,
+        caption: post.caption,
         createdAt: post.createdAt
     });
 
@@ -109,6 +126,46 @@ const updatePost = async (postId, userId, { caption }) => {
     return post;
 };
 
+/**
+ * Removes a post and everything that referenced it.
+ *
+ * Deleting the post document alone left its likes, comments, saves and
+ * notifications behind as permanent orphans, and the author's postsCount
+ * unchanged. Exported so the admin moderation path deletes exactly as much as
+ * the author's own delete does. Mirrors the cascade in
+ * user/userPurge.service.js. Performs no authorization: callers do that.
+ */
+const cascadeDeletePost = async (post) => {
+    const postId = post._id;
+
+    if (post.mediaPublicId) {
+        await deleteFromCloudinary(post.mediaPublicId, post.mediaType === 'video' ? 'video' : 'image');
+    }
+
+    const comments = await Comment.find({ post: postId }).select('_id').lean();
+    const commentIds = comments.map((c) => c._id);
+
+    await Promise.all([
+        Comment.deleteMany({ post: postId }),
+        Like.deleteMany({ targetId: { $in: [postId, ...commentIds] } }),
+        SavedPost.deleteMany({ post: postId }),
+        notificationService.removeNotification({ entityId: postId, entityModel: 'Post' }),
+    ]);
+
+    if (commentIds.length > 0) {
+        await notificationService.removeNotification({
+            entityId: { $in: commentIds },
+            entityModel: 'Comment',
+        });
+    }
+
+    await Post.deleteOne({ _id: postId });
+    await User.findByIdAndUpdate(post.author, clampedDecrement('postsCount'));
+
+    const redis = getRedisOptional();
+    if (redis) await redis.del(`post:${postId}`);
+};
+
 const deletePost = async (postId, userId) => {
     const post = await Post.findById(postId);
     if (!post) throw new ApiError(404, 'Post not found');
@@ -116,12 +173,7 @@ const deletePost = async (postId, userId) => {
         throw new ApiError(403, 'Not authorised to delete this post');
     }
 
-    await deleteFromCloudinary(post.mediaPublicId, post.mediaType === 'video' ? 'video' : 'image');
-    await post.deleteOne();
-    await User.findByIdAndUpdate(userId, { $inc: { postsCount: -1 } });
-
-    const redis = getRedisOptional();
-    if (redis) await redis.del(`post:${postId}`);
+    await cascadeDeletePost(post);
 };
 
 const likePost = async (postId, userId) => {
@@ -142,6 +194,11 @@ const likePost = async (postId, userId) => {
             });
         }
 
+        // Counterpart to POST_UNLIKED below. Without it the worker's ranking
+        // and category-affinity branch never ran, so the personalisation the
+        // feed reads back was always an empty affinity map.
+        publishEvent('post_events', 'POST_LIKED', { postId, userId });
+
         const redis = getRedisOptional();
         if (redis) await redis.del(`post:${postId}`);
         return { liked: true };
@@ -154,7 +211,10 @@ const likePost = async (postId, userId) => {
 const unlikePost = async (postId, userId) => {
     const like = await Like.findOneAndDelete({ user: userId, targetId: postId, targetModel: 'Post' });
     if (!like) return { liked: false }; // Idempotent: if already unliked, just succeed
-    await Post.findByIdAndUpdate(postId, { $inc: { likesCount: -1 } });
+
+    const post = await Post.findByIdAndUpdate(postId, clampedDecrement('likesCount'), { new: true })
+        .select('author')
+        .lean();
 
     // Notify via Event Bus
     publishEvent('post_events', 'POST_UNLIKED', {
@@ -162,12 +222,18 @@ const unlikePost = async (postId, userId) => {
         userId
     });
 
-    // Sync with Notifications: Remove the like alert
-    await notificationService.removeNotification({
-        sender: userId,
-        entityId: postId,
-        type: 'like'
-    });
+    // Sync with Notifications: Remove the like alert. The full filter matters:
+    // without recipient and entityModel this could match another user's
+    // notification for the same post.
+    if (post) {
+        await notificationService.removeNotification({
+            recipient: post.author,
+            sender: userId,
+            entityId: postId,
+            entityModel: 'Post',
+            type: 'like'
+        });
+    }
 
     const redis = getRedisOptional();
     if (redis) await redis.del(`post:${postId}`);
@@ -186,8 +252,9 @@ const savePost = async (postId, userId) => {
 };
 
 const unsavePost = async (postId, userId) => {
-    const saved = await SavedPost.findOneAndDelete({ user: userId, post: postId });
-    if (!saved) throw new ApiError(404, 'Saved post not found');
+    // Idempotent, matching unlikePost: un-saving something already un-saved is
+    // the desired end state, not an error.
+    await SavedPost.findOneAndDelete({ user: userId, post: postId });
     return { saved: false };
 };
 
@@ -200,17 +267,23 @@ const getSavedPosts = async (userId, { limit, cursor }) => {
         .sort({ createdAt: -1 })
         .limit(limit + 1);
 
-    const validDocs = docs.filter(d => {
-        if (!d.post) {
-            SavedPost.findByIdAndDelete(d._id).catch(() => {});
-            return false;
-        }
-        return true;
-    });
+    // Rows whose post has since been deleted. Collected and removed in one
+    // batch rather than firing an unawaited delete from inside a filter.
+    const staleIds = docs.filter((d) => !d.post).map((d) => d._id);
+    if (staleIds.length > 0) {
+        SavedPost.deleteMany({ _id: { $in: staleIds } }).catch((err) =>
+            logger.warn(`Failed to clean up stale saved posts: ${err.message}`),
+        );
+    }
 
+    const validDocs = docs.filter((d) => d.post);
     const hasMore = docs.length > limit;
     const results = hasMore ? validDocs.slice(0, limit) : validDocs;
-    const nextCursor = hasMore ? docs[docs.length - 1].createdAt.toISOString() : null;
+    // Built from the last returned row, not from the limit+1 look-ahead row:
+    // using the look-ahead skipped one saved post on every page boundary.
+    const nextCursor = results.length > 0 && hasMore
+        ? results[results.length - 1].createdAt.toISOString()
+        : null;
 
     return { data: results.map((d) => d.post), nextCursor, hasMore };
 };
@@ -274,7 +347,7 @@ const getPostsByIds = async (postIds) => {
 };
 
 module.exports = {
-    createPost, getPost, updatePost, deletePost,
+    createPost, getPost, updatePost, deletePost, cascadeDeletePost,
     likePost, unlikePost,
     savePost, unsavePost, getSavedPosts,
     getUserPosts, getPostsByIds,

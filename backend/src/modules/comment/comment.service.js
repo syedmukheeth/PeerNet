@@ -5,6 +5,8 @@ const Post = require('../post/Post');
 const Like = require('../post/Like');
 const ApiError = require('../../utils/ApiError');
 const { checkToxicity } = require('../../config/ai.config');
+const { publishEvent } = require('../../config/kafka');
+const { clampedDecrement } = require('../../utils/counters.utils');
 const notificationService = require('../notification/notification.service');
 
 const addComment = async (postId, userId, { body, parentComment }) => {
@@ -23,13 +25,24 @@ const addComment = async (postId, userId, { body, parentComment }) => {
     });
     if (existing) throw new ApiError(409, 'Duplicate comment detected. Please wait a moment.');
 
-    // 3. AI Toxicity Check
+    // 3. A reply has to belong to the same post as its parent. Without this a
+    // reply could be attached to a comment on a different post, and the reply
+    // notification would then link the recipient to the wrong thread.
+    if (parentComment) {
+        const parent = await Comment.findById(parentComment).select('post').lean();
+        if (!parent) throw new ApiError(404, 'Parent comment not found');
+        if (parent.post.toString() !== postId.toString()) {
+            throw new ApiError(400, 'Parent comment belongs to a different post');
+        }
+    }
+
+    // 4. AI Toxicity Check
     const toxicityScore = await checkToxicity(trimmedBody);
     if (toxicityScore > 0.7) {
         throw new ApiError(400, 'Comment rejected by AI Community Safety Filter');
     }
 
-    // 4. Create comment
+    // 5. Create comment
     const comment = await Comment.create({
         author: userId,
         body: trimmedBody,
@@ -39,10 +52,18 @@ const addComment = async (postId, userId, { body, parentComment }) => {
         post: postId,
     });
 
-    // 5. Update count
+    // 6. Update count
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
-    // 6. Notify post/comment author
+    // The feed worker subscribes to comment_events to re-rank the post, but
+    // nothing ever published to that topic.
+    publishEvent('comment_events', 'COMMENT_ADDED', {
+        postId,
+        commentId: comment._id,
+        userId,
+    });
+
+    // 7. Notify post/comment author
     if (parentComment) {
         const parent = await Comment.findById(parentComment);
         if (parent && parent.author.toString() !== userId.toString()) {
@@ -105,6 +126,43 @@ const getReplies = async (commentId, { limit = 20, cursor = null }) => {
     return { data: results, nextCursor, hasMore };
 };
 
+/**
+ * Removes a comment, its replies, their likes and their notifications.
+ *
+ * Exported so the admin moderation path deletes exactly as much as the author's
+ * own delete does. Performs no authorization: callers do that.
+ */
+const cascadeDeleteComment = async (comment, userId) => {
+    // Deleting a comment used to leave its replies and every Like row pointing
+    // at it behind, and decremented commentsCount by exactly 1 no matter how
+    // many replies went with it.
+    const replies = await Comment.find({ parentComment: comment._id }).select('_id').lean();
+    const replyIds = replies.map((r) => r._id);
+    const removedIds = [comment._id, ...replyIds];
+
+    await Comment.deleteMany({ _id: { $in: removedIds } });
+    await Like.deleteMany({ targetId: { $in: removedIds }, targetModel: 'Comment' });
+
+    if (comment.post) {
+        await Post.findByIdAndUpdate(comment.post, clampedDecrement('commentsCount', removedIds.length));
+        publishEvent('comment_events', 'COMMENT_DELETED', {
+            postId: comment.post,
+            commentId: comment._id,
+            userId,
+        });
+    }
+
+    // Remove the notifications for the comment and every reply. The type varies
+    // by how the comment was created, so all three are cleared.
+    await Promise.all(
+        removedIds.flatMap((id) =>
+            ['comment', 'reply', 'like'].map((type) =>
+                notificationService.removeNotification({ entityId: id, entityModel: 'Comment', type }),
+            ),
+        ),
+    );
+};
+
 const deleteComment = async (commentId, userId) => {
     const comment = await Comment.findById(commentId);
     if (!comment) throw new ApiError(404, 'Comment not found');
@@ -121,14 +179,7 @@ const deleteComment = async (commentId, userId) => {
         throw new ApiError(403, 'Not authorised to delete this comment');
     }
 
-    await comment.deleteOne();
-
-    if (comment.post) {
-        await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } });
-    }
-
-    // Remove associated notification
-    await notificationService.removeNotification({ entityId: comment._id, type: 'comment' });
+    await cascadeDeleteComment(comment, userId);
 };
 
 const likeComment = async (commentId, userId) => {
@@ -157,17 +208,30 @@ const likeComment = async (commentId, userId) => {
 
 const unlikeComment = async (commentId, userId) => {
     const like = await Like.findOneAndDelete({ user: userId, targetId: commentId, targetModel: 'Comment' });
-    if (!like) throw new ApiError(404, 'Like not found');
-    await Comment.findByIdAndUpdate(commentId, { $inc: { likesCount: -1 } });
-    
+    // Idempotent, matching unlikePost. Throwing 404 here meant a double-tap or a
+    // retried request surfaced as an error for a no-op.
+    if (!like) return { liked: false };
+
+    const comment = await Comment.findByIdAndUpdate(commentId, clampedDecrement('likesCount'), { new: true })
+        .select('author')
+        .lean();
+
     // Sync with Notifications: Remove the like alert
-    await notificationService.removeNotification({
-        sender: userId,
-        entityId: commentId,
-        type: 'like'
-    });
+    if (comment) {
+        await notificationService.removeNotification({
+            recipient: comment.author,
+            sender: userId,
+            entityId: commentId,
+            entityModel: 'Comment',
+            type: 'like'
+        });
+    }
 
     return { liked: false };
 };
 
-module.exports = { addComment, getComments, getReplies, deleteComment, likeComment, unlikeComment };
+module.exports = {
+    addComment, getComments, getReplies,
+    deleteComment, cascadeDeleteComment,
+    likeComment, unlikeComment,
+};

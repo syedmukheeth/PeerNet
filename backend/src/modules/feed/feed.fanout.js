@@ -15,6 +15,13 @@ const fanoutPost = async (post) => {
     const redis = getRedisOptional();
     if (!redis) return;
 
+    // A missing author would turn the follower lookup below into an unfiltered
+    // scan of the whole collection, pushing the post into every user's feed.
+    if (!post?._id || !post.author) {
+        logger.error('Feed fan-out skipped: post is missing _id or author');
+        return;
+    }
+
     try {
         const score = calculateScore(post.likesCount || 0, post.commentsCount || 0, post.createdAt);
         const followerDocs = await Follower.find({ following: post.author }).select('follower').lean();
@@ -45,6 +52,11 @@ const fanoutPost = async (post) => {
 const updatePostScore = async (post) => {
     const redis = getRedisOptional();
     if (!redis) return;
+
+    if (!post?._id || !post.author) {
+        logger.error('Feed score update skipped: post is missing _id or author');
+        return;
+    }
 
     try {
         const score = calculateScore(post.likesCount || 0, post.commentsCount || 0, post.createdAt);

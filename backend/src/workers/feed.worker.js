@@ -34,9 +34,16 @@ const initFeedWorker = async () => {
 
             try {
                 switch (type) {
-                    case 'POST_CREATED':
-                        await fanoutPost(payload);
+                    case 'POST_CREATED': {
+                        // fanoutPost reads post.author and post._id, but the
+                        // event payload carries postId/authorId. Passing the
+                        // payload straight through made every fan-out query
+                        // Follower.find({ following: undefined }), which matches
+                        // the whole collection, and then throw on post._id.
+                        const post = await Post.findById(payload.postId).lean();
+                        if (post) await fanoutPost(post);
                         break;
+                    }
                     
                     case 'POST_LIKED':
                     case 'POST_UNLIKED': {

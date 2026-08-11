@@ -33,8 +33,14 @@ const storySchema = new mongoose.Schema(
     { timestamps: true },
 );
 
-// MongoDB TTL index: Mongo background task deletes documents after expiresAt
-storySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Lookup index for the hourly sweep in jobs/storyCleanup.job.js. Deliberately
+// NOT a Mongo TTL index ({ expireAfterSeconds: 0 }) as it used to be: the TTL
+// monitor deletes the document with no application hook, so it always won the
+// race against the cron and every expired story's Cloudinary asset was
+// orphaned permanently. user/User.js documents the same trap for guests.
+storySchema.index({ expiresAt: 1 });
 storySchema.index({ author: 1, createdAt: -1 });
+// userPurge.service.js sweeps stories a deleted user had viewed.
+storySchema.index({ viewers: 1 });
 
 module.exports = mongoose.model('Story', storySchema);

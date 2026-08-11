@@ -6,6 +6,7 @@ const Comment = require('../comment/Comment');
 const User = require('../user/User');
 const Follower = require('../user/Follower');
 const { getRedisOptional } = require('../../config/redis');
+const logger = require('../../config/logger');
 
 /**
  * The "Absolute Truth" Formatter
@@ -138,27 +139,43 @@ const createNotification = async (data) => {
         }
 
         return formatted;
-    } catch {
+    } catch (err) {
+        // Same reasoning as removeNotification: never break the request, but
+        // never lose the reason either.
+        logger.error(`Failed to create notification: ${err.message}`, err);
         return null;
     }
 };
 
+/**
+ * Deletes every notification matching the filter.
+ *
+ * Deletes all matches rather than the first one findOne happens to return:
+ * callers frequently omit `recipient`, and with an arbitrary pick that meant
+ * unliking your own post could delete a different user's notification for the
+ * same post. Callers should still pass the narrowest filter they can.
+ */
 const removeNotification = async (filter) => {
     try {
-        const notification = await Notification.findOne(filter);
-        if (!notification) return;
-        await Notification.deleteOne({ _id: notification._id });
+        const notifications = await Notification.find(filter).select('_id recipient').lean();
+        if (notifications.length === 0) return;
+
+        await Notification.deleteMany({ _id: { $in: notifications.map((n) => n._id) } });
 
         const redis = getRedisOptional();
         if (redis) {
-            await redis.publish('peernet:notifications', JSON.stringify({
-                recipient: notification.recipient.toString(),
-                type: 'notification_removed',
-                notificationId: notification._id.toString()
-            }));
+            await Promise.all(notifications.map((n) =>
+                redis.publish('peernet:notifications', JSON.stringify({
+                    recipient: n.recipient.toString(),
+                    type: 'notification_removed',
+                    notificationId: n._id.toString()
+                }))
+            ));
         }
-    } catch {
-        // no-op: notification removal should not break request flow
+    } catch (err) {
+        // Notification removal must not break the request flow, but swallowing
+        // it silently made every lost notification undiagnosable.
+        logger.error(`Failed to remove notification: ${err.message}`, err);
     }
 };
 

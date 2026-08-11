@@ -5,11 +5,28 @@ const adminService = require('./admin.service');
 const catchAsync = require('../../utils/catchAsync');
 const ApiError = require('../../utils/ApiError');
 
+const MAX_ADMIN_PAGE = 100;
+
+/**
+ * These were uncapped `parseInt(limit) || 20`, so ?limit=1000000 dumped every
+ * user, post, comment or log row in a single unpaginated response.
+ */
+const parseLimit = (value, fallback = 20) => {
+    const parsed = parseInt(value, 10);
+    if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+    return Math.min(parsed, MAX_ADMIN_PAGE);
+};
+
+const parseSkip = (value) => {
+    const parsed = parseInt(value, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
+
 const getUsers = catchAsync(async (req, res) => {
     const { limit, skip, search, role, status } = req.query;
     const data = await adminService.getUsers({ 
-        limit: parseInt(limit) || 20, 
-        skip: parseInt(skip) || 0, 
+        limit: parseLimit(limit, 20), 
+        skip: parseSkip(skip), 
         search,
         role,
         status
@@ -40,8 +57,8 @@ const resetUserPassword = catchAsync(async (req, res) => {
 const getPosts = catchAsync(async (req, res) => {
     const { limit, skip, type, status, search } = req.query;
     const data = await adminService.getPosts({ 
-        limit: parseInt(limit) || 20, 
-        skip: parseInt(skip) || 0,
+        limit: parseLimit(limit, 20), 
+        skip: parseSkip(skip),
         type: type || 'all',
         status,
         search
@@ -52,8 +69,8 @@ const getPosts = catchAsync(async (req, res) => {
 const getComments = catchAsync(async (req, res) => {
     const { limit, skip, search } = req.query;
     const data = await adminService.getComments({ 
-        limit: parseInt(limit) || 20, 
-        skip: parseInt(skip) || 0, 
+        limit: parseLimit(limit, 20), 
+        skip: parseSkip(skip), 
         search
     });
     res.json({ success: true, ...data });
@@ -68,8 +85,8 @@ const updatePostVisibility = catchAsync(async (req, res) => {
 const getFeedback = catchAsync(async (req, res) => {
     const { limit, skip } = req.query;
     const data = await adminService.getFeedback({ 
-        limit: parseInt(limit) || 20, 
-        skip: parseInt(skip) || 0 
+        limit: parseLimit(limit, 20), 
+        skip: parseSkip(skip) 
     });
     res.json({ success: true, ...data });
 });
@@ -77,8 +94,8 @@ const getFeedback = catchAsync(async (req, res) => {
 const getReports = catchAsync(async (req, res) => {
     const { limit, skip, status } = req.query;
     const data = await adminService.getReports({
-        limit: parseInt(limit) || 20,
-        skip: parseInt(skip) || 0,
+        limit: parseLimit(limit, 20),
+        skip: parseSkip(skip),
         status
     });
     res.json({ success: true, ...data });
@@ -93,8 +110,8 @@ const resolveReport = catchAsync(async (req, res) => {
 const getAuditLogs = catchAsync(async (req, res) => {
     const { limit, skip, search } = req.query;
     const data = await adminService.getAuditLogs({
-        limit: parseInt(limit) || 50,
-        skip: parseInt(skip) || 0,
+        limit: parseLimit(limit, 50),
+        skip: parseSkip(skip),
         search
     });
     res.json({ success: true, ...data });

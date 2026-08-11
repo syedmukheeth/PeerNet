@@ -12,25 +12,37 @@ const Message = require('../chat/Message');
 const AdminLog = require('./AdminLog');
 const Report = require('./Report');
 const { purgeUser } = require('../user/userPurge.service');
+const postService = require('../post/post.service');
+const commentService = require('../comment/comment.service');
 const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 const logger = require('../../config/logger');
 const { register } = require('../../config/metrics');
 
+/**
+ * Escapes regex metacharacters in an admin search term.
+ *
+ * These terms went into $regex verbatim. A search for "(" was a 500, and a
+ * search for something like "(a+)+$" is a catastrophic-backtracking ReDoS that
+ * pins the event loop for the whole process.
+ */
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const getUsers = async ({ limit = 20, skip = 0, search = '', role = '', status = '' }) => {
     let query = {};
     if (search) {
+        const safe = escapeRegex(search);
         query.$or = [
-            { username: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } },
-            { fullName: { $regex: search, $options: 'i' } }
+            { username: { $regex: safe, $options: 'i' } },
+            { email: { $regex: safe, $options: 'i' } },
+            { fullName: { $regex: safe, $options: 'i' } }
         ];
     }
     if (role) query.role = role;
     if (status) query.status = status;
-    
+
     const [users, total] = await Promise.all([
-        User.find(query).select('-passwordHash').sort({ createdAt: -1 }).limit(limit).skip(skip),
+        User.find(query).select('-passwordHash').lean().sort({ createdAt: -1 }).limit(limit).skip(skip),
         User.countDocuments(query),
     ]);
     return { users, total };
@@ -46,10 +58,10 @@ const getPosts = async ({ limit = 20, skip = 0, type = 'all', status = '', searc
     else if (status === 'active') postQuery.isHidden = { $ne: true };
 
     if (search) {
-        postQuery.$or = [
-            { caption: { $regex: search, $options: 'i' } },
-            { _id: mongoose.isValidObjectId(search) ? search : undefined }
-        ].filter(Boolean);
+        // .filter(Boolean) never removed the id clause: the object literal is
+        // always truthy, so { _id: undefined } stayed in the $or.
+        postQuery.$or = [{ caption: { $regex: escapeRegex(search), $options: 'i' } }];
+        if (mongoose.isValidObjectId(search)) postQuery.$or.push({ _id: search });
     }
     
     const [posts, total] = await Promise.all([
@@ -62,7 +74,7 @@ const getPosts = async ({ limit = 20, skip = 0, type = 'all', status = '', searc
 const getComments = async ({ limit = 20, skip = 0, search = '' }) => {
     let query = {};
     if (search) {
-        query.body = { $regex: search, $options: 'i' };
+        query.body = { $regex: escapeRegex(search), $options: 'i' };
     }
     
     const [comments, total] = await Promise.all([
@@ -140,19 +152,31 @@ const resetUserPassword = async (adminId, userId, newPassword) => {
 };
 
 const deletePost = async (adminId, postId, reason = '') => {
-    const post = await Post.findByIdAndDelete(postId);
+    // Author is populated before the delete: reading `post.author?.username` off
+    // the result of findByIdAndDelete gave an unpopulated ObjectId, so every
+    // audit entry recorded "unknown". Deletion goes through the post service's
+    // cascade so moderator deletion removes as much as an author's own does
+    // (likes, comments, saves, notifications, postsCount) instead of leaving
+    // orphans behind.
+    const post = await Post.findById(postId).populate('author', 'username');
     if (!post) throw new ApiError(404, 'Post not found');
-    
-    if (post.mediaPublicId) {
-        await deleteFromCloudinary(post.mediaPublicId, post.mediaType === 'video' ? 'video' : 'image');
-    }
+
+    const authorName = post.author?.username || 'unknown';
+    const authorId = post.author?._id || post.author;
+
+    await postService.cascadeDeletePost({
+        _id: post._id,
+        author: authorId,
+        mediaPublicId: post.mediaPublicId,
+        mediaType: post.mediaType,
+    });
 
     await AdminLog.create({
         adminId,
         action: 'DELETE_POST',
         targetType: 'Post',
         targetId: postId,
-        details: `Deleted post by @${post.author?.username || 'unknown'}. Reason: ${reason}`
+        details: `Deleted post by @${authorName}. Reason: ${reason}`
     });
 };
 
@@ -173,15 +197,26 @@ const updatePostVisibility = async (adminId, postId, isHidden, reason = '') => {
 };
 
 const deleteComment = async (adminId, commentId, reason = '') => {
-    const comment = await Comment.findByIdAndDelete(commentId);
+    // Same two fixes as deletePost: populate before deleting so the log records
+    // a real username, and cascade so replies, likes and commentsCount stay
+    // consistent.
+    const comment = await Comment.findById(commentId).populate('author', 'username');
     if (!comment) throw new ApiError(404, 'Comment not found');
+
+    const authorName = comment.author?.username || 'unknown';
+    const authorId = comment.author?._id || comment.author;
+
+    await commentService.cascadeDeleteComment(
+        { _id: comment._id, post: comment.post, author: authorId },
+        adminId,
+    );
 
     await AdminLog.create({
         adminId,
         action: 'DELETE_COMMENT',
         targetType: 'Comment',
         targetId: commentId,
-        details: `Deleted comment by @${comment.author?.username || 'unknown'}. Reason: ${reason}`
+        details: `Deleted comment by @${authorName}. Reason: ${reason}`
     });
 };
 
@@ -298,7 +333,7 @@ const resolveReport = async (adminId, reportId, status, resolution = '') => {
 };
 
 const getAuditLogs = async ({ limit = 50, skip = 0, search = '' }) => {
-    const query = search ? { details: { $regex: search, $options: 'i' } } : {};
+    const query = search ? { details: { $regex: escapeRegex(search), $options: 'i' } } : {};
     const [logs, total] = await Promise.all([
         AdminLog.find(query).populate('adminId', 'username avatarUrl').sort({ createdAt: -1 }).limit(limit).skip(skip),
         AdminLog.countDocuments(query)
@@ -372,10 +407,12 @@ const getAdvancedStats = async () => {
     const storagePercentage = Math.min(100, Math.round((storageUsedMB / MAX_STORAGE_MB) * 100));
 
     // Synchronicity Logic: Success rate of last 50 administrative operations
-    const recentLogs = await AdminLog.find().sort({ createdAt: -1 }).limit(50);
+    const recentLogs = await AdminLog.find().sort({ createdAt: -1 }).limit(50).lean();
     const failurePatterns = ['error', 'fail', 'unauthorized'];
-    const failures = recentLogs.filter(log => 
-        failurePatterns.some(p => log.details.toLowerCase().includes(p))
+    // details is optional on AdminLog, so any entry written without one used to
+    // throw here and take the whole analytics endpoint down.
+    const failures = recentLogs.filter(log =>
+        failurePatterns.some(p => (log.details || '').toLowerCase().includes(p))
     ).length;
     const healthSynchronicity = recentLogs.length > 0 
         ? Math.max(92, 100 - (failures / recentLogs.length) * 100).toFixed(1) 
@@ -414,21 +451,36 @@ const getAdvancedStats = async () => {
 
 const nukeUsers = async (requestingAdminId) => {
     logger.warn(`NUKE: User purge initiated by ${requestingAdminId}`);
-    
-    // We preserve the current admin to prevent total system lockout
-    const result = await User.deleteMany({ 
+
+    // Preserve the requesting admin and every other privileged account to
+    // prevent total system lockout. The role filter used to be
+    // `{ $ne: 'admin' }`, which deleted superadmins along with everyone else.
+    const targets = await User.find({
         _id: { $ne: requestingAdminId },
-        role: { $ne: 'admin' } 
-    });
-    
-    // Also clear associated system data that breaks without users
+        role: { $nin: ['admin', 'superadmin'] },
+    }).select('_id').lean();
+
+    // purgeUser rather than deleteMany: a bare delete left every post, comment,
+    // like, follow, story and saved post owned by these accounts behind, and
+    // left the surviving admins' followersCount permanently inflated.
+    let purgedCount = 0;
+    for (const target of targets) {
+        try {
+            await purgeUser(target._id);
+            purgedCount += 1;
+        } catch (err) {
+            logger.error(`NUKE: Failed to purge ${target._id}: ${err.message}`);
+        }
+    }
+
+    // Anything the per-user cascade cannot own, because it spans users.
     await Promise.all([
         Notification.deleteMany({}),
         Conversation.deleteMany({}),
         Message.deleteMany({}),
     ]);
 
-    return { purgedCount: result.deletedCount };
+    return { purgedCount };
 };
 
 const nukeContent = async () => {

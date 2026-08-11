@@ -37,12 +37,7 @@ const logger = require('../../config/logger');
  * that to zero rather than letting counters go negative.
  */
 
-// Counters carry `min: 0` in their schemas, but that is document validation and
-// updateMany bypasses it entirely, so $inc: -1 can drive a counter negative.
-// This pipeline form clamps at the database.
-const clampedDecrement = (field, amount = 1) => [
-    { $set: { [field]: { $max: [0, { $subtract: [`$${field}`, amount] }] } } },
-];
+const { clampedDecrement } = require('../../utils/counters.utils');
 
 // Group a list of {targetId, targetModel} rows into per-model id->count maps.
 const tallyByModel = (rows) => {

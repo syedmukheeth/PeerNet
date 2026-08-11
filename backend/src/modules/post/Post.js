@@ -15,6 +15,10 @@ const postSchema = new mongoose.Schema(
         likesCount: { type: Number, default: 0, min: 0 },
         commentsCount: { type: Number, default: 0, min: 0 },
         isArchived: { type: Boolean, default: false },
+        // Moderator-applied hide. admin.service read and wrote this field
+        // already, but it was not declared here, so strict mode dropped every
+        // write and hiding a post was a silent no-op.
+        isHidden: { type: Boolean, default: false },
     },
     { timestamps: true },
 );

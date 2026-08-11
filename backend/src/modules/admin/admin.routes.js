@@ -14,11 +14,15 @@ router.delete('/users/:userId', ...guard, adminController.deleteUser);
 router.patch('/users/:userId/verify', ...guard, adminController.verifyUser);
 router.patch('/users/:userId/status', ...guard, adminController.updateUserStatus);
 router.post('/users/:userId/warn', ...guard, adminController.warnUser);
+// Superadmin only: setting another user's password is account takeover, which
+// is a different power from the moderation actions above.
+router.post('/users/:userId/reset-password', ...superGuard, adminController.resetUserPassword);
 
 // Content
 router.get('/posts', ...guard, adminController.getPosts);
 router.get('/comments', ...guard, adminController.getComments);
 router.delete('/posts/:postId', ...guard, adminController.deletePost);
+router.patch('/posts/:postId/visibility', ...guard, adminController.updatePostVisibility);
 router.delete('/stories/:storyId', ...guard, adminController.deleteStory);
 router.delete('/comments/:commentId', ...guard, adminController.deleteComment);
 

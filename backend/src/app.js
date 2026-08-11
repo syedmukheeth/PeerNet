@@ -12,6 +12,7 @@ const { isOriginAllowed } = require('./config/cors');
 const { authenticate } = require('./middleware/auth.middleware');
 const { requireAdmin } = require('./middleware/admin.middleware');
 const { tracingMiddleware } = require('./middleware/tracing.middleware');
+const { cleanupOrphanedUpload } = require('./middleware/upload.middleware');
 const { metricsMiddleware } = require('./config/metrics');
 const notificationController = require('./modules/notification/notification.controller');
 const routes = require('./routes/v1');
@@ -132,6 +133,10 @@ const createApp = () => {
     }
 
     // ── ❌ Error Handling ──────────────────────────────────────────────────────
+    // Runs before the handlers below so a request that fails validation after
+    // multer has already written to os.tmpdir() does not leave the file behind.
+    app.use(cleanupOrphanedUpload);
+
     app.use((req, res) => {
         logger.warn(`[API-404] ${req.method} ${req.path}`);
         res.status(404).json({ success: false, message: 'Requested resource not found' });

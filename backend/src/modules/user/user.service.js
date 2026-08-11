@@ -96,7 +96,9 @@ const updateProfile = async (userId, updates, avatarFile) => {
     if (avatarFile) {
         // Delete old avatar from Cloudinary
         if (user.avatarPublicId) await deleteFromCloudinary(user.avatarPublicId);
-        const { secure_url, public_id } = await uploadToCloudinary(avatarFile.buffer, {
+        // diskStorage, not memoryStorage: .buffer is always undefined here and
+        // uploadToCloudinary takes a path, so avatar upload failed for everyone.
+        const { secure_url, public_id } = await uploadToCloudinary(avatarFile.path, {
             folder: 'peernet/avatars',
             transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face', quality: 'auto', fetch_format: 'auto' }],
         });

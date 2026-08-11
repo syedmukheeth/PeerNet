@@ -21,7 +21,9 @@ const createStory = async (userId, file, data = {}) => {
     // 2. Media Story Path
     if (!file) throw new ApiError(400, 'Media file is required');
 
-    const isVideo = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
+    // upload.middleware resolves generic octet-stream uploads to a real type
+    // before they get here, so the mimetype can be trusted.
+    const isVideo = file.mimetype.startsWith('video/');
     const { secure_url, public_id } = await uploadToCloudinary(file.path, {
         folder: 'peernet/stories',
         resource_type: isVideo ? 'video' : 'image',
