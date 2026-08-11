@@ -12,6 +12,11 @@ import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 
+// Mirrors the limits enforced by the backend's upload middleware, so an
+// oversized file is refused here instead of after a long upload.
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024
+
 export default function CreatePostModal({ onClose }) {
     const queryClient = useQueryClient()
     const [isTextMode, setIsTextMode] = useState(false)
@@ -35,10 +40,12 @@ export default function CreatePostModal({ onClose }) {
         { name: 'Royal Velvet', value: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' },
     ]
 
+    // Decided by type and extension only. There used to be a third clause
+    // treating any octet-stream over 1MB as video, so a 1MB file of unknown
+    // type rendered inside a <video> tag and never played.
     const isVideo = file
         ? file.type?.startsWith('video/') ||
-          /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(file.name || '') ||
-          (file.type === 'application/octet-stream' && file.size > 1_000_000)
+          /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(file.name || '')
         : false
 
     // Auto-expand textarea logic
@@ -50,11 +57,29 @@ export default function CreatePostModal({ onClose }) {
     }, [caption])
 
 
-    const processFile = (f) => { 
+    // Blob URLs pin the whole file in memory until they are revoked, and
+    // nothing revoked them: not replacing the selection, not removing it, not
+    // unmounting. Picking several videos in one session leaked every one.
+    useEffect(() => {
+        if (!preview) return
+        return () => URL.revokeObjectURL(preview)
+    }, [preview])
+
+    const processFile = useCallback((f) => {
         if (!f) return
+
+        // Matches the limits the upload middleware enforces, so an oversized
+        // file is rejected here rather than after a long upload.
+        const video = f.type?.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(f.name || '')
+        const limit = video ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES
+        if (f.size > limit) {
+            toast.error(`That file is too large. Limit is ${video ? '100MB' : '10MB'}.`)
+            return
+        }
+
         setFile(f)
-        setPreview(URL.createObjectURL(f)) 
-    }
+        setPreview(URL.createObjectURL(f))
+    }, [])
 
     const handleFile = (e) => processFile(e.target.files[0])
     
@@ -72,7 +97,7 @@ export default function CreatePostModal({ onClose }) {
         setDragOver(false)
         const f = e.dataTransfer.files[0]
         if (f) processFile(f)
-    }, [])
+    }, [processFile])
 
     const handleSubmit = async () => {
         if (!isTextMode && !file) return toast.error('Select a photo or video first')

@@ -141,23 +141,31 @@ export default function AdminPage() {
      * Orchestrates the retrieval of system-wide metrics, user databases,
      * and security logs from the central infrastructure.
      */
+    // contentType is deliberately not a dependency. It used to be, and the mount
+    // effect below is keyed on init, so changing the post-type filter re-ran all
+    // seven fetches and flipped the global loading flag, blanking the entire
+    // console to reload one list.
     const init = useCallback(async () => {
         setLoading(true)
         await Promise.all([
             fetchStats(),
             fetchAnalytics(),
             fetchUsers(),
-            fetchPosts(contentType),
             fetchComments(),
             fetchReports(),
             fetchLogs()
         ])
         setLoading(false)
-    }, [fetchStats, fetchAnalytics, fetchUsers, fetchPosts, fetchComments, fetchReports, fetchLogs, contentType])
+    }, [fetchStats, fetchAnalytics, fetchUsers, fetchComments, fetchReports, fetchLogs])
 
     useEffect(() => {
         init()
     }, [init])
+
+    // The post list owns its own filter, so it refetches on its own.
+    useEffect(() => {
+        fetchPosts(contentType)
+    }, [fetchPosts, contentType])
 
     const handleDeleteUser = async () => {
         if (!targetUserId) return
@@ -298,8 +306,11 @@ export default function AdminPage() {
             case 'posts':
                 return (
                     <PostModule
+                        // Filters on caption, not content. Post has no `content`
+                        // field, so this search silently matched nothing except
+                        // by author.
                         posts={posts.filter(p =>
-                            (p.content || '').toLowerCase().includes(search.toLowerCase()) ||
+                            (p.caption || '').toLowerCase().includes(search.toLowerCase()) ||
                             (p.author?.username || '').toLowerCase().includes(search.toLowerCase())
                         )}
                         onDelete={handleDeletePost}
@@ -313,7 +324,12 @@ export default function AdminPage() {
             case 'comments':
                 return (
                     <CommentModule
-                        comments={comments.filter(c => (c.content || '').toLowerCase().includes(search.toLowerCase()))}
+                        // Comment stores its text in `body`, not `content`, so
+                        // this search matched nothing at all before.
+                        comments={comments.filter(c =>
+                            (c.body || '').toLowerCase().includes(search.toLowerCase()) ||
+                            (c.author?.username || '').toLowerCase().includes(search.toLowerCase())
+                        )}
                         onDelete={handleDeleteComment}
                         search={search}
                         setSearch={setSearch}

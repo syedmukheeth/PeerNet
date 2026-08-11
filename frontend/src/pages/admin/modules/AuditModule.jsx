@@ -21,6 +21,11 @@ export default function AuditModule({ logs, loading }) {
                             a.href = url
                             a.download = `peernet-audit-${new Date().toISOString()}.json`
                             a.click()
+                            // The URL was never revoked and the anchor never
+                            // removed, so every export leaked the full log
+                            // payload for the life of the page.
+                            URL.revokeObjectURL(url)
+                            a.remove()
                             toast.success('Audit trail exported successfully')
                         }}
                         className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-admin-card border border-admin-border text-[10px] font-black uppercase tracking-widest text-primary hover:text-accent hover:border-accent/30 transition-all shadow-inner"

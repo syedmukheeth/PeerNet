@@ -98,6 +98,14 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
         // but maybe keep the content if they want an overlay
     }
 
+    // Revokes the blob URL when the preview changes or the modal unmounts.
+    // Without it every media pick pinned the whole file in memory for the rest
+    // of the session.
+    useEffect(() => {
+        if (!mediaPreview) return
+        return () => URL.revokeObjectURL(mediaPreview)
+    }, [mediaPreview])
+
     const removeMedia = () => {
         setMediaFile(null)
         setMediaType('text')

@@ -33,45 +33,75 @@ export default function Profile() {
     const isMe = me?._id === id || id === 'me'
 
     useEffect(() => {
+        // Aborted on unmount and on an id change. Navigating between two
+        // profiles reuses this component instance, so without this the slower
+        // of the two responses won and painted the wrong user.
+        const controller = new AbortController()
+
         const fetchAll = async () => {
             setLoading(true)
+            setProfile(null)
+            setPosts([])
             try {
                 const [{ data: pd }, { data: postsD }] = await Promise.all([
-                    api.get(`/users/${id}`),
-                    api.get(`/users/${id}/posts`),
+                    api.get(`/users/${id}`, { signal: controller.signal }),
+                    api.get(`/users/${id}/posts`, { signal: controller.signal }),
                 ])
                 setProfile(pd.data)
                 setFollowing(pd.data.isFollowing)
                 setPosts(postsD.data || [])
-            } catch { toast.error('User not found') }
-            finally { setLoading(false) }
+            } catch (err) {
+                if (controller.signal.aborted) return
+                // A private account refuses the posts request rather than 404ing.
+                if (err.response?.status === 403) setProfile((p) => p ?? { isLocked: true })
+                else toast.error('User not found')
+            } finally {
+                if (!controller.signal.aborted) setLoading(false)
+            }
         }
         fetchAll()
+
+        return () => controller.abort()
     }, [id])
 
     // Check if this profile user has active stories
     useEffect(() => {
-        api.get('/stories').then(({ data }) => {
+        const controller = new AbortController()
+
+        api.get('/stories', { signal: controller.signal }).then(({ data }) => {
             const allStories = data.data || []
             // Find stories authored by the profile user
             const userStories = allStories.filter(s => s.author?._id === id || s.author === id)
             setHasStory(userStories.length > 0)
             if (userStories.length > 0) {
-                // Build a group object that StoryViewer can use
+                // Prefer the author object on the story itself. The fallback used
+                // to read `profile`, which this effect closes over before the
+                // profile request has resolved, so the viewer header rendered
+                // "undefined" on a cold load. That is also what the blanket
+                // eslint-disable here was hiding.
                 const author = userStories[0].author
-                setStoryGroupData({ author: typeof author === 'object' ? author : { _id: id, username: profile?.username, avatarUrl: profile?.avatarUrl }, stories: userStories })
+                setStoryGroupData({
+                    author: typeof author === 'object' ? author : { _id: id },
+                    stories: userStories,
+                })
             }
         }).catch(() => { })
-    }, [id]) // eslint-disable-line
+
+        return () => controller.abort()
+    }, [id])
 
     // Fetch saved posts only when Saved tab is opened (and only for own profile)
     useEffect(() => {
         if (tab !== 'saved' || !isMe) return
+        const controller = new AbortController()
+
         setSavedLoading(true)
-        api.get('/posts/saved')
+        api.get('/posts/saved', { signal: controller.signal })
             .then(({ data }) => setSavedPosts(data.data || []))
-            .catch(() => setSavedPosts([]))
-            .finally(() => setSavedLoading(false))
+            .catch(() => { if (!controller.signal.aborted) setSavedPosts([]) })
+            .finally(() => { if (!controller.signal.aborted) setSavedLoading(false) })
+
+        return () => controller.abort()
     }, [tab, isMe])
 
     const handleFollow = async () => {
@@ -234,11 +264,13 @@ export default function Profile() {
                     { key: 'posts', icon: <HiViewGrid />, label: 'POSTS' },
                     ...(isMe ? [{ key: 'saved', icon: <HiBookmark />, label: 'SAVED' }] : []),
                 ].map(({ key, icon, label }) => (
-                    <button key={key} 
-                        onClick={() => {
-                            setTab(key)
-                            if (key === 'saved' && savedPosts.length === 0) setSavedLoading(true)
-                        }}
+                    <button key={key}
+                        // Only sets the tab. It used to raise savedLoading here
+                        // too, but the fetch effect is keyed on [tab, isMe], so
+                        // clicking SAVED while already on SAVED set a flag that
+                        // nothing would ever clear: a permanent skeleton until
+                        // you navigated away. The effect owns the flag.
+                        onClick={() => setTab(key)}
                         className={`profile-tab-btn ${tab === key ? 'active' : ''}`}>
                         <span className="flex items-center gap-2">
                             {icon}

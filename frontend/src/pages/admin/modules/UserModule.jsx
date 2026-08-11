@@ -47,8 +47,11 @@ export default function UserModule({ users, onVerify, onDelete, loading, search,
                         </div>
                     ))
                 ) : users.filter(u =>
-                    u.username.toLowerCase().includes(search.toLowerCase()) ||
-                    u.email.toLowerCase().includes(search.toLowerCase())
+                    // Guarded: guest accounts created through /auth/guest have
+                    // no email, and the bare .toLowerCase() threw a TypeError
+                    // that took down the whole admin console.
+                    (u.username || '').toLowerCase().includes(search.toLowerCase()) ||
+                    (u.email || '').toLowerCase().includes(search.toLowerCase())
                 ).map(user => (
                     <div key={user._id} className="p-4 space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
@@ -127,8 +130,8 @@ export default function UserModule({ users, onVerify, onDelete, loading, search,
                                 </tr>
                             ))
                         ) : users.filter(u =>
-                            u.username.toLowerCase().includes(search.toLowerCase()) ||
-                            u.email.toLowerCase().includes(search.toLowerCase())
+                            (u.username || '').toLowerCase().includes(search.toLowerCase()) ||
+                            (u.email || '').toLowerCase().includes(search.toLowerCase())
                         ).map(user => (
                             <tr key={user._id} className="group hover:bg-accent/[0.02] transition-colors">
                                 <td className="pl-8 py-4">
@@ -202,7 +205,7 @@ export default function UserModule({ users, onVerify, onDelete, loading, search,
             </div>
 
             {/* Empty State */}
-            {users.filter(u => u.username.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+            {users.filter(u => (u.username || '').toLowerCase().includes(search.toLowerCase()) || (u.email || '').toLowerCase().includes(search.toLowerCase())).length === 0 && (
                 <div className="p-16 text-center space-y-3">
                     <div className="text-muted/20 flex justify-center"><HiUsers size={40} /></div>
                     <p className="text-[11px] font-black text-muted uppercase tracking-widest">No users found</p>

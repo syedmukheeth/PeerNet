@@ -17,6 +17,7 @@ import {
     useMessageActions, useConvoActions, useChatState, useMarkRead, useDeleteChat
 } from '../hooks/useChat'
 import { timeago as formatTime } from '../utils/timeago'
+import { splitOnQuery } from '../utils/highlight'
 import toast from 'react-hot-toast'
 
 /**
@@ -77,12 +78,14 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
     const quickEmojis = ['❤️', '😂', '🔥', '👍', '😢', '😮']
 
     const renderContent = () => {
-        if (!searchQuery) return m.body
-        const parts = m.body.split(new RegExp(`(${searchQuery})`, 'gi'))
-        return parts.map((part, i) =>
-            part.toLowerCase() === searchQuery.toLowerCase()
-                ? <mark key={i} className="zn-search-highlight">{part}</mark>
-                : part
+        // splitOnQuery escapes the query and tolerates a null body. Building the
+        // RegExp inline here meant typing "(" into the in-chat search threw a
+        // SyntaxError mid-render and blanked the whole app.
+        const segments = splitOnQuery(m.body, searchQuery)
+        return segments.map((seg, i) =>
+            seg.match
+                ? <mark key={i} className="zn-search-highlight">{seg.text}</mark>
+                : seg.text
         )
     }
 

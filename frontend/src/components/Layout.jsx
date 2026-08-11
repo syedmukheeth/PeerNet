@@ -13,6 +13,7 @@ import DesktopSidebar from './shell/DesktopSidebar'
 import MobileHeader from './shell/MobileHeader'
 import MobileNav from './shell/MobileNav'
 import SiteFooter from './shell/SiteFooter'
+import ErrorBoundary from './ErrorBoundary'
 import { useQueryClient } from '@tanstack/react-query'
 
 /*
@@ -298,8 +299,16 @@ export default function Layout() {
                     className={`layout-container ${isMessages ? 'h-full' : ''} ${(!['/messages', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
                 >
 
+                    {/*
+                      Page-level boundary. A page that throws now keeps the
+                      shell, the navigation and the socket connection alive
+                      instead of blanking the whole app, and resetKey clears the
+                      error on navigation so the failure is not sticky.
+                    */}
                     <div className={isMessages ? 'h-full' : ''}>
-                        <Outlet />
+                        <ErrorBoundary resetKey={location.pathname}>
+                            <Outlet />
+                        </ErrorBoundary>
                     </div>
 
                     {/* Site footer */}

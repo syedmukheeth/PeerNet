@@ -8472,3 +8472,67 @@ body:has(.zn-messages-root) .content-wrap {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-ring);
 }
+
+/* ============================================================================
+   ERROR BOUNDARY + NOT FOUND
+   Shown when a page throws, or when a URL matches no route. Both used to be
+   invisible states: a render throw blanked the app, and an unknown URL silently
+   redirected to the feed.
+   ========================================================================== */
+
+.error-boundary,
+.not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--s-3);
+    padding: var(--s-7) var(--s-4);
+    min-height: 50vh;
+}
+
+.error-boundary-title,
+.not-found-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-1);
+}
+
+.error-boundary-body,
+.not-found-body {
+    margin: 0;
+    max-width: 42ch;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-3);
+}
+
+.error-boundary-detail {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: var(--s-3);
+    border: 1px solid var(--border-md);
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-size: 12px;
+    text-align: left;
+}
+
+.error-boundary-actions {
+    display: flex;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.not-found-code {
+    margin: 0;
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-3);
+    opacity: 0.5;
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
@@ -13,15 +13,22 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false)
     const { login, loginGoogle, loginGuest, user: authUser } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
     const [params] = useSearchParams()
     // When adding a second account the user is deliberately signed in already,
     // so the usual "you are logged in, go home" redirect has to stand down.
     const isAddingAccount = params.get('addAccount') === '1'
 
+    // Where to land after signing in. ProtectedRoute puts the URL the user
+    // actually asked for in location.state, so a shared post link survives the
+    // trip through the sign-in form instead of dumping them on the feed.
+    const destination = location.state?.from || '/'
+
     // ── Redirect if already logged in ────────────────────────────────
     useEffect(() => {
-        if (authUser && !isAddingAccount) navigate('/')
-    }, [authUser, isAddingAccount, navigate]);
+        // replace, so the Back button does not bounce between /login and /.
+        if (authUser && !isAddingAccount) navigate(destination, { replace: true })
+    }, [authUser, isAddingAccount, navigate, destination]);
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
@@ -33,7 +40,7 @@ export default function Login() {
         try {
             await login(form.identifier, form.password)
             toast.success('Welcome back!')
-            navigate('/')
+            navigate(destination, { replace: true })
         } catch (err) {
             let msg = 'Login failed';
             if (err.response) {
@@ -56,7 +63,7 @@ export default function Login() {
         try {
             await loginGoogle(credentialResponse.credential)
             toast.success('Logged in with Google!')
-            navigate('/')
+            navigate(destination, { replace: true })
         } catch (err) {
             const msg = err.response?.data?.message || 'Google login failed'
             toast.error(msg, { id: 'google-error' })
@@ -69,7 +76,7 @@ export default function Login() {
         try {
             await loginGuest()
             toast.success('Welcome, Guest!', { id: 'guest-success' })
-            navigate('/')
+            navigate(destination, { replace: true })
         } catch (err) {
             const msg = err.response?.data?.message || 'Guest login failed'
             toast.error(msg, { id: 'guest-error' })

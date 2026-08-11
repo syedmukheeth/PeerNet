@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { HiX, HiCamera } from 'react-icons/hi'
 import api from '../api/axios'
@@ -20,9 +20,24 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
 
     const handleField = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
+    // Only blob: URLs need revoking; preview starts out as the remote avatar
+    // URL, which must be left alone.
+    useEffect(() => {
+        if (!preview?.startsWith('blob:')) return
+        return () => URL.revokeObjectURL(preview)
+    }, [preview])
+
     const handleAvatarChange = (e) => {
         const file = e.target.files[0]
         if (!file) return
+
+        if (!file.type.startsWith('image/')) {
+            return toast.error('Please choose an image')
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            return toast.error('That image is too large. Limit is 10MB.')
+        }
+
         setAvatar(file)
         setPreview(URL.createObjectURL(file))
     }

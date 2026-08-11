@@ -1,10 +1,11 @@
 import { useState, useCallback, Suspense, lazy } from 'react'
-import { Routes, Route, Navigate, useSearchParams } from 'react-router'
+import { Routes, Route, Navigate, useSearchParams, useLocation } from 'react-router'
 import { HelmetProvider } from 'react-helmet-async'
 import { useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
 import SplashScreen from './components/SplashScreen'
 import ComplianceNotice from './components/ComplianceNotice'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const Feed = lazy(() => import('./pages/Feed'))
 const Login = lazy(() => import('./pages/Login'))
@@ -20,36 +21,41 @@ const Terms = lazy(() => import('./pages/Terms'))
 const Admin = lazy(() => import('./pages/admin/AdminPage'))
 const About = lazy(() => import('./pages/About'))
 const Help = lazy(() => import('./pages/Help'))
+const NotFound = lazy(() => import('./pages/NotFound'))
+
+const RouteSpinner = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
+    <div className="spinner" style={{ width: 40, height: 40 }} />
+  </div>
+)
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
-      <div className="spinner" style={{ width: 40, height: 40 }} />
-    </div>
-  )
-  return user ? children : <Navigate to="/login" replace />
+  const location = useLocation()
+  if (loading) return <RouteSpinner />
+  // Carries the attempted URL so Login can return the user to it. Without this
+  // every deep link a signed-out user opened (a shared post, a conversation)
+  // was lost and they landed on the feed instead.
+  return user
+    ? children
+    : <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />
 }
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth()
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
-      <div className="spinner" style={{ width: 40, height: 40 }} />
-    </div>
-  )
-  if (!user || user.role !== 'admin') return <Navigate to="/" replace />
+  if (loading) return <RouteSpinner />
+  // superadmin outranks admin everywhere else in the app, but was locked out
+  // of the console by an exact-equality check.
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+    return <Navigate to="/" replace />
+  }
   return children
 }
 
 const GuestRoute = ({ children }) => {
   const { user, loading } = useAuth()
   const [params] = useSearchParams()
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
-      <div className="spinner" style={{ width: 40, height: 40 }} />
-    </div>
-  )
+  if (loading) return <RouteSpinner />
   // ?addAccount=1 lets a signed-in user reach the sign-in form to add a second
   // account. Without it the switcher's "Log into an existing account" bounced
   // straight back to the feed, so adding an account was impossible.
@@ -69,13 +75,14 @@ export default function App() {
 
   return (
     <HelmetProvider>
+      {/*
+        The splash is an overlay, not a gate. Rendering the routes only after it
+        finished meant roughly a second of nothing at all on a cold session, so
+        a deep link (a shared post) showed a blank page before it began loading.
+      */}
       {!splashDone && <SplashScreen onDone={handleSplashDone} />}
-      {splashDone && (
-        <Suspense fallback={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
-            <div className="spinner" style={{ width: 40, height: 40 }} />
-          </div>
-        }>
+      <ErrorBoundary>
+        <Suspense fallback={<RouteSpinner />}>
           <Routes>
             {/* Auth */}
             <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
@@ -106,10 +113,14 @@ export default function App() {
             <Route path="/privacy" element={<Navigate to="/legal/privacy" replace />} />
             <Route path="/terms" element={<Navigate to="/legal/terms" replace />} />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* A real 404. This used to redirect to "/", which made a typo or
+                a deleted post indistinguishable from a normal feed load. */}
+            <Route element={<Layout />}>
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </Suspense>
-      )}
+      </ErrorBoundary>
       <ComplianceNotice />
     </HelmetProvider>
   )
