@@ -8,23 +8,11 @@ const getFeed = async (req, res, next) => {
     try {
         const { limit, cursor } = parsePagination(req.query);
         const result = await feedService.getFeed(req.user._id, { limit, cursor });
-        
-        // Attach diagnostic tier header
-        const tier = result.data?.[0]?.logicTier || 'cache-zset';
-        res.setHeader('X-PeerNet-Feed-Tier', tier);
 
-        // _debug carries the database name and document counts, so it stays out
-        // of production responses.
-        const body = { success: true, ...result };
-        if (process.env.NODE_ENV !== 'production') {
-            body._debug = {
-                tier,
-                dbCount: result.data?.[0]?._dbCount || 0,
-                dbName: result.data?.[0]?._dbName || 'unknown',
-            };
-        }
-
-        res.json(body);
+        // The feed no longer stamps every post with logicTier/_dbCount/_dbName.
+        // Those were debug fields that shipped to the client on every response,
+        // and _dbName disclosed the database name.
+        res.json({ success: true, ...result });
     } catch (err) { next(err); }
 };
 

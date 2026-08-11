@@ -1,6 +1,5 @@
 'use strict';
 
-const mongoose = require('mongoose');
 const Post = require('../post/Post');
 const Like = require('../post/Like');
 const SavedPost = require('../post/SavedPost');
@@ -9,10 +8,38 @@ const User = require('../user/User');
 const postService = require('../post/post.service');
 const { getRedisOptional } = require('../../config/redis');
 const { calculateScore, MinHeap } = require('../../utils/rank.utils');
+const logger = require('../../config/logger');
 
 const MAX_FEED_SIZE = 500;
+// Upper bound on how many candidate posts are pulled into Node to be ranked.
+// The followed-user query used to be completely unbounded, so a user following
+// active accounts loaded their entire post history into memory on every single
+// feed request.
+const MAX_CANDIDATE_POOL = 500;
 // How far back to look for discovery/global posts (not applied to followed-user posts)
 const DISCOVERY_TIMEFRAME_DAYS = 365;
+
+const FEED_CACHE_TTL = 300; // 5 min
+
+/**
+ * The feed is ordered by a computed score, not by date, so a createdAt cursor
+ * cannot express "everything after this page": it skipped and duplicated posts
+ * on every page boundary.
+ *
+ * The cursor is an offset into the ranked list rather than the score of the
+ * last item, because calculateScore decays against Date.now(). Every request
+ * recomputes slightly lower scores than the one before it, so a score-valued
+ * cursor drifts downwards between pages and re-admits posts the client has
+ * already seen. The ranked candidate pool is deterministic and bounded, so an
+ * offset over it is stable for the life of a scroll.
+ */
+const encodeCursor = (offset) => Buffer.from(String(offset)).toString('base64url');
+
+const decodeCursor = (cursor) => {
+    if (!cursor) return 0;
+    const parsed = Number(Buffer.from(cursor, 'base64url').toString('utf8'));
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+};
 
 /**
  * Ranked Feed System:
@@ -24,28 +51,69 @@ const getFeed = async (userId, { limit = 20, cursor = null }) => {
     const redis = getRedisOptional();
     const redisKey = `feed:user:${userId}`;
 
-    let postIds = [];
-    if (redis) {
-        if (!cursor) {
-            // Always flush + re-hydrate so the cache is never stale from old date-cutoff data
-            await redis.del(redisKey);
-            await hydrateFeed(userId);
-            postIds = await redis.zRange(redisKey, 0, limit - 1, { REV: true });
+    // The first page used to del() the key and re-hydrate on every request,
+    // which made the ZSET pure overhead: it was never read before being
+    // rebuilt. It is now a real cache with a TTL, refreshed only on a miss.
+    if (redis && !cursor) {
+        try {
+            const cached = await redis.exists(redisKey);
+            if (!cached) await hydrateFeed(userId);
+        } catch (err) {
+            logger.warn(`Feed cache check failed, falling back to direct query: ${err.message}`);
         }
     }
 
-    // Fallback or Cold Cache/Cursor Handling: Direct DB query is most reliable for cursors
-    if (postIds.length === 0 || cursor) {
-        const directPosts = await _getDirectFeed(userId, limit, cursor);
-        const nextCursor = directPosts.length === limit ? directPosts[directPosts.length - 1].createdAt : null;
-        return { data: directPosts, hasMore: !!nextCursor, nextCursor };
+    if (redis && !cursor) {
+        try {
+            const postIds = await redis.zRange(redisKey, 0, limit - 1, { REV: true });
+            if (postIds.length > 0) {
+                const ranked = await postService.getPostsByIds(postIds);
+                const enriched = await _enrichPosts(ranked, userId);
+                const hasMore = enriched.length === limit;
+                return {
+                    data: enriched,
+                    hasMore,
+                    nextCursor: hasMore ? encodeCursor(enriched.length) : null,
+                };
+            }
+        } catch (err) {
+            logger.warn(`Feed cache read failed, falling back to direct query: ${err.message}`);
+        }
     }
 
-    const rankedResults = await postService.getPostsByIds(postIds);
-    const enrichedResults = await _enrichPosts(rankedResults, userId);
-    
-    const nextCursor = (enrichedResults.length === limit) ? enrichedResults[enrichedResults.length - 1].createdAt : null;
-    return { data: enrichedResults, hasMore: !!nextCursor, nextCursor };
+    return _getDirectFeed(userId, limit, decodeCursor(cursor));
+};
+
+/** Attaches the ranking score to each post, applying the user's tag affinity. */
+const _withScores = (posts, affinity) =>
+    posts.map((p) => {
+        let score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
+
+        // Personalization Boost: If post tags match high-affinity categories
+        if (p.tags && p.tags.length > 0) {
+            let boost = 0;
+            p.tags.forEach((tag) => {
+                const weight = affinity?.get ? affinity.get(tag) : affinity?.[tag];
+                if (weight) boost += Math.log1p(weight); // Logarithmic growth to prevent saturation
+            });
+            score *= (1 + boost);
+        }
+
+        return { ...p, score };
+    });
+
+/**
+ * Authors whose posts may appear in the discovery tier.
+ *
+ * Discovery pulls from the whole platform, so without this it served private
+ * accounts' posts to people who do not follow them, which is exactly what
+ * isPrivate is supposed to prevent.
+ */
+const _discoveryExclusions = async (userId, followingIds) => {
+    const privateAuthors = await User.find({ isPrivate: true, _id: { $nin: followingIds } })
+        .select('_id')
+        .lean();
+    return [...followingIds, ...privateAuthors.map((u) => u._id)];
 };
 
 /**
@@ -65,21 +133,26 @@ const hydrateFeed = async (userId) => {
     const user = await User.findById(userId).select('categoryAffinity').lean();
     const affinity = user?.categoryAffinity || new Map();
 
-    // 3. Fetch ALL posts from followed users, no date cutoff. On a small platform
-    //    you must show everything your connections ever posted.
+    // 3. Posts from followed users, newest first, bounded.
     let posts = await Post.find({
         author: { $in: followingIds },
         isArchived: { $ne: true },  // $ne:true also matches docs without the field
-    }).lean();
+        isHidden: { $ne: true },
+    })
+        .sort({ createdAt: -1 })
+        .limit(MAX_CANDIDATE_POOL)
+        .lean();
 
     // 4. Discovery Fallback: If feed is thin, pull global posts from last year
     if (posts.length < 10) {
         const discoveryCutoff = new Date();
         discoveryCutoff.setDate(discoveryCutoff.getDate() - DISCOVERY_TIMEFRAME_DAYS);
+        const excluded = await _discoveryExclusions(userId, followingIds);
 
         const discoveryPosts = await Post.find({
-            author: { $nin: followingIds },
+            author: { $nin: excluded },
             isArchived: { $ne: true },
+            isHidden: { $ne: true },
             $or: [
                 { likesCount: { $gt: 0 } },
                 { commentsCount: { $gt: 0 } },
@@ -93,35 +166,15 @@ const hydrateFeed = async (userId) => {
         posts = [...posts, ...discoveryPosts];
     }
 
-    // 5. Desperation Fallback: If still empty (e.g. cluster is very old), pull absolute latest
-    if (posts.length === 0) {
-        posts = await Post.find({ isArchived: false })
-            .sort({ createdAt: -1 })
-            .limit(20)
-            .lean();
-    }
-
-    // 4. Rank posts using Min-Heap to find top K
+    // 5. Rank posts using Min-Heap to find top K
     const heap = new MinHeap(MAX_FEED_SIZE);
-    posts.forEach(p => {
-        let score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
-        
-        // Personalization Boost: If post tags match high-affinity categories
-        if (p.tags && p.tags.length > 0) {
-            let boost = 0;
-            p.tags.forEach(tag => {
-                const weight = affinity.get ? affinity.get(tag) : affinity[tag];
-                if (weight) boost += Math.log1p(weight); // Logarithmic growth to prevent saturation
-            });
-            score *= (1 + boost);
-        }
-        
-        heap.push({ id: p._id.toString(), score });
+    _withScores(posts, affinity).forEach((p) => {
+        heap.push({ id: p._id.toString(), score: p.score });
     });
 
     const topPosts = heap.toArray();
-    
-    // 4. Batch push to Redis
+
+    // 6. Batch push to Redis
     const redisKey = `feed:user:${userId}`;
     if (topPosts.length > 0) {
         const pipeline = redis.multi();
@@ -129,150 +182,116 @@ const hydrateFeed = async (userId) => {
         topPosts.forEach(item => {
             pipeline.zAdd(redisKey, { score: item.score, value: item.id });
         });
-        pipeline.expire(redisKey, 86400 * 7); // Cache for 7 days
+        pipeline.expire(redisKey, FEED_CACHE_TTL);
         await pipeline.exec();
     }
 };
 
-/** 
+/**
  * Direct DB Fallback: Fetches posts directly from MongoDB if Redis is empty or offline.
  * Reuses the same ranking logic as hydrateFeed but returns documents immediately.
+ *
+ * Every tier keeps the isArchived and isHidden filters. There used to be a
+ * "nuclear fallback" below these that dropped both, which served archived and
+ * moderator-hidden posts, and a "self-heal" step that wrote two hard-coded
+ * Unsplash posts into the database when the collection was empty. Both are
+ * gone: a GET must not mutate state, and an empty database is an empty feed.
  */
-const _getDirectFeed = async (userId, limit, cursor) => {
-    let tier = 'following';
+const _getDirectFeed = async (userId, limit, offset) => {
     // 1. Get authors (Following + Self)
     const followRelations = await Follower.find({ follower: userId }).select('following').lean();
     const followingIds = followRelations.map(f => f.following);
     followingIds.push(userId);
 
-    // 2. Fetch all potential candidates (Followed + Discovery)
-    const queryBase = { isArchived: { $ne: true } };
+    const visible = { isArchived: { $ne: true }, isHidden: { $ne: true } };
+    // Private accounts the viewer does not follow are excluded from every tier
+    // that reaches outside the follow graph, not just from discovery.
+    const excluded = await _discoveryExclusions(userId, followingIds);
 
-    // Initial pool: ALL posts from followed users (+ self), no date cutoff.
-    // Users should always see everything their connections posted, regardless of age.
-    const followingQuery = {
-        ...queryBase,
-        author: { $in: followingIds },
-        ...(cursor ? { createdAt: { $lt: new Date(cursor) } } : {}),
-    };
+    // 2. Candidate pool: posts from followed users (+ self), newest first.
+    let posts = await Post.find({ ...visible, author: { $in: followingIds } })
+        .sort({ createdAt: -1 })
+        .limit(MAX_CANDIDATE_POOL)
+        .lean();
 
-    let posts = await Post.find(followingQuery).lean();
-
-    // Set cursor filter on queryBase AFTER following query, for discovery/desperation queries
-    if (cursor) queryBase.createdAt = { $lt: new Date(cursor) };
-
-    // Discovery pool: If we have less than the limit, fill with global content (last year)
-    if (posts.length < limit) {
-        tier = 'discovery';
+    // 3. Discovery pool: if the pool is thin, fill with global content.
+    if (posts.length < MAX_CANDIDATE_POOL) {
         const discoveryCutoff = new Date();
         discoveryCutoff.setDate(discoveryCutoff.getDate() - DISCOVERY_TIMEFRAME_DAYS);
 
         const discovery = await Post.find({
-            ...queryBase,
-            author: { $nin: followingIds },
+            ...visible,
+            author: { $nin: excluded },
             $or: [
                 { likesCount: { $gt: 0 } },
                 { commentsCount: { $gt: 0 } },
-                { createdAt: cursor ? { $lt: new Date(cursor) } : { $gt: discoveryCutoff } },
+                { createdAt: { $gt: discoveryCutoff } },
             ]
-        }).sort({ likesCount: -1, createdAt: -1 }).limit(100).lean();
-
-        // Merge without duplicates
-        const postSet = new Set(posts.map(p => p._id.toString()));
-        discovery.forEach(p => {
-            if (!postSet.has(p._id.toString())) posts.push(p);
-        });
-    }
-
-    // Desperation Fallback: If still thin, pull absolute anything regardless of cutoff
-    if (posts.length < limit) {
-        tier = 'desperation';
-        const absoluteFallback = await Post.find(queryBase)
-            .sort({ createdAt: -1 })
-            .limit(100)
+        })
+            .sort({ likesCount: -1, createdAt: -1 })
+            .limit(MAX_CANDIDATE_POOL - posts.length)
             .lean();
-            
-        const postSet = new Set(posts.map(p => p._id.toString()));
-        absoluteFallback.forEach(p => {
-            if (!postSet.has(p._id.toString())) posts.push(p);
+
+        const seen = new Set(posts.map(p => p._id.toString()));
+        discovery.forEach(p => {
+            if (!seen.has(p._id.toString())) posts.push(p);
         });
     }
 
-    // NUCLEAR FALLBACK: If STILL empty, bypass EVERY filter (Archives, Cursors, etc.)
+    // 4. Desperation tier: still thin, so take the most recent visible posts.
+    //    Still excludes private accounts the viewer does not follow: this tier
+    //    used to query with no author filter at all, which leaked them.
+    if (posts.length < limit + offset) {
+        const fallback = await Post.find({ ...visible, author: { $nin: excluded } })
+            .sort({ createdAt: -1 })
+            .limit(MAX_CANDIDATE_POOL)
+            .lean();
+
+        const seen = new Set(posts.map(p => p._id.toString()));
+        fallback.forEach(p => {
+            if (!seen.has(p._id.toString())) posts.push(p);
+        });
+    }
+
     if (posts.length === 0) {
-        tier = 'nuclear';
-        posts = await Post.find({}).sort({ createdAt: -1 }).limit(10).lean();
+        return { data: [], hasMore: false, nextCursor: null };
     }
 
-    // OPERATION SELF-HEAL: If literally ZERO posts in the entire DB, seed it on the fly
-    const rawCount = await Post.countDocuments({});
-    if (rawCount === 0) {
-        tier = 'self-heal';
-        posts = await Post.insertMany([
-            {
-                author: userId,
-                mediaUrl: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
-                mediaPublicId: 'peernet/debug/seed-1',
-                mediaType: 'image',
-                caption: 'Welcome to PeerNet! (Self-Healed Content) 🚀',
-            },
-            {
-                author: userId,
-                mediaUrl: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=800',
-                mediaPublicId: 'peernet/debug/seed-2',
-                mediaType: 'image',
-                caption: 'The platform is now connected and operational. 🌐',
-            }
-        ]);
-        // convert to plain objects if insertMany returns full docs
-        posts = posts.map(p => p.toObject ? p.toObject() : p);
-    }
-
-    const dbName = mongoose.connection.name;
-
-    // Fetch affinity for personalization ranking
+    // 5. Rank, then page on the ranking rather than on date.
     const currentUser = await User.findById(userId).select('categoryAffinity').lean();
     const affinity = currentUser?.categoryAffinity || {};
 
-    const ranked = posts.map(p => {
-        let score = calculateScore(p.likesCount || 0, p.commentsCount || 0, p.createdAt);
-        if (p.tags && p.tags.length > 0) {
-            let boost = 0;
-            p.tags.forEach(tag => {
-                const weight = affinity.get ? affinity.get(tag) : affinity[tag];
-                if (weight) boost += Math.log1p(weight);
-            });
-            score *= (1 + boost);
-        }
-        return { ...p, score, logicTier: tier, _dbCount: rawCount, _dbName: dbName };
-    }).sort((a, b) => b.score - a.score);
+    // Ties broken by id so the order is total and stable across requests.
+    const ranked = _withScores(posts, affinity)
+        .sort((a, b) => (b.score - a.score) || a._id.toString().localeCompare(b._id.toString()));
 
-    // 4. Slice to page size
-    const paginated = ranked.slice(0, limit);
+    const page = ranked.slice(offset, offset + limit);
+    const hasMore = ranked.length > offset + limit;
 
-    // 5. Populate author, lean() returns raw ObjectIds, PostCard needs username/avatarUrl/etc.
-    const postIds = paginated.map(p => p._id);
-    const populatedPosts = await Post.find({ _id: { $in: postIds } })
+    // 6. Populate author: lean() returns raw ObjectIds and the client needs
+    //    username/avatarUrl.
+    const populated = await Post.find({ _id: { $in: page.map(p => p._id) } })
         .populate('author', 'username fullName avatarUrl isVerified')
         .lean();
 
-    // Re-merge score/tier metadata from ranked into the populated docs
-    const metaMap = new Map(paginated.map(p => [p._id.toString(), p]));
-    const mergedPosts = populatedPosts.map(p => ({
-        ...p,
-        score: metaMap.get(p._id.toString())?.score,
-        logicTier: metaMap.get(p._id.toString())?.logicTier,
-        _dbCount: metaMap.get(p._id.toString())?._dbCount,
-        _dbName: metaMap.get(p._id.toString())?._dbName,
-    })).sort((a, b) => (b.score || 0) - (a.score || 0));
+    const scoreById = new Map(page.map(p => [p._id.toString(), p.score]));
+    const merged = populated
+        .map(p => ({ ...p, score: scoreById.get(p._id.toString()) }))
+        .sort((a, b) => (b.score - a.score) || a._id.toString().localeCompare(b._id.toString()));
 
-    return await _enrichPosts(mergedPosts, userId);
+    const data = await _enrichPosts(merged, userId);
+
+    return {
+        data,
+        hasMore,
+        nextCursor: hasMore ? encodeCursor(offset + page.length) : null,
+    };
 };
 
 /** Private helper to add isLiked and isSaved flags to posts for a specific user */
 const _enrichPosts = async (posts, userId) => {
     if (!userId || posts.length === 0) return posts;
-    
+
     const postIds = posts.map(p => p._id);
     const [likedDocs, savedDocs] = await Promise.all([
         Like.find({ user: userId, targetId: { $in: postIds }, targetModel: 'Post' }).select('targetId').lean(),
