@@ -2,6 +2,7 @@
 
 const Story = require('./Story');
 const Follower = require('../user/Follower');
+const userService = require('../user/user.service');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const ApiError = require('../../utils/ApiError');
 
@@ -77,6 +78,16 @@ const deleteStory = async (storyId, userId) => {
 };
 
 const markViewed = async (storyId, userId) => {
+    // viewers is an unbounded embedded array. Without an existence and
+    // visibility check any user could append themselves to any story by
+    // guessing an id, inflating the author's viewer list indefinitely.
+    const story = await Story.findById(storyId).select('author').lean();
+    if (!story) throw new ApiError(404, 'Story not found');
+
+    if (story.author.toString() !== userId.toString()) {
+        await userService.assertCanViewContent(story.author, userId);
+    }
+
     await Story.findByIdAndUpdate(storyId, { $addToSet: { viewers: userId } });
 };
 

@@ -3,9 +3,10 @@
 const router = require('express').Router();
 const adminController = require('./admin.controller');
 const { authenticate } = require('../../middleware/auth.middleware');
-const { requireAdmin } = require('../../middleware/admin.middleware');
+const { requireAdmin, requireSuperAdmin } = require('../../middleware/admin.middleware');
 
 const guard = [authenticate, requireAdmin];
+const superGuard = [authenticate, requireSuperAdmin];
 
 // Users
 router.get('/users', ...guard, adminController.getUsers);
@@ -30,6 +31,8 @@ router.get('/analytics', ...guard, adminController.getAnalytics);
 router.patch('/reports/:reportId', ...guard, adminController.resolveReport);
 
 // Infrastructure Control
-router.delete('/infrastructure/nuke', ...guard, adminController.nukeInfrastructure);
+// Deletes every user and all of their content. Superadmin only: a plain admin
+// account must not be one request away from emptying the database.
+router.delete('/infrastructure/nuke', ...superGuard, adminController.nukeInfrastructure);
 
 module.exports = router;

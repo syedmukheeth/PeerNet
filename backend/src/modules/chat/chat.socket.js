@@ -26,11 +26,23 @@ module.exports = (io, socket) => {
     markOnline();
 
     // ── Room Management ──
-    socket.on('join_conversation', (conversationId) => {
-        socket.join(`chat:${conversationId}`);
-        logger.info(`User ${userId} joined room: chat:${conversationId}`);
+    // Joining is the read path for every broadcast in this file, so it has to
+    // check membership. Without it any socket can subscribe to any conversation
+    // by guessing an id and receive every message sent in it from then on.
+    socket.on('join_conversation', async (conversationId, ack) => {
+        try {
+            await chatService.assertParticipant(conversationId, userId);
+            socket.join(`chat:${conversationId}`);
+            logger.info(`User ${userId} joined room: chat:${conversationId}`);
+            if (typeof ack === 'function') ack({ ok: true });
+        } catch (err) {
+            logger.warn(`User ${userId} denied join on chat:${conversationId}: ${err.message}`);
+            if (typeof ack === 'function') ack({ ok: false, message: err.message });
+            socket.emit('error', { message: err.message });
+        }
     });
-    
+
+
     socket.on('leave_conversation', (conversationId) => {
         socket.leave(`chat:${conversationId}`);
     });

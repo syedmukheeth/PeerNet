@@ -6,15 +6,32 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
 const logger = require('./config/logger');
 const { isOriginAllowed } = require('./config/cors');
 const { authenticate } = require('./middleware/auth.middleware');
+const { requireAdmin } = require('./middleware/admin.middleware');
+const { tracingMiddleware } = require('./middleware/tracing.middleware');
+const { metricsMiddleware } = require('./config/metrics');
 const notificationController = require('./modules/notification/notification.controller');
 const routes = require('./routes/v1');
 
 const { globalLimiter } = require('./middleware/rateLimiter');
 
-// ... imports ...
+/**
+ * Guards /metrics. Prometheus scrapes with a bearer token from METRICS_TOKEN;
+ * a human hitting it in a browser falls through to the normal admin session
+ * check. With neither configured nor supplied the endpoint is closed.
+ */
+const authenticateMetrics = (req, res, next) => {
+    const expected = process.env.METRICS_TOKEN;
+    if (expected) {
+        const supplied = (req.headers.authorization || '').replace(/^Bearer /, '');
+        if (supplied && supplied === expected) return next();
+    }
+    return authenticate(req, res, (err) => (err ? next(err) : requireAdmin(req, res, next)));
+};
+
 const createApp = () => {
     const app = express();
     
@@ -50,6 +67,7 @@ const createApp = () => {
     }));
 
     // ── 🛡️ Middleware ──────────────────────────────────────────────────────────
+    app.use(tracingMiddleware);
     app.use(globalLimiter);
     app.use(helmet());
     app.use(express.json());
@@ -57,14 +75,25 @@ const createApp = () => {
     app.use(compression());
     app.use(cookieParser());
 
+    // Strips $-prefixed and dotted keys so a body like {"email": {"$ne": null}}
+    // cannot reach a Mongo query as an operator. The package was already a
+    // dependency but was never mounted.
+    app.use(mongoSanitize());
+
+    app.use(metricsMiddleware);
+
     // ── 🩺 Health Check & Monitoring ──────────────────────────────────────────
+    // Process, route and traffic telemetry is infrastructure detail, not public
+    // information. Requires either the scrape token Prometheus is configured
+    // with or an authenticated admin session.
     const { register } = require('./config/metrics');
-    app.get('/metrics', async (req, res) => {
+    app.get('/metrics', authenticateMetrics, async (req, res) => {
         try {
             res.set('Content-Type', register.contentType);
             res.end(await register.metrics());
         } catch (err) {
-            res.status(500).end(err);
+            logger.error('[METRICS] Failed to collect metrics', err);
+            res.status(500).end(err.message);
         }
     });
 

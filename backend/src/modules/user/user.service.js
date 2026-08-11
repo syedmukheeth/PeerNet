@@ -28,6 +28,33 @@ const stripPrivateFields = (profile) => {
     return visible;
 };
 
+/**
+ * Whether requestingUserId is allowed to see targetUserId's content.
+ *
+ * `isPrivate` existed on the schema but was enforced nowhere, so a private
+ * account's posts, followers and following lists were readable by anyone with
+ * a login. Follows a permissive-header/restrictive-content split: the profile
+ * header stays visible so people can find the account and request to follow it,
+ * everything behind it does not.
+ */
+const canViewContent = async (targetUserId, requestingUserId) => {
+    if (requestingUserId && requestingUserId.toString() === targetUserId.toString()) return true;
+
+    const target = await User.findById(targetUserId).select('isPrivate').lean();
+    if (!target) throw new ApiError(404, 'User not found');
+    if (!target.isPrivate) return true;
+    if (!requestingUserId) return false;
+
+    const relation = await Follower.exists({ follower: requestingUserId, following: targetUserId });
+    return Boolean(relation);
+};
+
+const assertCanViewContent = async (targetUserId, requestingUserId) => {
+    if (!(await canViewContent(targetUserId, requestingUserId))) {
+        throw new ApiError(403, 'This account is private');
+    }
+};
+
 const getProfile = async (targetUserId, requestingUserId) => {
     const redis = getRedisOptional();
     const cacheKey = `user:${targetUserId}`;
@@ -54,7 +81,12 @@ const getProfile = async (targetUserId, requestingUserId) => {
     const isOwnProfile = requestingUserId && requestingUserId.toString() === targetUserId.toString();
     const visibleProfile = isOwnProfile ? profileData : stripPrivateFields(profileData);
 
-    return { ...visibleProfile, isFollowing };
+    // The header stays visible on a private account so it can be found and
+    // followed; isLocked tells the client to render the request-to-follow state
+    // instead of asking for posts it will be refused.
+    const isLocked = Boolean(profileData.isPrivate) && !isOwnProfile && !isFollowing;
+
+    return { ...visibleProfile, isFollowing, isLocked };
 };
 
 const updateProfile = async (userId, updates, avatarFile) => {
@@ -149,22 +181,41 @@ const unfollow = async (followerId, followingId) => {
     return { message: 'Unfollowed successfully' };
 };
 
-const getFollowers = async (userId, { limit = 20, skip = 0 }) => {
-    const followers = await Follower.find({ following: userId })
-        .populate('follower', 'username fullName avatarUrl isVerified')
+/**
+ * Cursor-paginated follower/following lists.
+ *
+ * The controller used to compute `skip` as `cursor ? 0 : 0` and always pass 0,
+ * so only the first page was ever reachable no matter what the client sent.
+ * Paginates on Follower.createdAt, matching the sort.
+ */
+const _paginateRelations = async (filter, populatePath, { limit = 20, cursor = null }) => {
+    const query = { ...filter };
+    if (cursor) query.createdAt = { $lt: new Date(cursor) };
+
+    const relations = await Follower.find(query)
+        .populate(populatePath, 'username fullName avatarUrl isVerified')
         .sort({ createdAt: -1 })
-        .limit(limit)
-        .skip(skip);
-    return followers.map((f) => f.follower);
+        .limit(limit + 1);
+
+    const hasMore = relations.length > limit;
+    const results = hasMore ? relations.slice(0, limit) : relations;
+    const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
+
+    return {
+        data: results.map((r) => r[populatePath]).filter(Boolean),
+        nextCursor,
+        hasMore,
+    };
 };
 
-const getFollowing = async (userId, { limit = 20, skip = 0 }) => {
-    const following = await Follower.find({ follower: userId })
-        .populate('following', 'username fullName avatarUrl isVerified')
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .skip(skip);
-    return following.map((f) => f.following);
+const getFollowers = async (userId, viewerId, options) => {
+    await assertCanViewContent(userId, viewerId);
+    return _paginateRelations({ following: userId }, 'follower', options);
+};
+
+const getFollowing = async (userId, viewerId, options) => {
+    await assertCanViewContent(userId, viewerId);
+    return _paginateRelations({ follower: userId }, 'following', options);
 };
 
 const searchUsers = async (q, { limit = 20, skip = 0 }) => {
@@ -195,6 +246,8 @@ const getSuggestions = async (userId, { limit = 5 }) => {
 };
 
 module.exports = {
+    canViewContent,
+    assertCanViewContent,
     getProfile,
     updateProfile,
     follow,

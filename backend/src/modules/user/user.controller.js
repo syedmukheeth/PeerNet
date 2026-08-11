@@ -42,17 +42,16 @@ const unfollow = async (req, res, next) => {
 const getFollowers = async (req, res, next) => {
     try {
         const { limit, cursor } = parsePagination(req.query);
-        const skip = cursor ? 0 : 0;
-        const data = await userService.getFollowers(req.params.id, { limit, skip });
-        res.json({ success: true, data });
+        const result = await userService.getFollowers(req.params.id, req.user._id, { limit, cursor });
+        res.json({ success: true, ...result });
     } catch (err) { next(err); }
 };
 
 const getFollowing = async (req, res, next) => {
     try {
-        const { limit } = parsePagination(req.query);
-        const data = await userService.getFollowing(req.params.id, { limit, skip: 0 });
-        res.json({ success: true, data });
+        const { limit, cursor } = parsePagination(req.query);
+        const result = await userService.getFollowing(req.params.id, req.user._id, { limit, cursor });
+        res.json({ success: true, ...result });
     } catch (err) { next(err); }
 };
 
@@ -75,6 +74,7 @@ const getSuggestions = async (req, res, next) => {
 const getUserPosts = async (req, res, next) => {
     try {
         const { limit, cursor } = parsePagination(req.query);
+        await userService.assertCanViewContent(req.params.id, req.user._id);
         const result = await postService.getUserPosts(req.params.id, { limit, cursor });
         res.json({ success: true, ...result });
     } catch (err) { next(err); }

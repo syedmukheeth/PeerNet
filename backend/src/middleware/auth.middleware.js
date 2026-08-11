@@ -17,6 +17,12 @@ const authenticate = async (req, _res, next) => {
         const user = await User.findById(decoded.userId).select('-passwordHash');
         if (!user) throw new ApiError(401, 'User no longer exists');
 
+        // Access tokens live for an hour, so without this a banned or suspended
+        // account keeps full API access until its current token expires.
+        if (user.status === 'banned' || user.status === 'suspended') {
+            throw new ApiError(403, 'This account is not active');
+        }
+
         req.user = user;
         next();
     } catch (err) {

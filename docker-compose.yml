@@ -112,6 +112,9 @@ services:
     container_name: peernet_prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      # Bearer token for the now-authenticated /metrics endpoint. Must contain
+      # the same value as METRICS_TOKEN in the app service.
+      - ./prometheus/metrics_token:/etc/prometheus/metrics_token:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

@@ -26,15 +26,24 @@ const messageSchema = new mongoose.Schema(
 
         status: { type: String, enum: ['sent', 'delivered', 'seen'], default: 'sent' },
 
-        // Idempotency: Prevent duplicate messages from retries
-        clientSideId: { type: String, unique: true, sparse: true }
+        // Idempotency: Prevent duplicate messages from retries.
+        // Uniqueness is scoped to the sender by the compound index below, not by
+        // a field-level `unique`, because this value is chosen by the client:
+        // a global constraint let one user's id collide with another's, which
+        // both leaked the other user's message body back as a "duplicate" and
+        // silently dropped legitimate messages on an accidental collision.
+        clientSideId: { type: String, sparse: true }
     },
     { timestamps: true },
 );
 
 // Indexes
-// clientSideId is already indexed by its unique+sparse field option, declaring
-// it again here made Mongoose warn about a duplicate index on every boot.
 messageSchema.index({ conversation: 1, createdAt: -1 });
+messageSchema.index(
+    { sender: 1, clientSideId: 1 },
+    { unique: true, partialFilterExpression: { clientSideId: { $type: 'string' } } },
+);
+// userPurge.service.js sweeps reactions left by a deleted user.
+messageSchema.index({ 'reactions.user': 1 });
 
 module.exports = mongoose.model('Message', messageSchema);

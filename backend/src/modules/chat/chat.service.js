@@ -8,6 +8,21 @@ const { getRedisOptional } = require('../../config/redis');
 const EDIT_WINDOW = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 /**
+ * Load a conversation and assert the caller is one of its participants.
+ * Every read and every mutation has to go through this. Skipping it on any
+ * single path is enough to expose every conversation in the database, because
+ * the ids are guessable and the routes only check that you are logged in.
+ */
+const assertParticipant = async (conversationId, userId) => {
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) throw new ApiError(404, 'Conversation not found');
+    if (!conversation.participants.some((p) => p.toString() === userId.toString())) {
+        throw new ApiError(403, 'Access denied');
+    }
+    return conversation;
+};
+
+/**
  * Get or create a 1-on-1 conversation
  */
 const getOrCreateConversation = async (userId, targetUserId) => {
@@ -53,11 +68,7 @@ const getUserConversations = async (userId) => {
  * Get message history with cursor-based pagination
  */
 const getMessages = async (conversationId, userId, { limit = 30, cursor = null }) => {
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) throw new ApiError(404, 'Conversation not found');
-    if (!conversation.participants.some((p) => p.toString() === userId.toString())) {
-        throw new ApiError(403, 'Access denied');
-    }
+    const conversation = await assertParticipant(conversationId, userId);
 
     const query = { conversation: conversationId };
     
@@ -92,13 +103,18 @@ const getMessages = async (conversationId, userId, { limit = 30, cursor = null }
  * Save a new message with unread count increments and idempotency
  */
 const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaType, replyTo, clientSideId }) => {
-    // 1. Check for duplicate if clientSideId provided
+    // 1. Only participants may write into a conversation
+    const conversation = await assertParticipant(conversationId, senderId);
+
+    // 2. Check for duplicate if clientSideId provided. Scoped to the sender:
+    // the id comes from the client, so a global lookup would hand one user
+    // another user's message body just by reusing their id.
     if (clientSideId) {
-        const existing = await Message.findOne({ clientSideId });
+        const existing = await Message.findOne({ clientSideId, sender: senderId });
         if (existing) return { message: await existing.populate('sender', '_id username avatarUrl'), isDuplicate: true };
     }
 
-    // 2. Create message
+    // 3. Create message
     const message = await Message.create({
         conversation: conversationId,
         sender: senderId,
@@ -110,28 +126,22 @@ const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaType
         status: 'sent',
     });
 
-    // 3. Atomic update: Update lastMessage AND increment unreadCounts for all OTHER participants
+    // 4. Atomic update: Update lastMessage AND increment unreadCounts for all OTHER participants
     const updateQuery = {
         lastMessage: message._id,
-        $inc: {}
+        // Un-delete the conversation for everyone (if it was deleted)
+        $pull: { 'metadata.deleted': { $in: conversation.participants } },
     };
 
-    // Find the conversation to get participants
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) {
-        await Message.findByIdAndDelete(message._id);
-        throw new ApiError(404, 'Conversation not found');
-    }
-
-    // Un-delete the conversation for everyone (if it was deleted)
-    updateQuery.$pull = { 'metadata.deleted': { $in: conversation.participants } };
-
     // Increment unread count for everyone except sender
+    const increments = {};
     conversation.participants.forEach(pId => {
         if (pId.toString() !== senderId.toString()) {
-            updateQuery.$inc[`unreadCounts.${pId}`] = 1;
+            increments[`unreadCounts.${pId}`] = 1;
         }
     });
+    // Mongo rejects an empty $inc, which a self-only conversation would produce
+    if (Object.keys(increments).length > 0) updateQuery.$inc = increments;
 
     const updated = await Conversation.findByIdAndUpdate(conversationId, updateQuery, { new: true })
         .populate('participants', 'username avatarUrl');
@@ -146,6 +156,8 @@ const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaType
  * Mark messages as seen and reset unread counter
  */
 const markAsSeen = async (conversationId, userId) => {
+    await assertParticipant(conversationId, userId);
+
     // Reset unread count for this user in the conversation
     await Conversation.findByIdAndUpdate(conversationId, {
         [`unreadCounts.${userId}`]: 0
@@ -175,8 +187,9 @@ const markAsSeen = async (conversationId, userId) => {
 const reactToMessage = async (messageId, userId, emoji) => {
     const message = await Message.findById(messageId);
     if (!message) throw new ApiError(404, 'Message not found');
+    await assertParticipant(message.conversation, userId);
 
-    const existingIndex = message.reactions.findIndex(r => 
+    const existingIndex = message.reactions.findIndex(r =>
         r.emoji === emoji && r.user.toString() === userId.toString()
     );
 
@@ -232,11 +245,7 @@ const getUnreadCount = async (userId) => {
  * Delete a conversation for a user (hides it and clears history for them)
  */
 const deleteConversation = async (conversationId, userId) => {
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) throw new ApiError(404, 'Conversation not found');
-    if (!conversation.participants.some((p) => p.toString() === userId.toString())) {
-        throw new ApiError(403, 'Access denied');
-    }
+    const conversation = await assertParticipant(conversationId, userId);
 
     // Update clearedBy array
     const clearedIndex = conversation.clearedBy?.findIndex(c => c.user.toString() === userId.toString());
@@ -259,6 +268,7 @@ const deleteConversation = async (conversationId, userId) => {
 };
 
 module.exports = {
+    assertParticipant,
     getOrCreateConversation,
     getUserConversations,
     getMessages,

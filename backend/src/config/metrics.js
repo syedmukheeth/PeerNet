@@ -41,10 +41,30 @@ const dbOperationDuration = new promClient.Histogram({
   register
 });
 
+/**
+ * Records every request against httpRequestDurationMicroseconds.
+ *
+ * The three metrics above were declared and exported but never observed, so
+ * /metrics only ever served prom-client's default Node process metrics. Labels
+ * use req.route.path rather than req.path so that /posts/:id collapses into one
+ * series instead of one per post id.
+ */
+const metricsMiddleware = (req, res, next) => {
+  const endTimer = httpRequestDurationMicroseconds.startTimer();
+  res.on('finish', () => {
+    const route = req.route?.path
+      ? `${req.baseUrl || ''}${req.route.path}`
+      : (req.baseUrl || 'unmatched');
+    endTimer({ method: req.method, route, code: res.statusCode });
+  });
+  next();
+};
+
 logger.info('Monitoring: Prometheus metrics initialized');
 
 module.exports = {
   register,
+  metricsMiddleware,
   httpRequestDurationMicroseconds,
   activeUsersGauge,
   dbOperationDuration

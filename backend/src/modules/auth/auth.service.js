@@ -151,7 +151,14 @@ const googleLogin = async (token) => {
         audience: process.env.GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
-    const { email, name, picture } = payload;
+    const { email, name, picture, email_verified: emailVerified } = payload;
+
+    // An unverified Google address must never be trusted to identify an account.
+    // The lookup below matches on email alone, so accepting one would hand over
+    // any PeerNet account whose email an attacker can claim but not prove.
+    if (!emailVerified) {
+        throw new ApiError(401, 'Google account email is not verified');
+    }
 
     let user = await User.findOne({ email }).select('+passwordHash');
     if (!user) {

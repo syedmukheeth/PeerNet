@@ -59,18 +59,39 @@ const initSocket = async (server) => {
     }
 
     // ── 2. JWT Middleware ──────────────────────────────────────────────────
-    io.use((socket, next) => {
+    const User = require('../modules/user/User');
+
+    io.use(async (socket, next) => {
         const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
-        
+
         if (!token) return next(new Error('Authentication error: Token required'));
 
         const cleanToken = token.startsWith('Bearer ') ? token.slice(7) : token;
 
-        jwt.verify(cleanToken, process.env.JWT_ACCESS_SECRET, (err, decoded) => {
-            if (err) return next(new Error('Authentication error: Invalid token'));
-            socket.user = decoded; // { id, role, ... }
+        let decoded;
+        try {
+            decoded = jwt.verify(cleanToken, process.env.JWT_ACCESS_SECRET);
+        } catch {
+            return next(new Error('Authentication error: Invalid token'));
+        }
+
+        // The JWT alone is not enough. Its `role` and the account's existence are
+        // both snapshots from issue time, so a banned, deleted or demoted user
+        // would otherwise keep full socket access until the token expires.
+        try {
+            const user = await User.findById(decoded.userId || decoded.id || decoded._id)
+                .select('role status')
+                .lean();
+            if (!user) return next(new Error('Authentication error: User no longer exists'));
+            if (user.status === 'banned' || user.status === 'suspended') {
+                return next(new Error('Authentication error: Account is not active'));
+            }
+            socket.user = { ...decoded, role: user.role };
             next();
-        });
+        } catch (err) {
+            logger.error(`Socket auth lookup failed: ${err.message}`);
+            next(new Error('Authentication error'));
+        }
     });
 
     // ── 3. Connection Handler ──────────────────────────────────────────────
@@ -90,7 +111,7 @@ const initSocket = async (server) => {
         socket.join(`user:${userId}`);
         
         // Admin authorization
-        if (socket.user.role === 'admin') {
+        if (socket.user.role === 'admin' || socket.user.role === 'superadmin') {
             socket.join('admin:infrastructure');
             logger.info(`Admin joined infrastructure stream: ${socket.id}`);
         }

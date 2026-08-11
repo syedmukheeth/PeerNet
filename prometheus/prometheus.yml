@@ -5,5 +5,11 @@ global:
 scrape_configs:
   - job_name: 'peernet_backend'
     metrics_path: '/metrics'
+    # /metrics is no longer public. The backend accepts this bearer token as an
+    # alternative to an authenticated admin session, so METRICS_TOKEN in the
+    # backend environment and the value in this file have to match.
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/metrics_token
     static_configs:
       - targets: ['app:3000']
