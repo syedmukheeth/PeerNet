@@ -149,6 +149,13 @@
   --error: #ef4444;
   --warning: #f59e0b;
 
+  /* Notification accents. These were hard-coded hex literals inside
+     pages/Notifications.jsx, so they ignored the theme entirely and were the
+     one place in the app that bypassed this file. */
+  --notif-like: #ef4444;
+  --notif-comment: #6366f1;
+  --notif-follow: #10b981;
+
   --input-bg: #121212;
   --overlay: rgba(0, 0, 0, 0.85);
 
@@ -219,6 +226,13 @@
   --success: #10b981;
   --error: #ef4444;
   --warning: #f59e0b;
+
+  /* Notification accents. These were hard-coded hex literals inside
+     pages/Notifications.jsx, so they ignored the theme entirely and were the
+     one place in the app that bypassed this file. */
+  --notif-like: #ef4444;
+  --notif-comment: #6366f1;
+  --notif-follow: #10b981;
 
   --input-bg: #f8fafc;
   --overlay: rgba(0, 0, 0, 0.4);

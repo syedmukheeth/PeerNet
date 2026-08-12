@@ -183,7 +183,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         </div>
                     </div>
                     <div className="post-card-menu-wrap" ref={menuRef}>
-                        <button className="post-card-menu-btn" onClick={() => setMenuOpen(o => !o)}>
+                        <button className="post-card-menu-btn" onClick={() => setMenuOpen(o => !o)} aria-label="Post options" aria-expanded={menuOpen}>
                             <HiDotsHorizontal />
                         </button>
                         <AnimatePresence>
@@ -239,7 +239,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     ) : post.mediaType === 'video' ? (
                         <div className="post-card-video-wrap">
                             <video ref={videoRef} src={post.mediaUrl} className="post-card-media" muted={isMuted} loop playsInline />
-                            <button className="post-card-video-toggle" onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted) }}>
+                            <button className="post-card-video-toggle" onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted) }} aria-label={isMuted ? 'Unmute video' : 'Mute video'}>
                                 {isMuted ? <HiVolumeOff size={16} /> : <HiVolumeUp size={16} />}
                             </button>
                             {!isPlaying && <HiPlay size={40} className="post-card-video-play-hint" />}
@@ -252,7 +252,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 {/* ── Post Actions ───────────────── */}
                 <div className="post-card-actions">
                     <div className="post-card-actions-left">
-                        <button className={`post-card-action-btn ${liked ? 'is-liked' : ''}`} onClick={handleLike}>
+                        <button className={`post-card-action-btn ${liked ? 'is-liked' : ''}`} onClick={handleLike} aria-label={liked ? 'Unlike this post' : 'Like this post'} aria-pressed={liked}>
                             {liked ? <HiHeart size={26} /> : <HiOutlineHeart size={26} />}
                         </button>
                         <Link to={`/posts/${post._id}`} className="post-card-action-btn">
@@ -273,7 +273,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                             <HiShare size={22} />
                         </button>
                     </div>
-                    <button className={`post-card-action-btn ${saved ? 'is-saved' : ''}`} onClick={handleSave}>
+                    <button className={`post-card-action-btn ${saved ? 'is-saved' : ''}`} onClick={handleSave} aria-label={saved ? 'Remove from saved' : 'Save this post'} aria-pressed={saved}>
                         {saved ? <HiBookmark size={24} /> : <HiOutlineBookmark size={24} />}
                     </button>
                 </div>

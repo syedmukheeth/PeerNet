@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
@@ -21,10 +21,13 @@ const formatTime = (date) => {
 };
 
 const typeConfig = {
-    like: { icon: HiHeart, color: '#FF3B30', text: 'liked your post.' },
-    comment: { icon: HiChatAlt2, color: '#5856D6', text: 'commented on your post.' },
-    reply: { icon: HiChatAlt2, color: '#5856D6', text: 'replied to your comment.' },
-    follow: { icon: HiUserAdd, color: '#34C759', text: 'started following you.' },
+    // Colours come from tokens.css so they follow the theme. These were
+    // hard-coded hex literals, the one place in the app that bypassed the
+    // token system.
+    like: { icon: HiHeart, color: 'var(--notif-like)', text: 'liked your post.' },
+    comment: { icon: HiChatAlt2, color: 'var(--notif-comment)', text: 'commented on your post.' },
+    reply: { icon: HiChatAlt2, color: 'var(--notif-comment)', text: 'replied to your comment.' },
+    follow: { icon: HiUserAdd, color: 'var(--notif-follow)', text: 'started following you.' },
     mention: { icon: HiAtSymbol, color: '#FF9500', text: 'mentioned you in a post.' },
 }
 
@@ -36,7 +39,7 @@ function SectionHeader({ label }) {
     )
 }
 
-function NotifRow({ n, onNavigate }) {
+function NotifRow({ n }) {
     const cfg = typeConfig[n.type] || typeConfig.like
     const avatar = n.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${n.sender?.username}&background=6366F1&color=fff`
     const [isFollowed, setIsFollowed] = useState(n.sender?.isFollowing || false)
@@ -64,39 +67,53 @@ function NotifRow({ n, onNavigate }) {
 
     const navTarget = n.targetUrl || (n.type === 'follow' ? `/profile/${n.sender?._id}` : `/posts/${n.targetId || n.entityId?._id || n.entityId}`)
 
+    const actionText = (n.type === 'comment' || n.type === 'reply') && n.commentBody
+        ? `commented: "${n.commentBody}"`
+        : cfg.text
+
+    /*
+     * The row used to be a click-handled div with two more click-handled
+     * elements nested inside it, stopping propagation to distinguish them. None
+     * of the three was focusable or keyboard-activatable.
+     *
+     * They are now real links, laid out with the stretched-link pattern: the
+     * main link's ::after covers the row, so clicking anywhere still opens the
+     * notification, while the avatar link and the follow button sit above it.
+     * Nothing is nested inside anything else.
+     */
     return (
-        <div
-            className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}
-            onClick={() => onNavigate(navTarget)}
-        >
-            <div className="notif-avatar-wrap" onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}>
+        <li className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}>
+            <Link
+                to={`/profile/${n.sender?._id}`}
+                className="notif-avatar-wrap"
+                aria-label={`${n.sender?.username || 'User'}'s profile`}
+            >
                 <img src={avatar} alt="" className="notif-avatar" />
                 {!n.isRead && <div className="notif-unread-dot" />}
-            </div>
+            </Link>
 
             <div className="notif-content">
                 <div className="notif-text-wrap">
-                    <span className="notif-username" onClick={(e) => { e.stopPropagation(); onNavigate(`/profile/${n.sender?._id}`) }}>
-                        {n.sender?.username || 'User'}
-                        {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-0.5 text-[#0095F6] align-middle" size={14} />}
-                    </span>
-                    <span className="notif-action-text">
-                        {/* commentBody is absent on older notifications, which
-                            used to render the literal text: commented: "undefined" */}
-                        {(n.type === 'comment' || n.type === 'reply') && n.commentBody
-                            ? `commented: "${n.commentBody}"`
-                            : cfg.text}
-                    </span>
+                    <Link to={navTarget} className="notif-main-link">
+                        <span className="notif-username">
+                            {n.sender?.username || 'User'}
+                            {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-0.5 text-accent align-middle" size={14} />}
+                        </span>
+                        {' '}
+                        <span className="notif-action-text">{actionText}</span>
+                    </Link>
                     <span className="notif-time">{formatTime(n.createdAt)}</span>
                 </div>
             </div>
 
-            <div className="shrink-0 ml-3">
+            <div className="shrink-0 ml-3 notif-trailing">
                 {n.type === 'follow' ? (
-                    <button 
+                    <button
                         onClick={handleAction}
                         className={isFollowed ? 'notif-btn-following' : 'notif-btn-follow'}
                         disabled={actionLoading}
+                        aria-label={`${isFollowed ? 'Unfollow' : 'Follow'} ${n.sender?.username || 'this user'}`}
+                        aria-pressed={isFollowed}
                     >
                         {isFollowed ? 'Following' : 'Follow'}
                     </button>
@@ -110,13 +127,12 @@ function NotifRow({ n, onNavigate }) {
                     </div>
                 )}
             </div>
-        </div>
+        </li>
     )
 }
 
 export default function Notifications() {
     const { user } = useAuth()
-    const navigate = useNavigate()
     const [notifs, setNotifs] = useState([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
@@ -269,19 +285,25 @@ export default function Notifications() {
                         {categorized.today.length > 0 && (
                             <div className="mb-4">
                                 <SectionHeader label="Today" />
-                                {categorized.today.map((n) => <NotifRow key={n._id} n={n} onNavigate={navigate} />)}
+                                <ul className="notif-list" aria-label="Today">
+                                    {categorized.today.map((n) => <NotifRow key={n._id} n={n} />)}
+                                </ul>
                             </div>
                         )}
                         {categorized.thisWeek.length > 0 && (
                             <div className="mb-4">
                                 <SectionHeader label="This Week" />
-                                {categorized.thisWeek.map((n) => <NotifRow key={n._id} n={n} onNavigate={navigate} />)}
+                                <ul className="notif-list" aria-label="This week">
+                                    {categorized.thisWeek.map((n) => <NotifRow key={n._id} n={n} />)}
+                                </ul>
                             </div>
                         )}
                         {categorized.earlier.length > 0 && (
                             <div className="mb-4">
                                 <SectionHeader label="Earlier" />
-                                {categorized.earlier.map((n) => <NotifRow key={n._id} n={n} onNavigate={navigate} />)}
+                                <ul className="notif-list" aria-label="Earlier">
+                                    {categorized.earlier.map((n) => <NotifRow key={n._id} n={n} />)}
+                                </ul>
                             </div>
                         )}
                     </div>

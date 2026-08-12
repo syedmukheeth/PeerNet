@@ -657,7 +657,7 @@ export default function Messages() {
                                             placeholder="Search in conversation..."
                                             className="zn-search-input"
                                         />
-                                        <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="zn-icon-btn-sm">
+                                        <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="zn-icon-btn-sm" aria-label="Close search">
                                             <HiX size={16} />
                                         </button>
                                     </motion.div>
@@ -737,7 +737,7 @@ export default function Messages() {
                                                 <p className="zn-reply-name">Replying to {replyingTo.sender?.username || 'user'}</p>
                                                 <p className="zn-reply-body">{replyingTo.body}</p>
                                             </div>
-                                            <button onClick={() => setReplyingTo(null)} className="zn-icon-btn-sm">
+                                            <button onClick={() => setReplyingTo(null)} className="zn-icon-btn-sm" aria-label="Cancel reply">
                                                 <HiX size={16} />
                                             </button>
                                         </motion.div>
@@ -752,7 +752,7 @@ export default function Messages() {
                                             </button>
                                         </div>
 
-                                        <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
+                                        <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()} aria-label="Attach a photo or video">
                                             <HiPaperClip size={22} />
                                         </button>
                                         <input
@@ -834,7 +834,7 @@ export default function Messages() {
                                     <h3 className="zn-edit-modal-title">Edit Message</h3>
                                     <p className="zn-edit-modal-sub">Update your message</p>
                                 </div>
-                                <button onClick={() => setEditingId(null)} className="zn-icon-btn">
+                                <button onClick={() => setEditingId(null)} className="zn-icon-btn" aria-label="Close editor">
                                     <HiX size={20} />
                                 </button>
                             </div>

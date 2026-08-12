@@ -20,6 +20,8 @@
 }
 
 /* Story Item (Circle) */
+/* Now a real <button> rather than a click-handled div, so the browser's own
+   button styling has to be cleared. */
 .story-item {
     display: flex;
     flex-direction: column;
@@ -28,7 +30,18 @@
     cursor: pointer;
     min-width: 84px;
     user-select: none;
+    padding: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.story-item:focus-visible {
+    outline: none;
+    border-radius: var(--r-md, 12px);
+    box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .story-item:active {

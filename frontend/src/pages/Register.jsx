@@ -77,20 +77,33 @@ export default function Register() {
                 <form className="auth-form" onSubmit={handleSubmit}>
                     {fields.map(({ k, label, placeholder, type }) => (
                         <div key={k} className="input-group">
-                            <label className="auth-label">{label}</label>
+                            {/* htmlFor/id, so the label is actually associated
+                                with its field rather than just sitting above
+                                it. Without the pairing a screen reader reads an
+                                unnamed input and clicking the label does
+                                nothing. */}
+                            <label className="auth-label" htmlFor={`register-${k}`}>{label}</label>
                             <div style={{ position: 'relative' }}>
-                                <input 
-                                    className="input-field w-full" 
-                                    type={k === 'password' ? (showPassword ? 'text' : 'password') : type} 
+                                <input
+                                    id={`register-${k}`}
+                                    className="input-field w-full"
+                                    type={k === 'password' ? (showPassword ? 'text' : 'password') : type}
                                     placeholder={placeholder}
-                                    value={form[k]} 
-                                    onChange={set(k)} 
-                                    required 
+                                    autoComplete={
+                                        k === 'password' ? 'new-password'
+                                            : k === 'email' ? 'email'
+                                                : k === 'username' ? 'username'
+                                                    : 'name'
+                                    }
+                                    value={form[k]}
+                                    onChange={set(k)}
+                                    required
                                     style={k === 'password' ? { paddingRight: 44 } : {}}
                                 />
                                 {k === 'password' && (
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100 transition-opacity"
                                         onClick={() => setShowPassword(!showPassword)}
                                     >

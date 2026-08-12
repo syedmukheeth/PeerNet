@@ -380,7 +380,7 @@ export default function PostDetail() {
         <>
             {/* Back header */}
             <div className="l-cluster gap-3 mb-4">
-                <button onClick={() => navigate(-1)} className="btn btn-ghost btn-icon"><HiArrowLeft /></button>
+                <button onClick={() => navigate(-1)} className="btn btn-ghost btn-icon" aria-label="Go back"><HiArrowLeft /></button>
                 <span className="t-h3 font-bold">Post</span>
             </div>
 
@@ -389,7 +389,7 @@ export default function PostDetail() {
 
             {/* ── MOBILE AUTHOR BAR (above image, hidden on desktop) ── */}
                 <div className="post-mobile-author-bar" ref={mobileMenuRef}>
-                    <Link to={`/profile/${author._id}`}>
+                    <Link to={`/profile/${author._id}`} aria-label={`${author.username}'s profile`}>
                         <img src={avatar} className="post-detail-avatar" alt="" />
                     </Link>
                     <div className="flex-1 flex items-center">
@@ -464,7 +464,7 @@ export default function PostDetail() {
                         handler would have treated the whole header as inside
                         the menu and it would never close. */}
                     <div className="post-detail-header post-detail-header--desktop">
-                        <Link to={`/profile/${author._id}`}>
+                        <Link to={`/profile/${author._id}`} aria-label={`${author.username}'s profile`}>
                             <img src={avatar} className="post-detail-avatar" alt="" />
                         </Link>
                         <div className="flex-1 flex items-center">
@@ -524,7 +524,7 @@ export default function PostDetail() {
                     {/* Caption */}
                     {post.caption && (
                         <div className="post-detail-caption" style={{ padding: '14px 16px 4px', borderBottom: 'none', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                            <Link to={`/profile/${author._id}`}>
+                            <Link to={`/profile/${author._id}`} aria-label={`${author.username}'s profile`}>
                                 <img src={avatar} className="post-detail-caption-avatar" style={{ width: 32, height: 32, marginTop: 2, flexShrink: 0 }} alt="" />
                             </Link>
                             <div style={{ fontSize: 14, lineHeight: 1.5, wordWrap: 'break-word', flex: 1 }}>
@@ -551,7 +551,7 @@ export default function PostDetail() {
                                 const cav = c.author?.avatarUrl || `https://ui-avatars.com/api/?name=${c.author?.username}&background=6366F1&color=fff`
                                 return (
                                     <div id={`comment-${c._id}`} key={c._id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '6px 0', borderRadius: 8 }}>
-                                        <Link to={`/profile/${c.author?._id}`}>
+                                        <Link to={`/profile/${c.author?._id}`} aria-label={`${c.author?.username}'s profile`}>
                                             <img src={cav} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block', marginTop: 2 }} alt="" />
                                         </Link>
                                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -607,7 +607,7 @@ export default function PostDetail() {
                                                         const rav = reply.author?.avatarUrl || `https://ui-avatars.com/api/?name=${reply.author?.username}&background=6366F1&color=fff`
                                                         return (
                                                             <div id={`comment-${reply._id}`} key={reply._id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '4px 0', borderRadius: 8 }}>
-                                                                <Link to={`/profile/${reply.author?._id}`}>
+                                                                <Link to={`/profile/${reply.author?._id}`} aria-label={`${reply.author?.username}'s profile`}>
                                                                     <img src={rav} style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, display: 'block', marginTop: 2 }} alt="" />
                                                                 </Link>
                                                                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -663,10 +663,10 @@ export default function PostDetail() {
                                 <motion.button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={handleLike} whileTap={{ scale: 0.85 }}>
                                     {liked ? <HiHeart size={28} /> : <HiOutlineHeart size={28} />}
                                 </motion.button>
-                                <button className="post-action-btn" onClick={() => inputRef.current?.focus()}>
+                                <button className="post-action-btn" onClick={() => inputRef.current?.focus()} aria-label="Write a comment">
                                     <HiOutlineChat size={28} />
                                 </button>
-                                <button className="post-action-btn relative top-[1px]" onClick={handleShare}>
+                                <button className="post-action-btn relative top-[1px]" onClick={handleShare} aria-label="Share this post">
                                     <FiSend size={28} />
                                 </button>
                             </div>

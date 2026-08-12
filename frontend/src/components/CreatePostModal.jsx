@@ -169,7 +169,7 @@ export default function CreatePostModal({ onClose }) {
                         <h2 className="t-h2 m-0">
                             {isTextMode ? 'Create Status' : 'Create New Post'}
                         </h2>
-                        <button className="btn btn-ghost btn-icon-sm" onClick={onClose}>
+                        <button className="btn btn-ghost btn-icon-sm" onClick={onClose} aria-label="Close">
                             <HiX size={20} />
                         </button>
                     </header>

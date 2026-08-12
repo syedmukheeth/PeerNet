@@ -121,9 +121,32 @@ textarea::placeholder {
   /* Slightly more muted for elegance */
 }
 
+/* Every text field in the app used to be `outline: none` here, with nothing
+   put back, so a keyboard user had no way to see where they were. Mirrors the
+   ring `button:focus-visible` already uses. :focus-visible, so it appears for
+   keyboard focus and not on mouse click. */
 input:focus-visible,
-textarea:focus-visible {
-  outline: none;
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable]:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Windows high-contrast mode discards box-shadow, so the ring needs a real
+   outline there or focus becomes invisible again. */
+@media (forced-colors: active) {
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  button:focus-visible,
+  a:focus-visible,
+  [contenteditable]:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }
 
 /* Smooth theme transitions - only for color props */
@@ -2791,9 +2814,9 @@ textarea:focus-visible {
 .status-main-textarea {
   width: 100%;
   background: transparent;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
+  border: none;
+  outline: none;
+  box-shadow: none;
   resize: none;
   padding: 0;
   margin: 0;
@@ -8591,4 +8614,42 @@ body:has(.zn-messages-root) .content-wrap {
 .comments-load-more {
     display: block;
     margin: var(--s-3) auto;
+}
+
+/* The notification row was a click-handled div with two more click-handled
+   elements nested inside it. It is now a list item holding real links, laid
+   out with the stretched-link pattern: .notif-main-link::after covers the
+   whole row so clicking anywhere still opens the notification, while the
+   avatar link and the follow button sit above it on their own. */
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notif-main-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.notif-main-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.notif-main-link:focus-visible::after {
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Above the stretched link, so they stay independently clickable. */
+.notif-avatar-wrap,
+.notif-trailing {
+  position: relative;
+  z-index: 1;
+}
+
+.notif-unread-dot {
+  background: var(--accent);
 }

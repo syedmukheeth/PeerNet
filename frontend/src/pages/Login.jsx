@@ -98,26 +98,33 @@ export default function Login() {
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label className="auth-label">Username or Email</label>
-                        <input className="input-field" type="text" placeholder="Username or Email"
+                        {/* htmlFor/id: the labels were not associated with their
+                            fields, so the inputs had no accessible name and
+                            clicking a label did nothing. */}
+                        <label className="auth-label" htmlFor="login-identifier">Username or Email</label>
+                        <input id="login-identifier" className="input-field" type="text" placeholder="Username or Email"
+                            autoComplete="username"
                             value={form.identifier} onChange={set('identifier')} required disabled={loading} />
                     </div>
                     <div className="input-group">
-                        <label className="auth-label">Password</label>
+                        <label className="auth-label" htmlFor="login-password">Password</label>
                         <div className="relative">
-                            <input 
-                                className="input-field w-full" 
-                                type={showPassword ? 'text' : 'password'} 
+                            <input
+                                id="login-password"
+                                className="input-field w-full"
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="••••••••"
+                                autoComplete="current-password"
                                 style={{ paddingRight: '45px' }}
-                                value={form.password} 
-                                onChange={set('password')} 
-                                required 
+                                value={form.password}
+                                onChange={set('password')}
+                                required
                                 disabled={loading}
                             />
 
                             <button
                                 type="button"
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100 transition-opacity"
                                 onClick={() => setShowPassword(!showPassword)}
                             >

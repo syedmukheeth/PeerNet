@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import api from '../api/axios'
 
 // Lazy load heavy components
@@ -15,7 +15,6 @@ import { FaLinkedin } from 'react-icons/fa'
 /* ── Right Panel ─────────────────────────────────────────── */
 function RightPanel() {
     const { user } = useAuth()
-    const navigate = useNavigate()
     const [suggestions, setSuggestions] = useState([])
     const [followed, setFollowed] = useState({})
     const [loading, setLoading] = useState(true)
@@ -52,26 +51,23 @@ function RightPanel() {
         <div className="sp-container">
 
             {/* ── Current User Card ───────────── */}
+            {/* The avatar and username were click-handled divs and images:
+                not focusable, not keyboard-activatable, and announced as plain
+                content. They navigate, so they are links. */}
             <div className="sp-user-card">
-                <img 
-                    src={myAvatar}
-                    className="sp-user-avatar"
-                    alt="" 
-                    onClick={() => navigate(`/profile/${user?._id}`)}
-                />
+                <Link to={`/profile/${user?._id}`} aria-label={`Your profile, ${user?.username || ''}`}>
+                    <img src={myAvatar} className="sp-user-avatar" alt="" />
+                </Link>
                 <div className="sp-user-info">
-                    <div className="sp-username" onClick={() => navigate(`/profile/${user?._id}`)}>
+                    <Link to={`/profile/${user?._id}`} className="sp-username">
                         {user?.username}
                         {user?.isVerified && <HiBadgeCheck className="text-accent" />}
-                    </div>
+                    </Link>
                     {user?.fullName && <div className="sp-fullname">{user.fullName}</div>}
                 </div>
-                <button
-                    onClick={() => navigate(`/profile/${user?._id}`)}
-                    className="sp-action-link"
-                >
+                <Link to={`/profile/${user?._id}`} className="sp-action-link">
                     View profile
-                </button>
+                </Link>
             </div>
 
             {/* ── Suggestions Section ─────────── */}
@@ -100,26 +96,29 @@ function RightPanel() {
                         const followers = u.followersCount || 0
                         return (
                             <div key={u._id} className="sp-suggestion-row">
-                                <img
-                                    src={av}
-                                    className="sp-suggestion-avatar"
-                                    alt=""
-                                    onClick={() => navigate(`/profile/${u._id}`)}
-                                />
+                                <Link to={`/profile/${u._id}`} tabIndex={-1} aria-hidden="true">
+                                    <img src={av} className="sp-suggestion-avatar" alt="" />
+                                </Link>
                                 <div className="sp-suggestion-info ml-1">
-                                    <div
-                                        className="sp-suggestion-username cursor-pointer hover:underline"
-                                        onClick={() => navigate(`/profile/${u._id}`)}
+                                    {/* The avatar above repeats this link, so it
+                                        is hidden from the accessible tree and
+                                        taken out of the tab order rather than
+                                        announcing the same destination twice. */}
+                                    <Link
+                                        to={`/profile/${u._id}`}
+                                        className="sp-suggestion-username hover:underline"
                                     >
                                         {u.username}
                                         {u.isVerified && <HiBadgeCheck className="text-accent" />}
-                                    </div>
+                                    </Link>
                                     <div className="sp-suggestion-subtext">
                                         {u.fullName || `${followers} follower${followers === 1 ? '' : 's'}`}
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => handleFollow(u)}
+                                    aria-label={`${isFollowed ? 'Unfollow' : 'Follow'} ${u.username}`}
+                                    aria-pressed={!!isFollowed}
                                     className={`sp-btn-follow text-xs font-bold ${isFollowed ? 'text-muted' : 'text-accent hover:text-accent-hover'}`}
                                 >
                                     {isFollowed ? 'Following' : 'Follow'}

@@ -59,9 +59,20 @@ export default function Modal({
         const previousOverflow = document.body.style.overflow
         document.body.style.overflow = 'hidden'
 
+        // Move focus into the dialog and put it back where it came from on
+        // close. Without this the trap above had nothing to trap: focus stayed
+        // on whatever opened the modal, so the first Tab went into the page
+        // behind it, and closing left focus on a detached element.
+        const previouslyFocused = document.activeElement
+        const firstField = cardRef.current?.querySelector(
+            'input:not([type="hidden"]), textarea, select, [autofocus]',
+        )
+        ;(firstField || cardRef.current)?.focus?.()
+
         return () => {
             document.removeEventListener('keydown', onKeyDown)
             document.body.style.overflow = previousOverflow
+            previouslyFocused?.focus?.()
         }
     }, [onClose])
 
@@ -72,6 +83,9 @@ export default function Modal({
                 role="dialog"
                 aria-modal="true"
                 aria-label={typeof title === 'string' ? title : undefined}
+                // Focusable so the dialog itself can receive focus when it
+                // contains no form field; -1 keeps it out of the tab order.
+                tabIndex={-1}
                 className={cx('modal-card', 'w-full', WIDTHS[size] || WIDTHS.sm, className)}
                 initial={variant.initial}
                 animate={variant.animate}

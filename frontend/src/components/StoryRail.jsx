@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiPlus, HiX, HiDotsVertical, HiPlay, HiPause, HiTrash } from 'react-icons/hi'
@@ -11,8 +11,17 @@ import './StoryRail.css'
 
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
-// ── Animated Progress Bar ────────────────────────────────────
-function ViewerProgressBar({ total, current, duration, paused, onNext }) {
+/*
+ * Progress bar. Purely a display of `progress` (0..1).
+ *
+ * Advancement used to be driven by this component's onAnimationComplete, which
+ * had two problems: `animate={{ scaleX: paused ? undefined : 1 }}` does not
+ * actually pause a running animation, so the pause button did not stop the
+ * story; and under prefers-reduced-motion the stylesheet zeroes every duration,
+ * so the animation "completed" immediately and the whole set of stories flashed
+ * past in a fraction of a second. The owning component now runs a real clock.
+ */
+function ViewerProgressBar({ total, current, progress }) {
     return (
         <div className="story-progress-row">
             {Array.from({ length: total }, (_, i) => (
@@ -20,12 +29,9 @@ function ViewerProgressBar({ total, current, duration, paused, onNext }) {
                     background: i < current ? '#fff' : 'rgba(255,255,255,0.3)',
                 }}>
                     {i === current && (
-                        <motion.div
+                        <div
                             className="story-progress-fill"
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: paused ? undefined : 1 }}
-                            transition={{ duration: duration / 1000, ease: 'linear' }}
-                            onAnimationComplete={paused ? undefined : onNext}
+                            style={{ transform: `scaleX(${progress})`, transformOrigin: 'left' }}
                         />
                     )}
                 </div>
@@ -86,6 +92,84 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
     useEffect(() => { setPaused(false); setMenuOpen(false) }, [groupIdx, storyIdx])
 
+    /*
+     * Story clock. Tracks elapsed time explicitly so that pausing genuinely
+     * stops the story and resuming continues from where it left off, and so
+     * that progression is independent of any CSS animation. rAF rather than an
+     * interval, so it stops while the tab is backgrounded instead of racing
+     * through the whole set when the user returns.
+     */
+    const [progress, setProgress] = useState(0)
+    const elapsedRef = useRef(0)
+
+    useEffect(() => {
+        elapsedRef.current = 0
+        setProgress(0)
+    }, [groupIdx, storyIdx])
+
+    useEffect(() => {
+        if (paused) return
+
+        let frame
+        let last = performance.now()
+
+        const tick = (now) => {
+            elapsedRef.current += now - last
+            last = now
+            const ratio = Math.min(1, elapsedRef.current / DURATION)
+            setProgress(ratio)
+            if (ratio >= 1) nextStory()
+            else frame = requestAnimationFrame(tick)
+        }
+
+        frame = requestAnimationFrame(tick)
+        return () => cancelAnimationFrame(frame)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [paused, groupIdx, storyIdx, DURATION])
+
+    // Keyboard control. The viewer covers the whole screen and was mouse- and
+    // touch-only: no way to close it, advance, or go back from the keyboard.
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            switch (e.key) {
+                case 'Escape':
+                    if (menuOpen) setMenuOpen(false)
+                    else onClose()
+                    break
+                case 'ArrowRight':
+                    nextStory()
+                    break
+                case 'ArrowLeft':
+                    prevStory()
+                    break
+                case ' ':
+                    e.preventDefault()
+                    togglePause()
+                    break
+                default:
+            }
+        }
+        document.addEventListener('keydown', onKeyDown)
+
+        // The overlay sits above the page, so the document behind it must not
+        // scroll underneath.
+        const previousOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+
+        return () => {
+            document.removeEventListener('keydown', onKeyDown)
+            document.body.style.overflow = previousOverflow
+        }
+    })
+
+    // Move focus into the viewer when it opens, and restore it on close.
+    const containerRef = useRef(null)
+    useEffect(() => {
+        const previouslyFocused = document.activeElement
+        containerRef.current?.focus()
+        return () => previouslyFocused?.focus?.()
+    }, [])
+
     if (!story) return null
     const rawAuthorAvatar = group.author.avatarUrl || `https://ui-avatars.com/api/?name=${group.author.username}&background=6366F1&color=fff`
     const authorAvatar = optimizeAvatarUrl(rawAuthorAvatar)
@@ -98,6 +182,11 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
             onClick={() => { if (menuOpen) { setMenuOpen(false); return } onClose() }}>
 
             <motion.div
+                ref={containerRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Stories from ${group.author.username}`}
+                tabIndex={-1}
                 className="story-viewer-container"
                 initial={{ scale: 0.9, y: 30 }}
                 animate={{ scale: 1, y: 0 }}
@@ -195,9 +284,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                     <ViewerProgressBar
                         total={group.stories.length}
                         current={storyIdx}
-                        duration={DURATION}
-                        paused={paused}
-                        onNext={nextStory} />
+                        progress={progress} />
 
                     <div className="story-header">
                         <div className="story-author">
@@ -211,13 +298,13 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                         </div>
 
                         <div className="story-controls">
-                            <button onClick={togglePause} className="story-control-btn">
+                            <button onClick={togglePause} className="story-control-btn" aria-label={paused ? 'Resume story' : 'Pause story'}>
                                 {paused ? <HiPlay size={20} color="#fff" /> : <HiPause size={20} color="#fff" />}
                             </button>
-                            <button onClick={() => setMenuOpen(o => !o)} className="story-control-btn">
+                            <button onClick={() => setMenuOpen(o => !o)} className="story-control-btn" aria-label="Story options" aria-expanded={menuOpen}>
                                 <HiDotsVertical size={20} color="#fff" />
                             </button>
-                            <button onClick={onClose} className="story-control-btn">
+                            <button onClick={onClose} className="story-control-btn" aria-label="Close stories">
                                 <HiX size={20} color="#fff" />
                             </button>
                         </div>
@@ -245,9 +332,21 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
                     )}
                 </AnimatePresence>
 
-                {/* Tap zones */}
-                <button onClick={prevStory} className="story-tap-zone story-tap-left" style={{ zIndex: 100 }} />
-                <button onClick={nextStory} className="story-tap-zone story-tap-right" style={{ zIndex: 100 }} />
+                {/* Tap zones. These were empty <button> elements with no
+                    children and no label, so a screen reader announced two
+                    anonymous buttons and gave no way to move between stories. */}
+                <button
+                    onClick={prevStory}
+                    className="story-tap-zone story-tap-left"
+                    style={{ zIndex: 100 }}
+                    aria-label="Previous story"
+                />
+                <button
+                    onClick={nextStory}
+                    className="story-tap-zone story-tap-right"
+                    style={{ zIndex: 100 }}
+                    aria-label="Next story"
+                />
             </motion.div>
         </motion.div>
     )
@@ -256,12 +355,18 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
 
 // ── Story Item Circle ─────────────────────────────────────────
 function StoryCircle({ label, avatar, seen, onClick, isAdd, hasStory }) {
+    // A real button, not a click-handled div: this is the only way into the
+    // story viewer, and it was unreachable from the keyboard.
+    const accessibleLabel = isAdd && !hasStory
+        ? 'Add to your story'
+        : `View ${isAdd ? 'your' : `${label}'s`} story${seen ? ', already seen' : ''}`
+
     return (
-        <div className="story-item" onClick={onClick}>
+        <button type="button" className="story-item" onClick={onClick} aria-label={accessibleLabel}>
             <div className="story-avatar-container">
                 <div className={`story-ring-vibrant ${seen ? 'seen' : ''} ${(!hasStory && !isAdd) || (isAdd && !hasStory) ? 'hidden-ring' : ''}`}>
                     <div className="story-avatar-inner">
-                        <img src={avatar} alt={label} draggable={false} />
+                        <img src={avatar} alt="" draggable={false} />
                     </div>
                 </div>
                 {isAdd && (
@@ -270,10 +375,10 @@ function StoryCircle({ label, avatar, seen, onClick, isAdd, hasStory }) {
                     </div>
                 )}
             </div>
-            <span className={`story-label-ig ${seen ? 'seen' : ''}`}>
+            <span className={`story-label-ig ${seen ? 'seen' : ''}`} aria-hidden="true">
                 {isAdd ? 'Your story' : label}
             </span>
-        </div>
+        </button>
     )
 }
 

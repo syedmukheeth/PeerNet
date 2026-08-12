@@ -205,7 +205,7 @@ export default function Profile() {
                                         <button className="btn btn-secondary btn-sm flex-1 h-9 rounded-lg font-semibold" onClick={() => setEditProfile(true)}>
                                             Edit Profile
                                         </button>
-                                        <button className="btn btn-secondary btn-sm p-2 rounded-lg" onClick={() => navigate('/settings')}>
+                                        <button className="btn btn-secondary btn-sm p-2 rounded-lg" onClick={() => navigate('/settings')} aria-label="Settings">
                                             <HiCog size={20} />
                                         </button>
                                     </>

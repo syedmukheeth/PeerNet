@@ -170,7 +170,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                     {/* --- Header: Simple & Unobtrusive --- */}
                     <header className="status-modal-header">
                         <span className="status-modal-title">Create Story</span>
-                        <button className="status-modal-close" onClick={onClose}>
+                        <button className="status-modal-close" onClick={onClose} aria-label="Close">
                             <HiX size={20} />
                         </button>
                     </header>
@@ -237,7 +237,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                     <div className="status-controls-panel">
                         <div className="status-toolbar">
                             <div className="status-toolbar-group">
-                                <button className="status-tool-btn media-btn" onClick={() => fileInputRef.current.click()}>
+                                <button className="status-tool-btn media-btn" onClick={() => fileInputRef.current.click()} aria-label="Add a photo or video">
                                     <HiCamera size={20} className="mr-2" />
                                     <span className="tool-label">Media</span>
                                 </button>

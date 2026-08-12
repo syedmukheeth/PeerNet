@@ -42,7 +42,7 @@ export default function FeedbackModal({ onClose }) {
                         </div>
                         <h3 className="t-h2 m-0">Send Feedback</h3>
                     </div>
-                    <button className="btn btn-icon-sm" onClick={onClose}><HiX size={20} /></button>
+                    <button className="btn btn-icon-sm" onClick={onClose} aria-label="Close"><HiX size={20} /></button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex-col gap-4">

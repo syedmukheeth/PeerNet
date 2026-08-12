@@ -111,7 +111,7 @@ export default function Search() {
                         autoComplete="off"
                     />
                     {q && (
-                        <button className="ig-search-clear" onClick={clearSearch}>
+                        <button className="ig-search-clear" onClick={clearSearch} aria-label="Clear search">
                             <HiX size={14} />
                         </button>
                     )}
