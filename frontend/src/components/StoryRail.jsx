@@ -284,6 +284,7 @@ export default function StoryRail() {
     const [viewerGroup, setViewerGroup] = useState(null)
     const [showCreate, setShowCreate] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [loadFailed, setLoadFailed] = useState(false)
 
     const loadStories = useCallback(async () => {
         if (!user) {
@@ -294,8 +295,15 @@ export default function StoryRail() {
         try {
             const { data } = await api.get('/stories')
             setStories(data.data || [])
-        } catch { /* silent */ }
-        finally { setLoading(false) }
+            setLoadFailed(false)
+        } catch {
+            // The rail sits above the feed and collapses to nothing when empty,
+            // so a swallowed failure was indistinguishable from "no stories".
+            // Not a toast: this is secondary content and the feed below it is
+            // what the user came for.
+            setStories([])
+            setLoadFailed(true)
+        } finally { setLoading(false) }
     }, [user])
 
     useEffect(() => { loadStories() }, [loadStories])
@@ -339,6 +347,12 @@ export default function StoryRail() {
                             else setShowCreate(true)
                         }}
                     />
+                )}
+
+                {!loading && loadFailed && (
+                    <button type="button" className="story-rail-retry" onClick={loadStories}>
+                        Stories did not load. Retry
+                    </button>
                 )}
 
                 {!loading && groups.map((g, i) => {

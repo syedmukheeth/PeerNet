@@ -5,7 +5,7 @@ import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
 import {
-    HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiDotsHorizontal
+    HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiRefresh
 } from 'react-icons/hi'
 
 // Compact relative time, e.g. "3h", "2d"
@@ -42,6 +42,13 @@ function NotifRow({ n, onNavigate }) {
     const [isFollowed, setIsFollowed] = useState(n.sender?.isFollowing || false)
     const [actionLoading, setActionLoading] = useState(false)
 
+    // Resync when the list refreshes. useState only reads its initial value
+    // once, so a row that stayed mounted across a refetch kept showing the
+    // follow state from whenever it first rendered.
+    useEffect(() => {
+        setIsFollowed(n.sender?.isFollowing || false)
+    }, [n.sender?.isFollowing])
+
     const handleAction = async (e) => {
         e.preventDefault(); e.stopPropagation()
         if (n.type !== 'follow' || actionLoading) return
@@ -74,7 +81,11 @@ function NotifRow({ n, onNavigate }) {
                         {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-0.5 text-[#0095F6] align-middle" size={14} />}
                     </span>
                     <span className="notif-action-text">
-                        {n.type === 'comment' || n.type === 'reply' ? `commented: "${n.commentBody}"` : cfg.text}
+                        {/* commentBody is absent on older notifications, which
+                            used to render the literal text: commented: "undefined" */}
+                        {(n.type === 'comment' || n.type === 'reply') && n.commentBody
+                            ? `commented: "${n.commentBody}"`
+                            : cfg.text}
                     </span>
                     <span className="notif-time">{formatTime(n.createdAt)}</span>
                 </div>
@@ -125,7 +136,10 @@ export default function Notifications() {
             const { data } = await api.get(`/notifications?limit=${LIMIT}&skip=${currentSkip}`)
             const newNotifs = data.data || []
 
-            if (newNotifs.length < LIMIT) setHasMore(false)
+            // Reset as well as clear. hasMore was only ever set to false, so
+            // once a session had paged to the end, a later reload of page 0
+            // could not page again.
+            setHasMore(newNotifs.length >= LIMIT)
             skipRef.current = currentSkip
 
             if (isMore) {
@@ -178,7 +192,11 @@ export default function Notifications() {
             const d = new Date(n.createdAt)
             const diff = now - d
             
-            if (isNaN(diff) || diff < oneDay) {
+            // An unparseable date is not "today". Bucketing it there put
+            // notifications of unknown age at the top of the list.
+            if (Number.isNaN(diff)) {
+                groups.earlier.push(n)
+            } else if (diff < oneDay) {
                 groups.today.push(n)
             } else if (diff < oneWeek) {
                 groups.thisWeek.push(n)
@@ -218,8 +236,15 @@ export default function Notifications() {
             <div className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-border-sm">
                 <div className="l-main-col flex items-center justify-between px-5 h-16">
                     <h1 className="text-2xl font-black text-primary tracking-tighter">Notifications</h1>
-                    <button className="p-2 hover:bg-surface-hover rounded-full transition-all active:scale-90">
-                        <HiDotsHorizontal size={22} className="text-primary" />
+                    {/* Was a dead control with no onClick and no label. Now it
+                        does the one thing this header can usefully offer. */}
+                    <button
+                        className="p-2 hover:bg-surface-hover rounded-full transition-all active:scale-90"
+                        aria-label="Refresh notifications"
+                        title="Refresh"
+                        onClick={() => loadNotifs(false)}
+                    >
+                        <HiRefresh size={22} className="text-primary" />
                     </button>
                 </div>
             </div>

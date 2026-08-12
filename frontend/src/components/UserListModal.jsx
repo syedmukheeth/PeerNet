@@ -82,11 +82,14 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                                     <p style={{ fontWeight: 600, color: 'var(--text-2)' }}>No users yet</p>
                                 </div>
                             ) : (
-                                users.map(u => {
+                                users.map((u, i) => {
                                     if (!u) return null;
                                     const avatar = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username || 'User'}&background=6366F1&color=fff`
                                     return (
-                                        <Link key={u._id || Math.random()} to={`/profile/${u._id}`} onClick={onClose}
+                                        // A Math.random() key changes on every
+                                        // render, so React remounted the row
+                                        // each time instead of reusing it.
+                                        <Link key={u._id ?? `idx-${i}`} to={`/profile/${u._id}`} onClick={onClose}
                                             style={{ textDecoration: 'none', color: 'inherit' }}>
                                             <div style={{
                                                 display: 'flex', alignItems: 'center', gap: 13,

@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
-import { HiSearch, HiBadgeCheck, HiX } from 'react-icons/hi'
+import { HiSearch, HiBadgeCheck, HiX, HiExclamationCircle } from 'react-icons/hi'
 import toast from 'react-hot-toast'
 
 export default function Search() {
@@ -10,6 +10,7 @@ export default function Search() {
     const [q, setQ] = useState('')
     const [results, setResults] = useState([])
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
     const [following, setFollowing] = useState({})
     const [focused, setFocused] = useState(false)
     const inputRef = useRef()
@@ -19,21 +20,28 @@ export default function Search() {
     const doSearch = useCallback(async (val) => {
         // Cancel any in-flight request
         if (abortRef.current) abortRef.current.abort()
-        abortRef.current = new AbortController()
+        const controller = new AbortController()
+        abortRef.current = controller
 
         setLoading(true)
+        setError(null)
         try {
             const { data } = await api.get('/users/search', {
                 params: { q: val, limit: 20 },
-                signal: abortRef.current.signal
+                signal: controller.signal
             })
             setResults(data.data || [])
         } catch (err) {
-            if (err?.name !== 'CanceledError' && err?.code !== 'ERR_CANCELED') {
-                // silent - don't show error for search
-            }
+            if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') return
+            // Errors were swallowed entirely, so a failed search was
+            // indistinguishable from "no results found".
+            setResults([])
+            setError('Search is unavailable right now.')
         } finally {
-            setLoading(false)
+            // Guarded on this request still being the current one. The cancelled
+            // request's finally used to run after the new one had already set
+            // loading, killing the spinner while a request was still in flight.
+            if (!controller.signal.aborted) setLoading(false)
         }
     }, [])
 
@@ -168,8 +176,22 @@ export default function Search() {
                     </div>
                 )}
 
+            {/* ── Search failed ── */}
+            {hasQuery && !loading && error && (
+                <div className="ig-search-empty" role="alert">
+                    <div className="ig-empty-icon-wrap">
+                        <HiExclamationCircle size={26} />
+                    </div>
+                    <p className="ig-empty-title">Search unavailable</p>
+                    <p className="ig-empty-sub">{error}</p>
+                    <button className="btn btn-secondary btn-sm" onClick={() => doSearch(q)}>
+                        Try again
+                    </button>
+                </div>
+            )}
+
             {/* ── No Results ── */}
-            {hasQuery && !loading && results.length === 0 && (
+            {hasQuery && !loading && !error && results.length === 0 && (
                 <div className="ig-search-empty">
                     <div className="ig-empty-icon-wrap">
                         <HiSearch size={26} />

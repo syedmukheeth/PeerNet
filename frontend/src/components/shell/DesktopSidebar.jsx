@@ -6,6 +6,7 @@ import {
     HiShieldCheck, HiSwitchHorizontal,
 } from 'react-icons/hi'
 import { HiOutlinePlusCircle, HiOutlineShieldCheck } from 'react-icons/hi'
+import { chatApi } from '../../api/axios'
 import { navLinks } from './navLinks'
 import logoImg from '../../assets/logo.png'
 
@@ -52,12 +53,21 @@ export default function DesktopSidebar({
                         end={exact}
                         className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
                         onMouseEnter={() => {
-                            if (to === '/messages') {
-                                queryClient.prefetchQuery({ queryKey: ['convos'] })
-                                const lastId = localStorage.getItem('zn_last_convo_id')
-                                if (lastId) {
-                                    queryClient.prefetchQuery({ queryKey: ['messages', lastId] })
-                                }
+                            if (to !== '/messages') return
+                            // Both of these used to be no-ops: the key was
+                            // ['convos'] while useConvos registers under
+                            // ['conversations'], and neither call supplied a
+                            // queryFn, which React Query v5 throws on.
+                            queryClient.prefetchQuery({
+                                queryKey: ['conversations'],
+                                queryFn: async () => (await chatApi.get('/')).data?.data ?? [],
+                            })
+                            const lastId = localStorage.getItem('zn_last_convo_id')
+                            if (lastId) {
+                                queryClient.prefetchQuery({
+                                    queryKey: ['messages', lastId],
+                                    queryFn: async () => (await chatApi.get(`/${lastId}/messages`)).data?.data ?? [],
+                                })
                             }
                         }}
                     >

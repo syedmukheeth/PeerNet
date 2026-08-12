@@ -14,8 +14,11 @@ import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'
 import ShareModal from '../components/ShareModal'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 import { useQueryClient } from '@tanstack/react-query'
+
+const COMMENT_PAGE_SIZE = 20
 
 export default function PostDetail() {
     const queryClient = useQueryClient()
@@ -38,29 +41,65 @@ export default function PostDetail() {
     const [replyingTo, setReplyingTo] = useState(null)
     const [replyData, setReplyData] = useState({}) // { commentId: { replies: [], loading: false, show: false } }
     const [isScanning, setIsScanning] = useState(false)
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+
+    // Comments were fetched with limit: 50 and no way to reach the rest, so any
+    // thread longer than that was silently truncated.
+    const [commentCursor, setCommentCursor] = useState(null)
+    const [loadingMoreComments, setLoadingMoreComments] = useState(false)
 
     const [showShareModal, setShowShareModal] = useState(false)
+    // Pending destructive action, replacing the blocking window.confirm() calls.
+    // { kind: 'post' } or { kind: 'comment', commentId, isReply, parentId }.
+    const [confirm, setConfirm] = useState(null)
     const inputRef = useRef()
     const menuRef = useRef()
     const mobileMenuRef = useRef()
     const commentsEndRef = useRef()
-    const emojiRef = useRef()
+
+    // The scroll-into-view and focus timers below fired after unmount, calling
+    // into refs that were already gone. Tracked so they can be cleared.
+    const timeoutsRef = useRef([])
+    const trackTimeout = useCallback((fn, ms) => {
+        timeoutsRef.current.push(setTimeout(fn, ms))
+    }, [])
+
+    useEffect(() => () => {
+        timeoutsRef.current.forEach(clearTimeout)
+        timeoutsRef.current = []
+    }, [])
 
     useEffect(() => {
+        // This component instance is reused when navigating between two posts,
+        // so the state has to be reset and the previous requests aborted.
+        // Without that the old post stayed painted with no spinner, and if the
+        // first response arrived last it overwrote the new one.
+        const controller = new AbortController()
+
+        setLoading(true)
+        setNotFound(false)
+        setPost(null)
+        setComments([])
+        setCommentCursor(null)
+
         Promise.all([
-            api.get(`/posts/${id}`),
-            api.get(`/posts/${id}/comments`, { params: { limit: 50 } }),
+            api.get(`/posts/${id}`, { signal: controller.signal }),
+            api.get(`/posts/${id}/comments`, { params: { limit: COMMENT_PAGE_SIZE }, signal: controller.signal }),
         ]).then(([{ data: pd }, { data: cd }]) => {
             setPost(pd.data)
             setLiked(pd.data.isLiked || false)
             setLikesCount(pd.data.likesCount || 0)
             setSaved(pd.data.isSaved || false)
             setComments(cd.data || [])
+            setCommentCursor(cd.hasMore ? cd.nextCursor : null)
         }).catch((err) => {
+            if (controller.signal.aborted) return
             console.error('Post Detail Error:', err)
             setNotFound(true)
-        }).finally(() => setLoading(false))
+        }).finally(() => {
+            if (!controller.signal.aborted) setLoading(false)
+        })
+
+        return () => controller.abort()
     }, [id])
 
 
@@ -76,19 +115,29 @@ export default function PostDetail() {
         return () => document.removeEventListener('mousedown', h)
     }, [menuOpen])
 
-    // Close emoji picker on outside click
-    useEffect(() => {
-        if (!showEmojiPicker) return
-        const h = (e) => { if (emojiRef.current && !emojiRef.current.contains(e.target)) setShowEmojiPicker(false) }
-        document.addEventListener('mousedown', h)
-        return () => document.removeEventListener('mousedown', h)
-    }, [showEmojiPicker])
+    const loadMoreComments = async () => {
+        if (!commentCursor || loadingMoreComments) return
+        setLoadingMoreComments(true)
+        try {
+            const { data } = await api.get(`/posts/${id}/comments`, {
+                params: { limit: COMMENT_PAGE_SIZE, cursor: commentCursor },
+            })
+            setComments((prev) => [...prev, ...(data.data || [])])
+            setCommentCursor(data.hasMore ? data.nextCursor : null)
+        } catch {
+            toast.error('Could not load more comments')
+        } finally {
+            setLoadingMoreComments(false)
+        }
+    }
 
     const handleLike = async () => {
         if (!user) { toast.error('Please sign in to like posts'); return navigate('/login'); }
         const next = !liked;
         setLiked(next);
-        setLikesCount(c => next ? c + 1 : c - 1);
+        // Floored: an optimistic decrement on a post whose count was already 0
+        // (stale cache, double tap) used to render a negative like count.
+        setLikesCount(c => next ? c + 1 : Math.max(0, c - 1));
         
         // Optimistically update the feed cache if it exists
         queryClient.setQueryData(['feed'], (old) => {
@@ -106,7 +155,7 @@ export default function PostDetail() {
             next ? await api.post(`/posts/${id}/like`) : await api.delete(`/posts/${id}/like`) 
         } catch { 
             setLiked(!next); 
-            setLikesCount(c => next ? c - 1 : c + 1);
+            setLikesCount(c => next ? Math.max(0, c - 1) : c + 1);
             // Revert feed cache
             queryClient.invalidateQueries({ queryKey: ['feed'] });
         }
@@ -142,7 +191,6 @@ export default function PostDetail() {
     }
 
     const handleDelete = async () => {
-        if (!confirm('Delete this post?')) return
         try { await api.delete(`/posts/${id}`); toast.success('Post deleted'); navigate(-1) }
         catch { toast.error('Delete failed') }
     }
@@ -177,7 +225,7 @@ export default function PostDetail() {
             } else {
                 // Add to top level comments
                 setComments(c => [...c, data.data])
-                setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+                trackTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
             }
         } catch (err) { 
             toast.error(err.response?.data?.message || 'Failed to post comment') 
@@ -186,23 +234,23 @@ export default function PostDetail() {
         }
     }
 
+    // Reads replyData through the functional setState form rather than closing
+    // over it, so this callback keeps a stable identity. It used to depend on
+    // replyData, which changes on every expand, and the highlight effect below
+    // depends on this callback.
     const toggleReplies = useCallback(async (commentId) => {
-        const current = replyData[commentId]
-        
-        // If we already have them and are showing them, hide them
-        if (current?.show) {
-            setReplyData(prev => ({ ...prev, [commentId]: { ...prev[commentId], show: false } }))
-            return
-        }
+        let needsFetch = false
 
-        // If we already have them but they're hidden, just show them
-        if (current?.replies) {
-            setReplyData(prev => ({ ...prev, [commentId]: { ...prev[commentId], show: true } }))
-            return
-        }
+        setReplyData(prev => {
+            const current = prev[commentId]
+            if (current?.show) return { ...prev, [commentId]: { ...current, show: false } }
+            if (current?.replies) return { ...prev, [commentId]: { ...current, show: true } }
+            needsFetch = true
+            return { ...prev, [commentId]: { loading: true, show: true, replies: [] } }
+        })
 
-        // Otherwise fetch them
-        setReplyData(prev => ({ ...prev, [commentId]: { loading: true, show: true, replies: [] } }))
+        if (!needsFetch) return
+
         try {
             const { data } = await api.get(`/posts/${id}/comments/${commentId}/replies`)
             setReplyData(prev => ({
@@ -213,40 +261,47 @@ export default function PostDetail() {
             setReplyData(prev => ({ ...prev, [commentId]: { loading: false, show: false, replies: [] } }))
             toast.error('Failed to load replies')
         }
-    }, [id, replyData])
+    }, [id])
 
-    // Auto-scroll and flash target comment if provided via URL
+    // Auto-scroll and flash the comment named in the URL, once.
+    //
+    // This used to depend on replyData and on toggleReplies (which itself
+    // changed identity whenever replyData did), so expanding any reply thread
+    // re-ran the highlight and yanked the scroll position back to the target
+    // comment again. The ref makes it fire once per target, and the timeouts
+    // are now cleared on unmount.
+    const highlightedRef = useRef(null)
+
     useEffect(() => {
-        if (!urlCommentId || comments.length === 0) return;
+        if (!urlCommentId || comments.length === 0) return
+        if (highlightedRef.current === urlCommentId) return
+
+        const timers = []
 
         const executeHighlight = () => {
             const el = document.getElementById(`comment-${urlCommentId}`)
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                const originalBg = el.style.backgroundColor || 'transparent'
-                el.style.backgroundColor = 'rgba(99, 102, 241, 0.25)'
-                el.style.transition = 'background-color 0.8s ease'
-                setTimeout(() => el.style.backgroundColor = originalBg, 2000)
-            }
-        };
+            if (!el) return
+            highlightedRef.current = urlCommentId
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            const originalBg = el.style.backgroundColor || 'transparent'
+            el.style.backgroundColor = 'rgba(99, 102, 241, 0.25)'
+            el.style.transition = 'background-color 0.8s ease'
+            timers.push(setTimeout(() => { el.style.backgroundColor = originalBg }, 2000))
+        }
 
         if (urlParentId) {
-            // Need to expand the parent first
-            if (!replyData[urlParentId]?.show) {
-                toggleReplies(urlParentId).then(() => {
-                    // Small delay to allow DOM to render replies
-                    setTimeout(executeHighlight, 400); 
-                });
-            } else {
-                executeHighlight();
-            }
+            // Expand the parent thread first, then wait for the replies to paint.
+            toggleReplies(urlParentId).then(() => {
+                timers.push(setTimeout(executeHighlight, 400))
+            })
         } else {
-            executeHighlight();
+            executeHighlight()
         }
-    }, [comments, urlCommentId, urlParentId, replyData, toggleReplies])
+
+        return () => timers.forEach(clearTimeout)
+    }, [comments, urlCommentId, urlParentId, toggleReplies])
 
     const handleDeleteComment = async (commentId, isReply, parentId) => {
-        if (!confirm('Delete this comment?')) return
         try {
             await api.delete(`/comments/${commentId}`)
             if (isReply) {
@@ -260,7 +315,7 @@ export default function PostDetail() {
             } else {
                 setComments(prev => prev.filter(c => c._id !== commentId))
             }
-            setPost(p => ({ ...p, commentsCount: (p.commentsCount || 1) - 1 }))
+            setPost(p => ({ ...p, commentsCount: Math.max(0, (p.commentsCount || 1) - 1) }))
             toast.success('Comment deleted')
         } catch {
             toast.error('Failed to delete comment')
@@ -362,7 +417,7 @@ export default function PostDetail() {
                                             onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                             <HiPencil /> Edit post
                                         </button>
-                                        <button onClick={() => { setMenuOpen(false); handleDelete() }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 14 }}
+                                        <button onClick={() => { setMenuOpen(false); setConfirm({ kind: 'post' }) }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 14 }}
                                             onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                             <HiTrash /> Delete post
                                         </button>
@@ -403,7 +458,12 @@ export default function PostDetail() {
                 <div className="post-detail-info">
 
                     {/* Header, desktop only, hidden on mobile */}
-                    <div className="post-detail-header post-detail-header--desktop" ref={menuRef}>
+                    {/* menuRef belongs on the menu wrapper below, not here. It
+                        was assigned to both, so the second assignment won and
+                        this one was dead; had it won instead, the outside-click
+                        handler would have treated the whole header as inside
+                        the menu and it would never close. */}
+                    <div className="post-detail-header post-detail-header--desktop">
                         <Link to={`/profile/${author._id}`}>
                             <img src={avatar} className="post-detail-avatar" alt="" />
                         </Link>
@@ -448,7 +508,7 @@ export default function PostDetail() {
                                                     onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                                     <HiPencil /> Edit post
                                                 </button>
-                                                <button onClick={() => { setMenuOpen(false); handleDelete() }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 14 }}
+                                                <button onClick={() => { setMenuOpen(false); setConfirm({ kind: 'post' }) }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 14 }}
                                                     onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'}
                                                     onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                                                     <HiTrash /> Delete post
@@ -510,7 +570,7 @@ export default function PostDetail() {
                                                     onClick={() => {
                                                         if (!user) { toast.error('Please sign in to reply'); return navigate('/login'); }
                                                         setReplyingTo(replyingTo?._id === c._id ? null : c);
-                                                        if (replyingTo?._id !== c._id) setTimeout(() => inputRef.current?.focus(), 10);
+                                                        if (replyingTo?._id !== c._id) trackTimeout(() => inputRef.current?.focus(), 10);
                                                     }}
                                                     style={{ background: 'none', border: 'none', color: replyingTo?._id === c._id ? 'var(--text-1)' : 'var(--text-3)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
                                                 >
@@ -519,7 +579,7 @@ export default function PostDetail() {
                                                 {/* Delete: shown to comment author OR post owner */}
                                                 {(String(user?._id) === String(c.author?._id || c.author) || String(user?._id) === String(post?.author?._id || post?.author)) && (
                                                     <button 
-                                                        onClick={() => handleDeleteComment(c._id, false)}
+                                                        onClick={() => setConfirm({ kind: 'comment', commentId: c._id, isReply: false })}
                                                         style={{ background: 'none', border: 'none', color: 'var(--error)', opacity: 0.7, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
                                                         title="Delete comment"
                                                     >
@@ -564,7 +624,7 @@ export default function PostDetail() {
                                                                         {/* Delete reply: author or post owner */}
                                                                         {(String(user?._id) === String(reply.author?._id || reply.author) || String(user?._id) === String(post?.author?._id || post?.author)) && (
                                                                             <button 
-                                                                                onClick={() => handleDeleteComment(reply._id, true, c._id)}
+                                                                                onClick={() => setConfirm({ kind: 'comment', commentId: reply._id, isReply: true, parentId: c._id })}
                                                                                 style={{ background: 'none', border: 'none', color: 'var(--error)', opacity: 0.7, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
                                                                                 title="Delete reply"
                                                                             >
@@ -582,6 +642,16 @@ export default function PostDetail() {
                                     </div>
                                 )
                             })
+                        )}
+                        {commentCursor && (
+                            <button
+                                type="button"
+                                className="btn btn-ghost btn-sm comments-load-more"
+                                onClick={loadMoreComments}
+                                disabled={loadingMoreComments}
+                            >
+                                {loadingMoreComments ? 'Loading…' : 'Load more comments'}
+                            </button>
                         )}
                         <div ref={commentsEndRef} />
                     </div>
@@ -644,11 +714,25 @@ export default function PostDetail() {
                 />
             )}
 
-            <ShareModal 
+            <ShareModal
                 isOpen={showShareModal}
                 onClose={() => setShowShareModal(false)}
                 postId={post?._id}
             />
+
+            {confirm && (
+                <ConfirmDialog
+                    title={confirm.kind === 'post' ? 'Delete this post?' : 'Delete this comment?'}
+                    body={confirm.kind === 'post'
+                        ? 'This removes the post along with its comments, likes and saves. It cannot be undone.'
+                        : 'This removes the comment and any replies to it. It cannot be undone.'}
+                    onConfirm={() => {
+                        if (confirm.kind === 'post') handleDelete()
+                        else handleDeleteComment(confirm.commentId, confirm.isReply, confirm.parentId)
+                    }}
+                    onClose={() => setConfirm(null)}
+                />
+            )}
         </>
     )
 }

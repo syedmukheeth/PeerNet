@@ -33,29 +33,30 @@ function SettingsRow({ icon, label, value, danger, onClick, chevron = true }) {
 }
 
 export default function Settings() {
-    const { user, logout } = useAuth()
+    const { user, logout, updateUser } = useAuth()
     const navigate = useNavigate()
-    const [mounted, setMounted] = useState(false)
 
     // Profile update state
     const [editMode, setEditMode] = useState(null) // 'username' | 'email' | null
-    const [profileDraft, setProfileDraft] = useState({ 
-        username: '', 
-        email: '' 
+    const [profileDraft, setProfileDraft] = useState({
+        username: '',
+        email: '',
+        currentPassword: '',
     })
     const [updateLoading, setUpdateLoading] = useState(false)
 
-    // ── Hydration & Context Sync ────────────────────────────────
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
+    // ── Context Sync ────────────────────────────────────────────
+    // There used to be a `mounted` flag set from an effect purely to gate the
+    // render, so the skeleton flashed on every visit even when the user was
+    // already in context. Gating on `user` alone is the same check without the
+    // extra paint.
     useEffect(() => {
         if (user) {
-            setProfileDraft({
+            setProfileDraft((d) => ({
+                ...d,
                 username: user.username || '',
                 email: user.email || ''
-            })
+            }))
         }
     }, [user])
 
@@ -90,19 +91,35 @@ export default function Settings() {
     }
 
     const handleUpdateProfile = async () => {
-        if (!profileDraft.username.trim() || !profileDraft.email.trim()) {
+        const username = profileDraft.username.trim()
+        const email = profileDraft.email.trim()
+
+        if (!username || !email) {
             return toast.error('Fields cannot be empty')
         }
+
+        // Changing the email is a credential change, not a profile edit: it is
+        // the account's recovery identity. The server refuses it without the
+        // current password, so ask for it here rather than surfacing a 400.
+        const emailChanged = email !== user.email
+        if (emailChanged && !profileDraft.currentPassword) {
+            return toast.error('Enter your current password to change your email')
+        }
+
         setUpdateLoading(true)
         try {
-            await api.patch('/users/me', {
-                username: profileDraft.username.trim(),
-                email: profileDraft.email.trim()
-            })
-            toast.success('Profile updated!')
+            const payload = { username, email }
+            if (emailChanged) payload.currentPassword = profileDraft.currentPassword
+
+            const { data } = await api.patch('/users/me', payload)
+            // Updates the context in place. This used to call
+            // window.location.reload(), which rebooted the whole app, replayed
+            // the splash screen and dropped the socket connection to reflect a
+            // one-field change.
+            updateUser(data.data)
+            setProfileDraft((d) => ({ ...d, currentPassword: '' }))
             setEditMode(null)
-            // Hard refresh to update context (could be improved with a local context update)
-            window.location.reload()
+            toast.success(emailChanged ? 'Profile updated. Please verify your new email.' : 'Profile updated')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to update profile')
         } finally {
@@ -115,7 +132,7 @@ export default function Settings() {
         navigate('/login', { replace: true })
     }
 
-    if (!mounted || !user) {
+    if (!user) {
         return (
             <div className="settings-page p-6 max-w-2xl mx-auto space-y-12">
                 <div className="space-y-4">
@@ -148,12 +165,17 @@ export default function Settings() {
                     <div className="settings-row-content">
                         <span className="settings-row-label">Username</span>
                         {editMode === 'username' ? (
-                            <input
-                                className="settings-input"
-                                value={profileDraft.username}
-                                onChange={(e) => setProfileDraft(d => ({ ...d, username: e.target.value }))}
-                                autoFocus
-                            />
+                            <>
+                                <label className="sr-only" htmlFor="settings-username">Username</label>
+                                <input
+                                    id="settings-username"
+                                    autoComplete="username"
+                                    className="settings-input"
+                                    value={profileDraft.username}
+                                    onChange={(e) => setProfileDraft(d => ({ ...d, username: e.target.value }))}
+                                    autoFocus
+                                />
+                            </>
                         ) : (
                             <span className="settings-row-value">@{user?.username}</span>
                         )}
@@ -167,7 +189,7 @@ export default function Settings() {
                         </div>
                     ) : (
                         <button className="settings-edit-btn" onClick={() => {
-                            setProfileDraft({ username: user?.username, email: user?.email })
+                            setProfileDraft({ username: user?.username, email: user?.email, currentPassword: '' })
                             setEditMode('username')
                         }}>Edit</button>
                     )}
@@ -178,12 +200,31 @@ export default function Settings() {
                     <div className="settings-row-content">
                         <span className="settings-row-label">Email</span>
                         {editMode === 'email' ? (
-                            <input
-                                className="settings-input"
-                                value={profileDraft.email}
-                                onChange={(e) => setProfileDraft(d => ({ ...d, email: e.target.value }))}
-                                autoFocus
-                            />
+                            <>
+                                <label className="sr-only" htmlFor="settings-email">Email address</label>
+                                <input
+                                    id="settings-email"
+                                    type="email"
+                                    autoComplete="email"
+                                    className="settings-input"
+                                    value={profileDraft.email}
+                                    onChange={(e) => setProfileDraft(d => ({ ...d, email: e.target.value }))}
+                                    autoFocus
+                                />
+                                {/* The server requires the current password to
+                                    move an account's email, since that address
+                                    is the recovery identity. */}
+                                <label className="sr-only" htmlFor="settings-email-password">Current password</label>
+                                <input
+                                    id="settings-email-password"
+                                    type="password"
+                                    autoComplete="current-password"
+                                    className="settings-input"
+                                    placeholder="Current password"
+                                    value={profileDraft.currentPassword}
+                                    onChange={(e) => setProfileDraft(d => ({ ...d, currentPassword: e.target.value }))}
+                                />
+                            </>
                         ) : (
                             <span className="settings-row-value">{user?.email}</span>
                         )}
@@ -197,7 +238,7 @@ export default function Settings() {
                         </div>
                     ) : (
                         <button className="settings-edit-btn" onClick={() => {
-                            setProfileDraft({ username: user?.username, email: user?.email })
+                            setProfileDraft({ username: user?.username, email: user?.email, currentPassword: '' })
                             setEditMode('email')
                         }}>Edit</button>
                     )}
@@ -217,27 +258,40 @@ export default function Settings() {
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         style={{ padding: '16px 16px 4px', borderTop: '1px solid var(--border)' }}>
+                        {/* Labelled and autoComplete-annotated: these were
+                            placeholder-only, so screen readers announced three
+                            unnamed password boxes and password managers could
+                            not tell the current one from the new one. */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <label className="sr-only" htmlFor="pw-current">Current password</label>
                             <input
+                                id="pw-current"
                                 className="input"
                                 type="password"
                                 name="currentPassword"
+                                autoComplete="current-password"
                                 placeholder="Current password"
                                 value={pwForm.currentPassword}
                                 onChange={handlePwChange}
                             />
+                            <label className="sr-only" htmlFor="pw-new">New password</label>
                             <input
+                                id="pw-new"
                                 className="input"
                                 type="password"
                                 name="newPassword"
+                                autoComplete="new-password"
                                 placeholder="New password"
                                 value={pwForm.newPassword}
                                 onChange={handlePwChange}
                             />
+                            <label className="sr-only" htmlFor="pw-confirm">Confirm new password</label>
                             <input
+                                id="pw-confirm"
                                 className="input"
                                 type="password"
                                 name="confirmPassword"
+                                autoComplete="new-password"
                                 placeholder="Confirm new password"
                                 value={pwForm.confirmPassword}
                                 onChange={handlePwChange}
@@ -270,7 +324,10 @@ export default function Settings() {
             </SettingsSection>
 
             <p className="t-small" style={{ textAlign: 'center', marginTop: 32, opacity: 0.4 }}>
-                PeerNet · v1.0.0
+                {/* Read from package.json at build time via vite's define, so
+                    it cannot drift from the real version the way the previously
+                    hard-coded "v1.0.0" had. */}
+                PeerNet · v{__APP_VERSION__}
             </p>
         </div>
     )

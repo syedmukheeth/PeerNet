@@ -6,16 +6,51 @@ import { useAuth } from '../context/AuthContext'
 // ZENITH SINGLETONS: These persist even when navigating away
 const draftCache = {}
 const scrollCache = {}
-const stateCache = {
-    pinned: new Set(),
-    muted: new Set(),
-    archived: new Set()
+
+/*
+ * Pin, mute and archive are client-side preferences: the API has no field for
+ * them. They used to live in module-level Sets, so every toggle was silently
+ * lost on reload and leaked between accounts on the same device, while the UI
+ * presented them as saved settings.
+ *
+ * Persisted per user id in localStorage instead. Still local-only, but now it
+ * behaves the way the controls claim to.
+ */
+const STATE_KEY = 'pn_convo_state'
+
+const readState = (userId) => {
+    if (!userId) return { pinned: [], muted: [], archived: [] }
+    try {
+        const all = JSON.parse(localStorage.getItem(STATE_KEY) || '{}')
+        const mine = all[userId] || {}
+        return {
+            pinned: mine.pinned || [],
+            muted: mine.muted || [],
+            archived: mine.archived || [],
+        }
+    } catch {
+        return { pinned: [], muted: [], archived: [] }
+    }
+}
+
+const writeState = (userId, next) => {
+    if (!userId) return
+    try {
+        const all = JSON.parse(localStorage.getItem(STATE_KEY) || '{}')
+        all[userId] = next
+        localStorage.setItem(STATE_KEY, JSON.stringify(all))
+    } catch {
+        // Storage can be full or blocked; the toggle simply does not persist.
+    }
 }
 
 /**
  * Hook for managing conversations list
  */
 export const useConvos = () => {
+    const { user } = useAuth()
+    const userId = user?._id
+
     return useQuery({
         queryKey: ['conversations'],
         queryFn: async () => {
@@ -26,14 +61,16 @@ export const useConvos = () => {
             else if (data?.conversations && Array.isArray(data.conversations)) list = data.conversations
             else list = Array.isArray(data) ? data : []
 
-            // Inject local state for Pin/Mute/Archive if backend doesn't support yet
+            // Inject local state for Pin/Mute/Archive; the API has no such fields
+            const state = readState(userId)
             return list.map(c => ({
                 ...c,
-                isPinned: stateCache.pinned.has(c._id),
-                isMuted: stateCache.muted.has(c._id),
-                isArchived: stateCache.archived.has(c._id)
+                isPinned: state.pinned.includes(c._id),
+                isMuted: state.muted.includes(c._id),
+                isArchived: state.archived.includes(c._id)
             }))
         },
+        enabled: !!userId,
         staleTime: 30000,
     })
 }
@@ -76,8 +113,11 @@ export const useChatState = (convoId) => {
 export const useSendMessage = (convoId) => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: ({ text, replyToId, attachments }) =>
-            chatApi.post(`/${convoId}/messages`, { body: text, replyTo: replyToId, attachments }),
+        // `attachments` used to be passed here, but no endpoint has ever
+        // accepted such a field; media goes through useSendMedia below, which
+        // posts the multipart body the API actually expects.
+        mutationFn: ({ text, replyToId }) =>
+            chatApi.post(`/${convoId}/messages`, { body: text, replyTo: replyToId }),
         onMutate: async ({ text, replyToId }) => {
             await queryClient.cancelQueries({ queryKey: ['messages', convoId] })
             const previousMessages = queryClient.getQueryData(['messages', convoId])
@@ -102,6 +142,31 @@ export const useSendMessage = (convoId) => {
             queryClient.invalidateQueries({ queryKey: ['messages', convoId] })
             queryClient.invalidateQueries({ queryKey: ['conversations'] })
         }
+    })
+}
+
+/**
+ * Sends an image or video attachment.
+ *
+ * The attachment button in the composer used to toast "Uploading soon..." and
+ * do nothing, even though the endpoint has always accepted a multipart body
+ * through uploadMedia.single('media').
+ */
+export const useSendMedia = (convoId) => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ file, text }) => {
+            const form = new FormData()
+            form.append('media', file)
+            if (text) form.append('body', text)
+            return chatApi.post(`/${convoId}/messages`, form, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['messages', convoId] })
+            queryClient.invalidateQueries({ queryKey: ['conversations'] })
+        },
     })
 }
 
@@ -199,10 +264,14 @@ export const useMessageActions = (convoId) => {
  */
 export const useConvoActions = () => {
     const queryClient = useQueryClient()
+    const { user } = useAuth()
+    const userId = user?._id
 
     const toggleState = (type, id) => {
-        if (stateCache[type].has(id)) stateCache[type].delete(id)
-        else stateCache[type].add(id)
+        const current = readState(userId)
+        const list = current[type]
+        current[type] = list.includes(id) ? list.filter((x) => x !== id) : [...list, id]
+        writeState(userId, current)
         queryClient.invalidateQueries({ queryKey: ['conversations'] })
     }
 

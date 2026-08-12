@@ -4,7 +4,7 @@ import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5'
 import {
     HiDotsVertical, HiPaperClip, HiEmojiHappy,
     HiReply, HiPencil, HiTrash, HiSearch,
-    HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft
+    HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiExclamationCircle
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
 import EmojiPicker from 'emoji-picker-react'
@@ -13,7 +13,7 @@ import { useTheme } from '../context/ThemeContext'
 import { useSocket } from '../hooks/useSocket'
 
 import {
-    useConvos, useMessages, useSendMessage,
+    useConvos, useMessages, useSendMessage, useSendMedia,
     useMessageActions, useConvoActions, useChatState, useMarkRead, useDeleteChat
 } from '../hooks/useChat'
 import { timeago as formatTime } from '../utils/timeago'
@@ -23,6 +23,11 @@ import toast from 'react-hot-toast'
 /**
  * CONVERSATION ITEM
  */
+// Mirrors EDIT_WINDOW in backend/src/modules/chat/chat.service.js.
+const EDIT_WINDOW_MS = 15 * 60 * 1000
+const withinEditWindow = (createdAt) =>
+    Date.now() - new Date(createdAt).getTime() < EDIT_WINDOW_MS
+
 const ConvoItem = ({ c, isActive, user, onClick }) => {
     const peer = useMemo(() => c.participants?.find(p => p._id !== user?._id), [c.participants, user?._id])
     const lastMsg = c.lastMessage
@@ -151,12 +156,16 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                         <button onClick={() => onReply(m)} className="zn-action-btn" title="Reply">
                             <HiReply size={16} />
                         </button>
-                        {isSelf && (Date.now() - new Date(m.createdAt).getTime() < 15 * 60 * 1000) && (
+                        {/* Evaluated at render, so the buttons can linger a
+                            little past the window if nothing re-renders. The
+                            server is the authority and rejects a late edit or
+                            delete with a 400, which the handlers surface. */}
+                        {isSelf && withinEditWindow(m.createdAt) && (
                             <button onClick={() => onEdit(m)} className="zn-action-btn" title="Edit">
                                 <HiPencil size={16} />
                             </button>
                         )}
-                        {isSelf && (Date.now() - new Date(m.createdAt).getTime() < 15 * 60 * 1000) && (
+                        {isSelf && withinEditWindow(m.createdAt) && (
                             <button onClick={() => onDelete(m._id)} className="zn-action-btn delete" title="Delete">
                                 <HiTrash size={16} />
                             </button>
@@ -191,9 +200,16 @@ export default function Messages() {
 
     const {
         data: convos = [],
-        isLoading: loadingConvos
+        isLoading: loadingConvos,
+        isError: convosFailed,
+        refetch: refetchConvos,
     } = useConvos()
-    const { data: messages = [], isLoading: loadingMsgs } = useMessages(convoId)
+    const {
+        data: messages = [],
+        isLoading: loadingMsgs,
+        isError: messagesFailed,
+        refetch: refetchMessages,
+    } = useMessages(convoId)
     const socket = useSocket(user)
 
     const [searchQuery, setSearchQuery] = useState('')
@@ -205,6 +221,7 @@ export default function Messages() {
 
     const { getDraft, setDraft } = useChatState(convoId)
     const sendMutation = useSendMessage(convoId)
+    const sendMediaMutation = useSendMedia(convoId)
     const { react: reactMutation, edit: editMutation, remove: deleteMutation } = useMessageActions(convoId)
     const { pin: pinMutation, mute: muteMutation, archive: archiveMutation } = useConvoActions()
     const deleteChatMutation = useDeleteChat()
@@ -221,22 +238,34 @@ export default function Messages() {
 
     const activeConvo = useMemo(() => convos.find(c => c._id === convoId), [convos, convoId])
 
+    // Last message this component has already marked read. The effect depends on
+    // the whole messages array, and marking read invalidates the conversation
+    // list, which changes that array's identity; since the local message status
+    // is never flipped to 'seen', the guard below stayed true and the PATCH
+    // re-fired on every one of those identity changes.
+    const lastMarkedRef = useRef(null)
+
     useEffect(() => {
-        if (convoId && messages.length > 0) {
-            const lastMsg = messages[messages.length - 1]
-            const isFromPeer = lastMsg.sender?._id !== user?._id && lastMsg.sender !== 'me'
-            
-            if (isFromPeer && lastMsg.status !== 'seen') {
-                markRead()
-                socket?.emit('mark_seen', { conversationId: convoId })
-            }
-        }
+        if (!convoId || messages.length === 0) return
+
+        const lastMsg = messages[messages.length - 1]
+        const isFromPeer = lastMsg.sender?._id !== user?._id && lastMsg.sender !== 'me'
+        if (!isFromPeer || lastMsg.status === 'seen') return
+        if (lastMarkedRef.current === lastMsg._id) return
+
+        lastMarkedRef.current = lastMsg._id
+        markRead()
+        socket?.emit('mark_seen', { conversationId: convoId })
     }, [convoId, messages, socket, user?._id, markRead])
 
     // Join/Leave room
     useEffect(() => {
         if (socket && convoId) {
-            socket.emit('join_conversation', convoId)
+            // The server now refuses a join for a conversation the user is not
+            // part of, and acks the result.
+            socket.emit('join_conversation', convoId, (ack) => {
+                if (ack && ack.ok === false) toast.error(ack.message || 'Cannot open that conversation')
+            })
             return () => socket.emit('leave_conversation', convoId)
         }
     }, [socket, convoId])
@@ -327,14 +356,14 @@ export default function Messages() {
         prevMsgCount.current = 0
     }, [convoId])
 
+    // Load the draft for the conversation being opened. The matching write is
+    // in the composer's onChange, not in an effect: as two effects they raced on
+    // every conversation switch, because both getDraft and setDraft change
+    // identity with convoId, so the "save" effect ran again after the "load"
+    // effect and wrote the outgoing conversation's text into the incoming one.
     useEffect(() => {
-        const draft = getDraft()
-        setInputText(draft)
+        setInputText(getDraft())
     }, [convoId, getDraft])
-
-    useEffect(() => {
-        setDraft(inputText)
-    }, [inputText, setDraft])
 
     useEffect(() => {
         if (convoId) localStorage.setItem('zn_last_convo_id', convoId)
@@ -345,6 +374,9 @@ export default function Messages() {
         const body = inputText
         const replyId = replyingTo?._id
         setInputText('')
+        // Clear the stored draft too. It was left behind, so the sent text
+        // reappeared in the composer the next time the conversation was opened.
+        setDraft('')
         setReplyingTo(null)
         try {
             await sendMutation.mutateAsync({ text: body, replyToId: replyId })
@@ -352,6 +384,7 @@ export default function Messages() {
         } catch {
             toast.error('Failed to send message')
             setInputText(body)
+            setDraft(body)
         }
     }
 
@@ -391,9 +424,30 @@ export default function Messages() {
         // but typically users want to pick multiple. We'll keep it open.
     }
 
-    const handleFileUpload = (e) => {
+    const handleFileUpload = async (e) => {
         const file = e.target.files[0]
-        if (file) toast.success(`Selected "${file.name}" - Uploading soon...`)
+        // Reset immediately, so picking the same file twice in a row still
+        // fires a change event. Without this the second pick did nothing.
+        e.target.value = ''
+        if (!file) return
+
+        const isVideo = file.type.startsWith('video/')
+        const limit = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024
+        if (!isVideo && !file.type.startsWith('image/')) {
+            return toast.error('Only images and videos can be attached')
+        }
+        if (file.size > limit) {
+            return toast.error(`That file is too large. Limit is ${isVideo ? '100MB' : '10MB'}.`)
+        }
+
+        try {
+            await sendMediaMutation.mutateAsync({ file, text: inputText.trim() })
+            setInputText('')
+            setDraft('')
+            scrollToBottom()
+        } catch {
+            toast.error('Could not send the attachment')
+        }
     }
 
     // Determine if showing chat or list on mobile
@@ -468,15 +522,29 @@ export default function Messages() {
                         ) : filteredConvos.length > 0 ? (
                             <div key="list">
                                 {filteredConvos.map(c => (
+                                    // ConvoItem accepts no onPin/onMute/onArchive
+                                    // and has no per-row menu, so those three
+                                    // props were dead. The same actions are
+                                    // available from the open chat's header menu.
                                     <ConvoItem
                                         key={c._id}
                                         c={c} isActive={convoId === c._id} user={user}
                                         onClick={() => navigate(`/messages/${c._id}`)}
-                                        onPin={() => pinMutation.mutate(c._id)}
-                                        onMute={() => muteMutation.mutate(c._id)}
-                                        onArchive={() => archiveMutation.mutate(c._id)}
                                     />
                                 ))}
+                            </div>
+                        ) : convosFailed ? (
+                            /* A failed request used to render as "No chats
+                               found", so an outage looked like an empty inbox. */
+                            <div key="convos-error" className="zn-empty-state" role="alert">
+                                <div className="zn-empty-icon">
+                                    <HiExclamationCircle size={36} />
+                                </div>
+                                <p className="zn-empty-title">Could not load chats</p>
+                                <p className="zn-empty-sub">Check your connection and try again.</p>
+                                <button className="btn btn-secondary btn-sm" onClick={() => refetchConvos()}>
+                                    Try again
+                                </button>
                             </div>
                         ) : (
                             <div key="empty" className="zn-empty-state">
@@ -626,11 +694,25 @@ export default function Messages() {
                                                     isNewGroup={item.isNewGroup}
                                                     onReply={setReplyingTo}
                                                     onEdit={(msg) => { setEditingId(msg._id); setEditingText(msg.body) }}
-                                                    onDelete={deleteMutation.mutate}
+                                                    onDelete={(messageId) => deleteMutation.mutate(messageId, {
+                                                        onError: (err) => toast.error(
+                                                            err.response?.data?.message || 'Could not delete the message',
+                                                        ),
+                                                    })}
                                                     onReact={(emoji) => onReact(item.value._id, emoji)}
                                                 />
                                             )
                                         ))
+                                    ) : messagesFailed ? (
+                                        /* Previously indistinguishable from an
+                                           empty thread. */
+                                        <div className="zn-empty-chat" role="alert">
+                                            <HiExclamationCircle size={28} className="zn-empty-chat-icon" />
+                                            <p>We could not load these messages.</p>
+                                            <button className="btn btn-secondary btn-sm" onClick={() => refetchMessages()}>
+                                                Try again
+                                            </button>
+                                        </div>
                                     ) : (
                                         <div className="zn-empty-chat">
                                             <HiMail size={28} className="zn-empty-chat-icon" />
@@ -673,7 +755,13 @@ export default function Messages() {
                                         <button className="zn-composer-action-btn" onClick={() => fileInputRef.current?.click()}>
                                             <HiPaperClip size={22} />
                                         </button>
-                                        <input type="file" ref={fileInputRef} onChange={handleFileUpload} hidden />
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleFileUpload}
+                                            accept="image/*,video/*"
+                                            hidden
+                                        />
 
                                         <textarea
                                             ref={textareaRef}
@@ -681,6 +769,9 @@ export default function Messages() {
                                             value={inputText}
                                             onChange={(e) => {
                                                 setInputText(e.target.value)
+                                                // Draft is persisted here rather than from an
+                                                // effect, so it cannot race the load on switch.
+                                                setDraft(e.target.value)
                                                 e.target.style.height = 'auto'
                                                 e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
                                             }}
@@ -699,8 +790,9 @@ export default function Messages() {
                                             disabled={!inputText.trim() && !replyingTo}
                                             onClick={() => {
                                                 handleSend()
-                                                const ta = document.querySelector('.zn-composer-input')
-                                                if (ta) ta.style.height = 'auto'
+                                                // textareaRef is right there; this used to
+                                                // reach into the DOM by class name instead.
+                                                if (textareaRef.current) textareaRef.current.style.height = 'auto'
                                             }}
                                             whileTap={{ scale: 0.9 }}
                                             className="zn-send-btn"
@@ -766,7 +858,13 @@ export default function Messages() {
                                             await editMutation.mutateAsync({ messageId: editingId, text: editingText })
                                             setEditingId(null)
                                             toast.success('Message updated')
-                                        } catch { toast.error('Update failed') }
+                                        } catch (err) {
+                                            // The server owns the 15-minute window and
+                                            // explains a refusal; a generic message here
+                                            // hid the actual reason.
+                                            toast.error(err.response?.data?.message || 'Update failed')
+                                            if (err.response?.status === 400) setEditingId(null)
+                                        }
                                     }}
                                     className="zn-btn-primary"
                                 >

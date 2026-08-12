@@ -13,6 +13,7 @@ import { timeago } from '../utils/timeago'
 import { optimizeAvatarUrl, optimizeCloudinaryUrl } from '../utils/cloudinary'
 import EditPostModal from './EditPostModal'
 import ReportModal from './ReportModal'
+import ConfirmDialog from './ConfirmDialog'
 
 export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const { user } = useAuth()
@@ -26,6 +27,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [menuOpen, setMenuOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
     const [reportOpen, setReportOpen] = useState(false)
+    const [confirmOpen, setConfirmOpen] = useState(false)
     const [caption, setCaption] = useState(post.caption || '')
     const [showHeart, setShowHeart] = useState(false)
     const menuRef = useRef(null)
@@ -113,12 +115,18 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
         }
     }
 
+    // The double-tap heart timer was never cleared, so scrolling a liked card
+    // out of view left a pending setState on an unmounted component.
+    const heartTimerRef = useRef(null)
+    useEffect(() => () => clearTimeout(heartTimerRef.current), [])
+
     const handleImageTap = () => {
         const now = Date.now()
         if (now - lastTap < 350) {
             if (!liked) handleLike()
             setShowHeart(true)
-            setTimeout(() => setShowHeart(false), 800)
+            clearTimeout(heartTimerRef.current)
+            heartTimerRef.current = setTimeout(() => setShowHeart(false), 800)
         }
         setLastTap(now)
     }
@@ -132,7 +140,6 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     }
 
     const handleDelete = async () => {
-        if (!window.confirm('Delete this post?')) return
         try {
             await api.delete(`/posts/${post._id}`)
             toast.success('Post deleted')
@@ -192,7 +199,7 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                                             <button className="post-card-menu-item" onClick={() => { setMenuOpen(false); setEditOpen(true) }}>
                                                 <HiPencil size={16} /> <span>Edit</span>
                                             </button>
-                                            <button className="post-card-menu-item text-error" onClick={() => { setMenuOpen(false); handleDelete() }}>
+                                            <button className="post-card-menu-item text-error" onClick={() => { setMenuOpen(false); setConfirmOpen(true) }}>
                                                 <HiTrash size={16} /> <span>Delete</span>
                                             </button>
                                         </>
@@ -251,9 +258,17 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         <Link to={`/posts/${post._id}`} className="post-card-action-btn">
                             <HiChatAlt2 size={24} />
                         </Link>
-                        <button className="post-card-action-btn" onClick={() => {
+                        {/* clipboard.writeText rejects on insecure origins and
+                            when permission is denied. Unhandled, that was a
+                            console rejection and no feedback at all. */}
+                        <button className="post-card-action-btn" onClick={async () => {
                             const url = `${window.location.origin}/posts/${post._id}`
-                            navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'))
+                            try {
+                                await navigator.clipboard.writeText(url)
+                                toast.success('Link copied')
+                            } catch {
+                                toast.error('Could not copy the link')
+                            }
                         }}>
                             <HiShare size={22} />
                         </button>
@@ -305,6 +320,14 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     targetType="Post"
                     targetId={post._id}
                     onClose={() => setReportOpen(false)}
+                />
+            )}
+            {confirmOpen && (
+                <ConfirmDialog
+                    title="Delete this post?"
+                    body="This removes the post along with its comments, likes and saves. It cannot be undone."
+                    onConfirm={handleDelete}
+                    onClose={() => setConfirmOpen(false)}
                 />
             )}
         </>

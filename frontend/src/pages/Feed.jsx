@@ -9,7 +9,7 @@ const StoryRail = lazy(() => import('../components/StoryRail'))
 
 import { optimizeAvatarUrl } from '../utils/cloudinary'
 import { useAuth } from '../context/AuthContext'
-import { HiBadgeCheck, HiCamera } from 'react-icons/hi'
+import { HiBadgeCheck, HiCamera, HiExclamationCircle } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
 
 /* ── Right Panel ─────────────────────────────────────────── */
@@ -25,11 +25,18 @@ function RightPanel() {
             setLoading(false)
             return
         }
+
+        // Aborted on unmount: this panel used to call setSuggestions and
+        // setLoading after the user navigated away.
+        const controller = new AbortController()
+
         setLoading(true)
-        api.get('/users/suggestions', { params: { limit: 5 } })
+        api.get('/users/suggestions', { params: { limit: 5 }, signal: controller.signal })
             .then(({ data }) => setSuggestions(data.data || []))
-            .catch(() => setSuggestions([]))
-            .finally(() => setLoading(false))
+            .catch(() => { if (!controller.signal.aborted) setSuggestions([]) })
+            .finally(() => { if (!controller.signal.aborted) setLoading(false) })
+
+        return () => controller.abort()
     }, [user])
 
     const handleFollow = async (u) => {
@@ -156,21 +163,27 @@ export default function Feed() {
         hasNextPage,
         isFetchingNextPage,
         status,
+        refetch,
     } = useInfiniteQuery({
         queryKey: ['feed'],
         queryFn: async ({ pageParam = null }) => {
-            const params = { limit: 10, _t: Date.now() }
+            // No _t cache-buster. Combined with refetchOnMount: 'always' it made
+            // staleTime and the whole React Query cache inert: every mount was a
+            // cold network round-trip, and every navigation back to the feed
+            // threw away data it already had. Freshness comes from invalidation
+            // on write instead.
+            const params = { limit: 10 }
             if (pageParam) params.cursor = pageParam
             const res = await api.get('/posts/feed', { params })
             return res.data
         },
         getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
         staleTime: 30_000,
-        refetchOnMount: 'always',
         enabled: !!user,
     })
 
     const isLoading = status === 'pending'
+    const isError = status === 'error'
     const posts = data
         ? data.pages.flatMap((page) => (Array.isArray(page?.data) ? page.data : []))
         : []
@@ -182,7 +195,7 @@ export default function Feed() {
                 ...oldData,
                 pages: oldData.pages.map(page => ({
                     ...page,
-                    data: page.data.map(post => String(post._id) === String(postId) ? { ...post, isLiked: liked, likesCount } : post)
+                    data: (page.data ?? []).map(post => String(post._id) === String(postId) ? { ...post, isLiked: liked, likesCount } : post)
                 }))
             }
         })
@@ -195,7 +208,7 @@ export default function Feed() {
                 ...oldData,
                 pages: oldData.pages.map(page => ({
                     ...page,
-                    data: page.data.filter(post => String(post._id) !== String(postId))
+                    data: (page.data ?? []).filter(post => String(post._id) !== String(postId))
                 }))
             }
         })
@@ -208,7 +221,7 @@ export default function Feed() {
                 ...oldData,
                 pages: oldData.pages.map(page => ({
                     ...page,
-                    data: page.data.map(post => String(post._id) === String(postId) ? { ...post, ...updated } : post)
+                    data: (page.data ?? []).map(post => String(post._id) === String(postId) ? { ...post, ...updated } : post)
                 }))
             }
         })
@@ -270,7 +283,25 @@ export default function Feed() {
                             </div>
                         )}
 
-                        {!isLoading && posts.length === 0 && (
+                        {/* A failed request used to fall through to the empty
+                            state below, so "the server is down" and "you follow
+                            nobody" looked identical and neither offered a retry. */}
+                        {isError && (
+                            <div className="feed-empty" role="alert">
+                                <div className="feed-empty__icon">
+                                    <HiExclamationCircle size={28} />
+                                </div>
+                                <h2 className="feed-empty__title">We could not load your feed</h2>
+                                <p className="feed-empty__text">
+                                    Something went wrong reaching PeerNet. Check your connection and try again.
+                                </p>
+                                <button className="btn btn-primary" onClick={() => refetch()}>
+                                    Try again
+                                </button>
+                            </div>
+                        )}
+
+                        {!isLoading && !isError && posts.length === 0 && (
                             <div className="feed-empty">
                                 <div className="feed-empty__icon">
                                     <HiCamera size={28} />

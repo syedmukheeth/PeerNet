@@ -90,10 +90,17 @@ export default function Layout() {
         return () => window.removeEventListener('peernet:sync-counts', handleSync)
     }, [syncAllCounts])
 
-    // Clear the badge when entering messages, restore it on the way out
+    // Clear the badge when entering messages. On the way out, re-sync from the
+    // server rather than restoring msgRef: that ref is only ever incremented,
+    // never decremented as messages are read, so leaving /messages used to
+    // resurrect a count for conversations the user had just read.
     useEffect(() => {
-        setMsgCount(location.pathname.startsWith('/messages') ? 0 : msgRef.current)
-    }, [location.pathname])
+        if (location.pathname.startsWith('/messages')) {
+            setMsgCount(0)
+        } else {
+            syncAllCounts()
+        }
+    }, [location.pathname, syncAllCounts])
 
     const showNotifToast = useCallback((notif) => {
         const typeEmoji = { like: '❤️', comment: '💬', follow: '👤', message: '💬', reply: '💬' }

@@ -248,3 +248,24 @@
 
 .story-tap-left { left: 0; }
 .story-tap-right { right: 0; width: 75%; }
+
+/* Shown when the stories request fails. The rail collapses when empty, so
+   without this a failure looked exactly like "nobody posted a story". */
+.story-rail-retry {
+    align-self: center;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border: 1px dashed var(--border-md);
+    border-radius: var(--r-full, 999px);
+    background: transparent;
+    color: var(--text-3);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.story-rail-retry:hover {
+    color: var(--text-1);
+    border-color: var(--border-lg);
+}
