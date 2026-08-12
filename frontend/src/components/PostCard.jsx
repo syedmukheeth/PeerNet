@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,12 +10,12 @@ import {
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
-import { optimizeAvatarUrl, optimizeCloudinaryUrl } from '../utils/cloudinary'
+import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 import EditPostModal from './EditPostModal'
 import ReportModal from './ReportModal'
 import ConfirmDialog from './ConfirmDialog'
 
-export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
+function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const { user } = useAuth()
     const [liked, setLiked] = useState(post.isLiked || false)
     const [likesCount, setLikesCount] = useState(post.likesCount || 0)
@@ -238,7 +238,10 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         </div>
                     ) : post.mediaType === 'video' ? (
                         <div className="post-card-video-wrap">
-                            <video ref={videoRef} src={post.mediaUrl} className="post-card-media" muted={isMuted} loop playsInline />
+                            {/* The image path below already went through
+                                Cloudinary's transform; the video did not, so
+                                feed videos were served at full source quality. */}
+                            <video ref={videoRef} src={optimizeCloudinaryVideo(post.mediaUrl)} className="post-card-media" muted={isMuted} loop playsInline preload="metadata" />
                             <button className="post-card-video-toggle" onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted) }} aria-label={isMuted ? 'Unmute video' : 'Mute video'}>
                                 {isMuted ? <HiVolumeOff size={16} /> : <HiVolumeUp size={16} />}
                             </button>
@@ -333,3 +336,10 @@ export default function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
         </>
     )
 }
+
+/*
+ * Memoised. Every card owns an IntersectionObserver and, for video posts, a
+ * <video> element, and the feed re-rendered all of them on any state change.
+ * Feed passes its handlers through useCallback so this comparison can hold.
+ */
+export default memo(PostCard)

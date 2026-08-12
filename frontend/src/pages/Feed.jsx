@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import api from '../api/axios'
@@ -187,7 +187,11 @@ export default function Feed() {
         ? data.pages.flatMap((page) => (Array.isArray(page?.data) ? page.data : []))
         : []
 
-    const onLikeToggle = (postId, liked, likesCount) => {
+    // useCallback, so the identity is stable across renders. PostCard is
+    // memoised, and fresh closures here would defeat that: every card in the
+    // feed re-rendered on any feed state change, each one carrying an
+    // IntersectionObserver and possibly a video element.
+    const onLikeToggle = useCallback((postId, liked, likesCount) => {
         queryClient.setQueryData(['feed'], (oldData) => {
             if (!oldData) return oldData;
             return {
@@ -198,9 +202,9 @@ export default function Feed() {
                 }))
             }
         })
-    }
+    }, [queryClient])
 
-    const onDelete = (postId) => {
+    const onDelete = useCallback((postId) => {
         queryClient.setQueryData(['feed'], (oldData) => {
             if (!oldData) return oldData;
             return {
@@ -211,9 +215,9 @@ export default function Feed() {
                 }))
             }
         })
-    }
+    }, [queryClient])
 
-    const onUpdate = (postId, updated) => {
+    const onUpdate = useCallback((postId, updated) => {
         queryClient.setQueryData(['feed'], (oldData) => {
             if (!oldData) return oldData;
             return {
@@ -224,7 +228,7 @@ export default function Feed() {
                 }))
             }
         })
-    }
+    }, [queryClient])
 
     return (
         <div>

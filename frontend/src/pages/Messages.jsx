@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5'
 import {
@@ -7,7 +7,7 @@ import {
     HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiExclamationCircle
 } from 'react-icons/hi'
 import { motion, AnimatePresence } from 'framer-motion'
-import EmojiPicker from 'emoji-picker-react'
+
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useSocket } from '../hooks/useSocket'
@@ -23,6 +23,14 @@ import toast from 'react-hot-toast'
 /**
  * CONVERSATION ITEM
  */
+/*
+ * emoji-picker-react is 308KB, the single largest chunk in the app, and it was
+ * imported statically here and in CreateStoryModal, so it was pulled in on
+ * every visit to Messages or the story composer whether or not the picker was
+ * ever opened. Both render it behind a boolean, so it loads on first open.
+ */
+const EmojiPicker = lazy(() => import('emoji-picker-react'))
+
 // Mirrors EDIT_WINDOW in backend/src/modules/chat/chat.service.js.
 const EDIT_WINDOW_MS = 15 * 60 * 1000
 const withinEditWindow = (createdAt) =>
@@ -468,16 +476,18 @@ export default function Messages() {
                         className="zn-emoji-popover"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <EmojiPicker 
-                            onEmojiClick={handleEmojiClick}
-                            theme={isDark ? 'dark' : 'light'}
-                            searchDisabled={false}
-                            skinTonesDisabled
-                            width="100%"
-                            height={400}
-                            previewConfig={{ showPreview: false }}
-                            searchPlaceholder="Search emojis..."
-                        />
+                        <Suspense fallback={<div className="zn-emoji-loading">Loading emojis…</div>}>
+                            <EmojiPicker
+                                onEmojiClick={handleEmojiClick}
+                                theme={isDark ? 'dark' : 'light'}
+                                searchDisabled={false}
+                                skinTonesDisabled
+                                width="100%"
+                                height={400}
+                                previewConfig={{ showPreview: false }}
+                                searchPlaceholder="Search emojis..."
+                            />
+                        </Suspense>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import api, { CHAT_BASE_URL } from '../api/axios'
 import toast from 'react-hot-toast'
 import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChatAlt2, HiBadgeCheck, HiCog, HiLink, HiUser } from 'react-icons/hi'
+import { optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
@@ -326,17 +327,27 @@ export default function Profile() {
                                     className="profile-grid-item block relative group"
                                 >
                                     {p.mediaType === 'video' ? (
-                                        <video 
-                                            src={p.mediaUrl} 
+                                        // preload="none": the grid renders one
+                                        // <video> per tile, and without this a
+                                        // profile of video posts began
+                                        // downloading every one of them on load.
+                                        <video
+                                            src={optimizeCloudinaryVideo(p.mediaUrl)}
                                             className="w-full h-full object-cover"
-                                            muted 
+                                            muted
                                             playsInline
+                                            preload="none"
                                         />
                                     ) : (
-                                        <img 
-                                            src={p.mediaUrl} 
-                                            alt="" 
-                                            loading="lazy" 
+                                        // Served through Cloudinary's transform,
+                                        // so a grid thumbnail no longer downloads
+                                        // the full-size original.
+                                        <img
+                                            src={optimizeCloudinaryUrl(p.mediaUrl, 400)}
+                                            alt=""
+                                            loading="lazy"
+                                            width={400}
+                                            height={400}
                                             className="w-full h-full object-cover"
                                         />
                                     )}

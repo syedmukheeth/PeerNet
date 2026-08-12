@@ -8544,3 +8544,14 @@ body:has(.zn-messages-root) .content-wrap {
 .notif-unread-dot {
   background: var(--accent);
 }
+
+/* Placeholder while the lazily-loaded emoji picker chunk arrives. */
+.zn-emoji-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: var(--s-4);
+  color: var(--text-3);
+  font-size: 13px;
+}

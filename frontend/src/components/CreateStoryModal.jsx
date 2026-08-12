@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiX, HiEmojiHappy, HiCamera, HiTrash } from 'react-icons/hi'
 import { FiAlignLeft, FiAlignCenter, FiAlignRight } from 'react-icons/fi'
-import EmojiPicker from 'emoji-picker-react'
+
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 
@@ -23,6 +23,10 @@ const BG_PRESETS = [
 ]
 
 const COLOR_PALETTE = ['#ffffff', '#000000', '#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#a29bfe', '#fd79a8']
+
+// 308KB, and only rendered once the picker is opened. See the note in
+// pages/Messages.jsx, which imports it the same way.
+const EmojiPicker = lazy(() => import('emoji-picker-react'))
 
 export default function CreateStatusModal({ onClose, onSuccess }) {
     const [content, setContent] = useState('')
@@ -276,14 +280,16 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
                                 </button>
                                 {showEmoji && (
                                     <div className="status-emoji-picker">
-                                        <EmojiPicker 
-                                            theme="dark" 
-                                            onEmojiClick={handleEmoji}
-                                            width={320}
-                                            height={380}
-                                            skinTonesDisabled
-                                            searchDisabled
-                                        />
+                                        <Suspense fallback={<div className="zn-emoji-loading">Loading emojis…</div>}>
+                                            <EmojiPicker
+                                                theme="dark"
+                                                onEmojiClick={handleEmoji}
+                                                width={320}
+                                                height={380}
+                                                skinTonesDisabled
+                                                searchDisabled
+                                            />
+                                        </Suspense>
                                     </div>
                                 )}
                             </div>

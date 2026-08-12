@@ -16,6 +16,8 @@ import EditPostModal from '../components/EditPostModal'
 import ShareModal from '../components/ShareModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 
+import { Helmet } from 'react-helmet-async'
+import { optimizeCloudinaryUrl } from '../utils/cloudinary'
 import { useQueryClient } from '@tanstack/react-query'
 
 const COMMENT_PAGE_SIZE = 20
@@ -376,8 +378,33 @@ export default function PostDetail() {
     const avatar = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username}&background=6366F1&color=fff`
     const isOwner = user?._id === (author._id || author)
 
+    // /posts/:id is the app's public share target, and it carried no metadata
+    // of its own, so every shared link previewed with index.html's generic
+    // title and description. Note that a crawler which does not execute
+    // JavaScript still sees the static tags; making these visible to those
+    // requires prerendering or SSR.
+    const shareTitle = `${author.username || 'A post'} on PeerNet`
+    const shareDescription = (post.caption || `See this post from ${author.username} on PeerNet.`).slice(0, 200)
+    const shareImage = post.mediaType === 'image' && post.mediaUrl
+        ? optimizeCloudinaryUrl(post.mediaUrl, 1200)
+        : undefined
+
     return (
         <>
+            <Helmet>
+                <title>{shareTitle}</title>
+                <meta name="description" content={shareDescription} />
+                <meta property="og:type" content="article" />
+                <meta property="og:title" content={shareTitle} />
+                <meta property="og:description" content={shareDescription} />
+                <meta property="og:url" content={`${window.location.origin}/posts/${id}`} />
+                {shareImage && <meta property="og:image" content={shareImage} />}
+                <meta name="twitter:card" content={shareImage ? 'summary_large_image' : 'summary'} />
+                <meta name="twitter:title" content={shareTitle} />
+                <meta name="twitter:description" content={shareDescription} />
+                {shareImage && <meta name="twitter:image" content={shareImage} />}
+            </Helmet>
+
             {/* Back header */}
             <div className="l-cluster gap-3 mb-4">
                 <button onClick={() => navigate(-1)} className="btn btn-ghost btn-icon" aria-label="Go back"><HiArrowLeft /></button>
