@@ -149,16 +149,42 @@ select:focus-visible,
   }
 }
 
-/* Smooth theme transitions - only for color props */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/*
+ * Theme-switch transition.
+ *
+ * This used to be an unconditional transition of four properties on every
+ * element in the document, which existed solely to smooth the light/dark swap
+ * but was paid for on every hover, focus and state change in the app. On a long
+ * feed or message list that is thousands of elements the compositor has to
+ * watch continuously.
+ *
+ * ThemeContext adds .theme-transition to <html> for the duration of a switch,
+ * so the cost is bounded to the moment it is actually wanted.
+ */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
   transition:
-  background-color var(--trans-fast),
-  border-color var(--trans-fast),
-  color var(--trans-fast),
-  box-shadow var(--trans-fast);
+    background-color var(--trans-fast),
+    border-color var(--trans-fast),
+    color var(--trans-fast),
+    box-shadow var(--trans-fast) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
 }
 
 /* ========================================================================================================================================================================================================================================
@@ -3871,142 +3897,13 @@ select:focus-visible,
    Layout architecture
    ============================================================================================================================================================================================================================================ */
 
-/* Panel 1: Global Nav */
-
-.v4-nav-item.active {
-  background: var(--v4-accent);
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
-}
-
-/* Panel 2: Middle Sidebar */
-
-.v4-convo-item.active {
-  background: var(--v4-hover);
-  border-left-color: var(--v4-accent-solid);
-}
-
-/* Panel 3: Chat Main */
-
-/* Message Bubbles */
-
-.v4-msg-wrapper.self {
-  justify-content: flex-end;
-  padding-left: 60px;
-}
-
-.v4-msg-wrapper.peer {
-  justify-content: flex-start;
-  padding-right: 60px;
-}
-
-/* SELF BUBBLES (Right) - Viewport Fixed Gradient */
-.v4-msg-wrapper.self .v4-msg-bubble {
-  background: var(--v4-accent);
-  background-attachment: fixed;
-  /* Instagram effect */
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
-}
-
-/* PEER BUBBLES (Left) */
-.v4-msg-wrapper.peer .v4-msg-bubble {
-  background: var(--v4-card);
-  color: var(--v4-text-p);
-  border: 1px solid var(--v4-border);
-}
-
-/* Dynamic Grouping Radii - SELF */
-.v4-msg-wrapper.self.group-start .v4-msg-bubble {
-  border-radius: 20px 20px 4px 20px;
-  margin-top: 12px;
-}
-
-.v4-msg-wrapper.self.group-mid .v4-msg-bubble {
-  border-radius: 20px 4px 4px 20px;
-}
-
-.v4-msg-wrapper.self.group-end .v4-msg-bubble {
-  border-radius: 20px 4px 20px 20px;
-  margin-bottom: 8px;
-}
-
-.v4-msg-wrapper.self.group-none .v4-msg-bubble {
-  border-radius: 20px 20px 20px 20px;
-  margin-top: 12px;
-  margin-bottom: 8px;
-}
-
-/* Dynamic Grouping Radii - PEER */
-.v4-msg-wrapper.peer.group-start .v4-msg-bubble {
-  border-radius: 20px 20px 20px 4px;
-  margin-top: 12px;
-}
-
-.v4-msg-wrapper.peer.group-mid .v4-msg-bubble {
-  border-radius: 4px 20px 20px 4px;
-}
-
-.v4-msg-wrapper.peer.group-end .v4-msg-bubble {
-  border-radius: 4px 20px 20px 20px;
-  margin-bottom: 8px;
-}
-
-.v4-msg-wrapper.peer.group-none .v4-msg-bubble {
-  border-radius: 20px 20px 20px 20px;
-  margin-top: 12px;
-  margin-bottom: 8px;
-}
-
-/* Mini Avatar for Peer */
-
-.v4-msg-wrapper.peer.group-end .v4-msg-avatar,
-.v4-msg-wrapper.peer.group-none .v4-msg-avatar {
-  opacity: 1;
-  /* Show on last message */
-}
-
-.v4-msg-wrapper.self .v4-msg-time {
-  right: 100%;
-  margin-right: 12px;
-}
-
-.v4-msg-wrapper.peer .v4-msg-time {
-  left: 100%;
-  margin-left: 12px;
-}
-
 /* Message Composer */
 
 /* ============================================================================================================================================================================================================================================
    ANIMATIONS & SHIMMERS
    ============================================================================================================================================================================================================================================ */
 
-@keyframes v4-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
 
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes v4-pop {
-  0% {
-    transform: scale(0.5) translateY(-50%);
-    opacity: 0;
-  }
-
-  50% {
-    transform: scale(1.1) translateY(-50%);
-  }
-
-  100% {
-    transform: scale(1) translateY(-50%);
-    opacity: 1;
-  }
-}
 
 /* =============================================================================
    INTEGRATED UTILITY BRIDGE (Tailwind Compatibility)
@@ -6002,7 +5899,6 @@ select:focus-visible,
   }
 
   .zn-chat-main,
-  .v4-chat-main,
   .chat-area {
     display: flex !important;
     flex: 1 !important;
@@ -6018,8 +5914,7 @@ select:focus-visible,
     min-width: 220px !important;
   }
 
-  .chat-active .zn-chat-main,
-  .chat-active .v4-chat-main {
+  .chat-active .zn-chat-main {
     display: flex !important;
     position: relative !important;
     flex: 1 !important;
@@ -6033,7 +5928,6 @@ select:focus-visible,
 @media (max-width: 767px) {
 
   /* Ensure the sidebar/list is the only thing shown initially */
-  .v4-middle-panel,
   .zn-messages-sidebar,
   .convo-list {
     display: flex !important;
@@ -6045,20 +5939,17 @@ select:focus-visible,
   }
 
   /* Hide the chat detail by default on mobile */
-  .v4-chat-main,
   .zn-chat-main,
   .chat-area {
     display: none !important;
   }
 
   /* When a conversation is active on mobile */
-  .chat-active .v4-middle-panel,
   .chat-active .zn-messages-sidebar,
   .chat-active .convo-list {
     display: none !important;
   }
 
-  .chat-active .v4-chat-main,
   .chat-active .zn-chat-main,
   .chat-active .chat-area {
     display: flex !important;

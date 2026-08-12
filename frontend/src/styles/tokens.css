@@ -296,7 +296,13 @@
   --text-secondary: var(--text-2);
   --text-muted: var(--text-3);
 
-  --border-subtle: 1px solid var(--border-md);
+  /* A colour, not a `1px solid ...` shorthand. Every one of its six callers
+     writes `border: 1px solid var(--border-subtle)`, which with the shorthand
+     expanded to `1px solid 1px solid <colour>`: invalid, so the browser dropped
+     the whole declaration and those borders never rendered at all. The name
+     also collided confusingly with --color-border-subtle, which was already a
+     bare colour. */
+  --border-subtle: var(--border-md);
   --border-sm: rgba(var(--border-rgb), 0.08);
   --border-hover: rgba(var(--border-rgb), 0.2);
 

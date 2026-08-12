@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 /* eslint-disable react-refresh/only-export-components */
 
 const ThemeContext = createContext()
@@ -22,6 +22,10 @@ export function ThemeProvider({ children }) {
         return systemTheme()
     })
 
+    // Skips the very first run: there is nothing to transition from on mount,
+    // and adding the class then would animate the initial paint.
+    const isFirstPaint = useRef(true)
+
     useEffect(() => {
         const root = document.documentElement
         root.setAttribute('data-theme', theme)
@@ -30,6 +34,17 @@ export function ThemeProvider({ children }) {
         // while the rest of the app was dark.
         root.style.colorScheme = theme
         if (explicit) localStorage.setItem(STORAGE_KEY, theme)
+
+        if (isFirstPaint.current) {
+            isFirstPaint.current = false
+            return
+        }
+
+        // The colour transition is scoped to this class rather than applied to
+        // every element permanently, which is what index.css used to do.
+        root.classList.add('theme-transition')
+        const timer = setTimeout(() => root.classList.remove('theme-transition'), 320)
+        return () => clearTimeout(timer)
     }, [theme, explicit])
 
     // Follow the OS while the user has not chosen for themselves. The initial
