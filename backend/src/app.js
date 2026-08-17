@@ -70,7 +70,15 @@ const createApp = () => {
     // ── 🛡️ Middleware ──────────────────────────────────────────────────────────
     app.use(tracingMiddleware);
     app.use(globalLimiter);
-    app.use(helmet());
+    // Google Identity Services completes sign-in by posting a message back to
+    // the opener window. Helmet's default Cross-Origin-Opener-Policy of
+    // same-origin severs that link, and the browser logs "Cross-Origin-Opener-
+    // Policy policy would block the window.postMessage call" instead of signing
+    // the user in. same-origin-allow-popups keeps the isolation from other
+    // origins while letting our own popup talk back.
+    app.use(helmet({
+        crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }
+    }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(compression());
