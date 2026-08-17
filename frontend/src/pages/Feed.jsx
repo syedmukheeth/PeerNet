@@ -11,6 +11,7 @@ import { optimizeAvatarUrl } from '../utils/cloudinary'
 import { useAuth } from '../context/AuthContext'
 import { HiBadgeCheck, HiCamera, HiExclamationCircle } from 'react-icons/hi'
 import { FaLinkedin } from 'react-icons/fa'
+import avatarFallback from '../components/ui/avatarFallback'
 
 /* ── Right Panel ─────────────────────────────────────────── */
 function RightPanel() {
@@ -45,7 +46,7 @@ function RightPanel() {
     }
 
     const myAvatar = optimizeAvatarUrl(user?.avatarUrl ||
-        `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`)
+        avatarFallback(user?.username))
 
     return (
         <div className="sp-container">
@@ -91,7 +92,7 @@ function RightPanel() {
                         ))
                     ) : suggestions.map((u) => {
                         const av = optimizeAvatarUrl(u.avatarUrl ||
-                            `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`)
+                            avatarFallback(u.username))
                         const isFollowed = followed[u._id]
                         const followers = u.followersCount || 0
                         return (

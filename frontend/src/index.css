@@ -234,7 +234,7 @@ select:focus-visible,
 .t-h1 {
   font-family: var(--font-display);
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.25;
   color: var(--text-1);
@@ -426,7 +426,7 @@ select:focus-visible,
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   background: transparent;
   border: none;
   color: var(--text-1);
@@ -487,20 +487,19 @@ select:focus-visible,
 .sidebar-brand-img {
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--r-md);
   box-shadow: var(--shadow-sm);
 }
 
+/* Solid, not clipped. The wordmark used to be a blue to violet gradient
+   painted through the letterforms, which is the one thing every generated
+   interface does. The logo mark beside it carries the colour instead. */
 .peernetLogo {
   font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: -0.05em;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.045em;
   color: var(--text-1);
-  background: var(--logo-gradient);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .sidebar-nav {
@@ -537,28 +536,19 @@ select:focus-visible,
   background: var(--hover);
 }
 
+/* The active item used to say so four times over: a tinted background, a left
+   bar, an accent label and an icon scaled up 10 percent. Two signals is
+   enough, and the label stays the reading colour so the row is still a row. */
 .ig-link--active {
-  background: var(--accent-low);
-}
-
-.ig-link--active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 15%;
-  bottom: 15%;
-  width: 3px;
-  background: var(--accent);
-  border-radius: 0 4px 4px 0;
+  background: var(--surface-1);
 }
 
 .ig-link--active .ig-label {
-  font-weight: 900;
-  color: var(--accent);
+  font-weight: 600;
+  color: var(--text-1);
 }
 
 .ig-link--active .ig-icon {
-  transform: scale(1.1);
   color: var(--accent);
 }
 
@@ -572,17 +562,16 @@ select:focus-visible,
 }
 
 .ig-icon {
-  width: 26px;
-  height: 26px;
-  transition: all 0.2s var(--ease-out);
+  width: 22px;
+  height: 22px;
+  transition: color var(--trans-fast);
 }
 
 .ig-label {
-  font-size: 16px;
-  font-weight: 600;
-  margin-left: 16px;
-  letter-spacing: -0.02em;
-  transition: all 0.2s ease;
+  font-size: 15px;
+  font-weight: 500;
+  margin-left: 14px;
+  letter-spacing: -0.015em;
   color: var(--text-1);
 }
 
@@ -590,8 +579,7 @@ select:focus-visible,
   position: absolute;
   top: -4px;
   right: -6px;
-  background: #FF3B30;
-  /* Vibrant iOS style red */
+  background: var(--error);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -601,9 +589,8 @@ select:focus-visible,
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  border: 2px solid var(--surface-1);
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+  border-radius: var(--r-full);
+  border: 2px solid var(--bg);
   z-index: 10;
   pointer-events: none;
   animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -665,11 +652,10 @@ select:focus-visible,
 }
 
 .profile-card-role {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-2);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 800;
+  letter-spacing: 0;
+  font-weight: 400;
 }
 
 .sidebar-more-wrap {
@@ -705,7 +691,7 @@ select:focus-visible,
   width: 280px;
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 12px;
   box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.5);
   z-index: 10001;
@@ -724,7 +710,7 @@ select:focus-visible,
 }
 
 .mobile-more-header span {
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-secondary);
@@ -818,6 +804,13 @@ select:focus-visible,
   margin: 0 auto;
   padding: 0 24px 20px;
   box-sizing: border-box;
+}
+
+/* Single column pages: Search, Notifications, Settings and the static pages.
+   The wide shell above only makes sense for the feed, which puts a 320px
+   panel beside its column. */
+.content-wrap--narrow {
+  max-width: var(--page-max);
 }
 
 /* -- FEED LAYOUT - 2-col inside main col ---------------- */
@@ -1059,15 +1052,16 @@ select:focus-visible,
 /* ========================================================================================================================================================================================================================================
    POST CARD - Instagram Quality
    ======================================================================================================================================================================================================================================== */
+/* Border only. The card carried a border AND a drop shadow, which is two
+   different claims about the same edge. */
 .l-post-card {
   display: flex;
   flex-direction: column;
-  background: var(--bg);
-  border: 1px solid var(--border-sm);
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
   overflow: hidden;
-  margin-bottom: 32px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 28px;
   contain: content;
   content-visibility: auto;
   contain-intrinsic-size: 1px 600px;
@@ -1116,7 +1110,7 @@ select:focus-visible,
 
 .post-card-username {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-1);
   text-decoration: none;
 }
@@ -1136,7 +1130,8 @@ select:focus-visible,
 }
 
 .post-card-time {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
   color: var(--text-3);
   font-weight: 400;
 }
@@ -1200,11 +1195,13 @@ select:focus-visible,
 }
 
 /* --- Media --- */
+/* Letterbox bars take the page's own ground. A photo narrower than the column
+   used to sit between two black bars even in light mode. */
 .post-card-media-wrap {
   position: relative;
   width: 100%;
   min-height: 200px;
-  background: #000;
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1216,7 +1213,7 @@ select:focus-visible,
   max-height: 75vh;
   display: block;
   object-fit: contain;
-  background: #000;
+  background: var(--surface-2);
 }
 
 .post-card-heart-overlay {
@@ -1238,7 +1235,7 @@ select:focus-visible,
 
 .post-card-text-inner {
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
   color: #fff;
   line-height: 1.3;
   white-space: pre-wrap;
@@ -1302,17 +1299,18 @@ select:focus-visible,
   transition: transform 0.2s var(--trans-spring);
 }
 
+/* Colour, not scale. Every icon in the row jumping 10 percent on hover is the
+   busiest possible way to say "this is a button". */
 .post-card-action-btn:hover {
-  transform: scale(1.1);
-  color: var(--text-glow);
+  color: var(--text-2);
 }
 
 .post-card-action-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.92);
 }
 
 .post-card-action-btn.is-liked {
-  color: #ff3040;
+  color: var(--notif-like);
 }
 
 .post-card-action-btn.is-liked svg {
@@ -1331,11 +1329,15 @@ select:focus-visible,
   gap: 6px;
 }
 
+/* Counts are numerals, so they take the mono face: they stop shifting width as
+   the number changes, and they read as data rather than as more prose. */
 .post-card-likes {
-  font-size: 14px;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-1);
   margin-bottom: 2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .post-card-caption {
@@ -1345,7 +1347,7 @@ select:focus-visible,
 }
 
 .post-card-caption-author {
-  font-weight: 700;
+  font-weight: 600;
   margin-right: 6px;
   color: var(--text-1);
   text-decoration: none;
@@ -1401,8 +1403,7 @@ select:focus-visible,
 }
 
 .post-action-btn:hover {
-  transform: scale(1.12);
-  color: var(--accent);
+  color: var(--text-2);
 }
 
 .post-action-btn:active {
@@ -1410,7 +1411,7 @@ select:focus-visible,
 }
 
 .post-action-btn.active-heart {
-  color: #e0245e;
+  color: var(--notif-like);
 }
 
 .post-action-btn.active-heart svg {
@@ -1449,11 +1450,9 @@ select:focus-visible,
   filter: none;
 }
 
-/* Primary - Instagram Style Blue */
-
 .btn-primary:active:not(:disabled) {
-  background: #1877f2 !important;
-  opacity: 0.8;
+  background: var(--accent-hover) !important;
+  transform: scale(0.985);
 }
 
 /* Secondary */
@@ -1578,9 +1577,7 @@ select:focus-visible,
 }
 
 .l-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(124, 58, 237, 0.2);
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-lg);
 }
 
 /* ========================================================================================================================================================================================================================================
@@ -1605,7 +1602,7 @@ select:focus-visible,
   height: 18px;
   padding: 0 5px;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
   border-radius: 99px;
   font-size: 11px;
   font-weight: 700;
@@ -1708,19 +1705,15 @@ select:focus-visible,
   height: 64px;
   border-radius: var(--r-lg);
   object-fit: cover;
-  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.3);
+  border: 1px solid var(--border);
 }
 
 .auth-logo-text {
   font-family: var(--font-display);
   font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: var(--logo-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  color: var(--text-1);
 }
 
 .auth-sub {
@@ -1919,12 +1912,12 @@ select:focus-visible,
   margin: 0 auto;
 }
 
-/* The wide Instagram-style gutter only fits once the sidebar and the 150px
-   avatar still leave room for the stats row, below 1024px it squeezes the
-   info column until its contents overflow. */
+/* The gutter used to open to 100px above 1024px, which is the spacing of the
+   site this page was copied from. 56px keeps the avatar and the identity block
+   reading as one unit instead of two separate columns. */
 @media (min-width: 1024px) {
   .profile-header-v2 {
-    gap: 100px;
+    gap: 56px;
   }
 }
 
@@ -1945,8 +1938,8 @@ select:focus-visible,
 
 @media (min-width: 768px) {
   .avatar-ring {
-    width: 150px;
-    height: 150px;
+    width: 112px;
+    height: 112px;
   }
 }
 
@@ -1985,9 +1978,9 @@ select:focus-visible,
 }
 
 .profile-username {
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--text-1);
 }
 
@@ -2012,14 +2005,18 @@ select:focus-visible,
   font-size: 16px;
 }
 
+/* The count is the figure, the word beside it is the caption. Both were
+   text-1 at the same weight, so the row read as six equal words. */
 .stat-value {
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--text-1);
 }
 
 .stat-label {
   font-weight: 400;
-  color: var(--text-1);
+  color: var(--text-2);
 }
 
 .profile-bio-v2 {
@@ -2031,26 +2028,23 @@ select:focus-visible,
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #00376b;
-  font-weight: 700;
+  color: var(--accent);
+  font-weight: 600;
   font-size: 14px;
   margin-top: 8px;
   text-decoration: none;
-}
-
-[data-theme="dark"] .profile-link-v2 {
-  color: #e0f1ff;
-  opacity: 0.9;
 }
 
 .profile-link-v2:hover {
   text-decoration: underline;
 }
 
+/* Tiles, not a contact sheet. A 1px gutter fuses the posts into one block and
+   is the single most recognisable grid on the internet. */
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
+  gap: 4px;
   margin-top: 0px;
 }
 
@@ -2059,7 +2053,8 @@ select:focus-visible,
   aspect-ratio: 1 / 1;
   overflow: hidden;
   position: relative;
-  background: var(--hover);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
 }
 
 .profile-grid-item img,
@@ -2075,7 +2070,7 @@ select:focus-visible,
 
 .profile-grid-item:hover img,
 .profile-grid-item:hover video {
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 .profile-grid-item:hover .profile-grid-overlay {
@@ -2105,7 +2100,7 @@ select:focus-visible,
   border-radius: var(--r-xl);
   overflow: hidden;
   background: #000;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.9);
+  box-shadow: var(--shadow-lg);
 }
 
 .story-media-container {
@@ -2325,11 +2320,10 @@ select:focus-visible,
 }
 
 .message-bubble.mine {
-  background: var(--accent-gradient);
-  color: #fff;
+  background: var(--accent);
+  color: var(--accent-fg);
   border-bottom-right-radius: 4px;
   align-self: flex-end;
-  box-shadow: 0 2px 10px var(--accent-ring);
 }
 
 .message-wrap.mine .message-time {
@@ -2382,15 +2376,10 @@ select:focus-visible,
   max-height: calc(100vh - 120px);
   min-height: 480px;
   background: var(--surface);
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
   margin-bottom: 24px;
-}
-
-[data-theme="light"] .post-detail-card {
-  border: 1px solid rgba(0, 0, 0, 0.09);
 }
 
 /* Mobile-only author bar above image (hidden on desktop) */
@@ -2402,7 +2391,7 @@ select:focus-visible,
   /* Takes whatever the info column leaves; shrinking here is what keeps the
      card inside its container on narrower desktops. */
   flex: 1 1 auto;
-  background: #000;
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2537,7 +2526,7 @@ select:focus-visible,
   border: none;
   cursor: pointer;
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 13px;
   transition: opacity var(--trans-fast);
 }
@@ -2794,7 +2783,7 @@ select:focus-visible,
 
 .status-modal-title {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-1);
 }
 
@@ -2891,7 +2880,7 @@ select:focus-visible,
 .font-modern {
   font-family: var(--font-display);
   letter-spacing: -0.04em;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .font-classic {
@@ -2901,14 +2890,14 @@ select:focus-visible,
 
 .font-neon {
   font-family: var(--font-display);
-  font-weight: 900;
+  font-weight: 700;
   text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
   text-transform: uppercase;
 }
 
 .font-strong {
   font-family: var(--font-display);
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -2929,7 +2918,7 @@ select:focus-visible,
 .tool-label {
   font-size: 9px;
   text-transform: uppercase;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--text-3);
 }
@@ -2975,7 +2964,7 @@ select:focus-visible,
 
 .tool-icon-btn.emoji-btn.is-open {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
 }
 
 .status-emoji-picker {
@@ -3000,7 +2989,7 @@ select:focus-visible,
 
 .selector-label {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-3);
@@ -3096,25 +3085,28 @@ select:focus-visible,
   padding: 40px;
 }
 
+/* An empty state is a sentence, not a monument. The old one centred a 72px
+   ringed icon over a bold title and a grey line, on every page, which is the
+   most recognisable stock layout on the web. This one reads left to right at
+   the top of the column the content would have filled, so the eye lands where
+   the first result will appear. */
 .empty-state {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 56px 24px;
-  gap: 10px;
-  text-align: center;
+  align-items: flex-start;
+  padding: 40px 4px;
+  gap: 6px;
+  text-align: left;
+  border-top: 1px solid var(--border);
 }
 
 .empty-state-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: var(--r-full);
-  border: 1px solid var(--border-md);
   color: var(--text-3);
-  font-size: 32px;
+  font-size: 20px;
+  margin-bottom: 2px;
 }
 
 /* ============================================================================
@@ -3126,9 +3118,15 @@ select:focus-visible,
   padding: 48px 24px 80px;
 }
 
+/* Left aligned by default. Two of the four static pages already opted out of
+   the centred logo-over-title-over-lead stack; it is the same arrangement as
+   every generated About page, so it is no longer the default. The modifier is
+   kept so the two pages that name it keep working. */
 .static-page__header {
-  text-align: center;
-  margin-bottom: 48px;
+  text-align: left;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
 }
 
 .static-page__header--left {
@@ -3136,10 +3134,10 @@ select:focus-visible,
 }
 
 .static-page__logo {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 20px;
-  border-radius: var(--r-md);
+  width: 40px;
+  height: 40px;
+  margin: 0 0 18px;
+  border-radius: var(--r-sm);
 }
 
 .static-page__title {
@@ -3329,22 +3327,22 @@ select:focus-visible,
   margin-bottom: 28px;
 }
 
+/* A subhead, not an eyebrow. Six 11px uppercase tracked labels down one page
+   is the section-label tic every generated settings screen has. */
 .settings-section-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
   padding: 0 4px;
   margin-bottom: 10px;
 }
 
 .settings-card {
-  background: var(--card);
-  border: 1px solid var(--border-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
 }
 
 .settings-row {
@@ -3379,24 +3377,27 @@ select:focus-visible,
 }
 
 .settings-row.danger:hover {
-  background: rgba(239, 68, 68, 0.08);
+  background: var(--hover);
 }
 
+/* No tinted chip behind the glyph. Twelve identical accent squares stacked
+   down the page turn a settings list into a colour swatch. */
 .settings-row-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--accent-subtle);
-  color: var(--accent);
+  width: 22px;
+  height: 22px;
+  color: var(--text-3);
   font-size: 18px;
   flex-shrink: 0;
 }
 
+.settings-row:hover .settings-row-icon {
+  color: var(--text-2);
+}
+
 .settings-row.danger .settings-row-icon {
-  background: rgba(239, 68, 68, 0.10);
   color: var(--error);
 }
 
@@ -3743,10 +3744,10 @@ select:focus-visible,
   position: absolute;
   top: -4px;
   right: -4px;
-  background: #FF3B30;
+  background: var(--error);
   color: #fff;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   min-width: 16px;
   height: 16px;
   border-radius: 99px;
@@ -3764,21 +3765,13 @@ select:focus-visible,
 
 /* Color aliases (JSX uses text-primary, text-muted, text-secondary) */
 
-/* Logo gradient text */
+/* Kept under its old name because JSX still applies it. It no longer clips a
+   gradient through the letters. */
 .logo-gradient-text {
-
-  background: var(--logo-gradient);
-
-  background-clip: text;
-
-  -webkit-background-clip: text;
-
-  -webkit-text-fill-color: transparent;
-
   font-family: var(--font-display);
-
-  color: transparent;
-
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  color: var(--text-1);
 }
 
 /* = = = = = = = = = =  BG/BORDER ALIASES = = = = = = = = = =  */
@@ -4011,9 +4004,9 @@ select:focus-visible,
 .skeleton {
   position: relative;
   overflow: hidden;
-  background-color: #121212;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: var(--surface-1);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
   pointer-events: none;
   /* Removed pulse to reduce visual noise, using shimmer only */
 }
@@ -4040,8 +4033,7 @@ select:focus-visible,
 }
 
 [data-theme="light"] .skeleton {
-  background-color: #f0f2f5;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background-color: var(--surface-2);
 }
 
 [data-theme="light"] .skeleton::after {
@@ -4070,7 +4062,7 @@ select:focus-visible,
 .skeleton-text {
   height: 12px;
   margin-bottom: 8px;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
 }
 
 .skeleton-text.s { width: 30%; }
@@ -4093,13 +4085,13 @@ select:focus-visible,
 /* Legacy support handled above */
 
 .react-hot-toast>div {
-  border-radius: 14px;
-  background: rgba(13, 13, 16, 0.85);
+  border-radius: var(--r-lg);
+  background: var(--glass-bg);
   color: var(--text-1);
-  border: 1px solid rgba(124, 58, 237, 0.38);
-  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(124, 58, 237, 0.12) inset;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-md);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .react-hot-toast [role="status"] {
@@ -4108,19 +4100,17 @@ select:focus-visible,
 
 /* Interactive refinements */
 .btn-primary {
-  background: #0095f6 !important;
-  color: #fff;
+  background: var(--accent) !important;
+  color: var(--accent-fg);
   border: none;
-  font-weight: 700;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  transition: background var(--trans-fast), color var(--trans-fast);
   position: relative;
   overflow: hidden;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1877f2 !important;
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(124, 58, 237, 0.32);
+  background: var(--accent-hover) !important;
 }
 
 .btn-primary:active:not(:disabled),
@@ -4288,7 +4278,7 @@ select:focus-visible,
 
 .dev-link:hover {
   opacity: 0.7;
-  border-color: #0A66C2;
+  border-color: var(--accent);
   transform: translateY(-1px);
   background: var(--surface-2);
 }
@@ -4502,7 +4492,7 @@ select:focus-visible,
 /* Sidebar List Items */
 
 .zn-convo-name.active {
-  color: #fff;
+  color: var(--text-1);
 }
 
 /* 2. Main View */
@@ -4614,7 +4604,7 @@ select:focus-visible,
 
 .zn-sidebar-scroll::-webkit-scrollbar-thumb {
   background: rgba(var(--accent-rgb), 0.2);
-  border-radius: 10px;
+  border-radius: var(--r-md);
 }
 
 .zn-viewport::-webkit-scrollbar {
@@ -4627,7 +4617,7 @@ select:focus-visible,
 
 .zn-viewport::-webkit-scrollbar-thumb {
   background: rgba(var(--border-rgb), 0.1);
-  border-radius: 10px;
+  border-radius: var(--r-md);
 }
 
 .zn-viewport::-webkit-scrollbar-thumb:hover {
@@ -4728,7 +4718,7 @@ select:focus-visible,
   position: relative;
   background: rgba(15, 15, 15, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 32px;
+  border-radius: var(--r-2xl);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   overflow: hidden;
@@ -4759,7 +4749,7 @@ select:focus-visible,
   text-align: left;
   padding: 20px 24px;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-3);
   text-transform: uppercase;
   border-bottom: 1px solid var(--border);
@@ -5103,7 +5093,7 @@ select:focus-visible,
     flex-direction: column;
     max-height: none;
     min-height: auto;
-    border-radius: 12px;
+    border-radius: var(--r-lg);
     margin: 0 12px 24px;
     overflow: hidden;
     box-shadow: var(--shadow-lg);
@@ -5166,7 +5156,7 @@ select:focus-visible,
   }
 
   .settings-card {
-    border-radius: 12px;
+    border-radius: var(--r-lg);
   }
 
   /* Admin page mobile */
@@ -5191,7 +5181,7 @@ select:focus-visible,
 
   .auth-card {
     padding: 32px 24px;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
   }
 
   /* Typography mobile */
@@ -5412,13 +5402,10 @@ select:focus-visible,
   .mobile-peernet-logo {
     display: inline-block;
     font-size: 22px;
-    font-weight: 900;
-    letter-spacing: -0.04em;
+    font-weight: 700;
+    letter-spacing: -0.045em;
     margin-left: 6px;
-    background: linear-gradient(135deg, #0095f6 0%, #00f2fe 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-1);
   }
 }
 
@@ -5438,7 +5425,7 @@ select:focus-visible,
 
   .status-preview-canvas {
     max-height: 60vh;
-    border-radius: 20px;
+    border-radius: var(--r-xl);
   }
 }
 
@@ -6041,7 +6028,7 @@ select:focus-visible,
 }
 
 .zn-convo-row.active {
-  background: var(--accent-subtle, rgba(99, 102, 241, 0.1));
+  background: var(--accent-subtle);
   border-left-color: var(--zn-accent);
   position: relative;
 }
@@ -6061,9 +6048,9 @@ select:focus-visible,
   right: 1px;
   width: 13px;
   height: 13px;
-  background: #22c55e;
+  background: var(--success);
   border-radius: 50%;
-  border: 2px solid #050505;
+  border: 2px solid var(--bg);
 }
 
 /* ---- CHAT MAIN AREA ---- */
@@ -6122,13 +6109,12 @@ select:focus-visible,
   padding: 12px 16px;
   font-size: 15px;
   line-height: 1.5;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   position: relative;
   transition: all 0.2s var(--ease-out);
   max-width: fit-content;
   word-break: break-word;
   min-width: 50px;
-  box-shadow: var(--shadow-sm);
   word-wrap: break-word;
 }
 
@@ -6142,11 +6128,10 @@ select:focus-visible,
 }
 
 .zn-row.self .zn-bubble {
-  background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-fg);
   border-top-right-radius: 18px;
   border-bottom-right-radius: 18px;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
   border-radius: 18px 4px 18px 18px;
 }
 
@@ -6155,16 +6140,17 @@ select:focus-visible,
   line-height: 1.5;
 }
 
+/* A timestamp is data, not a heading. Uppercase at 0.08em tracking gave every
+   single message its own small-caps label. */
 .zn-bubble-meta {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 4px;
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.85;
+  font-weight: 400;
+  opacity: 0.7;
 }
 
 .zn-bubble-meta.self {
@@ -6175,7 +6161,7 @@ select:focus-visible,
   background: rgba(255, 255, 255, 0.05);
   border-left: 3px solid var(--accent);
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   margin-bottom: 6px;
   font-size: 12px;
   color: var(--text-2);
@@ -6197,7 +6183,7 @@ select:focus-visible,
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   padding: 2px 8px;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -6230,22 +6216,19 @@ select:focus-visible,
 }
 
 .zn-composer-pill {
-  background: var(--bg);
-  backdrop-filter: blur(25px);
-  border: 1.5px solid var(--border);
+  background: var(--zn-composer-bg);
+  border: 1px solid var(--zn-composer-border);
   border-radius: 28px;
   padding: 8px 8px 8px 14px;
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  transition: border-color 0.2s;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
 }
 
 .zn-composer-pill:focus-within {
   border-color: var(--accent);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-md), 0 0 0 4px var(--accent-low);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .zn-composer-action-btn {
@@ -6300,23 +6283,20 @@ select:focus-visible,
   align-items: center;
   justify-content: center;
   background: var(--accent);
-  color: white;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  color: var(--accent-fg);
+  transition: background var(--trans-fast);
   border: none;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .zn-send-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-  filter: brightness(1.1);
+  background: var(--accent-hover);
 }
 
 .zn-send-btn:disabled {
-  background: #27272a;
-  color: #52525b;
+  background: var(--surface-2);
+  color: var(--text-3);
   box-shadow: none;
   cursor: not-allowed;
   opacity: 0.3;
@@ -6414,8 +6394,8 @@ select:focus-visible,
 
 .zn-convo-time {
   font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 400;
+  font-family: var(--font-mono);
   letter-spacing: -0.02em;
   color: var(--text-3);
   flex-shrink: 0;
@@ -6471,7 +6451,7 @@ select:focus-visible,
 
 .zn-sidebar-title {
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-1);
   margin: 0;
 }
@@ -6483,7 +6463,7 @@ select:focus-visible,
   gap: 10px;
   background: var(--surface-el);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   padding: 10px 14px;
 }
 
@@ -6518,7 +6498,7 @@ select:focus-visible,
   color: var(--text-2);
   cursor: pointer;
   pointer-events: auto;
-  border-radius: 10px;
+  border-radius: var(--r-md);
   transition: background 0.15s, color 0.15s;
 }
 
@@ -6542,7 +6522,7 @@ select:focus-visible,
   background: transparent;
   color: var(--text-2);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   transition: all 0.15s;
 }
 
@@ -6580,7 +6560,7 @@ select:focus-visible,
 .zn-skeleton-name {
   height: 14px;
   width: 40%;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
 }
 
 .zn-skeleton-msg {
@@ -6614,7 +6594,7 @@ select:focus-visible,
 .zn-empty-icon {
   width: 72px;
   height: 72px;
-  border-radius: 24px;
+  border-radius: var(--r-xl);
   background: var(--surface-el);
   display: flex;
   align-items: center;
@@ -6625,7 +6605,7 @@ select:focus-visible,
 
 .zn-empty-title {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-1);
   margin: 0 0 6px;
 }
@@ -6682,11 +6662,9 @@ select:focus-visible,
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 400;
 }
 
 .zn-status-dot {
@@ -6697,7 +6675,7 @@ select:focus-visible,
 }
 
 .zn-status-dot.online {
-  background: #22c55e;
+  background: var(--success);
 }
 
 .zn-online-dot-sm {
@@ -6707,7 +6685,7 @@ select:focus-visible,
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: #22c55e;
+  background: var(--success);
   border: 2px solid var(--bg);
 }
 
@@ -6742,7 +6720,7 @@ select:focus-visible,
 .zn-chat-skeleton-bubble {
   height: 50px;
   width: 200px;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
 }
 
 /* Date divider */
@@ -6753,15 +6731,14 @@ select:focus-visible,
 }
 
 .zn-date-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
   color: var(--text-3);
   background: var(--surface-el);
   border: 1px solid var(--border);
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
 }
 
 /* Empty chat */
@@ -6791,7 +6768,7 @@ select:focus-visible,
   display: flex;
   align-items: center;
   gap: 10px;
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   margin-bottom: 8px;
   border: 1px solid var(--border);
 }
@@ -6810,11 +6787,10 @@ select:focus-visible,
 }
 
 .zn-reply-name {
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   margin: 0 0 2px;
 }
 
@@ -6841,17 +6817,16 @@ select:focus-visible,
 }
 
 .zn-search-highlight {
-  background: rgba(0, 149, 246, 0.3);
-  color: white;
+  background: var(--accent-subtle);
+  color: var(--text-1);
   border-radius: 2px;
   padding: 0 2px;
 }
 
 .zn-reply-label {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
   opacity: 0.5;
   margin-bottom: 2px;
 }
@@ -6925,7 +6900,7 @@ select:focus-visible,
   max-width: 480px;
   background: var(--surface-el);
   border: 1px solid var(--border-md);
-  border-radius: 24px;
+  border-radius: var(--r-xl);
   padding: 28px;
 }
 
@@ -6938,16 +6913,14 @@ select:focus-visible,
 
 .zn-edit-modal-title {
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-1);
   margin: 0 0 4px;
 }
 
 .zn-edit-modal-sub {
-  font-size: 11px;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 13px;
+  color: var(--text-2);
   margin: 0;
 }
 
@@ -6956,7 +6929,7 @@ select:focus-visible,
   min-height: 140px;
   background: var(--bg);
   border: 1.5px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 16px;
   color: var(--text-1);
   font-size: 15px;
@@ -6983,7 +6956,7 @@ select:focus-visible,
   background: var(--accent);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -7000,7 +6973,7 @@ select:focus-visible,
   background: var(--hover);
   color: var(--text-1);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -7050,7 +7023,7 @@ select:focus-visible,
 
   overflow: hidden;
 
-  color: #fff;
+  color: var(--text-1);
 
   flex-direction: row;
 
@@ -7141,7 +7114,7 @@ select:focus-visible,
   width: 200px;
   background: var(--surface-el);
   border: 1px solid var(--border-md);
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   padding: 6px;
   box-shadow: var(--shadow-lg);
   z-index: 2000;
@@ -7161,7 +7134,7 @@ select:focus-visible,
   text-align: left;
   font-size: 14px;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -7358,98 +7331,83 @@ body:has(.zn-messages-root) .content-wrap {
 [data-theme="light"] {
   /* Token declarations for this theme moved to styles/tokens.css, where they
      sit directly beneath the dark palette instead of three thousand lines away
-     from it. Only light-specific component overrides remain below. */
+     from it.
+
+     What is left is a handful of surfaces that were written as literal light
+     hex values: #fafafa sidebars, #f0f0f2 bubbles, an #09090b menu item and a
+     hard-coded blue selection. They now name the same tokens the dark theme
+     uses, so the palette can be changed in one file and both themes follow.
+     The !important flags stay only where a dark-theme rule of equal
+     specificity would otherwise win. */
 
   .mobile-top-header,
   .mobile-nav {
-    background: rgba(255, 255, 255, 0.92) !important;
-
-    border-color: rgba(0, 0, 0, 0.1);
-
+    background: var(--glass-bg) !important;
+    border-color: var(--border);
   }
 
   .zn-messages-sidebar {
-    background: #fafafa !important;
-
-    border-right-color: rgba(0, 0, 0, 0.08);
-
+    background: var(--surface) !important;
+    border-right-color: var(--border);
   }
 
   .zn-chat-header {
-    background: rgba(255, 255, 255, 0.95) !important;
-
-    border-bottom-color: rgba(0, 0, 0, 0.08);
-
+    background: var(--glass-bg) !important;
+    border-bottom-color: var(--border);
   }
 
   .zn-footer {
-    background: #fafafa !important;
-
-    border-top-color: rgba(0, 0, 0, 0.08);
-
+    background: var(--zn-footer-bg) !important;
+    border-top-color: var(--border);
   }
 
   .zn-composer-pill {
-    background: #f0f0f2 !important;
-
+    background: var(--zn-composer-bg) !important;
+    border-color: var(--zn-composer-border);
   }
 
   .zn-row.peer .zn-bubble {
-    background: #f0f0f2 !important;
-
-    color: #1a1a1a !important;
-
+    background: var(--zn-bubble-peer) !important;
+    color: var(--zn-bubble-peer-text) !important;
   }
 
   .zn-convo-row:hover {
-    background: #f4f4f6 !important;
-
+    background: var(--hover) !important;
   }
 
   .zn-convo-row.active {
-    background: rgba(0, 149, 246, 0.08) !important;
-
+    background: var(--accent-subtle) !important;
   }
 
   .zn-sidebar-search {
-    background: #f0f0f2 !important;
-
+    background: var(--zn-search-bg) !important;
   }
 
   .zn-date-label {
-    background: #f0f0f2 !important;
-
+    background: var(--surface-2) !important;
   }
 
   .zn-edit-modal {
-    background: #ffffff !important;
-
+    background: var(--surface) !important;
   }
 
   .zn-edit-textarea {
-    background: #f4f4f6 !important;
-
+    background: var(--input-bg) !important;
   }
 
   .mobile-more-popup {
-    background: #ffffff !important;
-
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12) !important;
-
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-md) !important;
   }
 
   .mobile-more-item {
-    color: #09090b !important;
-
+    color: var(--text-1) !important;
   }
 
   .mobile-more-item:active {
-    background: #f4f4f5 !important;
-
-  };
-
+    background: var(--hover) !important;
+  }
 }
 
 /* ============================================================
@@ -7518,7 +7476,7 @@ body:has(.zn-messages-root) .content-wrap {
   background: var(--surface-el);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   padding: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   gap: 2px;
@@ -7527,7 +7485,7 @@ body:has(.zn-messages-root) .content-wrap {
 .zn-action-btn {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7545,8 +7503,8 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 .zn-action-btn.delete:hover {
-  color: #f43f5e;
-  background: rgba(244, 63, 94, 0.1);
+  color: var(--error);
+  background: var(--hover);
 }
 
 .zn-action-divider {
@@ -7569,7 +7527,7 @@ body:has(.zn-messages-root) .content-wrap {
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   font-size: 16px;
   transition: all 0.15s;
   display: flex;
@@ -7638,7 +7596,7 @@ body:has(.zn-messages-root) .content-wrap {
   gap: 10px;
   background: var(--surface-1);
   border: 1.5px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   padding: 11px 14px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -7725,13 +7683,13 @@ body:has(.zn-messages-root) .content-wrap {
 .ig-skeleton-name {
   height: 13px;
   width: 40%;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
 }
 
 .ig-skeleton-sub {
   height: 11px;
   width: 25%;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
 }
 
 /* Results list */
@@ -7818,14 +7776,14 @@ body:has(.zn-messages-root) .content-wrap {
 .ig-follow-btn {
   flex-shrink: 0;
   padding: 7px 16px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   font-size: 13px;
   font-weight: 700;
   border: none;
   cursor: pointer;
   transition: all 0.18s;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
 }
 
 .ig-follow-btn.following {
@@ -7839,43 +7797,38 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 /* Empty / initial state */
+/* Sits directly under the field it is talking about, left aligned, instead of
+   floating in the vertical centre of a blank page. */
 .ig-search-empty {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 64px 24px 24px;
-  gap: 10px;
-  flex: 1;
+  align-items: flex-start;
+  text-align: left;
+  padding: 28px 2px 40px;
+  gap: 6px;
 }
 
 .ig-empty-icon-wrap {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--surface-1);
-  border: 1.5px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: center;
   color: var(--text-3);
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 
 .ig-empty-title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-1);
   margin: 0;
 }
 
 .ig-empty-sub {
-  font-size: 13px;
-  color: var(--text-3);
-  line-height: 1.5;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.55;
   margin: 0;
-  max-width: 220px;
+  max-width: 42ch;
 }
 
 /* Mobile tweaks */
@@ -7918,7 +7871,7 @@ body:has(.zn-messages-root) .content-wrap {
   transform-origin: bottom right;
   z-index: 10000; /* Extremely high to clear everything */
   box-shadow: var(--shadow-xl);
-  border-radius: 24px;
+  border-radius: var(--r-xl);
   overflow: hidden;
   border: 1px solid var(--border-md);
   background: var(--glass-bg);
@@ -7951,7 +7904,7 @@ body:has(.zn-messages-root) .content-wrap {
 .EmojiPickerReact .epr-category-label {
   height: 44px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-1);
@@ -7961,15 +7914,15 @@ body:has(.zn-messages-root) .content-wrap {
   padding: 0 20px;
 }/* Light Mode Specific Adjustments */
 [data-theme="light"] .zn-emoji-popover {
-  background: rgba(255, 255, 255, 1) !important;
-  border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+  background: var(--surface) !important;
+  border-color: var(--border);
+  box-shadow: var(--shadow-md) !important;
 }
 
 [data-theme="light"] .EmojiPickerReact {
-  --epr-search-input-bg-color: #f0f2f5 !important;
-  --epr-search-input-text-color: #1a1a1a !important;
-  --epr-category-label-text-color: #1a1a1a !important;
+  --epr-search-input-bg-color: var(--input-bg) !important;
+  --epr-search-input-text-color: var(--text-1) !important;
+  --epr-category-label-text-color: var(--text-1) !important;
   --epr-category-icon-active-color: var(--accent);
   --epr-hover-bg-color: rgba(0, 0, 0, 0.05) !important;
 }
@@ -8128,7 +8081,7 @@ body:has(.zn-messages-root) .content-wrap {
   padding: 12px 16px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   margin-bottom: 2px;
   position: relative;
   margin: 2px 8px;
@@ -8138,12 +8091,14 @@ body:has(.zn-messages-root) .content-wrap {
   background: var(--surface-hover);
 }
 
+/* Unread is carried by the dot on the avatar. Tinting the whole row accent as
+   well turned a normal inbox into a page of orange bands. */
 .notif-unread {
-  background: var(--accent-subtle);
+  background: var(--surface-1);
 }
 
 .notif-unread:hover {
-  background: var(--accent-low);
+  background: var(--hover);
 }
 
 .notif-avatar-wrap {
@@ -8168,7 +8123,7 @@ body:has(.zn-messages-root) .content-wrap {
   transform: translateY(-50%);
   width: 12px;
   height: 12px;
-  background: #0095F6;
+  background: var(--accent);
   border-radius: 50%;
   border: 2px solid var(--bg);
   bottom: 2px;
@@ -8192,8 +8147,8 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 .notif-username {
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--text-1);
   margin-right: 4px;
   cursor: pointer;
 }
@@ -8207,8 +8162,9 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 .notif-time {
+  font-family: var(--font-mono);
   color: var(--text-3);
-  font-size: 13px;
+  font-size: 11.5px;
   margin-left: 6px;
   white-space: nowrap;
 }
@@ -8232,24 +8188,24 @@ body:has(.zn-messages-root) .content-wrap {
 .notif-btn-follow {
   height: 32px;
   padding: 7px 20px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   font-size: 13px;
   font-weight: 700;
-  background: #0095F6;
-  color: white;
+  background: var(--accent);
+  color: var(--accent-fg);
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background var(--trans-fast);
 }
 
 .notif-btn-follow:hover {
-  background: #1877f2;
+  background: var(--accent-hover);
 }
 
 .notif-btn-following {
   height: 32px;
   padding: 7px 16px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   font-size: 13px;
   font-weight: 700;
   background: var(--surface-2);
@@ -8292,13 +8248,13 @@ body:has(.zn-messages-root) .content-wrap {
 }
 
 .zn-msg-status.seen {
-  color: #0095f6; /* Default Blue */
+  color: var(--accent);
 }
 
-/* High Contrast for Self (Blue Bubbles) */
+/* The tick sits inside the accent bubble, so it takes the bubble's own label
+   colour rather than an unconditional white. */
 .zn-row.self .zn-msg-status.seen {
-  color: #fff !important;
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+  color: var(--accent-fg) !important;
 }
 
 .zn-msg-status.delivered {
@@ -8455,7 +8411,7 @@ body:has(.zn-messages-root) .content-wrap {
 .not-found-code {
     margin: 0;
     font-size: 56px;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1;
     color: var(--text-3);
     opacity: 0.5;

@@ -14,6 +14,7 @@ import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } fro
 import EditPostModal from './EditPostModal'
 import ReportModal from './ReportModal'
 import ConfirmDialog from './ConfirmDialog'
+import avatarFallback from './ui/avatarFallback'
 
 function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const { user } = useAuth()
@@ -150,7 +151,7 @@ function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     }
 
     const author = post.author || {}
-    const rawAvatarUrl = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username}&background=6366F1&color=fff`
+    const rawAvatarUrl = author.avatarUrl || avatarFallback(author.username)
     const avatarUrl = optimizeAvatarUrl(rawAvatarUrl)
 
     return (
@@ -233,7 +234,10 @@ function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                     </AnimatePresence>
 
                     {post.mediaType === 'text' ? (
-                        <div className="post-card-text-content" style={{ background: post.backgroundColor || 'var(--accent-gradient)' }}>
+                        // The default ground is the deep accent, not the bright one: the
+                        // caption is set in white, which clears 8:1 on the deep shade and
+                        // only 2.9:1 on the bright one.
+                        <div className="post-card-text-content" style={{ background: post.backgroundColor || 'var(--accent-2)' }}>
                             <div className="post-card-text-inner">{post.caption}</div>
                         </div>
                     ) : post.mediaType === 'video' ? (

@@ -19,6 +19,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import { Helmet } from 'react-helmet-async'
 import { optimizeCloudinaryUrl } from '../utils/cloudinary'
 import { useQueryClient } from '@tanstack/react-query'
+import avatarFallback from '../components/ui/avatarFallback'
 
 const COMMENT_PAGE_SIZE = 20
 
@@ -375,7 +376,7 @@ export default function PostDetail() {
     }
 
     const author = post.author || {}
-    const avatar = author.avatarUrl || `https://ui-avatars.com/api/?name=${author.username}&background=6366F1&color=fff`
+    const avatar = author.avatarUrl || avatarFallback(author.username)
     const isOwner = user?._id === (author._id || author)
 
     // /posts/:id is the app's public share target, and it carried no metadata
@@ -575,7 +576,7 @@ export default function PostDetail() {
                             </div>
                         ) : (
                             comments.map(c => {
-                                const cav = c.author?.avatarUrl || `https://ui-avatars.com/api/?name=${c.author?.username}&background=6366F1&color=fff`
+                                const cav = c.author?.avatarUrl || avatarFallback(c.author?.username)
                                 return (
                                     <div id={`comment-${c._id}`} key={c._id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '6px 0', borderRadius: 8 }}>
                                         <Link to={`/profile/${c.author?._id}`} aria-label={`${c.author?.username}'s profile`}>
@@ -631,7 +632,7 @@ export default function PostDetail() {
                                             {replyData[c._id]?.show && (
                                                 <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
                                                     {replyData[c._id]?.replies?.map(reply => {
-                                                        const rav = reply.author?.avatarUrl || `https://ui-avatars.com/api/?name=${reply.author?.username}&background=6366F1&color=fff`
+                                                        const rav = reply.author?.avatarUrl || avatarFallback(reply.author?.username)
                                                         return (
                                                             <div id={`comment-${reply._id}`} key={reply._id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '4px 0', borderRadius: 8 }}>
                                                                 <Link to={`/profile/${reply.author?._id}`} aria-label={`${reply.author?.username}'s profile`}>
@@ -707,7 +708,7 @@ export default function PostDetail() {
 
                         {/* Comment input */}
                         <form onSubmit={handleComment} className="post-detail-comment-form">
-                            <img src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`}
+                            <img src={user?.avatarUrl || avatarFallback(user?.username)}
                                 className="post-detail-form-avatar" alt="" />
                             <div className="flex-1 relative">
                                 {replyingTo && (

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router'
 import { HiX, HiBadgeCheck, HiUser } from 'react-icons/hi'
 import api from '../api/axios'
+import avatarFallback from './ui/avatarFallback'
 
 export default function UserListModal({ isOpen, onClose, title, userId, type }) {
     const [users, setUsers] = useState([])
@@ -84,7 +85,7 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }) 
                             ) : (
                                 users.map((u, i) => {
                                     if (!u) return null;
-                                    const avatar = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username || 'User'}&background=6366F1&color=fff`
+                                    const avatar = u.avatarUrl || avatarFallback(u.username || 'User')
                                     return (
                                         // A Math.random() key changes on every
                                         // render, so React remounted the row

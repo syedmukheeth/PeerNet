@@ -4,6 +4,7 @@ import { HiX, HiCamera } from 'react-icons/hi'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
+import avatarFallback from './ui/avatarFallback'
 
 export default function EditProfileModal({ profile, onClose, onSave }) {
     const { updateUser } = useAuth()
@@ -86,7 +87,7 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
                     <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileRef.current.click()}>
                         <img
-                            src={preview || `https://ui-avatars.com/api/?name=${profile.username}&size=200&background=6366F1&color=fff`}
+                            src={preview || `${avatarFallback(profile.username)}&size=200`}
                             alt="avatar"
                             style={{ width: 90, height: 90, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--accent)' }}
                         />

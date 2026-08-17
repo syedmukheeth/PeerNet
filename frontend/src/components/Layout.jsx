@@ -14,7 +14,9 @@ import MobileHeader from './shell/MobileHeader'
 import MobileNav from './shell/MobileNav'
 import SiteFooter from './shell/SiteFooter'
 import ErrorBoundary from './ErrorBoundary'
+import { HiHeart, HiChatAlt2, HiUserAdd } from 'react-icons/hi'
 import { useQueryClient } from '@tanstack/react-query'
+import avatarFallback from './ui/avatarFallback'
 
 /*
  * The data layer for the app shell: unread/message counts, the socket
@@ -103,7 +105,13 @@ export default function Layout() {
     }, [location.pathname, syncAllCounts])
 
     const showNotifToast = useCallback((notif) => {
-        const typeEmoji = { like: '❤️', comment: '💬', follow: '👤', message: '💬', reply: '💬' }
+        // Icons, not emoji. The emoji rendered as whatever glyph the operating
+        // system happened to ship, which is why the badge looked like a
+        // different app on Windows than on iOS.
+        const TypeIcon = {
+            like: HiHeart, comment: HiChatAlt2, follow: HiUserAdd,
+            message: HiChatAlt2, reply: HiChatAlt2
+        }[notif.type] || HiChatAlt2
         const typeText = {
             like: notif.entityModel === 'Comment' ? 'liked your comment' : 'liked your post',
             comment: 'commented on your post',
@@ -115,9 +123,9 @@ export default function Layout() {
         toast((t) => (
             <div onClick={() => { navigate(targetUrl); toast.dismiss(t.id) }} className="flex items-center gap-3 cursor-pointer">
                 <div className="relative flex-shrink-0">
-                    <img src={notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.username || 'User'}&background=6366F1&color=fff`} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
-                    <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-accent flex items-center justify-center text-[10px] border-2 border-surface shadow-sm">
-                        {typeEmoji[notif.type]}
+                    <img src={notif.sender?.avatarUrl || avatarFallback(notif.sender?.username || 'User')} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
+                    <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-accent text-accent-fg flex items-center justify-center border-2 border-surface">
+                        <TypeIcon size={10} />
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -140,8 +148,10 @@ export default function Layout() {
         toast((t) => (
             <div onClick={() => { navigate(`/messages/${convoId || ''}`); toast.dismiss(t.id) }} className="flex items-center gap-3 cursor-pointer">
                 <div className="relative flex-shrink-0">
-                    <img src={msg.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${senderName}&background=6366F1&color=fff`} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
-                    <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-primary flex items-center justify-center text-[9px] border-2 border-surface shadow-sm">💬</div>
+                    <img src={msg.sender?.avatarUrl || avatarFallback(senderName)} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
+                    <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-accent text-accent-fg flex items-center justify-center border-2 border-surface">
+                        <HiChatAlt2 size={10} />
+                    </div>
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="m-0 text-[13.5px] font-bold text-primary">{senderName}</p>
@@ -247,7 +257,7 @@ export default function Layout() {
     // arrive together: AuthContext's login/register/google/guest and fetchMe.
 
     const handleLogout = async () => { await logout(); navigate('/login') }
-    const avatarUrl = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
+    const avatarUrl = user?.avatarUrl || avatarFallback(user?.username)
 
     useEffect(() => {
         if (!showMore) return
@@ -267,6 +277,12 @@ export default function Layout() {
 
     const isMessages = location.pathname.startsWith('/messages')
     const isAdmin = location.pathname.startsWith('/admin')
+
+    // Pages with no side rail read as a single column. Without this they
+    // inherited the feed's 1200px shell, which is how the search field ended
+    // up as wide as the window with two centred lines of text under it.
+    const NARROW_ROUTES = ['/search', '/notifications', '/settings', '/about', '/help', '/privacy', '/terms']
+    const isNarrow = NARROW_ROUTES.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))
 
     return (
         <div className="app-layout">
@@ -303,7 +319,7 @@ export default function Layout() {
 
             <main className={`main-col ${isMessages ? 'h-full overflow-hidden' : ''} ${isAdmin ? 'main-col--admin' : ''}`} ref={mainRef}>
                 <div
-                    className={`layout-container ${isMessages ? 'h-full' : ''} ${(!['/messages', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''}`}
+                    className={`layout-container ${isMessages ? 'h-full' : ''} ${(!['/messages', '/admin'].some(p => location.pathname.startsWith(p))) ? 'content-wrap' : ''} ${isNarrow ? 'content-wrap--narrow' : ''}`}
                 >
 
                     {/*

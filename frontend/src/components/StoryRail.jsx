@@ -10,6 +10,7 @@ import CreateStoryModal from './CreateStoryModal'
 import './StoryRail.css'
 
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
+import avatarFallback from './ui/avatarFallback'
 
 /*
  * Progress bar. Purely a display of `progress` (0..1).
@@ -171,7 +172,7 @@ export function StoryViewer({ groups, startGroupIdx, onClose, onStoryDeleted }) 
     }, [])
 
     if (!story) return null
-    const rawAuthorAvatar = group.author.avatarUrl || `https://ui-avatars.com/api/?name=${group.author.username}&background=6366F1&color=fff`
+    const rawAuthorAvatar = group.author.avatarUrl || avatarFallback(group.author.username)
     const authorAvatar = optimizeAvatarUrl(rawAuthorAvatar)
 
     return (
@@ -422,7 +423,7 @@ export default function StoryRail() {
         }, {})
     )
 
-    const userAvatar = user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}&background=6366F1&color=fff`
+    const userAvatar = user?.avatarUrl || avatarFallback(user?.username)
 
     const userGroupIdx = groups.findIndex(g => g.author._id === user?._id)
     const hasUserStory = userGroupIdx !== -1
@@ -462,7 +463,7 @@ export default function StoryRail() {
 
                 {!loading && groups.map((g, i) => {
                     if (g.author._id === user?._id) return null // Skip own story here as it's first
-                    const rawAvatarUrl = g.author.avatarUrl || `https://ui-avatars.com/api/?name=${g.author.username}&background=6366F1&color=fff`
+                    const rawAvatarUrl = g.author.avatarUrl || avatarFallback(g.author.username)
                     return (
                         <StoryCircle
                             key={g.author._id}

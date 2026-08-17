@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { HiSearch, HiTrash, HiTrendingUp, HiChatAlt2, HiCollection } from 'react-icons/hi'
+import avatarFallback from '../../../components/ui/avatarFallback'
 
 /**
  * PostModule Component
@@ -72,7 +73,7 @@ export default function PostModule({ posts, onDelete, contentType, setContentTyp
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full overflow-hidden border border-admin-border p-[1px] bg-gradient-to-tr from-accent to-accent/20">
                                     <img
-                                        src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`}
+                                        src={post.author?.avatarUrl || avatarFallback(post.author?.username)}
                                         className="w-full h-full object-cover rounded-full border border-admin-card"
                                         alt=""
                                     />

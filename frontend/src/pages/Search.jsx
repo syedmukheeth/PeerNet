@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
 import { HiSearch, HiBadgeCheck, HiX, HiExclamationCircle } from 'react-icons/hi'
 import toast from 'react-hot-toast'
+import avatarFallback from '../components/ui/avatarFallback'
 
 export default function Search() {
     const { user: me } = useAuth()
@@ -138,7 +139,7 @@ export default function Search() {
                     <div className="ig-search-results">
                         {results.map((u) => {
                             const isFollowing = following[u._id] !== undefined ? following[u._id] : u.isFollowing
-                            const avatar = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
+                            const avatar = u.avatarUrl || avatarFallback(u.username)
                             return (
                                 <div key={u._id} className="ig-result-row">
                                     <Link to={`/profile/${u._id}`} className="ig-result-user">

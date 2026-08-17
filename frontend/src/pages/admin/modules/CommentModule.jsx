@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { HiSearch, HiTrash, HiChatAlt2 } from 'react-icons/hi'
+import avatarFallback from '../../../components/ui/avatarFallback'
 
 export default function CommentModule({ comments, onDelete, search, setSearch, loading }) {
     return (
@@ -42,7 +43,7 @@ export default function CommentModule({ comments, onDelete, search, setSearch, l
                     <div key={comment._id} className="p-6 space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl overflow-hidden border border-admin-border bg-admin-card p-0.5">
-                                <img src={comment.author?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.author?.username}&background=random`} className="w-full h-full object-cover rounded-[10px]" alt="" />
+                                <img src={comment.author?.avatarUrl || avatarFallback(comment.author?.username)} className="w-full h-full object-cover rounded-[10px]" alt="" />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="text-[13px] font-black text-primary tracking-tight truncate">@{comment.author?.username}</div>
@@ -94,7 +95,7 @@ export default function CommentModule({ comments, onDelete, search, setSearch, l
                                 <td className="pl-8 py-5">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-xl overflow-hidden border border-admin-border p-0.5 bg-admin-card shadow-sm">
-                                            <img src={comment.author?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.author?.username}&background=random`} className="w-full h-full object-cover rounded-[10px]" alt="" />
+                                            <img src={comment.author?.avatarUrl || avatarFallback(comment.author?.username)} className="w-full h-full object-cover rounded-[10px]" alt="" />
                                         </div>
                                         <span className="text-[13px] font-black text-primary tracking-tight">@{comment.author?.username}</span>
                                     </div>

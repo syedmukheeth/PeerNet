@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import {
     HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiRefresh
 } from 'react-icons/hi'
+import avatarFallback from '../components/ui/avatarFallback'
 
 // Compact relative time, e.g. "3h", "2d"
 const formatTime = (date) => {
@@ -41,7 +42,7 @@ function SectionHeader({ label }) {
 
 function NotifRow({ n }) {
     const cfg = typeConfig[n.type] || typeConfig.like
-    const avatar = n.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${n.sender?.username}&background=6366F1&color=fff`
+    const avatar = n.sender?.avatarUrl || avatarFallback(n.sender?.username)
     const [isFollowed, setIsFollowed] = useState(n.sender?.isFollowing || false)
     const [actionLoading, setActionLoading] = useState(false)
 

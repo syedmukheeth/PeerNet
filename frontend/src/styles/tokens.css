@@ -17,6 +17,25 @@
    Theming works off a data-theme attribute on <html>, set by
    context/ThemeContext.jsx and pre-applied by the flash guard in index.html.
    It is NOT Tailwind's dark: variant, and must not be changed to one.
+
+   ── Direction (2026 redesign) ─────────────────────────────────────────────
+   The old palette was Instagram blue #0095f6 on pure black with an Inter and
+   Syne pairing, a three stop gradient wordmark and 25px glass on every
+   surface. That reads as a template. Four rules replace it, and anything
+   added here has to obey them:
+
+   1. Colour: one accent, vermilion, and nothing else. It is warm, it is not
+      a social blue and it is not a violet. It changes shade between themes
+      because a single shade cannot clear 4.5:1 on both #0B0B0C and #FAF9F7.
+      --accent-fg is the label colour to put ON the accent: near black in
+      dark, white in light. Never guess it.
+   2. Type: Geist for everything, Geist Mono for counts, timestamps and ids.
+      One family, weight and tracking carry the hierarchy, not a second face.
+   3. Shape: one radius scale. Controls 10px, cards 14px, sheets 20px, and
+      --r-full only for things that are genuinely circular or a chip.
+   4. Depth: borders first. A shadow means the element actually floats above
+      the page (menu, modal, toast). Nothing else gets one, and no shadow is
+      pure black on a light surface.
    ============================================================================ */
 
 /* Tailwind reads these to generate bg-*, text-*, border-* utilities.
@@ -59,20 +78,25 @@
   --color-admin-border: var(--border);
   --color-admin-surface-subtle: var(--surface-subtle);
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Syne', 'Inter', sans-serif;
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', monospace;
+
+  --color-accent-fg: var(--accent-fg);
 }
 
 /* ── 2. Primitives: identical in every theme ──────────────────────────────── */
 
 :root {
-  /* Radii */
-  --r-xs: 6px;
+  /* Radii. One scale, four jobs: --r-sm on small chrome, --r-md on every
+     control, --r-lg on cards, --r-xl on sheets and modals. --r-full is for
+     avatars and chips only, never for a full width button. */
+  --r-xs: 4px;
   --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 24px;
-  --r-2xl: 32px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-2xl: 28px;
   --r-full: 9999px;
 
   /* Spacing */
@@ -85,7 +109,11 @@
   --s-7: 48px;
   --s-8: 64px;
 
-  /* Layout */
+  /* Layout. --page-max is the reading column for every page that is not the
+     feed. Search, Settings and Notifications used to stretch the full window,
+     which is how a search input ended up 1400px wide with its results, and
+     the footer, floating in the middle of an empty screen. */
+  --page-max: 720px;
   --sidebar-w: 244px;
   --sidebar-collapsed-w: 72px;
   --sidebar-actual-w: var(--sidebar-w);
@@ -119,75 +147,87 @@
 
 :root,
 [data-theme="dark"] {
-  --bg: #000000;
-  --surface: #0a0a0a;
-  --card: #0a0a0a;
-  --surface-el: #121212;
-  --hover: #1c1c1c;
+  /* Off black, not #000. Pure black has no room for a surface to sit above
+     it, which is why every card needed a border and a glow to be visible. */
+  --bg: #0b0b0c;
+  --surface: #101012;
+  --card: #101012;
+  --surface-el: #17171a;
+  --hover: #1f1f23;
 
-  --border: rgba(255, 255, 255, 0.08);
-  --border-md: rgba(255, 255, 255, 0.12);
-  --border-lg: rgba(255, 255, 255, 0.18);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-md: rgba(255, 255, 255, 0.14);
+  --border-lg: rgba(255, 255, 255, 0.22);
 
-  --text-1: #ffffff;
-  --text-2: #a1a1aa;
-  --text-3: #71717a;
+  /* 17.9:1, 7.7:1 and 4.7:1 on --bg. text-3 carries placeholders and meta
+     lines, so it has to clear 4.5:1 like any other body text. */
+  --text-1: #f5f4f2;
+  --text-2: #a5a29c;
+  --text-3: #7e7b74;
 
-  --accent: #0095f6;
-  --accent-2: #00376b;
-  --accent-hover: #1877f2;
-  --accent-gradient: linear-gradient(135deg, #0095f6, #00376b);
-  --accent-gradient-hover: linear-gradient(135deg, #1877f2, #002d5a);
-  --accent-subtle: rgba(0, 149, 246, 0.12);
-  --accent-low: rgba(0, 149, 246, 0.06);
-  --accent-ring: rgba(0, 149, 246, 0.35);
+  /* 6.9:1 on --bg, so it is legible as link text and not only as a fill. */
+  --accent: #ff6a3d;
+  --accent-2: #7a2d16;
+  --accent-hover: #ff835c;
+  --accent-fg: #14100e;
+  --accent-gradient: linear-gradient(180deg, #ff6a3d, #f0532a);
+  --accent-gradient-hover: linear-gradient(180deg, #ff835c, #ff6a3d);
+  --accent-subtle: rgba(255, 106, 61, 0.14);
+  --accent-low: rgba(255, 106, 61, 0.07);
+  --accent-ring: rgba(255, 106, 61, 0.4);
 
-  --logo-gradient: linear-gradient(135deg, #0095f6, #0ea5e9, #6366f1);
-  --story-ring: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  /* Flat, expressed as a gradient because the wordmark clips a background
+     image to text. A three stop blue to violet fade was the single loudest
+     tell that nobody chose these colours. */
+  --logo-gradient: linear-gradient(0deg, var(--accent), var(--accent));
+  --story-ring: linear-gradient(140deg, #ff6a3d 0%, #ff9a3d 50%, #e0431f 100%);
 
-  --success: #10b981;
-  --error: #ef4444;
-  --warning: #f59e0b;
+  --success: #37b26d;
+  --error: #e5484d;
+  --warning: #d99512;
 
   /* Notification accents. These were hard-coded hex literals inside
      pages/Notifications.jsx, so they ignored the theme entirely and were the
      one place in the app that bypassed this file. */
-  --notif-like: #ef4444;
-  --notif-comment: #6366f1;
-  --notif-follow: #10b981;
+  --notif-like: #e5484d;
+  --notif-comment: #4a9ee0;
+  --notif-follow: #37b26d;
 
-  --input-bg: #121212;
-  --overlay: rgba(0, 0, 0, 0.85);
+  --input-bg: #17171a;
+  --overlay: rgba(6, 6, 7, 0.72);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 12px 48px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 24px 72px rgba(0, 0, 0, 0.8);
-  --shadow-xl: 0 32px 128px rgba(0, 0, 0, 0.9);
-  --shadow-accent: 0 0 40px rgba(0, 149, 246, 0.2);
+  /* Only three real steps. sm is a hairline for a sticky bar, md is a menu
+     or popover, lg is a modal. xl is kept because rules still name it, and
+     points at lg rather than a 128px black cloud. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 16px 44px rgba(0, 0, 0, 0.55);
+  --shadow-accent: 0 0 0 1px rgba(255, 106, 61, 0.28);
   --text-glow: none;
 
-  --glass-bg: rgba(0, 0, 0, 0.75);
+  --glass-bg: rgba(11, 11, 12, 0.82);
   --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-blur: blur(25px);
+  --glass-blur: blur(12px);
 
-  --surface-1: #121212;
-  --surface-2: #18181b;
-  --surface-subtle: rgba(255, 255, 255, 0.04);
-  --surface-overlay: rgba(20, 20, 24, 0.85);
-  --surface-rgb: 0, 0, 0;
-  --text-1-rgb: 255, 255, 255;
-  --accent-rgb: 0, 149, 246;
+  --surface-1: #17171a;
+  --surface-2: #1f1f23;
+  --surface-subtle: rgba(255, 255, 255, 0.045);
+  --surface-overlay: rgba(16, 16, 18, 0.88);
+  --surface-rgb: 11, 11, 12;
+  --text-1-rgb: 245, 244, 242;
+  --accent-rgb: 255, 106, 61;
   --border-rgb: 255, 255, 255;
 
   /* Messaging */
-  --zn-footer-bg: rgba(0, 0, 0, 0.6);
-  --zn-composer-bg: rgba(24, 24, 27, 0.7);
-  --zn-composer-border: rgba(255, 255, 255, 0.1);
-  --zn-composer-text: #ffffff;
-  --zn-bubble-peer: #18181b;
-  --zn-bubble-peer-text: #f4f4f5;
-  --zn-action-bar-bg: rgba(9, 9, 11, 0.96);
-  --zn-search-bg: rgba(255, 255, 255, 0.05);
+  --zn-footer-bg: rgba(11, 11, 12, 0.72);
+  --zn-composer-bg: #17171a;
+  --zn-composer-border: rgba(255, 255, 255, 0.12);
+  --zn-composer-text: #f5f4f2;
+  --zn-bubble-peer: #1f1f23;
+  --zn-bubble-peer-text: #f5f4f2;
+  --zn-action-bar-bg: rgba(11, 11, 12, 0.96);
+  --zn-search-bg: rgba(255, 255, 255, 0.06);
 }
 
 /* ── 4. Light theme ───────────────────────────────────────────────────────── */
@@ -197,75 +237,83 @@
    re-resolve on their own. */
 
 [data-theme="light"] {
-  --bg: #ffffff;
+  /* Warm off white. The page is the paper, cards are pure white on top of
+     it, which is what separates them without a shadow. */
+  --bg: #faf9f7;
   --surface: #ffffff;
   --card: #ffffff;
-  --surface-el: #fafafa;
-  --hover: #f4f4f5;
+  --surface-el: #ffffff;
+  --hover: #f1efeb;
 
-  --border: rgba(0, 0, 0, 0.08);
-  --border-md: rgba(0, 0, 0, 0.12);
-  --border-lg: rgba(0, 0, 0, 0.18);
+  --border: rgba(23, 22, 26, 0.1);
+  --border-md: rgba(23, 22, 26, 0.16);
+  --border-lg: rgba(23, 22, 26, 0.24);
 
-  --text-1: #09090b;
-  --text-2: #52525b;
-  --text-3: #71717a;
+  /* 17.1:1, 7.1:1 and 4.8:1 on --bg. */
+  --text-1: #17161a;
+  --text-2: #57545c;
+  --text-3: #716e76;
 
-  --accent: #0095f6;
-  --accent-2: #00376b;
-  --accent-hover: #1877f2;
-  --accent-gradient: linear-gradient(135deg, #0095f6, #00376b);
-  --accent-gradient-hover: linear-gradient(135deg, #1877f2, #002d5a);
-  --accent-subtle: rgba(0, 149, 246, 0.08);
-  --accent-low: rgba(0, 149, 246, 0.04);
-  --accent-ring: rgba(0, 149, 246, 0.25);
+  /* Darker than the dark theme accent on purpose: #ff6a3d only reaches
+     2.3:1 on this background. #c23a17 reaches 5.1:1, and white on it
+     reaches 5.4:1. */
+  --accent: #c23a17;
+  --accent-2: #7a2d16;
+  --accent-hover: #a63113;
+  --accent-fg: #ffffff;
+  --accent-gradient: linear-gradient(180deg, #c23a17, #a63113);
+  --accent-gradient-hover: linear-gradient(180deg, #a63113, #8c2810);
+  --accent-subtle: rgba(194, 58, 23, 0.1);
+  --accent-low: rgba(194, 58, 23, 0.05);
+  --accent-ring: rgba(194, 58, 23, 0.32);
 
-  --logo-gradient: linear-gradient(135deg, #0095f6, #0ea5e9, #6366f1);
-  --story-ring: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  --logo-gradient: linear-gradient(0deg, var(--accent), var(--accent));
+  --story-ring: linear-gradient(140deg, #e0431f 0%, #d97218 50%, #a63113 100%);
 
-  --success: #10b981;
-  --error: #ef4444;
-  --warning: #f59e0b;
+  --success: #1d7f4c;
+  --error: #c62a2f;
+  --warning: #9a6b06;
 
   /* Notification accents. These were hard-coded hex literals inside
      pages/Notifications.jsx, so they ignored the theme entirely and were the
      one place in the app that bypassed this file. */
-  --notif-like: #ef4444;
-  --notif-comment: #6366f1;
-  --notif-follow: #10b981;
+  --notif-like: #c62a2f;
+  --notif-comment: #1f6aa8;
+  --notif-follow: #1d7f4c;
 
-  --input-bg: #f8fafc;
-  --overlay: rgba(0, 0, 0, 0.4);
+  --input-bg: #ffffff;
+  --overlay: rgba(23, 22, 26, 0.4);
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 32px 96px rgba(0, 0, 0, 0.15);
-  --shadow-accent: 0 0 24px rgba(0, 149, 246, 0.15);
+  /* Tinted toward the warm page ground, never pure black. */
+  --shadow-sm: 0 1px 2px rgba(40, 33, 24, 0.06);
+  --shadow-md: 0 8px 24px rgba(40, 33, 24, 0.1);
+  --shadow-lg: 0 16px 44px rgba(40, 33, 24, 0.14);
+  --shadow-xl: 0 16px 44px rgba(40, 33, 24, 0.14);
+  --shadow-accent: 0 0 0 1px rgba(194, 58, 23, 0.24);
   --text-glow: none;
 
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-blur: blur(25px);
+  --glass-bg: rgba(250, 249, 247, 0.86);
+  --glass-border: rgba(23, 22, 26, 0.1);
+  --glass-blur: blur(12px);
 
-  --surface-1: #fafafa;
-  --surface-2: #f4f4f5;
-  --surface-subtle: rgba(0, 0, 0, 0.04);
-  --surface-overlay: rgba(255, 255, 255, 0.9);
-  --surface-rgb: 255, 255, 255;
-  --text-1-rgb: 9, 9, 11;
-  --accent-rgb: 0, 149, 246;
-  --border-rgb: 0, 0, 0;
+  --surface-1: #ffffff;
+  --surface-2: #f4f2ee;
+  --surface-subtle: rgba(23, 22, 26, 0.045);
+  --surface-overlay: rgba(255, 255, 255, 0.92);
+  --surface-rgb: 250, 249, 247;
+  --text-1-rgb: 23, 22, 26;
+  --accent-rgb: 194, 58, 23;
+  --border-rgb: 23, 22, 26;
 
   /* Messaging */
-  --zn-footer-bg: rgba(255, 255, 255, 0.9);
-  --zn-composer-bg: #f4f4f7;
-  --zn-composer-border: rgba(0, 0, 0, 0.08);
-  --zn-composer-text: #09090b;
-  --zn-bubble-peer: #f4f4f5;
-  --zn-bubble-peer-text: #09090b;
+  --zn-footer-bg: rgba(250, 249, 247, 0.88);
+  --zn-composer-bg: #ffffff;
+  --zn-composer-border: rgba(23, 22, 26, 0.12);
+  --zn-composer-text: #17161a;
+  --zn-bubble-peer: #f1efeb;
+  --zn-bubble-peer-text: #17161a;
   --zn-action-bar-bg: rgba(255, 255, 255, 0.98);
-  --zn-search-bg: rgba(0, 0, 0, 0.04);
+  --zn-search-bg: rgba(23, 22, 26, 0.045);
 }
 
 /* ── 5. Aliases ───────────────────────────────────────────────────────────── */

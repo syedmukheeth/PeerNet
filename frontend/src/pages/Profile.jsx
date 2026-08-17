@@ -10,6 +10,7 @@ import { optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudin
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
+import avatarFallback from '../components/ui/avatarFallback'
 
 
 export default function Profile() {
@@ -186,7 +187,7 @@ export default function Profile() {
                 <div className="profile-avatar-wrap">
                     <div className={`avatar-ring ${hasStory ? 'has-stories' : ''} cursor-pointer group`} onClick={() => hasStory && setViewerOpen(true)}>
                         <img 
-                            src={profile.avatarUrl || `https://ui-avatars.com/api/?name=${profile.username}&background=6366F1&color=fff`} 
+                            src={profile.avatarUrl || avatarFallback(profile.username)} 
                             className="profile-avatar-img transition-transform group-hover:scale-105" 
                             alt={profile.username} 
                         />

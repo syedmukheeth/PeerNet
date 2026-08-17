@@ -19,6 +19,7 @@ import {
 import { timeago as formatTime } from '../utils/timeago'
 import { splitOnQuery } from '../utils/highlight'
 import toast from 'react-hot-toast'
+import avatarFallback from '../components/ui/avatarFallback'
 
 /**
  * CONVERSATION ITEM
@@ -48,7 +49,7 @@ const ConvoItem = ({ c, isActive, user, onClick }) => {
         >
             <div style={{ position: 'relative', flexShrink: 0 }}>
                 <img
-                    src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=0095f6&color=fff`}
+                    src={peer?.avatarUrl || avatarFallback(peer?.username)}
                     className="zn-convo-avatar"
                     alt={peer?.username}
                 />
@@ -588,7 +589,7 @@ export default function Messages() {
                                     >
                                         <div style={{ position: 'relative' }}>
                                             <img
-                                                src={peer?.avatarUrl || `https://ui-avatars.com/api/?name=${peer?.username}&background=0095f6&color=fff`}
+                                                src={peer?.avatarUrl || avatarFallback(peer?.username)}
                                                 className="zn-chat-peer-avatar"
                                                 alt=""
                                             />

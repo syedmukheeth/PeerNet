@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { HiSearch, HiShieldCheck, HiTrash, HiCheck, HiUsers } from 'react-icons/hi'
+import avatarFallback from '../../../components/ui/avatarFallback'
 
 /**
  * UserModule Component
@@ -56,7 +57,7 @@ export default function UserModule({ users, onVerify, onDelete, loading, search,
                     <div key={user._id} className="p-4 space-y-4 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-xl overflow-hidden border border-admin-border bg-admin-card">
-                                <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random`} className="w-full h-full object-cover" alt="" />
+                                <img src={user.avatarUrl || avatarFallback(user.username)} className="w-full h-full object-cover" alt="" />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="text-[14px] font-black text-primary tracking-tight truncate">@{user.username}</div>
@@ -138,7 +139,7 @@ export default function UserModule({ users, onVerify, onDelete, loading, search,
                                     <div className="flex items-center gap-4">
                                         <div className="relative">
                                             <div className="w-10 h-10 rounded-xl overflow-hidden border border-admin-border bg-admin-card">
-                                                <img src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.username}&background=random`} className="w-full h-full object-cover" alt="" />
+                                                <img src={user.avatarUrl || avatarFallback(user.username)} className="w-full h-full object-cover" alt="" />
                                             </div>
                                             {user.isVerified && (
                                                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-success text-white rounded-full flex items-center justify-center border-2 border-admin-card">

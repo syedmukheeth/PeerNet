@@ -4,6 +4,7 @@ import { HiX, HiBadgeCheck, HiUser } from 'react-icons/hi'
 import api, { chatApi } from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
+import avatarFallback from './ui/avatarFallback'
 
 export default function ShareModal({ isOpen, onClose, postId }) {
     const { user: currentUser } = useAuth()
@@ -96,7 +97,7 @@ export default function ShareModal({ isOpen, onClose, postId }) {
                                 </div>
                             ) : (
                                 users.map(u => {
-                                    const avatar = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username}&background=6366F1&color=fff`
+                                    const avatar = u.avatarUrl || avatarFallback(u.username)
                                     const isSent = sentStatus[u._id]
                                     return (
                                         <div key={u._id} style={{
