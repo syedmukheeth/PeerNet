@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { HiSearch, HiShieldCheck, HiTrash, HiCheck, HiUsers } from '../../../components/ui/icons'
 import avatarFallback from '../../../components/ui/avatarFallback'
+import { isAdmin } from '../../../utils/roles'
 
 /**
  * UserModule Component
@@ -169,7 +170,7 @@ export default function UserModule({ users, onVerify, onDelete, loading, search,
                                 </td>
                                 <td>
                                     <span className={`inline-flex px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] border ${
-                                        user.role === 'admin'
+                                        isAdmin(user)
                                             ? 'bg-accent/10 border-accent/30 text-accent'
                                             : 'bg-surface-subtle border-admin-border text-muted/60'
                                     }`}>

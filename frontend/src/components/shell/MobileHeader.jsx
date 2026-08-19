@@ -1,7 +1,8 @@
 import { Link, NavLink } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiOutlineBell, HiOutlineChatAlt2, HiMenu, HiMoon, HiSun, HiCog, HiShieldCheck, HiSwitchHorizontal, HiLogout, HiLogin } from '../ui/icons'
-import logoImg from '../../assets/logo.svg'
+import logoImg from '../../assets/logo.png'
+import { isAdmin } from '../../utils/roles'
 
 /*
  * The mobile top bar plus its slide-down "more" popup. Mirrors the desktop
@@ -76,7 +77,7 @@ export default function MobileHeader({
                                 <HiCog size={20} /> <span>Settings</span>
                             </NavLink>
                         )}
-                        {user?.role === 'admin' && (
+                        {isAdmin(user) && (
                             <NavLink to="/admin" className="mobile-more-item" onClick={() => setShowMore(false)}>
                                 <HiShieldCheck size={20} /> <span>Admin Console</span>
                             </NavLink>

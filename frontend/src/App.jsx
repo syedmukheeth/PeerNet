@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import SplashScreen from './components/SplashScreen'
 import ComplianceNotice from './components/ComplianceNotice'
 import ErrorBoundary from './components/ErrorBoundary'
+import { isAdmin } from './utils/roles'
 
 const Feed = lazy(() => import('./pages/Feed'))
 const Login = lazy(() => import('./pages/Login'))
@@ -44,9 +45,7 @@ const ProtectedRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth()
   if (loading) return <RouteSpinner />
-  // superadmin outranks admin everywhere else in the app, but was locked out
-  // of the console by an exact-equality check.
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+  if (!isAdmin(user)) {
     return <Navigate to="/" replace />
   }
   return children

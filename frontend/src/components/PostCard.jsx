@@ -12,6 +12,7 @@ import EditPostModal from './EditPostModal'
 import ReportModal from './ReportModal'
 import ConfirmDialog from './ConfirmDialog'
 import avatarFallback from './ui/avatarFallback'
+import { isAdmin as isStaff } from '../utils/roles'
 
 function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const { user } = useAuth()
@@ -30,8 +31,7 @@ function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [showHeart, setShowHeart] = useState(false)
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
-    // superadmin outranks admin, so match the console's check in App.jsx.
-    const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+    const isAdmin = isStaff(user)
 
     // Sync liked state from server data, but only when no local override is active
     useEffect(() => {

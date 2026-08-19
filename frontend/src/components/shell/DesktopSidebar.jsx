@@ -4,7 +4,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { HiLogout, HiLogin, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal, HiOutlinePlusCircle, HiOutlineShieldCheck } from '../ui/icons'
 import { chatApi } from '../../api/axios'
 import { navLinks } from './navLinks'
-import logoImg from '../../assets/logo.svg'
+import logoImg from '../../assets/logo.png'
+import { isAdmin } from '../../utils/roles'
 
 /*
  * The desktop rail: branding, primary nav, create/admin entries, and the
@@ -89,7 +90,7 @@ export default function DesktopSidebar({
                     </button>
                 )}
 
-                {user?.role === 'admin' && (
+                {isAdmin(user) && (
                     <NavLink
                         to="/admin"
                         className={({ isActive }) => `ig-link ${isActive ? 'ig-link--active' : ''}`}
@@ -113,6 +114,7 @@ export default function DesktopSidebar({
                         type="button"
                         className="sidebar-profile-card"
                         onClick={() => navigate(`/profile/${user._id}`)}
+                        title={user.fullName ? `${user.fullName} (@${user.username})` : `@${user.username}`}
                     >
                         <img src={avatarUrl} className="profile-card-avatar" alt="" />
                         <div className="profile-card-info">
@@ -159,7 +161,7 @@ export default function DesktopSidebar({
                                         <HiCog size={20} /> <span>Settings</span>
                                     </NavLink>
                                 )}
-                                {user?.role === 'admin' && (
+                                {isAdmin(user) && (
                                     <NavLink to="/admin" className="ig-more-item" onClick={() => setShowMore(false)}>
                                         <HiShieldCheck size={20} /> <span>Admin Console</span>
                                     </NavLink>
