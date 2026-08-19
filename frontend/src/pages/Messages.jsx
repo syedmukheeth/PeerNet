@@ -501,12 +501,12 @@ export default function Messages() {
                             <HiPencil size={20} />
                         </button>
                     </div>
-                    <div className="zn-sidebar-search">
-                        <HiSearch size={16} className="zn-search-icon" />
+                    <div className="field field-sm">
+                        <HiSearch size={16} className="field-icon" />
                         <input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="zn-search-input"
+                            className="field-input"
                             placeholder="Search chats..."
                         />
                     </div>
@@ -655,14 +655,16 @@ export default function Messages() {
                                         exit={{ height: 0, opacity: 0 }}
                                         className="zn-chat-search-bar"
                                     >
-                                        <HiSearch size={16} />
-                                        <input
-                                            autoFocus
-                                            value={chatSearchQuery}
-                                            onChange={(e) => setChatSearchQuery(e.target.value)}
-                                            placeholder="Search in conversation..."
-                                            className="zn-search-input"
-                                        />
+                                        <div className="field field-sm">
+                                            <HiSearch size={16} className="field-icon" />
+                                            <input
+                                                autoFocus
+                                                value={chatSearchQuery}
+                                                onChange={(e) => setChatSearchQuery(e.target.value)}
+                                                placeholder="Search in conversation..."
+                                                className="field-input"
+                                            />
+                                        </div>
                                         <button onClick={() => { setIsSearchingInChat(false); setChatSearchQuery('') }} className="zn-icon-btn-sm" aria-label="Close search">
                                             <HiX size={16} />
                                         </button>

@@ -458,7 +458,7 @@
 .zn-composer-pill {
   background: var(--zn-composer-bg);
   border: 1px solid var(--zn-composer-border);
-  border-radius: 28px;
+  border-radius: var(--r-2xl);
   padding: 8px 8px 8px 14px;
   display: flex;
   align-items: flex-end;
@@ -693,35 +693,9 @@
   margin: 0;
 }
 
-/* Sidebar search */
-.zn-sidebar-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface-el);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 10px 14px;
-}
-
-.zn-search-icon {
-  color: var(--text-3);
-  flex-shrink: 0;
-}
-
-.zn-search-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  color: var(--text-1);
-  font-family: inherit;
-}
-
-.zn-search-input::placeholder {
-  color: var(--text-3);
-}
+/* Both search bars in this surface use the shared `.field` shell from
+   components.css. They used to be two separate hand-rolled boxes with
+   different grounds, and neither had a focus state at all. */
 
 /* Icon buttons */
 .zn-icon-btn {
@@ -926,7 +900,7 @@
   border: 2px solid var(--bg);
 }
 
-/* Chat search bar */
+/* Chat search bar. The row is a divider; the field inside it is a .field. */
 .zn-chat-search-bar {
   display: flex;
   align-items: center;
@@ -1164,8 +1138,8 @@
 .zn-edit-textarea {
   width: 100%;
   min-height: 140px;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
+  background: var(--input-bg);
+  border: 1px solid transparent;
   border-radius: var(--r-lg);
   padding: 16px;
   color: var(--text-1);
@@ -1173,12 +1147,15 @@
   font-family: inherit;
   outline: none;
   resize: none;
-  transition: border-color 0.2s;
+  transition: background var(--trans-fast), border-color var(--trans-fast),
+    box-shadow var(--trans-fast);
   box-sizing: border-box;
 }
 
 .zn-edit-textarea:focus {
+  background: var(--input-bg-focus);
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .zn-edit-modal-actions {
@@ -1191,7 +1168,7 @@
   flex: 1;
   height: 44px;
   background: var(--accent);
-  color: white;
+  color: var(--accent-fg);
   border: none;
   border-radius: var(--r-lg);
   font-size: 13px;

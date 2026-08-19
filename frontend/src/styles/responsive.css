@@ -99,11 +99,6 @@
     padding: 20px 16px;
   }
 
-  /* Search bar */
-  .search-bar {
-    padding: 12px 18px;
-    margin-bottom: 20px;
-  }
 }
 
 /* ========================================================================================================================================================================================================================================
@@ -246,12 +241,6 @@
 
   
 
-  /* Search bar mobile */
-  .search-bar {
-    padding: 10px 16px;
-    margin: 12px 16px 16px;
-    gap: 10px;
-  }
 
   /* Modals mobile */
   .modal-overlay {
@@ -356,20 +345,6 @@
     border-radius: var(--r-lg);
   }
 
-  /* Admin page mobile */
-
-  
-
-  
-
-  .admin-table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .admin-table {
-    min-width: 600px;
-  }
 
   /* Auth pages mobile */
   .auth-page {
@@ -558,7 +533,7 @@
   .story-rail-wrap,
   .post-card-actions,
   .post-card-header button,
-  .admin-side-panel {
+  .ac-sidebar {
     display: none !important;
   }
 

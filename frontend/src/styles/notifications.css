@@ -32,93 +32,11 @@
   background: var(--surface-2);
 }
 
-.admin-surface-el {
-  position: relative;
-  background: rgba(15, 15, 15, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--r-2xl);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  overflow: hidden;
-  transition: all 0.4s var(--ease-out);
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.1);
-}
-
-.admin-surface-el:hover {
-  border-color: rgba(var(--accent-rgb), 0.2);
-  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
-  transform: translateY(-2px);
-}
-
-.admin-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.admin-table th {
-  text-align: left;
-  padding: 20px 24px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-3);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-  letter-spacing: 0.2em;
-  background: rgba(255, 255, 255, 0.01);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  opacity: 0.6;
-  white-space: nowrap;
-}
-
-.admin-table td {
-  padding: 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  vertical-align: middle;
-  font-size: 13px;
-  transition: background 0.2s;
-}
-
-.admin-table tr:hover td {
-  background: rgba(255, 255, 255, 0.01);
-}
-
-.admin-table tr:last-child td {
-  border-bottom: none;
-}
-
-/* Stat Cards */
-.admin-stat-card {
-  background: linear-gradient(135deg, rgba(20, 20, 20, 0.6) 0%, rgba(10, 10, 10, 0.4) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 28px;
-  padding: 24px;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-}
-
-.admin-stat-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle at 100% 0%, var(--accent-alpha), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.5s;
-}
+/* The admin console styles that lived here are gone. They were a second,
+   older copy of .admin-surface-el / .admin-table / .admin-stat-card sitting in
+   the notifications module, competing with the copies in the console's own
+   stylesheet purely on import order. The console now owns its rules, under
+   ac- names, in pages/admin/admin.css. */
 
 /* Fix for Admin Sidebar horizontal scroll glow */
 

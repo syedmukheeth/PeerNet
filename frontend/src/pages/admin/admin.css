@@ -1,420 +1,850 @@
-:root {
-    --admin-bg: #09090b;
-    --admin-card: #121214;
-    --admin-surface: rgba(18, 18, 20, 0.7);
-    --admin-surface-subtle: rgba(255, 255, 255, 0.03);
-    --admin-border: rgba(255, 255, 255, 0.06);
-    --admin-border-md: rgba(255, 255, 255, 0.12);
-    /* Was #7c3aed (violet) - a second accent competing with the app's blue.
-       Aliased to the single accent so the console matches the rest of the
-       app; every rule below already reads --admin-accent, so this one change
-       retints the whole console. */
-    --admin-accent: var(--accent);
-    --admin-text-primary: #fafafa;
-    --admin-text-secondary: #a1a1aa;
-    --admin-text-muted: #52525b;
-}
+/* ============================================================================
+   ADMIN CONSOLE
 
-/* This file ships in the lazily loaded /admin chunk but its rules stay in the
-   document for the rest of the session. Everything below must therefore stay
-   namespaced (--admin-*) or scoped to .admin-root-v2. Never redefine a global
-   token or a Tailwind utility name here: it silently reskins the whole app the
-   moment someone visits /admin.
+   This file ships inside the lazily loaded /admin chunk, but once the chunk
+   loads its rules stay in the document for the rest of the session. Every
+   selector below is therefore prefixed `ac-` or scoped under `.ac-shell`.
+   Never declare a global token or a Tailwind utility name here: it silently
+   reskins the whole app the moment someone visits /admin.
 
-   Previously leaked from this block: --success/--error/--warning (identical
-   values already exist globally) and --accent-rgb, which turned every accent
-   glow in the app violet. */
+   Two things have leaked out of this file before and both were hard to trace:
+   a `--accent-rgb` override that turned every accent glow in the app violet,
+   and bare `.text-primary` / `.text-muted` rules that retinted Layout, Feed,
+   Profile, Notifications and PostDetail.
 
-[data-theme='light'] {
-    --admin-bg: #fafafa; /* Higher contrast off-white */
-    --admin-card: #ffffff;
-    --admin-surface: rgba(255, 255, 255, 0.95);
-    --admin-surface-subtle: #f4f4f5; /* Zinc 100 */
-    --admin-border: #e4e4e7; /* Zinc 200 */
-    --admin-border-md: #d4d4d8; /* Zinc 300 */
-    --admin-text-primary: #09090b; /* Zinc 950 */
-    --admin-text-secondary: #27272a; /* Zinc 800 */
-    --admin-text-muted: #52525b; /* Zinc 600 */
-}
+   There is no `--admin-*` token set any more. The console used to carry a
+   private copy of the palette, which meant a colour fixed in tokens.css was
+   still wrong here. It now reads the same tokens as every other surface and
+   themes through `[data-theme]` for free.
+   ============================================================================ */
 
-.admin-root-v2 {
+/* -- Shell ----------------------------------------------------------------- */
+
+.ac-shell {
+    --ac-sidebar-w: 248px;
+    --ac-sidebar-collapsed-w: 68px;
     display: flex;
     height: 100dvh;
     max-height: 100dvh;
-    background: var(--admin-bg);
-    color: var(--admin-text-primary);
     overflow: hidden;
+    background: var(--bg);
+    color: var(--text-1);
     font-family: var(--font-sans);
 }
 
-.admin-main-col {
+.ac-main {
     flex: 1;
+    min-width: 0;
     height: 100dvh;
     max-height: 100dvh;
     overflow-y: auto;
-    min-width: 0;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    background: var(--admin-bg);
     overflow-anchor: none;
+    background: var(--bg);
 }
 
-/* Sidebar width management.
-   The widths live on .admin-root-v2, not :root, because the global --sidebar-w
-   (244px, index.css) belongs to the main app shell.
-   .admin-main-col is a SIBLING of .admin-sidebar-v2, not a descendant, so the
+/* The main column is a SIBLING of the sidebar, not a descendant, so the
    collapsed width has to reach it through a sibling combinator. Setting a
    custom property on the collapsed aside never propagates sideways, which is
-   why collapsing used to shrink the sidebar while the main column kept its
-   full-width margin. */
-.admin-root-v2 {
-    --admin-sidebar-w: 280px;
-    --admin-sidebar-collapsed-w: 88px;
+   why collapsing once shrank the sidebar while the main column kept its full
+   width margin. */
+@media (min-width: 1025px) {
+    .ac-main {
+        margin-left: var(--ac-sidebar-w);
+        transition: margin-left var(--trans-smooth);
+    }
+
+    .ac-sidebar.is-collapsed ~ .ac-main {
+        margin-left: var(--ac-sidebar-collapsed-w);
+    }
 }
 
-@media (min-width: 1025px) {
-    .admin-main-col {
-        margin-left: var(--admin-sidebar-w);
-    }
+.ac-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 32px 64px;
+}
 
-    .admin-sidebar-v2.collapsed ~ .admin-main-col {
-        margin-left: var(--admin-sidebar-collapsed-w);
-    }
+/* -- Sidebar --------------------------------------------------------------- */
+
+.ac-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-overlay);
+    width: var(--ac-sidebar-w);
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    transition: width var(--trans-smooth), transform var(--trans-smooth);
+    overflow: hidden;
+}
+
+.ac-sidebar.is-collapsed {
+    width: var(--ac-sidebar-collapsed-w);
+}
+
+/* Grid items default to min-height: auto, which stops 1fr from constraining
+   the nav. This one line is what keeps the footer on screen. */
+.ac-sidebar-nav {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 12px;
+}
+
+.ac-sidebar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 60px;
+    padding: 0 12px 0 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.ac-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--text-1);
+}
+
+.ac-brand img {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.ac-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    min-width: 0;
+}
+
+.ac-brand-name {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.ac-brand-sub {
+    font-size: 12px;
+    color: var(--text-3);
+}
+
+.ac-sidebar-group + .ac-sidebar-group {
+    margin-top: 18px;
+}
+
+.ac-sidebar-label {
+    padding: 0 12px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+.ac-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: var(--r-md);
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--trans-fast), color var(--trans-fast);
+}
+
+.ac-nav-item svg {
+    flex-shrink: 0;
+    color: var(--text-3);
+    transition: color var(--trans-fast);
+}
+
+.ac-nav-item:hover {
+    background: var(--hover);
+    color: var(--text-1);
+}
+
+.ac-nav-item:hover svg {
+    color: var(--text-2);
+}
+
+.ac-nav-item.active {
+    background: var(--accent-subtle);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.ac-nav-item.active svg {
+    color: var(--accent);
+}
+
+.ac-nav-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ac-nav-count {
+    flex-shrink: 0;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-full);
+    background: var(--error);
+    color: var(--error-fg);
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.ac-sidebar-foot {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.ac-sidebar.is-collapsed .ac-brand-text,
+.ac-sidebar.is-collapsed .ac-nav-label,
+.ac-sidebar.is-collapsed .ac-nav-count,
+.ac-sidebar.is-collapsed .ac-sidebar-label,
+.ac-sidebar.is-collapsed .ac-collapse-hide {
+    display: none;
+}
+
+.ac-sidebar.is-collapsed .ac-nav-item,
+.ac-sidebar.is-collapsed .ac-sidebar-head {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.ac-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-overlay) - 1);
+    background: var(--overlay);
 }
 
 @media (max-width: 1024px) {
-    .admin-main-col {
+    .ac-sidebar {
+        transform: translateX(-100%);
+        width: var(--ac-sidebar-w);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .ac-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .ac-main {
         margin-left: 0;
     }
 }
 
-/* --- Components --- */
+/* -- Page header ----------------------------------------------------------- */
 
-.admin-surface-el {
-    background: var(--admin-card);
-    border: 1px solid var(--admin-border);
-    border-radius: var(--r-2xl);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-
-.admin-surface-el:hover {
-    border-color: var(--admin-accent);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.admin-surface-el-v2 {
-    background: var(--admin-card);
-    border: 1px solid var(--admin-border);
-    border-radius: var(--r-2xl);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.admin-glass-v2 {
-    background: var(--admin-surface);
-    border: 1px solid var(--admin-border);
-    border-radius: var(--r-2xl);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.admin-stat-card-v2 {
-    background: var(--admin-card);
-    border: 1px solid var(--admin-border);
-    border-radius: var(--r-2xl);
-    padding: 32px;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-}
-
-.admin-stat-card-v2:hover {
-    transform: translateY(-4px);
-    border-color: var(--admin-accent);
-    box-shadow: 0 12px 30px rgba(var(--accent-rgb), 0.1);
-}
-
-.admin-h1-v2 {
-    font-size: clamp(32px, 5vw, 56px);
-    font-weight: 900;
-    letter-spacing: -0.05em;
-    line-height: 1;
-    text-transform: uppercase;
-    background: linear-gradient(135deg, var(--admin-text-primary) 30%, var(--admin-accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-}
-
-/* --- Sidebar --- */
-.admin-sidebar-v2 {
-    width: var(--admin-sidebar-w, 280px);
-    height: 100dvh;
-    position: fixed;
+.ac-header {
+    position: sticky;
     top: 0;
-    left: 0;
-    background: var(--admin-card);
-    border-right: 1px solid var(--admin-border);
-    display: grid !important;
-    grid-template-rows: auto 1fr auto !important;
-    z-index: 1000;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+    z-index: var(--z-sticky);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 60px;
+    padding: 0 32px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--border);
+}
+
+/* The title was 56px, weight 900, uppercase, with a gradient clipped into the
+   text. It is a page label, not a headline. */
+.ac-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-1);
+}
+
+.ac-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ac-identity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+}
+
+.ac-identity-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-1);
+}
+
+.ac-identity-role {
+    font-size: 12px;
+    color: var(--text-3);
+}
+
+.ac-avatar {
+    width: var(--ctl-sm);
+    height: var(--ctl-sm);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-full);
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* -- Panels ---------------------------------------------------------------- */
+
+.ac-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
 
-.admin-sidebar-v2.collapsed {
-    width: var(--admin-sidebar-collapsed-w, 88px);
-}
-
-.admin-sidebar-v2.collapsed .sidebar-brand-text,
-.admin-sidebar-v2.collapsed .sidebar-nav-item span,
-.admin-sidebar-v2.collapsed .admin-sidebar-header-text,
-.admin-sidebar-v2.collapsed .infrastructure-pulse-details,
-.admin-sidebar-v2.collapsed .exit-console-text {
-    display: none;
-}
-
-.admin-sidebar-v2.collapsed .sidebar-nav-item {
-    justify-content: center;
-    padding: 16px;
-}
-
-.admin-sidebar-v2.collapsed {
-    /* No vertical padding here to keep flex flow stable */
-    padding-left: 16px;
-    padding-right: 16px;
-}
-
-/* CRITICAL: Grid items default to min-height: auto, which prevents 1fr from
-   constraining the nav. This one rule makes the footer always visible. */
-.admin-sidebar-v2 > nav {
-    min-height: 0;
-    overflow-y: auto;
-}
-
-@media (max-width: 1024px) {
-    .admin-sidebar-v2 {
-        transform: translateX(-100%);
-        width: 280px;
-    }
-    .admin-sidebar-v2.open {
-        transform: translateX(0);
-        box-shadow: 20px 0 60px rgba(0, 0, 0, 0.5);
-    }
-}
-
-.sidebar-nav-item {
+.ac-panel-head {
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 16px;
     padding: 16px 20px;
-    border-radius: 20px;
-    color: var(--admin-text-secondary);
-    font-weight: 800;
+    border-bottom: 1px solid var(--border);
+}
+
+.ac-panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-1);
+}
+
+.ac-panel-sub {
+    margin-top: 2px;
     font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    border: 1px solid transparent;
-    background: transparent;
+    color: var(--text-3);
+}
+
+.ac-panel-body {
+    padding: 20px;
+}
+
+.ac-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(212px, 1fr));
+}
+
+.ac-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* -- Metric ---------------------------------------------------------------- */
+
+.ac-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.ac-metric-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+}
+
+.ac-metric-label svg {
+    color: var(--text-3);
+}
+
+.ac-metric-value {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text-1);
+    font-variant-numeric: tabular-nums;
+}
+
+.ac-metric-sub {
+    font-size: 12px;
+    color: var(--text-3);
+}
+
+.ac-metric.is-alert .ac-metric-value {
+    color: var(--error);
+}
+
+/* -- Toolbar --------------------------------------------------------------- */
+
+.ac-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.ac-toolbar .field {
+    width: 260px;
+}
+
+.ac-segmented {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    background: var(--surface-subtle);
+    border-radius: var(--r-md);
+}
+
+.ac-segmented button {
+    height: 28px;
+    padding: 0 12px;
+    border-radius: var(--r-sm);
+    color: var(--text-2);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    text-align: left;
-    margin-bottom: 2px;
+    transition: background var(--trans-fast), color var(--trans-fast);
 }
 
-.sidebar-nav-item:hover {
-    background: var(--admin-surface-subtle);
-    color: var(--admin-text-primary);
-    border-color: var(--admin-border);
-    transform: translateX(6px);
+.ac-segmented button:hover {
+    color: var(--text-1);
 }
 
-.sidebar-nav-item.active {
-    /* Was a violet two-stop gradient (--admin-accent, #9333ea). Reuses the
-       app's own accent-gradient token instead of a bespoke admin-only pair. */
-    background: var(--accent-gradient);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 12px 24px rgba(var(--accent-rgb), 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-    transform: scale(1.02);
+.ac-segmented button.active {
+    background: var(--surface);
+    color: var(--text-1);
+    box-shadow: var(--shadow-sm);
 }
 
-.sidebar-nav-item svg {
-    transition: transform 0.3s ease;
-}
+/* -- Table ----------------------------------------------------------------- */
 
-.sidebar-nav-item:hover svg {
-    transform: scale(1.1) rotate(-5deg);
-}
-
-/* --- Tables --- */
-.admin-table-wrap {
+.ac-table-wrap {
     width: 100%;
     overflow-x: auto;
-    border-radius: var(--r-xl);
 }
 
-.admin-table {
+.ac-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-}
-
-.admin-table th {
-    text-align: left;
-    padding: 20px 24px;
-    font-size: 11px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--admin-text-muted);
-    border-bottom: 1px solid var(--admin-border);
-    background: var(--admin-surface-subtle);
-}
-
-.admin-table td {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--admin-border);
     font-size: 14px;
-    transition: background 0.2s;
 }
 
-.admin-table tr:last-child td {
+/* The only uppercase left in the console, and the one place it belongs.
+   Not sticky: the scroll container is .ac-main, not the table wrapper, so a
+   sticky header row would slide under the page header rather than pin below
+   it. */
+.ac-table th {
+    padding: 10px 20px;
+    background: var(--surface-subtle);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-3);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.ac-table td {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-2);
+    vertical-align: middle;
+}
+
+.ac-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-.admin-table tr:hover td {
-    background: var(--admin-surface-subtle);
+.ac-table tbody tr:hover td {
+    background: var(--hover);
 }
 
-/* --- Utilities ---
-   These names all collide with real Tailwind utilities that index.css generates
-   from its @theme block, so they are scoped to the console. Unscoped, they
-   retinted every .text-primary / .text-muted in Layout, Feed, Profile,
-   Notifications and PostDetail for the rest of the session. */
-.admin-root-v2 .text-primary { color: var(--admin-text-primary); }
-.admin-root-v2 .text-secondary { color: var(--admin-text-secondary); }
-.admin-root-v2 .text-muted { color: var(--admin-text-muted); }
-
-.admin-root-v2 .bg-surface-subtle { background: var(--admin-surface-subtle); }
-.admin-root-v2 .border-subtle { border-color: var(--admin-border); }
-
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+.ac-table .ac-num {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-3);
 }
 
-/* --- Mobile Specifics --- */
-.mobile-nav-scroll {
+.ac-cell-actions {
     display: flex;
-    overflow-x: auto;
-    gap: 12px;
-    padding: 16px;
-    background: var(--admin-card);
-    border-bottom: 1px solid var(--admin-border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    scrollbar-width: none;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
 }
 
-.mobile-nav-scroll::-webkit-scrollbar {
-    display: none;
-}
+/* -- Identity cell --------------------------------------------------------- */
 
-.mobile-nav-btn {
+.ac-user {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 20px;
-    border-radius: 100px;
-    white-space: nowrap;
+    min-width: 0;
+}
+
+.ac-user-img {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: var(--r-full);
+    object-fit: cover;
+    background: var(--surface-subtle);
+}
+
+.ac-user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-1);
+}
+
+.ac-user-meta {
     font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border: 1px solid var(--admin-border-md);
-    background: var(--admin-bg);
-    color: var(--admin-text-secondary);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-3);
 }
 
-.mobile-nav-btn.active {
-    background: var(--admin-accent);
-    color: white;
-    border-color: var(--admin-accent);
-    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
+/* -- Badges ---------------------------------------------------------------- */
+
+.ac-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: var(--r-sm);
+    background: var(--surface-subtle);
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
-/* Responsive grids.
-   .grid, .grid-cols-1 and .gap-4/6/8 used to be redeclared here with values
-   identical to Tailwind's, so they are simply gone: Tailwind already emits them.
-   The rules below are NOT identical to Tailwind, they move the breakpoint
-   (xl fires at 1536 rather than 1280, 2xl at 1920 rather than 1536), so they
-   stay, scoped to the console. Every one of them is only used inside /admin.
-   .3xl\:grid-cols-6 was unreferenced and has been dropped. */
-@media (min-width: 640px) {
-    .admin-root-v2 .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ac-badge.is-good {
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    color: var(--success);
 }
 
-@media (min-width: 1024px) {
-    .admin-root-v2 .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .admin-root-v2 .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ac-badge.is-warn {
+    background: color-mix(in srgb, var(--warning) 14%, transparent);
+    color: var(--warning);
 }
 
-@media (min-width: 1536px) {
-    .admin-root-v2 .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ac-badge.is-bad {
+    background: color-mix(in srgb, var(--error) 12%, transparent);
+    color: var(--error);
 }
 
-@media (min-width: 1920px) {
-    .admin-root-v2 .\32 xl\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.ac-badge.is-accent {
+    background: var(--accent-subtle);
+    color: var(--accent);
 }
 
-.custom-scrollbar::-webkit-scrollbar {
+/* -- Chart ----------------------------------------------------------------- */
+
+.ac-chart {
+    width: 100%;
+    height: 260px;
+}
+
+.ac-chart svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.ac-chart-grid {
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.ac-chart-line {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ac-chart-area {
+    fill: var(--accent-low);
+    stroke: none;
+}
+
+.ac-chart-axis {
+    fill: var(--text-3);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.ac-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-2);
+}
+
+.ac-legend-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ac-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--r-full);
+    background: var(--accent);
+}
+
+/* -- Meter ----------------------------------------------------------------- */
+
+.ac-meter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ac-meter-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-2);
+}
+
+.ac-meter-value {
+    color: var(--text-1);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.ac-meter-track {
+    height: 6px;
+    border-radius: var(--r-full);
+    background: var(--surface-subtle);
+    overflow: hidden;
+}
+
+.ac-meter-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+    transition: width var(--trans-smooth);
+}
+
+.ac-meter-fill.is-warn {
+    background: var(--warning);
+}
+
+.ac-meter-fill.is-bad {
+    background: var(--error);
+}
+
+/* -- Definition rows ------------------------------------------------------- */
+
+.ac-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.ac-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.ac-row:last-child {
+    border-bottom: none;
+}
+
+.ac-row-label {
+    color: var(--text-2);
+}
+
+.ac-row-value {
+    color: var(--text-1);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+/* -- Empty state ----------------------------------------------------------- */
+
+.ac-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 56px 24px;
+    text-align: center;
+}
+
+.ac-empty svg {
+    color: var(--text-3);
+    opacity: 0.5;
+}
+
+.ac-empty-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-1);
+}
+
+.ac-empty-text {
+    font-size: 13px;
+    color: var(--text-3);
+    max-width: 42ch;
+}
+
+/* -- Mobile cards ---------------------------------------------------------- */
+/* Every table in the console has a card form under 768px. */
+
+.ac-cards {
+    display: flex;
+    flex-direction: column;
+}
+
+.ac-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.ac-card:last-child {
+    border-bottom: none;
+}
+
+.ac-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ac-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.ac-card-actions .btn {
+    flex: 1;
+}
+
+/* These only ever hide. An earlier version forced `display: block` at the
+   desktop breakpoint, which also landed on the two .btn elements that carry
+   the class and turned them from inline-flex into blocks, breaking the icon
+   centring inside them. Scoped under .ac-shell so they outrank .btn without
+   needing !important. */
+@media (max-width: 767px) {
+    .ac-shell .ac-desktop-only {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .ac-shell .ac-mobile-only {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .ac-content {
+        padding: 16px 16px 48px;
+    }
+
+    .ac-header {
+        padding: 0 16px;
+    }
+
+    .ac-toolbar .field {
+        width: 100%;
+    }
+}
+
+/* -- Scrollbar ------------------------------------------------------------- */
+
+.ac-scroll::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.ac-scroll::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--admin-border-md);
-    border-radius: 10px;
+.ac-scroll::-webkit-scrollbar-thumb {
+    background: var(--border-lg);
+    border-radius: var(--r-full);
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--admin-accent);
+.ac-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--text-3);
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* -- Text helpers ---------------------------------------------------------- */
+
+.ac-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 38ch;
 }
 
-.animate-fade-in {
-    animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.ac-muted {
+    color: var(--text-3);
 }
 
-@media (max-width: 768px) {
-    .admin-table th, .admin-table td {
-        padding: 12px 16px;
-    }
-    
-    .admin-h1-v2 {
-        font-size: 32px;
-    }
-    
-    .admin-sidebar-v2 {
-        width: 100%;
-        max-width: 280px;
-    }
+.ac-mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
 }

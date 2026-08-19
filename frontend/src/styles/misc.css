@@ -1,17 +1,12 @@
 /* =============================================================================
-   PeerNet - Admin console
-   Mission-critical governance & real-time telemetry
+   PeerNet - misc surfaces
+
+   Named admin-console.css, but 417 of its 419 lines were the story creator,
+   the cookie banner, the splash screen and a handful of layout primitives.
+   The two admin rules it did carry were a fourth copy of .admin-table's hover
+   and a button style nothing referenced; both are gone with the console
+   rewrite.
    ============================================================================= */
-
-.admin-table tr:hover {
-  background: var(--hover);
-}
-
-.admin-btn-icon.danger:hover {
-  border-color: var(--error);
-  color: var(--error);
-  background: rgba(239, 68, 68, 0.05);
-}
 
 /* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
    STORY CREATOR

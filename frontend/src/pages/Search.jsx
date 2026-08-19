@@ -13,7 +13,7 @@ export default function Search() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [following, setFollowing] = useState({})
-    const [focused, setFocused] = useState(false)
+
     const inputRef = useRef()
     const debounceRef = useRef(null)
     const abortRef = useRef(null)
@@ -99,16 +99,14 @@ export default function Search() {
         <div className="ig-search-page">
             {/* ── Search Bar ── */}
             <div className="ig-search-bar-wrap">
-                <div className={`ig-search-bar field-shell ${focused ? 'focused' : ''}`}>
-                    <HiSearch className={`ig-search-icon ${loading ? 'loading' : ''}`} />
+                <div className="field">
+                    <HiSearch className={`field-icon ${loading ? 'loading' : ''}`} />
                     <input
                         ref={inputRef}
-                        className="ig-search-input"
+                        className="field-input"
                         placeholder="Search"
                         value={q}
                         onChange={handleSearch}
-                        onFocus={() => setFocused(true)}
-                        onBlur={() => setFocused(false)}
                         autoComplete="off"
                     />
                     {q && (

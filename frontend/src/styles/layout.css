@@ -751,84 +751,10 @@
   }
 }
 
-/* =============================================================================
-   PeerNet - CSS Architecture Completion (Resolved Plan)
-   Admin hardening + utility bridge
-   ============================================================================= */
-
-/* Admin hardening */
-
-[data-theme="dark"] .admin-surface-el {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%), rgba(13, 13, 15, 0.6);
-  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
-}
-
-.admin-surface-el::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0.5;
-}
-
-.admin-table tr {
-  transition: transform var(--trans-fast), background-color var(--trans-fast);
-}
-
-@keyframes statusPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.65);
-  }
-
-  70% {
-    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
-}
-
-/* --- Admin surface tokens --- */
-
-[data-theme="light"] .admin-surface-el {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-}
-
-[data-theme="dark"] .admin-stat-card {
-  background: linear-gradient(165deg, rgba(20, 20, 22, 0.8), rgba(10, 10, 12, 0.4));
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-[data-theme="light"] .admin-stat-card {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-}
-
-.admin-stat-card:hover {
-  border-color: var(--accent);
-  background: var(--hover);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -10px color-mix(in srgb, var(--accent) 15%, transparent);
-}
-
-[data-theme="dark"] .admin-table td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.admin-stat-card:hover .chart-bg {
-  opacity: 1;
-}
+/* A third copy of the admin surface styles lived here, layering a gradient
+   border pseudo-element and a hover lift on top of the two other copies. All
+   of it is gone; the console owns its own rules now. The statusPulse keyframe
+   that sat in the middle of it had no user. */
 
 /* ========================================================================================================================================================================================================================================
    FOOTER SYSTEMS - Sidebar & Global

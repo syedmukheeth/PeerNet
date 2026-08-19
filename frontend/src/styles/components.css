@@ -43,31 +43,85 @@
 /* One field, four states. This used to be a 4px ring plus a 20px drop shadow
    fired on `:focus`, so clicking into a login field lit up a haloed, lifted
    box: the heaviest thing on the screen was an empty text input. The ring is
-   now 3px and there is no shadow, the transition names the two properties that
+   now 3px and there is no shadow, the transition names the properties that
    actually change rather than `all`, and the disabled and invalid states exist
-   at all, which they did not. */
+   at all, which they did not.
+
+   The field is filled rather than outlined. Drawn the other way round it was a
+   white box with a hard border sitting on a white card, which is the shape a
+   browser gives you for free and reads as nothing having been designed. The
+   fill states the boundary at rest, the border is transparent until focus, and
+   focus is then the only moment an accent colour appears.
+
+   `.field` is the same recipe for the shell pattern: a container holding an
+   icon plus a borderless input, which is how every search bar in the app is
+   built. One class instead of the six hand-rolled copies there used to be. */
 .input,
-.input-field {
+.input-field,
+.field {
   width: 100%;
   min-height: 44px;
   background: var(--input-bg);
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
   padding: 11px 14px;
   color: var(--text-1);
   font-size: 15px;
+  font-weight: 400;
   font-family: inherit;
-  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+  transition: background var(--trans-fast), border-color var(--trans-fast),
+    box-shadow var(--trans-fast);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: text;
+}
+
+/* The bare input inside a .field shell. The shell owns the box, so this owns
+   nothing but the text, and must not draw a second ring of its own. */
+.field-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+}
+
+.field-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.field-icon {
+  flex-shrink: 0;
+  display: flex;
+  color: var(--text-3);
+  font-size: 18px;
+  transition: color var(--trans-fast);
+}
+
+.field:focus-within .field-icon {
+  color: var(--accent);
 }
 
 .input:hover:not(:disabled):not(:focus),
-.input-field:hover:not(:disabled):not(:focus) {
-  border-color: var(--border-lg);
+.input-field:hover:not(:disabled):not(:focus),
+.field:hover:not(:focus-within) {
+  background: var(--input-bg-hover);
 }
 
 .input:focus,
-.input-field:focus {
+.input-field:focus,
+.field:focus-within {
   outline: none;
+  background: var(--input-bg-focus);
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
@@ -80,13 +134,26 @@
 }
 
 .input[aria-invalid='true'],
-.input-field[aria-invalid='true'] {
+.input-field[aria-invalid='true'],
+.field[aria-invalid='true'] {
   border-color: var(--error);
 }
 
 .input[aria-invalid='true']:focus,
-.input-field[aria-invalid='true']:focus {
+.input-field[aria-invalid='true']:focus,
+.field[aria-invalid='true']:focus-within {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--error) 30%, transparent);
+}
+
+/* Size variants, matching the control heights the buttons use. */
+.field-sm {
+  min-height: var(--ctl-md);
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+}
+
+.field-sm .field-input {
+  font-size: 14px;
 }
 
 .input-group {
@@ -532,14 +599,16 @@
    outline-free, so focus reads as a single object rather than a rectangle
    inside a rectangle. */
 .caption-shell {
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
   background: var(--input-bg);
   padding: 10px 12px;
-  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+  transition: background var(--trans-fast), border-color var(--trans-fast),
+    box-shadow var(--trans-fast);
 }
 
 .caption-shell:focus-within {
+  background: var(--input-bg-focus);
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
@@ -774,17 +843,20 @@
 
 .report-description {
     width: 100%;
-    padding: var(--s-2) var(--s-3);
-    border: 1px solid var(--border-md);
-    border-radius: var(--r-sm);
-    background: var(--surface-2);
+    padding: var(--s-3);
+    border: 1px solid transparent;
+    border-radius: var(--r-lg);
+    background: var(--input-bg);
     color: var(--text-1);
     font: inherit;
     font-size: 14px;
     resize: vertical;
+    transition: background var(--trans-fast), border-color var(--trans-fast),
+        box-shadow var(--trans-fast);
 }
 
 .report-description:focus-visible {
+    background: var(--input-bg-focus);
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-ring);
 }
@@ -855,8 +927,8 @@
 
 /* ============================================================================
    CONFIRM DIALOG
-   Replaces window.confirm() for destructive actions in the app (the admin
-   console keeps its own, louder variant).
+   Replaces window.confirm() for destructive actions everywhere, including the
+   admin console, which used to carry its own louder copy.
    ========================================================================== */
 
 .confirm-dialog {

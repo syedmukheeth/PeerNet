@@ -6,7 +6,7 @@ import Layout from './components/Layout'
 import SplashScreen from './components/SplashScreen'
 import ComplianceNotice from './components/ComplianceNotice'
 import ErrorBoundary from './components/ErrorBoundary'
-import { isAdmin } from './utils/roles'
+import { isAdmin, isSuperAdmin } from './utils/roles'
 
 const Feed = lazy(() => import('./pages/Feed'))
 const Login = lazy(() => import('./pages/Login'))
@@ -20,6 +20,14 @@ const Settings = lazy(() => import('./pages/Settings'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Terms = lazy(() => import('./pages/Terms'))
 const Admin = lazy(() => import('./pages/admin/AdminPage'))
+const AdminSummary = lazy(() => import('./pages/admin/screens/SummaryScreen'))
+const AdminUsers = lazy(() => import('./pages/admin/screens/UsersScreen'))
+const AdminContent = lazy(() => import('./pages/admin/screens/ContentScreen'))
+const AdminComments = lazy(() => import('./pages/admin/screens/CommentsScreen'))
+const AdminReports = lazy(() => import('./pages/admin/screens/ReportsScreen'))
+const AdminHealth = lazy(() => import('./pages/admin/screens/HealthScreen'))
+const AdminActivity = lazy(() => import('./pages/admin/screens/ActivityScreen'))
+const AdminSettings = lazy(() => import('./pages/admin/screens/SettingsScreen'))
 const About = lazy(() => import('./pages/About'))
 const Help = lazy(() => import('./pages/Help'))
 const NotFound = lazy(() => import('./pages/NotFound'))
@@ -47,6 +55,18 @@ const AdminRoute = ({ children }) => {
   if (loading) return <RouteSpinner />
   if (!isAdmin(user)) {
     return <Navigate to="/" replace />
+  }
+  return children
+}
+
+// The destructive infrastructure endpoints are superadmin-only on the server.
+// The screen that calls them is guarded the same way, so an admin cannot land
+// on a page whose every button will 403.
+const SuperAdminRoute = ({ children }) => {
+  const { user, loading } = useAuth()
+  if (loading) return <RouteSpinner />
+  if (!isSuperAdmin(user)) {
+    return <Navigate to="/admin" replace />
   }
   return children
 }
@@ -96,7 +116,19 @@ export default function App() {
               <Route path="search" element={<Search />} />
               <Route path="profile/:id" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
-              <Route path="admin" element={<AdminRoute><Admin /></AdminRoute>} />
+              {/* One URL per screen. These were tab ids in component state, so
+                  the whole console lived at /admin: refreshing dropped you back
+                  on Summary and the back button left the console entirely. */}
+              <Route path="admin" element={<AdminRoute><Admin /></AdminRoute>}>
+                <Route index element={<AdminSummary />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="content" element={<AdminContent />} />
+                <Route path="comments" element={<AdminComments />} />
+                <Route path="reports" element={<AdminReports />} />
+                <Route path="health" element={<AdminHealth />} />
+                <Route path="activity" element={<AdminActivity />} />
+                <Route path="settings" element={<SuperAdminRoute><AdminSettings /></SuperAdminRoute>} />
+              </Route>
             </Route>
 
             {/* Public/shared routes, viewable without logging in */}

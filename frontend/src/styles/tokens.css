@@ -281,7 +281,13 @@
      blue LinkedIn itself switches to on dark surfaces, and clears 8:1 here. */
   --linkedin: #70b5f9;
 
+  /* Fields are filled, not outlined. A field drawn as a plain box with a hard
+     1px border on a same-coloured surface is the browser default, which is
+     what made every search box read as unstyled. The fill carries the shape;
+     the border only shows up on focus. */
   --input-bg: #18161f;
+  --input-bg-hover: #211e2b;
+  --input-bg-focus: #18161f;
   --overlay: rgba(5, 4, 8, 0.72);
 
   /* Only three real steps. sm is a hairline for a sticky bar, md is a menu
@@ -315,7 +321,7 @@
   --zn-bubble-peer: #211e2b;
   --zn-bubble-peer-text: #eceaf2;
   --zn-action-bar-bg: rgba(11, 10, 15, 0.96);
-  --zn-search-bg: rgba(255, 255, 255, 0.06);
+
 }
 
 /* -- 4. Light theme -------------------------------------------------------- */
@@ -379,7 +385,12 @@
   /* The brand value itself, 5.68:1 on this background. */
   --linkedin: #0a66c2;
 
-  --input-bg: #ffffff;
+  /* Cards are pure white in this theme, so the field steps down to be visible
+     on them at all. #f1eff5 is --hover, the same ground the app already uses
+     for a resting interactive surface. */
+  --input-bg: #f1eff5;
+  --input-bg-hover: #eae7f0;
+  --input-bg-focus: #ffffff;
   --overlay: rgba(20, 18, 26, 0.4);
 
   /* Tinted toward the cool page ground, never pure black. */
@@ -411,7 +422,7 @@
   --zn-bubble-peer: #f1eff5;
   --zn-bubble-peer-text: #14121a;
   --zn-action-bar-bg: rgba(255, 255, 255, 0.98);
-  --zn-search-bg: rgba(20, 18, 26, 0.045);
+
 }
 
 /* -- 5. Aliases ------------------------------------------------------------ */
