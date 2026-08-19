@@ -46,11 +46,9 @@
 }
 
 .auth-logo-img {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--r-lg);
-  object-fit: cover;
-  border: 1px solid var(--border);
+  width: 60px;
+  height: 60px;
+  color: var(--text-1);
 }
 
 .auth-logo-text {

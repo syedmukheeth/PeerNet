@@ -1,7 +1,7 @@
 import { Link, NavLink } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiOutlineBell, HiOutlineChatAlt2, HiMenu, HiMoon, HiSun, HiCog, HiShieldCheck, HiSwitchHorizontal, HiLogout, HiLogin } from '../ui/icons'
-import logoImg from '../../assets/logo.png'
+import Logo from '../ui/Logo'
 import { isAdmin } from '../../utils/roles'
 
 /*
@@ -37,7 +37,7 @@ export default function MobileHeader({
                     <HiMenu size={24} />
                 </button>
                 <Link to="/" className="flex items-center gap-2 no-underline">
-                    <img src={logoImg} alt="" className="w-8 h-8 rounded-lg" />
+                    <Logo className="w-8 h-8" />
                     <span className="mobile-peernet-logo text-lg font-bold text-primary">PeerNet</span>
                 </Link>
             </div>

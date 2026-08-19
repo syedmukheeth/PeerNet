@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { HiLogout, HiLogin, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal, HiOutlinePlusCircle, HiOutlineShieldCheck } from '../ui/icons'
 import { chatApi } from '../../api/axios'
 import { navLinks } from './navLinks'
-import logoImg from '../../assets/logo.png'
+import Logo from '../ui/Logo'
 import { isAdmin } from '../../utils/roles'
 
 /*
@@ -36,7 +36,7 @@ export default function DesktopSidebar({
             {/* Top: Branding */}
             <div className="sidebar-logo-row">
                 <Link to="/" className="sidebar-brand">
-                    <img src={logoImg} alt="PeerNet" className="sidebar-brand-img" />
+                    <Logo className="sidebar-brand-img" title="PeerNet" />
                     <span className="peernetLogo">PeerNet</span>
                 </Link>
             </div>

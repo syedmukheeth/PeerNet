@@ -149,11 +149,13 @@
   text-decoration: none;
 }
 
+/* The mark is drawn, not tiled. It used to be a rounded raster square, so it
+   carried a radius and a shadow; an SVG mark on a transparent ground would put
+   that shadow on an invisible box. */
 .sidebar-brand-img {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-sm);
+  width: 32px;
+  height: 32px;
+  color: var(--text-1);
 }
 
 /* Solid, not clipped. The wordmark used to be a blue to violet gradient

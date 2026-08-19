@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import logo from '../assets/logo.png'
+import Logo from './ui/Logo'
 
 /**
  * Brief brand frame shown once per session while the app boots.
@@ -27,7 +27,7 @@ export default function SplashScreen({ onDone }) {
                     transition={{ duration: 0.25 }}
                 >
                     <div className="splash-logo-wrap">
-                        <img src={logo} alt="" className="splash-logo-img" />
+                        <Logo className="splash-logo-img" />
                     </div>
                     <div className="splash-brand">PeerNet</div>
                 </motion.div>

@@ -111,11 +111,23 @@
     color: var(--text-1);
 }
 
-.ac-brand img {
-    width: 26px;
-    height: 26px;
+.ac-brand svg {
     flex-shrink: 0;
-    object-fit: contain;
+    color: var(--text-1);
+}
+
+/* Collapse control. Only meaningful where the rail is actually docked: below
+   1025px it is a drawer, so collapsing it means nothing and the button is not
+   shown. */
+.ac-collapse-toggle {
+    display: none;
+    flex-shrink: 0;
+}
+
+@media (min-width: 1025px) {
+    .ac-collapse-toggle {
+        display: inline-flex;
+    }
 }
 
 .ac-brand-text {
@@ -226,11 +238,28 @@
     display: none;
 }
 
-.ac-sidebar.is-collapsed .ac-nav-item,
-.ac-sidebar.is-collapsed .ac-sidebar-head {
+.ac-sidebar.is-collapsed .ac-nav-item {
     justify-content: center;
     padding-left: 0;
     padding-right: 0;
+}
+
+/* Collapsed, the head stacks so the logo and the expand control both fit in
+   68px instead of fighting for one row. */
+.ac-sidebar.is-collapsed .ac-sidebar-head {
+    flex-direction: column;
+    justify-content: center;
+    height: auto;
+    gap: 6px;
+    padding: 12px 0;
+}
+
+.ac-sidebar.is-collapsed .ac-brand {
+    justify-content: center;
+}
+
+.ac-sidebar.is-collapsed .ac-sidebar-foot .btn {
+    padding: 0;
 }
 
 .ac-backdrop {

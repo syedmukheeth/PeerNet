@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <title>PeerNet</title>
+  <!-- Favicon copy of components/ui/Logo.jsx. A favicon is an isolated
+       document: it cannot read currentColor or the accent custom property
+       from the page, so the colours are literal and it carries its own
+       theme switch. Keep the two drawings in step.
+       Note for editors: no double hyphen may appear in this comment. SVG is
+       parsed as XML, where that is a syntax error, and the whole file then
+       fails to render. -->
+  <style>
+    .ink { stroke: #14121a; }
+    .node { fill: #5b45d6; }
+    @media (prefers-color-scheme: dark) {
+      .ink { stroke: #eceaf2; }
+      .node { fill: #8b7bff; }
+    }
+  </style>
+  <line class="ink" x1="13.4" y1="18.6" x2="18.6" y2="13.4" stroke-width="2.6" stroke-linecap="round"/>
+  <circle class="node" cx="9.5" cy="22.5" r="5.4"/>
+  <circle class="ink" cx="22.5" cy="9.5" r="5.4" stroke-width="2.6"/>
+</svg>

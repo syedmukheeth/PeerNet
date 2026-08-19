@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router'
 import { Icon } from '../../components/ui/icons'
 import { navGroups } from './navGroups'
 import { isSuperAdmin } from '../../utils/roles'
+import Logo from '../../components/ui/Logo'
 
 const COLLAPSE_KEY = 'peernet:admin:sidebar-collapsed'
 
@@ -29,18 +30,23 @@ export default function AdminSidebar({ counts = {}, isOpen, user }) {
         >
             <div className="ac-sidebar-head">
                 <Link to="/" className="ac-brand" title="Back to PeerNet">
-                    <img src="/logo.svg" alt="" />
+                    <Logo size={26} />
                     <span className="ac-brand-text">
                         <span className="ac-brand-name">PeerNet</span>
                         <span className="ac-brand-sub">Admin</span>
                     </span>
                 </Link>
 
+                {/* Must never carry ac-collapse-hide: that class is what the
+                    collapsed sidebar hides, so the one control that expands the
+                    rail again disappeared the moment you collapsed it. */}
                 <button
                     type="button"
                     onClick={() => setIsCollapsed(prev => !prev)}
-                    className="btn btn-ghost btn-icon-sm ac-desktop-only ac-collapse-hide"
+                    className="btn btn-ghost btn-icon-sm ac-collapse-toggle"
                     aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
+                    aria-expanded={!isCollapsed}
+                    title={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
                 >
                     <Icon name={isCollapsed ? 'chevron-right' : 'chevron-left'} size={16} />
                 </button>

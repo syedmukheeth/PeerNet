@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
-import logo from '../assets/logo.png'
+import Logo from '../components/ui/Logo'
 import { GoogleLogin } from '@react-oauth/google'
 import { MdVisibility, MdVisibilityOff } from '../components/ui/icons'
 export default function Login() {
@@ -90,7 +90,7 @@ export default function Login() {
 
             <div className="auth-card">
                 <div className="auth-logo-wrap">
-                    <img src={logo} alt="PeerNet" className="auth-logo-img" />
+                    <Logo className="auth-logo-img" title="PeerNet" />
                     <div className="auth-logo-text">PeerNet</div>
                 </div>
                 <p className="auth-sub">Sign in to your account</p>

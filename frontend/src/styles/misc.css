@@ -119,9 +119,8 @@
 .splash-logo-img {
   width: 72px;
   height: 72px;
-  border-radius: var(--r-lg);
-  object-fit: cover;
   display: block;
+  color: var(--text-1);
 }
 
 .splash-brand {

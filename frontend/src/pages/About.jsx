@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async'
-import logoImg from '../assets/logo.png'
+import Logo from '../components/ui/Logo'
 
 export default function About() {
     return (
@@ -10,7 +10,7 @@ export default function About() {
             </Helmet>
 
             <header className="static-page__header">
-                <img src={logoImg} alt="" className="static-page__logo" />
+                <Logo className="static-page__logo" />
                 <h1 className="static-page__title">About PeerNet</h1>
                 <p className="static-page__lead">
                     A social app for sharing photos, short videos and messages.
