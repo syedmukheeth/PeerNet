@@ -276,6 +276,11 @@
   --notif-comment: #6fa8ff;
   --notif-follow: #3ecf8e;
 
+  /* LinkedIn's own two blues: #0a66c2 is the brand value and is what the light
+     theme uses, but it only reaches 3.05:1 on this background. #70b5f9 is the
+     blue LinkedIn itself switches to on dark surfaces, and clears 8:1 here. */
+  --linkedin: #70b5f9;
+
   --input-bg: #18161f;
   --overlay: rgba(5, 4, 8, 0.72);
 
@@ -370,6 +375,9 @@
   --notif-like: #c42b31;
   --notif-comment: #1f5fd8;
   --notif-follow: #087443;
+
+  /* The brand value itself, 5.68:1 on this background. */
+  --linkedin: #0a66c2;
 
   --input-bg: #ffffff;
   --overlay: rgba(20, 18, 26, 0.4);

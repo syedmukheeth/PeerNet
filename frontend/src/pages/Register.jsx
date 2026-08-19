@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
-import logo from '../assets/logo.svg'
+import logo from '../assets/logo.png'
 import { GoogleLogin } from '@react-oauth/google'
 import { MdVisibility, MdVisibilityOff } from '../components/ui/icons'
 export default function Register() {

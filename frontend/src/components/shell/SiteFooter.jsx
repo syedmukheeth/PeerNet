@@ -24,7 +24,7 @@ export default function SiteFooter({ onReportBug }) {
                         rel="noopener noreferrer"
                         className="dev-link"
                     >
-                        <FaLinkedin size={16} />
+                        <FaLinkedin size={16} className="icon-linkedin" />
                         <span>Syed Mukheeth</span>
                     </a>
                 </div>

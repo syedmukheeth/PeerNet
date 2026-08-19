@@ -19,6 +19,7 @@
  *   'name': ['d1', 'd2']                     several stroked paths
  *   'name': { fill: 'd string' }             one filled path, no stroke
  *   'name': { fill: ['d1', 'd2'] }           several filled paths
+ *   'name': { fill: 'd', fillRule: 'evenodd' }   filled, counters knocked out
  *
  * Add the outline under `name` and its filled twin under `name-solid`, so
  * <Icon name="heart" solid /> resolves without the call site knowing whether a
@@ -117,7 +118,16 @@ export const ICON_PATHS = {
     clipboard: ['M9 4.5H6.5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-14a1 1 0 0 0-1-1H15', 'M9.6 3.5h4.8a.6.6 0 0 1 .6.6v1.8a.6.6 0 0 1-.6.6H9.6a.6.6 0 0 1-.6-.6V4.1a.6.6 0 0 1 .6-.6z', 'M9 11h6', 'M9 15h4'],
 
     /* -- brand ------------------------------------------------------------ */
-    linkedin: { fill: 'M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM3 9.5h4v11H3zm6.5 0h3.83v1.5a4.2 4.2 0 0 1 3.77-2c3.03 0 4.4 1.9 4.4 5.3v6.2h-4v-5.5c0-1.6-.6-2.5-1.9-2.5-1.4 0-2.1 1-2.1 2.5v5.5h-4z' },
+
+    /* The one drawing in this file that is not ours to redraw. A brand mark has
+       to be the brand mark: this is LinkedIn's own geometry, the rounded square
+       with the wordmark knocked out of it, not an "in" traced by hand. Knockout
+       needs evenodd, since the letterforms sit inside the square rather than
+       beside it. */
+    linkedin: {
+        fillRule: 'evenodd',
+        fill: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
+    },
 };
 
 /* Names the app asks for that are the same drawing as another entry. */

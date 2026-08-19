@@ -287,6 +287,11 @@
   border-radius: var(--r-lg);
   cursor: pointer;
   transition: all 0.2s var(--ease-out);
+  /* Without this the card refuses to shrink below the widest full name it
+     contains, so the name wraps instead of truncating. */
+  min-width: 0;
+  width: 100%;
+  text-align: left;
 }
 
 .sidebar-profile-card:hover {
@@ -305,12 +310,22 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
 }
 
 .profile-card-name {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-1);
+}
+
+/* A full name is arbitrary-length: "Syed Abdul Mukheeth Peer" used to wrap to
+   three lines and stretch the card taller than the avatar beside it. Both rows
+   are one line with an ellipsis now, and the card carries title= so the full
+   name is still readable on hover. */
+.profile-card-name,
+.profile-card-role {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -566,6 +581,9 @@
   min-width: 0;
 }
 
+/* The username sits in a flex row beside a verified badge, so the name itself
+   is what has to shrink: the badge must never be pushed out of the panel or
+   wrapped onto a line of its own. */
 .sp-username {
   font-size: 14px;
   font-weight: 700;
@@ -573,6 +591,15 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sp-username > svg,
+.sp-suggestion-username > svg {
+  flex-shrink: 0;
 }
 
 .sp-fullname {
@@ -645,11 +672,19 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .sp-suggestion-subtext {
   font-size: 11px;
   color: var(--text-3);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .sp-btn-follow {

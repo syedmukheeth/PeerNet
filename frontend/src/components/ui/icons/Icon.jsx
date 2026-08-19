@@ -41,6 +41,9 @@ export default function Icon({
     const filled = typeof entry === 'object' && !Array.isArray(entry) && entry.fill
     const d = filled ? entry.fill : entry
     const paths = Array.isArray(d) ? d : [d]
+    // Only a mark whose counters sit inside its outer shape needs evenodd, so
+    // it is opt-in per entry rather than the default for every filled icon.
+    const fillRule = filled ? entry.fillRule : undefined
 
     return (
         <svg
@@ -60,7 +63,7 @@ export default function Icon({
         >
             {title && <title>{title}</title>}
             {paths.map((p, i) => (
-                <path key={i} d={p} />
+                <path key={i} d={p} fillRule={fillRule} />
             ))}
         </svg>
     )

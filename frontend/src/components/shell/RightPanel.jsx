@@ -140,7 +140,7 @@ export default function RightPanel() {
                         rel="noopener noreferrer"
                         className="sp-developer-link"
                     >
-                        <FaLinkedin size={14} className="text-[#0A66C2]" />
+                        <FaLinkedin size={16} className="icon-linkedin" />
                         <span>Developed by Syed Mukheeth</span>
                     </a>
                     <span className="sp-footer-copyright">

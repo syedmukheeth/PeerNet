@@ -58,6 +58,63 @@
   color: var(--error);
 }
 
+/* ── Text overflow ────────────────────────────────────────────────────────── */
+
+/* A person's name is arbitrary-length data in a fixed-width slot, so every
+   surface that prints one needs to decide what happens when it does not fit.
+   Until now each of them decided separately, or not at all: the sidebar
+   profile card let "Syed Abdul Mukheeth Peer" wrap onto three lines and grow
+   the card, because .profile-card-name truncated and .profile-card-role did
+   not.
+
+   min-width: 0 is part of the utility on purpose. Inside a flex row the
+   default min-width: auto refuses to shrink below the content's intrinsic
+   width, so text-overflow never triggers and the ellipsis silently does
+   nothing. Every ancestor between the text and the flex row needs it too,
+   which is why .profile-card-info and .sidebar-profile-card carry it. */
+.u-truncate {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Two lines then ellipsis, for places with vertical room to spare: a bio, a
+   suggestion subtitle, a notification body. */
+.u-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Fields inside a shell ────────────────────────────────────────────────── */
+
+/* base.css gives every input and textarea a focus ring, which is right for a
+   bare field and wrong for a field that sits inside a container drawing its
+   own: the message pill, the caption box and the search bar all lit up twice,
+   a purple rectangle around the text inside a purple rectangle around the
+   container. That is the "cheap" look, and it is one rule, not taste.
+
+   Mark the container `.field-shell` and its inner field stops drawing. The
+   shell keeps a real ring through :focus-within, so keyboard focus is still
+   visible, and forced-colors mode still gets its outline from base.css. */
+.field-shell :is(input, textarea, [contenteditable]):focus-visible {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* ── Brand marks ──────────────────────────────────────────────────────────── */
+
+/* The LinkedIn square, in LinkedIn's blue rather than the surrounding text
+   colour, and never squeezed by the label beside it. */
+.icon-linkedin {
+  color: var(--linkedin);
+  flex-shrink: 0;
+}
+
 /* ── Badge tones ──────────────────────────────────────────────────────────── */
 /* .badge already ships the accent background, so .badge-accent is a no-op kept
    for symmetry with the other tones. */
