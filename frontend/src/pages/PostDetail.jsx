@@ -3,13 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../api/axios'
-import {
-    HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark,
-    HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft,
-    HiBadgeCheck,
-    HiOutlineChat, HiPhotograph
-} from 'react-icons/hi'
-import { FiSend } from 'react-icons/fi'
+import { HiHeart, HiOutlineHeart, HiBookmark, HiOutlineBookmark, HiDotsHorizontal, HiShare, HiPencil, HiTrash, HiArrowLeft, HiBadgeCheck, HiOutlineChat, HiPhotograph, FiSend } from '../components/ui/icons'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import EditPostModal from '../components/EditPostModal'
@@ -368,7 +362,7 @@ export default function PostDetail() {
                 <div className="empty-state-icon"><HiPhotograph /></div>
                 <h2 className="t-h2">Post not found</h2>
                 <p className="t-body text-muted max-w-[320px]">It may have been deleted, or the link is wrong.</p>
-                <Link to="/" className="btn btn-primary px-6 no-underline">
+                <Link to="/" className="btn btn-primary no-underline">
                     Back to feed
                 </Link>
             </div>
@@ -467,10 +461,8 @@ export default function PostDetail() {
                 ) : (
                     <div className="post-detail-media post-detail-media--text">
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '40px', textAlign: 'center' }}>
-                            <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, flexShrink: 0 }}>
-                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                                </svg>
+                            <div style={{ width: 64, height: 64, borderRadius: 'var(--r-xl)', background: 'var(--accent-subtle)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, flexShrink: 0 }}>
+                                <HiOutlineChat size={30} />
                             </div>
                             {post.caption && (
                                 <p style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.6, color: 'var(--text-1)', maxWidth: 380, wordWrap: 'break-word', margin: 0 }}>
@@ -570,7 +562,7 @@ export default function PostDetail() {
                     <div className="post-detail-comments">
                         {comments.length === 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-3)', textAlign: 'center', gap: 8 }}>
-                                <span style={{ fontSize: 32 }}>💬</span>
+                                <HiOutlineChat size={32} />
                                 <p style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-1)' }}>No comments yet</p>
                                 <p style={{ fontSize: 13 }}>Be the first to comment</p>
                             </div>

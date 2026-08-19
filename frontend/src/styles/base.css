@@ -1,0 +1,290 @@
+/* ========================================================================================================================================================================================================================================
+   BASE RESET
+   ======================================================================================================================================================================================================================================== */
+
+html,
+body {
+  width: 100%;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text-1);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.layout-locked,
+.layout-locked body {
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: inherit;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+  filter: brightness(0.95);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+  border-radius: var(--r-sm);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+input,
+textarea {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+  transition: all 0.2s var(--ease-out);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-3);
+  opacity: 0.6;
+  /* Slightly more muted for elegance */
+}
+
+/* Every text field in the app used to be `outline: none` here, with nothing
+   put back, so a keyboard user had no way to see where they were. Mirrors the
+   ring `button:focus-visible` already uses. :focus-visible, so it appears for
+   keyboard focus and not on mouse click. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable]:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Windows high-contrast mode discards box-shadow, so the ring needs a real
+   outline there or focus becomes invisible again. */
+@media (forced-colors: active) {
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  button:focus-visible,
+  a:focus-visible,
+  [contenteditable]:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Theme-switch transition.
+ *
+ * This used to be an unconditional transition of four properties on every
+ * element in the document, which existed solely to smooth the light/dark swap
+ * but was paid for on every hover, focus and state change in the app. On a long
+ * feed or message list that is thousands of elements the compositor has to
+ * watch continuously.
+ *
+ * ThemeContext adds .theme-transition to <html> for the duration of a switch,
+ * so the cost is bounded to the moment it is actually wanted.
+ */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color var(--trans-fast),
+    border-color var(--trans-fast),
+    color var(--trans-fast),
+    box-shadow var(--trans-fast) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   SCROLLBARS - Ghostly & Professional
+   ======================================================================================================================================================================================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-lg) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-lg);
+  border-radius: var(--r-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+  background-clip: content-box;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  background-clip: content-box;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+  background-clip: content-box;
+}
+
+/* ========================================================================================================================================================================================================================================
+   TYPOGRAPHY SYSTEM
+   ======================================================================================================================================================================================================================================== */
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--text-1);
+}
+
+.t-h2 {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: var(--text-1);
+}
+
+.t-h3 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+}
+
+.t-body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.t-sub {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.t-caption {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  letter-spacing: 0.01em;
+}
+
+.t-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.t-accent {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.t-small {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ========================================================================================================================================================================================================================================
+   UTILITY CLASSES - 8px GRID
+   ======================================================================================================================================================================================================================================== */
+
+/* Spacing */
+
+/* Sizes */
+
+/* Font Weights */
+
+/* Font Sizes */
+
+/* Colors */
+
+/* Other */
+
+/* ============================================================================
+   REDUCED MOTION
+   Honours the OS-level "reduce motion" setting. Spinners and shimmers keep a
+   slow loop so loading states still read as active.
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .spinner,
+  .spinner-sm {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .skeleton::after {
+    animation: none !important;
+  }
+}

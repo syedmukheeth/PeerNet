@@ -4,9 +4,7 @@ import { Link } from 'react-router'
 import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
-import {
-    HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiRefresh
-} from 'react-icons/hi'
+import { HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiRefresh } from '../components/ui/icons'
 import avatarFallback from '../components/ui/avatarFallback'
 
 // Compact relative time, e.g. "3h", "2d"

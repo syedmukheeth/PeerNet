@@ -44,7 +44,7 @@
     background: var(--admin-bg);
     color: var(--admin-text-primary);
     overflow: hidden;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-sans);
 }
 
 .admin-main-col {

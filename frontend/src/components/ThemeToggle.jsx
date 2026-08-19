@@ -1,7 +1,6 @@
 import { useTheme } from '../context/ThemeContext'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiSun, HiMoon } from 'react-icons/hi'
-
+import { HiSun, HiMoon } from './ui/icons'
 export default function ThemeToggle({ className = '' }) {
     const { isDark, toggle } = useTheme()
 

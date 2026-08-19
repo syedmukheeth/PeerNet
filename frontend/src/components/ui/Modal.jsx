@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { HiX } from 'react-icons/hi'
+import { HiX } from './icons'
 import { modalCard, useMotionPreset } from '../../lib/motion'
 import cx from './cx'
 

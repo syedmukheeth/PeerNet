@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiX, HiBadgeCheck, HiUser } from 'react-icons/hi'
+import { HiX, HiBadgeCheck, HiUser } from './ui/icons'
 import api, { chatApi } from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'

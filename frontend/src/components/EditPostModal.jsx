@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { HiX } from 'react-icons/hi'
+import { HiX } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 

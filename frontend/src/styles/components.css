@@ -1,0 +1,728 @@
+/* ========================================================================================================================================================================================================================================
+   GLASS & SURFACE COMPONENTS
+   ======================================================================================================================================================================================================================================== */
+
+.glass-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 767px) {
+
+}
+
+/* Hide page headings on mobile where the top bar is enough */
+@media (max-width: 767px) {
+
+}
+
+[data-theme="light"] .glass-card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ========================================================================================================================================================================================================================================
+   RIGHT PANEL - Profile Summary + Suggestions
+   ======================================================================================================================================================================================================================================== */
+
+/* User suggestion row */
+
+/* ========================================================================================================================================================================================================================================
+   BUTTONS - 3-size system
+   ======================================================================================================================================================================================================================================== */
+
+/* Danger. The section header existed with no rules under it, so btn-danger
+   rendered as an unstyled base button. */
+
+/* Gradient share */
+
+/* ========================================================================================================================================================================================================================================
+   INPUTS
+   ======================================================================================================================================================================================================================================== */
+.input {
+  width: 100%;
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  color: var(--text-1);
+  font-size: 15px;
+  transition: all 0.25s var(--ease-out);
+}
+
+.input:focus {
+  border-color: var(--accent);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-ring), 0 4px 20px -5px rgba(0, 0, 0, 0.3);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+/* ========================================================================================================================================================================================================================================
+   CARDS
+   ======================================================================================================================================================================================================================================== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.l-card {
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--trans-fast);
+}
+
+.l-card:hover {
+  border-color: var(--border-lg);
+}
+
+/* ========================================================================================================================================================================================================================================
+   AVATARS
+   ======================================================================================================================================================================================================================================== */
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--hover);
+  display: block;
+}
+
+/* ========================================================================================================================================================================================================================================
+   BADGE & VERIFIED
+   ======================================================================================================================================================================================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.verified {
+  color: var(--accent);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ========================================================================================================================================================================================================================================
+   SPINNERS & LOADING
+   ======================================================================================================================================================================================================================================== */
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid var(--border-md);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Skeleton styles moved to unified section at bottom */
+
+/* ========================================================================================================================================================================================================================================
+   THEME TOGGLE
+   ======================================================================================================================================================================================================================================== */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-md);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.theme-toggle:hover {
+  background: var(--hover);
+  color: var(--text-1);
+  border-color: var(--border-lg);
+}
+
+/* ========================================================================================================================================================================================================================================
+   MODAL
+   ======================================================================================================================================================================================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-overlay);
+  padding: 16px;
+}
+
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  padding: 28px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--shadow-lg);
+  animation: modalScaleUp 0.25s var(--ease-out);
+}
+
+@keyframes modalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Create Post Modal */
+.create-post-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-post-card {
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.create-post-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.create-post-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.create-post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.create-post-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-1);
+}
+
+/* Upload zones */
+.upload-zone {
+  border: 2px dashed var(--border-md);
+  border-radius: var(--r-lg);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--input-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: all var(--trans-fast);
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-low);
+}
+
+.upload-zone__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--accent-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--accent);
+}
+
+.media-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #000;
+}
+
+.media-preview img,
+.media-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-preview__remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--trans-fast);
+  font-size: 16px;
+}
+
+.media-preview__remove:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.caption-section {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.caption-field {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 15px;
+  color: var(--text-1);
+  font-family: inherit;
+  min-height: 72px;
+  line-height: 1.5;
+}
+
+.caption-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.upload-zone {
+  border: 2px dashed var(--border-md);
+  border-radius: var(--r-lg);
+  padding: 56px 24px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--input-bg);
+  transition: all var(--trans-fast);
+}
+
+.upload-zone:hover {
+  border-color: var(--accent);
+  background: var(--accent-low);
+  transform: translateY(-2px);
+}
+
+.upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+/* ============================================================================================================================================================================================================================================
+   OVERLAYS
+   ============================================================================================================================================================================================================================================ */
+
+/* 1. Glassmorphism */
+/* ========================================================================================================================================================================================================================================
+   SKELETON LOADING SYSTEM
+   ======================================================================================================================================================================================================================================== */
+
+@keyframes peernet-shimmer {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(150%) skewX(-20deg); }
+}
+
+@keyframes peernet-pulse-glow {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.9; }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-1);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  pointer-events: none;
+  /* Removed pulse to reduce visual noise, using shimmer only */
+}
+
+/* Shimmer sweep */
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background: linear-gradient(
+  110deg,
+  transparent 0%,
+  rgba(255, 255, 255, 0) 30%,
+  rgba(255, 255, 255, 0.04) 50%,
+  rgba(255, 255, 255, 0) 70%,
+  transparent 100%
+  );
+  animation: peernet-shimmer 1.2s infinite linear;
+  z-index: 2;
+  pointer-events: none;
+}
+
+[data-theme="light"] .skeleton {
+  background-color: var(--surface-2);
+}
+
+[data-theme="light"] .skeleton::after {
+  background: linear-gradient(
+  90deg,
+  transparent 0%,
+  rgba(0, 0, 0, 0) 20%,
+  rgba(0, 0, 0, 0.03) 50%,
+  rgba(0, 0, 0, 0) 80%,
+  transparent 100%
+  );
+}
+
+/* Skeleton Presets for Precision Loading */
+.skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50% !important;
+  flex-shrink: 0;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+.skeleton-text {
+  height: 12px;
+  margin-bottom: 8px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-text.s { width: 30%; }
+.skeleton-text.m { width: 60%; }
+.skeleton-text.l { width: 100%; }
+
+/* Glass Enhancement for Skeletons */
+.skeleton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Legacy support handled above */
+
+.react-hot-toast>div {
+  border-radius: var(--r-lg);
+  background: var(--glass-bg);
+  color: var(--text-1);
+  border: 1px solid var(--border-md);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.react-hot-toast [role="status"] {
+  letter-spacing: 0.01em;
+}
+
+.glass-v2 {
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  backdrop-filter: blur(16px) saturate(145%);
+  -webkit-backdrop-filter: blur(16px) saturate(145%);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.3);
+}
+
+/* Integrated Utility Bridge: Admin.jsx coverage */
+
+.space-y-2> :not([hidden])~ :not([hidden]) {
+  margin-top: 8px;
+}
+
+.space-y-3> :not([hidden])~ :not([hidden]) {
+  margin-top: 12px;
+}
+
+.space-y-8> :not([hidden])~ :not([hidden]) {
+  margin-top: 32px;
+}
+
+.space-y-10> :not([hidden])~ :not([hidden]) {
+  margin-top: 40px;
+}
+
+/* ============================================================================
+   REPORT MODAL
+   Built on components/ui/Modal, so the overlay, escape key, focus trap and
+   scroll lock all come from there. Only the form body is styled here.
+   ========================================================================== */
+
+.report-reason {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-2);
+    transition: background var(--trans-fast);
+}
+
+.report-reason:hover {
+    background: var(--hover);
+    color: var(--text-1);
+}
+
+.report-reason:focus-within {
+    background: var(--hover);
+    box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.report-reason input {
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.report-description {
+    width: 100%;
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--border-md);
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    color: var(--text-1);
+    font: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.report-description:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* ============================================================================
+   ERROR BOUNDARY + NOT FOUND
+   Shown when a page throws, or when a URL matches no route. Both used to be
+   invisible states: a render throw blanked the app, and an unknown URL silently
+   redirected to the feed.
+   ========================================================================== */
+
+.error-boundary,
+.not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--s-3);
+    padding: var(--s-7) var(--s-4);
+    min-height: 50vh;
+}
+
+.error-boundary-title,
+.not-found-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-1);
+}
+
+.error-boundary-body,
+.not-found-body {
+    margin: 0;
+    max-width: 42ch;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-3);
+}
+
+.error-boundary-detail {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: var(--s-3);
+    border: 1px solid var(--border-md);
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-size: 12px;
+    text-align: left;
+}
+
+.error-boundary-actions {
+    display: flex;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.not-found-code {
+    margin: 0;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-3);
+    opacity: 0.5;
+}
+
+/* ============================================================================
+   CONFIRM DIALOG
+   Replaces window.confirm() for destructive actions in the app (the admin
+   console keeps its own, louder variant).
+   ========================================================================== */
+
+.confirm-dialog {
+    padding: var(--s-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+}
+
+.confirm-dialog-body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-2);
+}
+
+.confirm-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--s-2);
+}
+
+/* Visually hidden but still announced. Used for labels on inputs that show
+   their name only as placeholder text, which screen readers do not treat as an
+   accessible name. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.comments-load-more {
+    display: block;
+    margin: var(--s-3) auto;
+}
+
+/* The notification row was a click-handled div with two more click-handled
+   elements nested inside it. It is now a list item holding real links, laid
+   out with the stretched-link pattern: .notif-main-link::after covers the
+   whole row so clicking anywhere still opens the notification, while the
+   avatar link and the follow button sit above it on their own. */
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notif-main-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.notif-main-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.notif-main-link:focus-visible::after {
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Above the stretched link, so they stay independently clickable. */
+.notif-avatar-wrap,
+.notif-trailing {
+  position: relative;
+  z-index: 1;
+}
+
+.notif-unread-dot {
+  background: var(--accent);
+}
+
+/* Placeholder while the lazily-loaded emoji picker chunk arrives. */
+.zn-emoji-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: var(--s-4);
+  color: var(--text-3);
+  font-size: 13px;
+}

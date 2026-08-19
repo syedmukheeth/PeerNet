@@ -11,8 +11,13 @@
  * @param {number} width - The target width (default 800 for post feed)
  * @returns {string} The optimized URL
  */
+// A falsy url returns '' rather than the falsy input itself. Returning undefined
+// made React drop the src attribute, which is how text posts (which have no
+// mediaUrl) rendered as empty grey squares in the profile grid rather than
+// failing visibly.
 export const optimizeCloudinaryUrl = (url, width = 800) => {
-    if (!url || !url.includes('res.cloudinary.com')) return url;
+    if (!url) return '';
+    if (!url.includes('res.cloudinary.com')) return url;
 
     // If it already has transformations, don't double inject
     if (url.includes('/upload/q_') || url.includes('/upload/f_')) return url;
@@ -31,7 +36,8 @@ export const optimizeCloudinaryUrl = (url, width = 800) => {
  * @returns {string} The optimized URL
  */
 export const optimizeCloudinaryVideo = (url) => {
-    if (!url || !url.includes('res.cloudinary.com')) return url;
+    if (!url) return '';
+    if (!url.includes('res.cloudinary.com')) return url;
 
     if (url.includes('/upload/q_') || url.includes('/upload/f_')) return url;
 
@@ -49,6 +55,7 @@ export const optimizeCloudinaryVideo = (url) => {
  */
 export const optimizeAvatarUrl = (url) => {
     // If it's a ui-avatars URL, it's already tiny and SVG/PNG.
-    if (!url || !url.includes('res.cloudinary.com')) return url;
+    if (!url) return '';
+    if (!url.includes('res.cloudinary.com')) return url;
     return optimizeCloudinaryUrl(url, 150);
 };

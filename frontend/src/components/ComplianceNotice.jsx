@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiInformationCircle } from 'react-icons/hi'
+import { HiInformationCircle } from './ui/icons'
 import { Link } from 'react-router'
 
 export default function ComplianceNotice() {

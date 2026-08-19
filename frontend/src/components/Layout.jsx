@@ -14,7 +14,7 @@ import MobileHeader from './shell/MobileHeader'
 import MobileNav from './shell/MobileNav'
 import SiteFooter from './shell/SiteFooter'
 import ErrorBoundary from './ErrorBoundary'
-import { HiHeart, HiChatAlt2, HiUserAdd } from 'react-icons/hi'
+import { HiHeart, HiChatAlt2, HiUserAdd } from './ui/icons'
 import { useQueryClient } from '@tanstack/react-query'
 import avatarFallback from './ui/avatarFallback'
 
@@ -143,7 +143,7 @@ export default function Layout() {
     const showMsgToast = useCallback((msg) => {
         const senderName = msg.sender?.username || 'Someone'
         const convoId = msg.conversationId
-        const preview = msg.body?.length > 40 ? msg.body.slice(0, 40) + '…' : (msg.body || '📷 Photo')
+        const preview = msg.body?.length > 40 ? msg.body.slice(0, 40) + '…' : (msg.body || 'Photo')
 
         toast((t) => (
             <div onClick={() => { navigate(`/messages/${convoId || ''}`); toast.dismiss(t.id) }} className="flex items-center gap-3 cursor-pointer">

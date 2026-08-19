@@ -1,13 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-    HiX, 
-    HiPhotograph, 
-    HiPencilAlt, 
-    HiCheckCircle,
-    HiCloudUpload,
-    HiTrash
-} from 'react-icons/hi'
+import { HiX, HiPhotograph, HiPencilAlt, HiCheckCircle, HiCloudUpload, HiTrash } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
@@ -113,7 +106,7 @@ export default function CreatePostModal({ onClose }) {
                 fd.append('caption', caption)
                 
                 await api.post('/posts', fd)
-                toast.success('📝 Status shared!')
+                toast.success('Status shared')
                 await queryClient.invalidateQueries({ queryKey: ['feed'] })
                 onClose()
             } else {
@@ -123,7 +116,7 @@ export default function CreatePostModal({ onClose }) {
                 fd.append('caption', caption)
 
                 await api.post('/posts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-                toast.success(isVideo ? '🎬 Video shared!' : '✅ Post shared!')
+                toast.success(isVideo ? 'Video shared' : 'Post shared')
                 await queryClient.invalidateQueries({ queryKey: ['feed'] })
                 onClose()
             }
@@ -275,11 +268,11 @@ export default function CreatePostModal({ onClose }) {
 
                     {/* Footer */}
                     <footer className="create-post-footer">
-                        <button className="btn btn-secondary px-6" onClick={onClose} disabled={loading}>
+                        <button className="btn btn-secondary" onClick={onClose} disabled={loading}>
                             Cancel
                         </button>
                         <motion.button 
-                            className={`btn btn-primary px-8 ${loading ? 'btn-loading' : ''}`}
+                            className={`btn btn-primary ${loading ? 'btn-loading' : ''}`}
                             onClick={handleSubmit}
                             disabled={loading || (!isTextMode && !file) || (isTextMode && !caption.trim())}
                             whileHover={{ scale: 1.02 }}

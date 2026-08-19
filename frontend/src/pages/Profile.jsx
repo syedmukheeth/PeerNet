@@ -5,8 +5,9 @@ import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import api, { CHAT_BASE_URL } from '../api/axios'
 import toast from 'react-hot-toast'
-import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChatAlt2, HiBadgeCheck, HiCog, HiLink, HiUser } from 'react-icons/hi'
+import { HiViewGrid, HiFilm, HiBookmark, HiHeart, HiChatAlt2, HiBadgeCheck, HiCog, HiLink, HiUser } from '../components/ui/icons'
 import { optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
+import { readableTextOn } from '../utils/contrast'
 import UserListModal from '../components/UserListModal'
 import EditProfileModal from '../components/EditProfileModal'
 import { StoryViewer } from '../components/StoryRail'
@@ -204,23 +205,23 @@ export default function Profile() {
                             <div className="profile-actions-row">
                                 {isMe ? (
                                     <>
-                                        <button className="btn btn-secondary btn-sm flex-1 h-9 rounded-lg font-semibold" onClick={() => setEditProfile(true)}>
+                                        <button className="btn btn-secondary btn-sm flex-1" onClick={() => setEditProfile(true)}>
                                             Edit Profile
                                         </button>
-                                        <button className="btn btn-secondary btn-sm p-2 rounded-lg" onClick={() => navigate('/settings')} aria-label="Settings">
+                                        <button className="btn btn-secondary btn-icon-sm" onClick={() => navigate('/settings')} aria-label="Settings">
                                             <HiCog size={20} />
                                         </button>
                                     </>
                                 ) : (
                                     <>
                                         <motion.button
-                                            className={`btn btn-sm flex-1 h-9 rounded-lg font-bold ${following ? 'following-btn' : 'btn-primary'}`}
+                                            className={`btn btn-sm flex-1 ${following ? 'following-btn' : 'btn-primary'}`}
                                             onClick={handleFollow}
                                             whileTap={{ scale: 0.96 }}>
                                             {following ? 'Following' : 'Follow'}
                                         </motion.button>
                                         <motion.button
-                                            className="btn btn-secondary btn-sm flex-1 h-9 rounded-lg font-bold flex items-center justify-center gap-2"
+                                            className="btn btn-secondary btn-sm flex-1"
                                             onClick={handleMessage}
                                             disabled={messaging}
                                             whileTap={{ scale: 0.96 }}>
@@ -339,6 +340,21 @@ export default function Profile() {
                                             playsInline
                                             preload="none"
                                         />
+                                    ) : p.mediaType === 'text' ? (
+                                        // Text posts have no mediaUrl at all. They
+                                        // used to fall through to the <img> below,
+                                        // where optimizeCloudinaryUrl(undefined)
+                                        // returned undefined, React dropped the
+                                        // src attribute, and the tile painted as an
+                                        // empty grey square. They get their own
+                                        // tile: the colour the author chose, with
+                                        // the caption set in it.
+                                        <div
+                                            className="profile-grid-text"
+                                            style={{ background: p.backgroundColor || 'var(--accent-2)' }}
+                                        >
+                                            <span className="profile-grid-text-body" style={{ color: readableTextOn(p.backgroundColor) }}>{p.caption}</span>
+                                        </div>
                                     ) : (
                                         // Served through Cloudinary's transform,
                                         // so a grid thumbnail no longer downloads

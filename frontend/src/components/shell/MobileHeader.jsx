@@ -1,10 +1,7 @@
 import { Link, NavLink } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-    HiOutlineBell, HiOutlineChatAlt2, HiMenu, HiMoon, HiSun,
-    HiCog, HiShieldCheck, HiSwitchHorizontal, HiLogout, HiLogin,
-} from 'react-icons/hi'
-import logoImg from '../../assets/logo.png'
+import { HiOutlineBell, HiOutlineChatAlt2, HiMenu, HiMoon, HiSun, HiCog, HiShieldCheck, HiSwitchHorizontal, HiLogout, HiLogin } from '../ui/icons'
+import logoImg from '../../assets/logo.svg'
 
 /*
  * The mobile top bar plus its slide-down "more" popup. Mirrors the desktop

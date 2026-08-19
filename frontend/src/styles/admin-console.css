@@ -1,0 +1,419 @@
+/* =============================================================================
+   PeerNet - Admin console
+   Mission-critical governance & real-time telemetry
+   ============================================================================= */
+
+.admin-table tr:hover {
+  background: var(--hover);
+}
+
+.admin-btn-icon.danger:hover {
+  border-color: var(--error);
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   STORY CREATOR
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+
+.story-toolbar-btn.active {
+  background: white;
+  color: black;
+}
+
+.story-swatch.active {
+  transform: scale(1.25);
+  border-color: white;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.story-text-preview {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.story-text-preview textarea {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: white;
+  font-family: inherit;
+  caret-color: var(--accent);
+}
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   LEGAL PAGES
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   COOKIE BANNER
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+.compliance-banner {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  max-width: 440px;
+  z-index: var(--z-toast);
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.compliance-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.compliance-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.compliance-text {
+  flex: 1;
+}
+
+.compliance-actions {
+  flex-shrink: 0;
+}
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   SITE FOOTER
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+
+.dev-text {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   SPLASH SCREEN
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.splash-logo-img {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r-lg);
+  object-fit: cover;
+  display: block;
+}
+
+.splash-brand {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+}
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   PAGE HEADER & LAYOUT UTILITIES
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  width: 100%;
+}
+
+.sidebar-brand .sidebar-brand-img {
+  display: block;
+}
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   ANIMATIONS (shared)
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+@keyframes pulseDot {
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0.5);
+    opacity: 0.35;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes rotateBorder {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(0.92);
+  }
+}
+
+/* Modal textarea */
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   RESPONSIVE - TABLET (<=1264px) Collapsed Sidebar
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+
+/* LAYOUT PRIMITIVES - used by Feed.jsx, PostCard.jsx, Layout.jsx
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+
+/* Stack: vertical flex with default gap */
+.l-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Cluster: horizontal flex, wrap, centered items */
+.l-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (min-width: 1264px) {
+  /* Center feed column */
+  .l-main-col {
+    flex: 0 0 620px;
+    max-width: 620px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Right panel */
+  .l-side-panel {
+    width: 320px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Generic 'box' container */
+
+/* = = = = = = = = = =  SIDEBAR FOOTER = = = = = = = = = =  */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* = = = = = = = = = =  MORE POPUP = = = = = = = = = =  */
+.more-popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  z-index: var(--z-dropdown);
+  min-width: 220px;
+}
+
+/* = = = = = = = = = =  NOTIFICATION BADGE = = = = = = = = = =  */
+
+.mobile-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--error);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg);
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+  animation: badgePop 0.3s ease-out;
+  padding: 0 3px;
+}
+
+/* = = = = = = = = = =  TYPOGRAPHY ALIASES = = = = = = = = = =  */
+/* Used inline by JSX: className="t-h4 ..." */
+
+/* Color aliases (JSX uses text-primary, text-muted, text-secondary) */
+
+/* Kept under its old name because JSX still applies it. It no longer clips a
+   gradient through the letters. */
+.logo-gradient-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  color: var(--text-1);
+}
+
+/* = = = = = = = = = =  BG/BORDER ALIASES = = = = = = = = = =  */
+
+/* = = = = = = = = = =  LAYOUT UTILITIES = = = = = = = = = =  */
+
+.group {
+  position: relative;
+}
+
+/* for group-hover targeting */
+
+/* Size + spacing shortcuts used by PostCard and Feed */
+
+/* Animate pulse */
+@keyframes animatePulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Grid/space helpers */
+
+/* Misc font overrides */
+
+/* page-transition-wrapper - no styling needed, just exists */
+.page-transition-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Instagram Heart Pop Animation */
+@keyframes heartPop {
+  0% {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.4);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* layout-container - used in Layout.jsx, provides the scroll context */
+.layout-container {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Translate helpers used in PostCard */
+
+/* Drop shadow & text white/opacity for video overlays */
+
+/* Site footer bottom padding helper */
+
+/* Inline flex centre for empty state visual circle */
+.empty-state-visual {
+  display: flex;
+  justify-content: center;
+}
+
+/* group-hover handled by parent .group and :hover via JS/tailwind approach
+   In pure CSS we can target it via parent hover: */
+.group:hover .group-hover\:scale-105 {
+  transform: scale(1.05);
+}
+
+.group:hover .group-hover\:text-accent {
+  color: var(--accent);
+}
+
+.group:hover .hover\:scale-105 {
+  transform: scale(1.05);
+}
+
+/* Transition shortcuts */
+
+.hover\:bg-surface\/50:hover {
+  background-color: rgba(var(--surface-rgb), 0.5);
+}
+
+.hover\:border-border\/30:hover {
+  border-color: rgba(var(--border-rgb), 0.3);
+}
+
+.hover\:brightness-125:hover {
+  filter: brightness(1.25);
+}
+
+.hover\:underline:hover {
+  text-decoration: underline;
+}
+
+/* ======================================== FEED RESPONSIVE ADJUSTMENTS ======================================== */

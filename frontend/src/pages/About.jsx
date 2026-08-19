@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async'
-import logoImg from '../assets/logo.png'
+import logoImg from '../assets/logo.svg'
 
 export default function About() {
     return (

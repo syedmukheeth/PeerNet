@@ -18,27 +18,33 @@
    context/ThemeContext.jsx and pre-applied by the flash guard in index.html.
    It is NOT Tailwind's dark: variant, and must not be changed to one.
 
-   ── Direction (2026 redesign) ─────────────────────────────────────────────
-   The old palette was Instagram blue #0095f6 on pure black with an Inter and
-   Syne pairing, a three stop gradient wordmark and 25px glass on every
-   surface. That reads as a template. Four rules replace it, and anything
-   added here has to obey them:
+   -- Direction (Iris) ------------------------------------------------------
+   Two earlier palettes are gone: Instagram blue #0095f6 on pure black, then a
+   vermilion #ff6a3d on off black. Vermilion was chosen to avoid social blue,
+   but orange at that saturation dominates every surface it touches and forced
+   a warm neutral ramp that fought the product's density.
 
-   1. Colour: one accent, vermilion, and nothing else. It is warm, it is not
-      a social blue and it is not a violet. It changes shade between themes
-      because a single shade cannot clear 4.5:1 on both #0B0B0C and #FAF9F7.
-      --accent-fg is the label colour to put ON the accent: near black in
-      dark, white in light. Never guess it.
-   2. Type: Geist for everything, Geist Mono for counts, timestamps and ids.
+   Iris is an indigo violet on a cool ink neutral. Five rules replace the old
+   four, and anything added here has to obey them:
+
+   1. Colour: one accent, iris, and nothing else. It shifts shade between
+      themes because a single shade cannot clear 4.5:1 on both #0B0A0F and
+      #F9F8FB. --accent-fg is the label colour to put ON the accent: near
+      black in dark, white in light. Never guess it.
+   2. Contrast: every text token and the accent clear WCAG AA 4.5:1 against
+      their own theme's --bg. The ratios are recorded inline. If you change a
+      value, recompute the ratio; do not eyeball it.
+   3. Type: Geist for everything, Geist Mono for counts, timestamps and ids.
       One family, weight and tracking carry the hierarchy, not a second face.
-   3. Shape: one radius scale. Controls 10px, cards 14px, sheets 20px, and
-      --r-full only for things that are genuinely circular or a chip.
-   4. Depth: borders first. A shadow means the element actually floats above
+   4. Shape: one radius scale, mirrored into Tailwind's --radius-* namespace
+      so `rounded-lg` in JSX and `var(--r-lg)` in CSS are the same number.
+      Controls 10px, cards 14px, sheets 20px, --r-full only for circles/chips.
+   5. Depth: borders first. A shadow means the element actually floats above
       the page (menu, modal, toast). Nothing else gets one, and no shadow is
       pure black on a light surface.
    ============================================================================ */
 
-/* Tailwind reads these to generate bg-*, text-*, border-* utilities.
+/* Tailwind reads these to generate bg-*, text-*, border-*, rounded-* utilities.
    `inline` keeps the var() reference intact so utilities follow the
    light/dark switch on [data-theme] instead of freezing at :root. */
 @theme inline {
@@ -78,19 +84,78 @@
   --color-admin-border: var(--border);
   --color-admin-surface-subtle: var(--surface-subtle);
 
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', monospace;
+  --font-sans: 'Geist Variable', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Geist Variable', 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', monospace;
 
   --color-accent-fg: var(--accent-fg);
 }
 
-/* ── 2. Primitives: identical in every theme ──────────────────────────────── */
+/* Radius, mirrored out of the --r-* scale below.
+
+   Tailwind ships its own --radius-* defaults, so before this block every
+   `rounded-lg` in JSX resolved to Tailwind's 8px while `var(--r-lg)` in CSS
+   resolved to 14px. The two systems disagreed on every card in the app, which
+   is the whole reason radius usage had drifted to six different values
+   (rounded-full x58, rounded-xl x39, rounded-2xl x32, rounded-md x24,
+   rounded-lg x23, rounded-3xl x1). Overriding the namespace makes the utility
+   and the variable the same number, so neither can drift again.
+
+   Not `inline`: these are static lengths, nothing to follow across themes. */
+@theme {
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-3xl: 28px;
+  --radius-full: 9999px;
+
+  /* Type scale. The px sizes match Tailwind's defaults on purpose, so adding
+     this block shifts nothing on its own. What it adds is a paired line height
+     and tracking for every step, which the app previously set ad hoc at each
+     call site. Display sizes get negative tracking because Geist opens up
+     noticeably above 20px.
+
+     Body density (14px rather than 16px) is set once on <body> in base.css
+     rather than by redefining --text-base, so components that ask for a
+     specific step keep getting that step. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.55;
+  --text-base: 1rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.45;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.35;
+  --text-xl--letter-spacing: -0.01em;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.3;
+  --text-2xl--letter-spacing: -0.015em;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 1.25;
+  --text-3xl--letter-spacing: -0.02em;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 1.15;
+  --text-4xl--letter-spacing: -0.025em;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1.05;
+  --text-5xl--letter-spacing: -0.03em;
+}
+
+/* -- 2. Primitives: identical in every theme ------------------------------- */
 
 :root {
   /* Radii. One scale, four jobs: --r-sm on small chrome, --r-md on every
      control, --r-lg on cards, --r-xl on sheets and modals. --r-full is for
-     avatars and chips only, never for a full width button. */
+     avatars and chips only, never for a full width button.
+
+     Kept in sync with the --radius-* block above by hand. There is no way to
+     derive one from the other: @theme cannot read :root, and :root cannot be
+     read by the utility generator. */
   --r-xs: 4px;
   --r-sm: 8px;
   --r-md: 10px;
@@ -99,7 +164,8 @@
   --r-2xl: 28px;
   --r-full: 9999px;
 
-  /* Spacing */
+  /* Spacing. A subset of Tailwind's default 4px-step scale, so --s-5 (24px)
+     and `p-6` are the same distance. Nothing to override in @theme. */
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -123,6 +189,13 @@
   --v4-convo-w: 360px;
   --zn-list-w: 360px;
 
+  /* Control heights. The .btn base used to declare no height at all, so a
+     button with no size modifier collapsed to its text box and every call site
+     patched it with its own Tailwind padding. */
+  --ctl-sm: 32px;
+  --ctl-md: 40px;
+  --ctl-lg: 48px;
+
   /* Motion. lib/motion.js mirrors these numerically so CSS and framer-motion
      animations stay in agreement. */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
@@ -143,58 +216,68 @@
   --z-toast: 9999;
 }
 
-/* ── 3. Dark theme (the default) ──────────────────────────────────────────── */
+/* -- 3. Dark theme (the default) ------------------------------------------- */
 
 :root,
 [data-theme="dark"] {
-  /* Off black, not #000. Pure black has no room for a surface to sit above
-     it, which is why every card needed a border and a glow to be visible. */
-  --bg: #0b0b0c;
-  --surface: #101012;
-  --card: #101012;
-  --surface-el: #17171a;
-  --hover: #1f1f23;
+  /* Ink, not #000. Pure black has no room for a surface to sit above it, which
+     is why every card needed a border and a glow to be visible. The hue is
+     pulled a few degrees toward the accent so surfaces read as one material. */
+  --bg: #0b0a0f;
+  --surface: #111017;
+  --card: #111017;
+  --surface-el: #18161f;
+  --hover: #211e2b;
 
   --border: rgba(255, 255, 255, 0.09);
   --border-md: rgba(255, 255, 255, 0.14);
   --border-lg: rgba(255, 255, 255, 0.22);
 
-  /* 17.9:1, 7.7:1 and 4.7:1 on --bg. text-3 carries placeholders and meta
+  /* 16.55:1, 7.34:1 and 4.84:1 on --bg. text-3 carries placeholders and meta
      lines, so it has to clear 4.5:1 like any other body text. */
-  --text-1: #f5f4f2;
-  --text-2: #a5a29c;
-  --text-3: #7e7b74;
+  --text-1: #eceaf2;
+  --text-2: #a09bb0;
+  --text-3: #807b90;
 
-  /* 6.9:1 on --bg, so it is legible as link text and not only as a fill. */
-  --accent: #ff6a3d;
-  --accent-2: #7a2d16;
-  --accent-hover: #ff835c;
-  --accent-fg: #14100e;
-  --accent-gradient: linear-gradient(180deg, #ff6a3d, #f0532a);
-  --accent-gradient-hover: linear-gradient(180deg, #ff835c, #ff6a3d);
-  --accent-subtle: rgba(255, 106, 61, 0.14);
-  --accent-low: rgba(255, 106, 61, 0.07);
-  --accent-ring: rgba(255, 106, 61, 0.4);
+  /* 5.99:1 on --bg, so it is legible as link text and not only as a fill.
+     --accent-fg is 6.11:1 on --accent. */
+  --accent: #8b7bff;
+  --accent-2: #4c3ba8;
+  --accent-hover: #a396ff;
+  --accent-fg: #08060f;
+  --accent-gradient: linear-gradient(180deg, #8b7bff, #7362f5);
+  --accent-gradient-hover: linear-gradient(180deg, #a396ff, #8b7bff);
+  --accent-subtle: rgba(139, 123, 255, 0.14);
+  --accent-low: rgba(139, 123, 255, 0.07);
+  --accent-ring: rgba(139, 123, 255, 0.4);
 
   /* Flat, expressed as a gradient because the wordmark clips a background
-     image to text. A three stop blue to violet fade was the single loudest
-     tell that nobody chose these colours. */
+     image to text. A multi stop fade was the single loudest tell that nobody
+     chose these colours. */
   --logo-gradient: linear-gradient(0deg, var(--accent), var(--accent));
-  --story-ring: linear-gradient(140deg, #ff6a3d 0%, #ff9a3d 50%, #e0431f 100%);
+  --story-ring: linear-gradient(140deg, #8b7bff 0%, #c07bff 50%, #5b45d6 100%);
 
-  --success: #37b26d;
-  --error: #e5484d;
-  --warning: #d99512;
+  /* 9.88:1, 6.80:1, 9.73:1 on --bg. */
+  --success: #3ecf8e;
+  --error: #ff6369;
+  --warning: #f5a623;
+
+  /* Labels to put ON the semantic fills, same rule as --accent-fg: never
+     guess. White on the dark error reaches only 2.90:1, which is why the
+     danger button spent its life illegible in dark mode. */
+  --success-fg: #0b0a0f;
+  --error-fg: #0b0a0f;
+  --warning-fg: #0b0a0f;
 
   /* Notification accents. These were hard-coded hex literals inside
      pages/Notifications.jsx, so they ignored the theme entirely and were the
      one place in the app that bypassed this file. */
-  --notif-like: #e5484d;
-  --notif-comment: #4a9ee0;
-  --notif-follow: #37b26d;
+  --notif-like: #ff6369;
+  --notif-comment: #6fa8ff;
+  --notif-follow: #3ecf8e;
 
-  --input-bg: #17171a;
-  --overlay: rgba(6, 6, 7, 0.72);
+  --input-bg: #18161f;
+  --overlay: rgba(5, 4, 8, 0.72);
 
   /* Only three real steps. sm is a hairline for a sticky bar, md is a menu
      or popover, lg is a modal. xl is kept because rules still name it, and
@@ -203,128 +286,135 @@
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.55);
   --shadow-xl: 0 16px 44px rgba(0, 0, 0, 0.55);
-  --shadow-accent: 0 0 0 1px rgba(255, 106, 61, 0.28);
+  --shadow-accent: 0 0 0 1px rgba(139, 123, 255, 0.28);
   --text-glow: none;
 
-  --glass-bg: rgba(11, 11, 12, 0.82);
+  --glass-bg: rgba(11, 10, 15, 0.82);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-blur: blur(12px);
 
-  --surface-1: #17171a;
-  --surface-2: #1f1f23;
+  --surface-1: #18161f;
+  --surface-2: #211e2b;
   --surface-subtle: rgba(255, 255, 255, 0.045);
-  --surface-overlay: rgba(16, 16, 18, 0.88);
-  --surface-rgb: 11, 11, 12;
-  --text-1-rgb: 245, 244, 242;
-  --accent-rgb: 255, 106, 61;
+  --surface-overlay: rgba(17, 16, 23, 0.88);
+  --surface-rgb: 11, 10, 15;
+  --text-1-rgb: 236, 234, 242;
+  --accent-rgb: 139, 123, 255;
   --border-rgb: 255, 255, 255;
 
   /* Messaging */
-  --zn-footer-bg: rgba(11, 11, 12, 0.72);
-  --zn-composer-bg: #17171a;
+  --zn-footer-bg: rgba(11, 10, 15, 0.72);
+  --zn-composer-bg: #18161f;
   --zn-composer-border: rgba(255, 255, 255, 0.12);
-  --zn-composer-text: #f5f4f2;
-  --zn-bubble-peer: #1f1f23;
-  --zn-bubble-peer-text: #f5f4f2;
-  --zn-action-bar-bg: rgba(11, 11, 12, 0.96);
+  --zn-composer-text: #eceaf2;
+  --zn-bubble-peer: #211e2b;
+  --zn-bubble-peer-text: #eceaf2;
+  --zn-action-bar-bg: rgba(11, 10, 15, 0.96);
   --zn-search-bg: rgba(255, 255, 255, 0.06);
 }
 
-/* ── 4. Light theme ───────────────────────────────────────────────────────── */
+/* -- 4. Light theme -------------------------------------------------------- */
 /* Declares the same token names as dark, in the same order, with two
    deliberate omissions: --accent-alpha and --accent-glow are derived from
    --accent-rgb in section 5, and light redefines --accent-rgb, so they
    re-resolve on their own. */
 
 [data-theme="light"] {
-  /* Warm off white. The page is the paper, cards are pure white on top of
+  /* Cool off white. The page is the paper, cards are pure white on top of
      it, which is what separates them without a shadow. */
-  --bg: #faf9f7;
+  --bg: #f9f8fb;
   --surface: #ffffff;
   --card: #ffffff;
   --surface-el: #ffffff;
-  --hover: #f1efeb;
+  --hover: #f1eff5;
 
-  --border: rgba(23, 22, 26, 0.1);
-  --border-md: rgba(23, 22, 26, 0.16);
-  --border-lg: rgba(23, 22, 26, 0.24);
+  --border: rgba(20, 18, 26, 0.1);
+  --border-md: rgba(20, 18, 26, 0.16);
+  --border-lg: rgba(20, 18, 26, 0.24);
 
-  /* 17.1:1, 7.1:1 and 4.8:1 on --bg. */
-  --text-1: #17161a;
-  --text-2: #57545c;
-  --text-3: #716e76;
+  /* 17.55:1, 7.10:1 and 4.90:1 on --bg. */
+  --text-1: #14121a;
+  --text-2: #565266;
+  --text-3: #6f6a80;
 
-  /* Darker than the dark theme accent on purpose: #ff6a3d only reaches
-     2.3:1 on this background. #c23a17 reaches 5.1:1, and white on it
-     reaches 5.4:1. */
-  --accent: #c23a17;
-  --accent-2: #7a2d16;
-  --accent-hover: #a63113;
+  /* Darker than the dark theme accent on purpose: #8b7bff only reaches 2.5:1
+     on this background. #5b45d6 reaches 6.08:1, and white on it reaches
+     6.43:1. */
+  --accent: #5b45d6;
+  --accent-2: #4c3ba8;
+  --accent-hover: #4a34c0;
   --accent-fg: #ffffff;
-  --accent-gradient: linear-gradient(180deg, #c23a17, #a63113);
-  --accent-gradient-hover: linear-gradient(180deg, #a63113, #8c2810);
-  --accent-subtle: rgba(194, 58, 23, 0.1);
-  --accent-low: rgba(194, 58, 23, 0.05);
-  --accent-ring: rgba(194, 58, 23, 0.32);
+  --accent-gradient: linear-gradient(180deg, #5b45d6, #4a34c0);
+  --accent-gradient-hover: linear-gradient(180deg, #4a34c0, #3f2ba6);
+  --accent-subtle: rgba(91, 69, 214, 0.1);
+  --accent-low: rgba(91, 69, 214, 0.05);
+  --accent-ring: rgba(91, 69, 214, 0.32);
 
   --logo-gradient: linear-gradient(0deg, var(--accent), var(--accent));
-  --story-ring: linear-gradient(140deg, #e0431f 0%, #d97218 50%, #a63113 100%);
+  --story-ring: linear-gradient(140deg, #5b45d6 0%, #9333c4 50%, #4a34c0 100%);
 
-  --success: #1d7f4c;
-  --error: #c62a2f;
-  --warning: #9a6b06;
+  /* 5.53:1, 5.31:1, 5.24:1 on --bg. White clears 4.5:1 on all three as a
+     button label. */
+  --success: #087443;
+  --error: #c42b31;
+  --warning: #8a6100;
+
+  /* 5.85:1, 5.62:1, 5.54:1. Black on the light warning reaches only 3.79:1. */
+  --success-fg: #ffffff;
+  --error-fg: #ffffff;
+  --warning-fg: #ffffff;
 
   /* Notification accents. These were hard-coded hex literals inside
      pages/Notifications.jsx, so they ignored the theme entirely and were the
      one place in the app that bypassed this file. */
-  --notif-like: #c62a2f;
-  --notif-comment: #1f6aa8;
-  --notif-follow: #1d7f4c;
+  --notif-like: #c42b31;
+  --notif-comment: #1f5fd8;
+  --notif-follow: #087443;
 
   --input-bg: #ffffff;
-  --overlay: rgba(23, 22, 26, 0.4);
+  --overlay: rgba(20, 18, 26, 0.4);
 
-  /* Tinted toward the warm page ground, never pure black. */
-  --shadow-sm: 0 1px 2px rgba(40, 33, 24, 0.06);
-  --shadow-md: 0 8px 24px rgba(40, 33, 24, 0.1);
-  --shadow-lg: 0 16px 44px rgba(40, 33, 24, 0.14);
-  --shadow-xl: 0 16px 44px rgba(40, 33, 24, 0.14);
-  --shadow-accent: 0 0 0 1px rgba(194, 58, 23, 0.24);
+  /* Tinted toward the cool page ground, never pure black. */
+  --shadow-sm: 0 1px 2px rgba(28, 24, 40, 0.06);
+  --shadow-md: 0 8px 24px rgba(28, 24, 40, 0.1);
+  --shadow-lg: 0 16px 44px rgba(28, 24, 40, 0.14);
+  --shadow-xl: 0 16px 44px rgba(28, 24, 40, 0.14);
+  --shadow-accent: 0 0 0 1px rgba(91, 69, 214, 0.24);
   --text-glow: none;
 
-  --glass-bg: rgba(250, 249, 247, 0.86);
-  --glass-border: rgba(23, 22, 26, 0.1);
+  --glass-bg: rgba(249, 248, 251, 0.86);
+  --glass-border: rgba(20, 18, 26, 0.1);
   --glass-blur: blur(12px);
 
   --surface-1: #ffffff;
-  --surface-2: #f4f2ee;
-  --surface-subtle: rgba(23, 22, 26, 0.045);
+  --surface-2: #f1eff5;
+  --surface-subtle: rgba(20, 18, 26, 0.045);
   --surface-overlay: rgba(255, 255, 255, 0.92);
-  --surface-rgb: 250, 249, 247;
-  --text-1-rgb: 23, 22, 26;
-  --accent-rgb: 194, 58, 23;
-  --border-rgb: 23, 22, 26;
+  --surface-rgb: 249, 248, 251;
+  --text-1-rgb: 20, 18, 26;
+  --accent-rgb: 91, 69, 214;
+  --border-rgb: 20, 18, 26;
 
   /* Messaging */
-  --zn-footer-bg: rgba(250, 249, 247, 0.88);
+  --zn-footer-bg: rgba(249, 248, 251, 0.88);
   --zn-composer-bg: #ffffff;
-  --zn-composer-border: rgba(23, 22, 26, 0.12);
-  --zn-composer-text: #17161a;
-  --zn-bubble-peer: #f1efeb;
-  --zn-bubble-peer-text: #17161a;
+  --zn-composer-border: rgba(20, 18, 26, 0.12);
+  --zn-composer-text: #14121a;
+  --zn-bubble-peer: #f1eff5;
+  --zn-bubble-peer-text: #14121a;
   --zn-action-bar-bg: rgba(255, 255, 255, 0.98);
-  --zn-search-bg: rgba(23, 22, 26, 0.045);
+  --zn-search-bg: rgba(20, 18, 26, 0.045);
 }
 
-/* ── 5. Aliases ───────────────────────────────────────────────────────────── */
+/* -- 5. Aliases ------------------------------------------------------------ */
 /* Derived and legacy names, resolved through var() so they follow the theme.
    Applied to every theme selector so they cannot go stale.
 
    The --v4-* set came from a redesign pass that introduced a SECOND accent
-   colour, violet #8b5cf6, alongside the app's blue. Rather than delete the
-   names and break the several hundred rules that use them, they now point at
-   the one blue accent. Same story for the admin console, whose own violet
-   lives in pages/admin/admin.css. */
+   colour alongside the app's first one. Rather than delete the names and break
+   the several hundred rules that use them, they now point at the one accent.
+   Same story for the admin console, whose own violet lives in
+   pages/admin/admin.css. */
 
 :root,
 [data-theme="dark"],
@@ -340,9 +430,16 @@
   --bg-rgb: var(--surface-rgb);
   --bg-card: var(--card);
   --bg-hover: var(--hover);
+  --bg-page: var(--bg);
   --text-primary: var(--text-1);
   --text-secondary: var(--text-2);
   --text-muted: var(--text-3);
+
+  /* The secondary button and the follow-state button both read this. It was
+     referenced three times and declared nowhere, so `background:
+     var(--card-alt)` was an invalid declaration that browsers dropped
+     outright, which is why "Cancel" rendered with no background at all. */
+  --card-alt: var(--surface-el);
 
   /* A colour, not a `1px solid ...` shorthand. Every one of its six callers
      writes `border: 1px solid var(--border-subtle)`, which with the shorthand
@@ -355,7 +452,7 @@
   --border-hover: rgba(var(--border-rgb), 0.2);
 
   /* Deprecated. Do not use in new code, they only exist so old rules keep
-     resolving. Formerly violet, now folded onto the single blue accent. */
+     resolving. Formerly a second accent, now folded onto the single one. */
   --v4-accent: var(--accent-gradient);
   --v4-accent-solid: var(--accent);
   --v4-bg: var(--bg);

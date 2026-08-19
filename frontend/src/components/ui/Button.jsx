@@ -10,12 +10,14 @@ const VARIANTS = {
     primary: 'btn-primary',
     secondary: 'btn-secondary',
     ghost: 'btn-ghost',
+    subtle: 'btn-subtle',
     danger: 'btn-danger',
 }
 
 const SIZES = {
     sm: 'btn-sm',
-    md: '',
+    md: 'btn-md',
+    lg: 'btn-lg',
     icon: 'btn-icon',
     iconSm: 'btn-icon-sm',
 }

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { HiClock, HiTerminal } from 'react-icons/hi'
+import { HiClock, HiTerminal } from '../../../components/ui/icons'
 import toast from 'react-hot-toast'
 
 export default function AuditModule({ logs, loading }) {

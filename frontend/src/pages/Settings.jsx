@@ -4,8 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
-import { HiLockClosed, HiUser, HiLogout, HiShieldCheck, HiChevronRight } from 'react-icons/hi'
-
+import { HiLockClosed, HiUser, HiLogout, HiShieldCheck, HiChevronRight } from '../components/ui/icons'
 function SettingsSection({ title, children }) {
     return (
         <div className="settings-section">

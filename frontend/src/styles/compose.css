@@ -1,0 +1,356 @@
+/* ========================================================================================================================================================================================================================================
+   STATUS CREATOR - Instagram Style
+   ======================================================================================================================================================================================================================================== */
+.l-status-modal {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  /* Don't exceed screen bounds */
+  background: var(--surface-el);
+  border-radius: var(--r-xl);
+  overflow-y: auto;
+  /* Fallback scroll for micro-screens */
+  overflow-x: hidden;
+  box-shadow: var(--shadow-xl), 0 0 0 1px var(--border-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.status-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.status-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.status-modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  transition: all 0.2s;
+}
+
+.status-modal-close:hover {
+  background: var(--surface-1);
+  color: var(--text-1);
+}
+
+/* --- Immersive Canvas --- */
+.status-canvas-wrap {
+  padding: 24px;
+}
+
+.status-preview-canvas {
+  position: relative;
+  width: 100%;
+  max-width: min(100%, 45vh);
+  /* Dynamically shrinks canvas width based on available viewport height! */
+  margin: 0 auto;
+  /* Keep it centered when it shrinks */
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  transition: background 0.4s var(--trans-smooth);
+}
+
+.status-main-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  resize: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2;
+  color: white;
+  caret-color: var(--accent);
+  text-align: center;
+  z-index: 5;
+}
+
+.status-main-textarea:focus,
+.status-main-textarea:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.status-main-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* --- Controls Panel --- */
+.status-controls-panel {
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.status-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-1);
+  padding: 4px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border-subtle);
+}
+
+.status-toolbar-group {
+  display: flex;
+  align-items: center;
+}
+
+/* --- Consolidated Font Personalities --- */
+.font-modern {
+  font-family: var(--font-display);
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+
+.font-classic {
+  /* Georgia ships on every target platform, so "Classic" gets a deliberate
+     serif without a download. Playfair Display was named here but never
+     loaded, which meant this fell through to the browser default. */
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
+
+.font-neon {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  text-transform: uppercase;
+}
+
+.font-strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4px 12px;
+  border-radius: var(--r-md);
+  transition: background 0.2s;
+}
+
+.status-tool-btn:hover {
+  background: var(--surface-el);
+}
+
+.tool-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+
+.tool-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.tool-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-subtle);
+  margin: 0 4px;
+}
+
+.align-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.tool-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  transition: all 0.2s;
+}
+
+.tool-icon-btn:hover {
+  background: var(--surface-el);
+  color: var(--text-1);
+}
+
+.tool-icon-btn.active {
+  background: var(--accent-low);
+  color: var(--accent);
+}
+
+.tool-icon-btn.emoji-btn.is-open {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.status-emoji-picker {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 12px;
+  z-index: 100;
+}
+
+/* --- Style Selectors --- */
+.status-style-selectors {
+  display: flex;
+  gap: 32px;
+}
+
+.selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selector-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+  padding-left: 2px;
+}
+
+.preset-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-dot,
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preset-dot:hover,
+.color-dot:hover {
+  transform: scale(1.15);
+}
+
+.preset-dot.is-active,
+.color-dot.is-active {
+  border-color: var(--accent);
+  transform: scale(1.25);
+  box-shadow: 0 0 10px var(--accent-ring);
+}
+
+/* --- Footer Actions --- */
+.status-footer-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+@keyframes dotBlink {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Caption counter */
+.character-counter {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.character-counter.warning {
+  color: var(--warning);
+}
+
+/* Hashtag helpers */
+.hashtags-helper {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--accent-ring);
+  transition: background var(--trans-fast);
+}
+
+.hashtags-helper:hover {
+  background: var(--accent-low);
+}
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+   EMPTY STATES
+   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  */
+.empty-state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: 16px;
+  padding: 40px;
+}
+
+/* An empty state is a sentence, not a monument. The old one centred a 72px
+   ringed icon over a bold title and a grey line, on every page, which is the
+   most recognisable stock layout on the web. This one reads left to right at
+   the top of the column the content would have filled, so the eye lands where
+   the first result will appear. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 40px 4px;
+  gap: 6px;
+  text-align: left;
+  border-top: 1px solid var(--border);
+}
+
+.empty-state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  font-size: 20px;
+  margin-bottom: 2px;
+}

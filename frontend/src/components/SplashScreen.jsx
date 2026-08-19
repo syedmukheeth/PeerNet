@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import logo from '../assets/logo.png'
+import logo from '../assets/logo.svg'
 
 /**
  * Brief brand frame shown once per session while the app boots.

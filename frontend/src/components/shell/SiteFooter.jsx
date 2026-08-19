@@ -1,6 +1,5 @@
 import { Link } from 'react-router'
-import { FaLinkedin } from 'react-icons/fa'
-
+import { FaLinkedin } from '../ui/icons'
 export default function SiteFooter({ onReportBug }) {
     return (
         <footer className="site-footer">

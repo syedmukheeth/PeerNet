@@ -1,10 +1,4 @@
-import {
-    HiHome, HiSearch, HiChatAlt2, HiBell,
-} from 'react-icons/hi'
-import {
-    HiOutlineHome, HiOutlineSearch, HiOutlineChatAlt2, HiOutlineBell,
-} from 'react-icons/hi'
-
+import { HiHome, HiSearch, HiChatAlt2, HiBell, HiOutlineHome, HiOutlineSearch, HiOutlineChatAlt2, HiOutlineBell } from '../ui/icons'
 export const navLinks = [
     { to: '/', icon: HiOutlineHome, activeIcon: HiHome, label: 'Home', exact: true },
     { to: '/search', icon: HiOutlineSearch, activeIcon: HiSearch, label: 'Search' },

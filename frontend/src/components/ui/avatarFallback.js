@@ -7,11 +7,11 @@
  * The background used to be hardcoded as 6366F1 (indigo) in twenty-one separate
  * places, none of which matched the app's accent.
  *
- * The value is the light theme's vermilion rather than the dark theme's, since
- * white lettering clears 5.4:1 on it and only 2.9:1 on the lighter shade, and
+ * The value is the light themes iris rather than the dark themes, since
+ * white lettering clears 6.4:1 on it and only 2.5:1 on the lighter shade, and
  * the service renders one image for both themes.
  */
-const FALLBACK_BG = 'C23A17'
+const FALLBACK_BG = '5B45D6'
 
 export const avatarFallback = (name) =>
     `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=${FALLBACK_BG}&color=fff`

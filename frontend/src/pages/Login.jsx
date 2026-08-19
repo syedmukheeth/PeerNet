@@ -3,10 +3,9 @@ import { Link, useNavigate, useSearchParams, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
-import logo from '../assets/logo.png'
+import logo from '../assets/logo.svg'
 import { GoogleLogin } from '@react-oauth/google'
-import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
-
+import { MdVisibility, MdVisibilityOff } from '../components/ui/icons'
 export default function Login() {
     const [form, setForm] = useState({ identifier: '', password: '' })
     const [loading, setLoading] = useState(false)

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { HiSearch, HiTrash, HiChatAlt2 } from 'react-icons/hi'
+import { HiSearch, HiTrash, HiChatAlt2 } from '../../../components/ui/icons'
 import avatarFallback from '../../../components/ui/avatarFallback'
 
 export default function CommentModule({ comments, onDelete, search, setSearch, loading }) {

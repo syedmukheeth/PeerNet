@@ -1,11 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { IoCheckmark, IoCheckmarkDone } from 'react-icons/io5'
-import {
-    HiDotsVertical, HiPaperClip, HiEmojiHappy,
-    HiReply, HiPencil, HiTrash, HiSearch,
-    HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiExclamationCircle
-} from 'react-icons/hi'
+import { IoCheckmark, IoCheckmarkDone, HiDotsVertical, HiPaperClip, HiEmojiHappy, HiReply, HiPencil, HiTrash, HiSearch, HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiExclamationCircle } from '../components/ui/icons'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import { useAuth } from '../context/AuthContext'

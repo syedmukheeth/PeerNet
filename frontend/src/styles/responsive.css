@@ -1,0 +1,606 @@
+/* ============================================================================================================================================================================================================================================
+   RESPONSIVE BREAKPOINTS - FIXED & STANDARDIZED
+   Mobile: 0-767px | Tablet: 768px-1263px | Desktop: 1264px+
+   ============================================================================================================================================================================================================================================ */
+
+/* ========================================================================================================================================================================================================================================
+   TABLET (768px - 1263px) - Side Rail Mode
+   ======================================================================================================================================================================================================================================== */
+/* ========================================================================================================================================================================================================================================
+   TABLET (768px - 1263px) - Full desktop-style sidebar
+   ======================================================================================================================================================================================================================================== */
+@media (min-width: 768px) and (max-width: 1263px) {
+  :root {
+    --sidebar-actual-w: var(--sidebar-w);
+  }
+
+  /* Sidebar stays FULL WIDTH, same as desktop */
+  .sidebar {
+    padding: 24px 0;
+    align-items: stretch; /* full-width items */
+    width: var(--sidebar-w);
+  }
+
+  /* Logo row stays left-aligned like desktop */
+  .sidebar-logo-row {
+    padding: 0 20px;
+    justify-content: flex-start;
+    margin-bottom: 32px;
+  }
+
+  /* Show logo, labels and profile info, same as desktop */
+  .peernetLogo,
+  .ig-label,
+  .profile-card-info,
+  .sidebar-footer .ig-label {
+    display: flex !important;
+  }
+
+  /* Nav links: full-width with label, same as desktop */
+  .ig-link {
+    justify-content: flex-start;
+    padding: 12px 20px;
+    width: auto;
+    margin: 2px 8px;
+  }
+
+  .ig-link div {
+    justify-content: flex-start;
+    gap: 14px;
+  }
+
+  .sidebar-profile-card {
+    justify-content: flex-start;
+    padding: 12px 20px;
+  }
+
+  /* Hide right sidebar panel */
+  .l-side-panel,
+  .sp-container {
+    display: none !important;
+  }
+
+  /* Feed and main col */
+  .main-col {
+    width: calc(100% - var(--sidebar-actual-w)) !important;
+    margin-left: var(--sidebar-actual-w) !important;
+    flex: none !important;
+  }
+
+  .l-main-col {
+    flex: 1;
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  /* Story rail adjustments */
+  .story-rail {
+    gap: 12px;
+    padding: 8px 16px 12px;
+  }
+
+  .story-item {
+    width: 68px;
+  }
+
+  /* Post cards */
+  .l-post-card {
+    margin-bottom: 16px;
+  }
+
+  /* Profile page adjustments */
+
+  .profile-stats {
+    gap: 24px;
+  }
+
+  /* Content wrap padding */
+  .content-wrap {
+    padding: 20px 16px;
+  }
+
+  /* Search bar */
+  .search-bar {
+    padding: 12px 18px;
+    margin-bottom: 20px;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   MOBILE (0-767px) - Bottom Navigation Mode
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 767px) {
+
+  /* Hide the desktop sidebar completely. It was previously only moved offscreen
+     with opacity 0, which left its links in the accessibility tree, screen
+     readers announced the whole nav twice. Mobile uses .mobile-nav and
+     .mobile-more-popup instead, so the element can go entirely. */
+  .sidebar {
+    display: none;
+  }
+
+  /* Remove left margin from main content */
+
+  /* Show mobile top header */
+  .mobile-top-header {
+
+    display: flex !important;
+
+    height: 60px;
+
+    overflow: visible !important;
+
+    background: rgba(var(--bg-rgb), 0.95);
+
+    border-bottom: 1px solid var(--border);
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    backdrop-filter: blur(20px);
+
+    -webkit-backdrop-filter: blur(20px);
+
+    z-index: 100;
+
+    padding: 0 16px;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+  }
+
+  /* Show mobile bottom navigation */
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    width: 56px;
+    height: 56px;
+    position: relative;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--text-1);
+  }
+
+  .mobile-nav-item svg {
+    font-size: 24px;
+  }
+
+  /* Content adjustments */
+  .content-wrap {
+    padding: 0px 16px 16px;
+    max-width: 100%;
+  }
+
+  /* Hide page headings (top bar shows them) */
+  .t-heading,
+  .profile-page-wrap>h1,
+  .search-page-wrap>h1 {
+    display: none;
+  }
+
+  /* Feed layout mobile */
+  .l-feed-grid {
+    display: block;
+    padding: 0;
+    gap: 0;
+    width: 100%;
+  }
+
+  .l-side-panel,
+  .sp-container {
+    display: none !important;
+  }
+
+  .l-main-col {
+    padding: 0;
+    flex: 1;
+    max-width: 100%;
+  }
+
+  /* Story rail mobile */
+
+  .story-item {
+    width: 64px;
+  }
+
+  
+
+  /* Post cards mobile */
+  .l-post-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin-bottom: 8px;
+  }
+
+  .post-card-header {
+    padding: 12px 16px;
+  }
+
+  /* Matches the desktop rule: the 40px action buttons carry an 8px inset of
+     their own, so 8px of row padding puts the first icon at 16px, in line
+     with the header above. */
+  .post-card-actions {
+    padding: var(--s-1) var(--s-2) 0;
+  }
+
+  .post-card-footer {
+    padding: var(--s-1) var(--s-4) var(--s-3);
+  }
+
+  /* Profile page mobile */
+
+  
+
+  /* Search bar mobile */
+  .search-bar {
+    padding: 10px 16px;
+    margin: 12px 16px 16px;
+    gap: 10px;
+  }
+
+  /* Modals mobile */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-card,
+  .create-post-card {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 95vh;
+  }
+
+  .create-post-footer {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Story creator mobile */
+
+  .status-footer-actions {
+    padding: 16px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface-1);
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  .status-preview-canvas {
+    max-width: 100%;
+    aspect-ratio: 9/16;
+  }
+
+  /* Post detail mobile - stack vertically */
+  .post-detail-card {
+    flex-direction: column;
+    max-height: none;
+    min-height: auto;
+    border-radius: var(--r-lg);
+    margin: 0 12px 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Show mobile author bar, hide desktop header */
+  .post-mobile-author-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-md);
+    flex-shrink: 0;
+  }
+
+  .post-detail-header--desktop {
+    display: none;
+  }
+
+  .post-detail-media {
+    flex: none;
+    width: 100%;
+    /* Square-ish aspect ratio for images, good for portraits */
+    aspect-ratio: 4 / 5;
+    max-height: 75vw;
+    overflow: hidden;
+  }
+
+  /* Cover image on mobile for clean fill */
+  .post-detail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .post-detail-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .post-detail-info {
+    flex: 1;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border-md);
+  }
+
+  /* Messages mobile */
+
+  
+
+  
+
+  /* Settings mobile */
+  .settings-page {
+    padding: 20px 16px 80px;
+  }
+
+  .settings-card {
+    border-radius: var(--r-lg);
+  }
+
+  /* Admin page mobile */
+
+  
+
+  
+
+  .admin-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 600px;
+  }
+
+  /* Auth pages mobile */
+  .auth-page {
+    padding: 20px 16px;
+  }
+
+  .auth-card {
+    padding: 32px 24px;
+    border-radius: var(--r-lg);
+  }
+
+  /* Typography mobile */
+
+  .t-h1 {
+    font-size: 20px;
+  }
+
+  .t-h2 {
+    font-size: 17px;
+  }
+
+  /* Buttons mobile */
+
+  /* Footer mobile */
+  .site-footer {
+    padding: 40px 16px 60px;
+  }
+
+  .site-footer__links {
+    gap: 8px 12px;
+  }
+
+  .site-footer__link {
+    font-size: 12px;
+  }
+
+  /* v4 Messages mobile */
+
+  
+
+  
+
+  /* Utility overrides for mobile */
+  .mobile\:hidden {
+    display: none;
+  }
+
+  .mobile\:block {
+    display: block;
+  }
+
+  .mobile\:flex {
+    display: flex;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   SMALL MOBILE (0-374px) - Extra small screens
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 374px) {
+  .mobile-nav {
+    padding: 0 5px;
+  }
+
+  .mobile-nav-item {
+    width: 50px;
+    height: 50px;
+  }
+
+  .mobile-nav-item svg {
+    font-size: 20px;
+  }
+
+  .story-item {
+    width: 56px;
+  }
+
+  .profile-stats {
+    gap: 16px;
+  }
+
+  .profile-stat {
+    font-size: 13px;
+  }
+
+}
+
+/* ========================================================================================================================================================================================================================================
+   LANDSCAPE MOBILE - Optimize for horizontal mobile screens
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 767px) and (orientation: landscape) {
+  .main-col {
+    padding-top: 0 !important;
+    padding-bottom: 60px !important;
+  }
+
+  .mobile-top-header {
+    height: 50px;
+  }
+
+  .mobile-nav {
+    height: 55px;
+  }
+
+  .story-rail {
+    padding: 6px 12px 8px;
+  }
+
+  .post-detail-media {
+    max-height: 80vh;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   SAFE AREA INSETS - iOS notch/home indicator support
+   ======================================================================================================================================================================================================================================== */
+@supports (padding: max(0px)) {
+  .mobile-top-header {
+    padding-top: max(env(safe-area-inset-top), 0px);
+    height: calc(60px + max(env(safe-area-inset-top), 0px));
+  }
+
+  .mobile-nav {
+    padding-bottom: max(env(safe-area-inset-bottom), 10px);
+    height: calc(65px + max(env(safe-area-inset-bottom), 0px));
+  }
+}
+
+@media (max-width: 767px) {
+  @supports (padding: max(0px)) {
+    .main-col {
+      padding-top: calc(50px + max(env(safe-area-inset-top), 0px)) !important;
+      padding-bottom: calc(80px + max(env(safe-area-inset-bottom), 0px)) !important;
+    }
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   TOUCH OPTIMIZATION - Better tap targets and interactions
+   ======================================================================================================================================================================================================================================== */
+@media (max-width: 767px) {
+
+  /* Increase tap targets */
+  .ig-link,
+  .mobile-nav-item,
+  .post-card-action-btn,
+  .story-item {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+
+  /* Disable hover effects on touch devices */
+  @media (hover: none) {
+
+    .ig-link:hover,
+    .post-card-action-btn:hover,
+    .story-item:hover {
+      transform: none;
+    }
+  }
+
+  /* Smoother scrolling */
+  .main-col,
+  .zn-viewport,
+  .messages-box {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent zoom on input focus */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   PRINT STYLES
+   ======================================================================================================================================================================================================================================== */
+@media print {
+
+  .sidebar,
+  .mobile-top-header,
+  .mobile-nav,
+  .l-side-panel,
+  .story-rail-wrap,
+  .post-card-actions,
+  .post-card-header button,
+  .admin-side-panel {
+    display: none !important;
+  }
+
+  .main-col {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .l-post-card {
+    page-break-inside: avoid;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   MOBILE HEADER & MENU FIXES
+   ======================================================================================================================================================================================================================================== */
+
+/* Duplicated mobile menu styles removed - consolidated at line 1334 */
+
+/* Remove gap around story rail on mobile */
+@media (max-width: 767px) {
+  .story-rail-wrap {
+    border-top: none;
+    border-bottom: none !important;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px !important;
+  }
+
+  .story-rail {
+    gap: 10px;
+    padding: 0px 12px 4px;
+    border: none;
+  }
+
+  .mobile-peernet-logo {
+    display: inline-block;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    margin-left: 6px;
+    color: var(--text-1);
+  }
+}

@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-    HiChevronRight, HiChevronLeft,
-    HiOutlineLogout as HiExit,
-} from 'react-icons/hi'
+import { HiChevronRight, HiChevronLeft, HiOutlineLogout as HiExit } from '../../components/ui/icons'
 import { navGroups } from './navGroups'
 import InfrastructurePulse from './InfrastructurePulse'
 
@@ -40,7 +37,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, pulse, reports =
                         <div className="flex items-center gap-3 overflow-hidden">
                             <Link to="/" className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-accent-hover/20 p-[1px] shadow-2xl shadow-accent/20 shrink-0 hover:scale-105 transition-transform group/logo">
                                 <div className="w-full h-full bg-admin-card rounded-[inherit] flex items-center justify-center overflow-hidden border border-white/5">
-                                    <img src="/logo.png" className="w-8 h-8 object-contain group-hover/logo:scale-110 transition-transform" alt="Logo" />
+                                    <img src="/logo.svg" className="w-8 h-8 object-contain group-hover/logo:scale-110 transition-transform" alt="Logo" />
                                 </div>
                             </Link>
                             <div className={`transition-all duration-500 sidebar-brand-text ${isCollapsed ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0'}`}>

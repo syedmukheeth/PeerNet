@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import {
-    HiUsers, HiCollection, HiFlag,
-    HiTrendingUp, HiRefresh, HiMenu,
-} from 'react-icons/hi'
+import { HiUsers, HiCollection, HiFlag, HiTrendingUp, HiRefresh, HiMenu } from '../../components/ui/icons'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
 import { useSocket } from '../../hooks/useSocket'

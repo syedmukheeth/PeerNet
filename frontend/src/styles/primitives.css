@@ -12,20 +12,6 @@
 
 /* ── Button additions ─────────────────────────────────────────────────────── */
 
-.btn-danger {
-  background: var(--error);
-  color: #fff;
-  border: 1px solid transparent;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--error) 85%, #000);
-}
-
-.btn-block {
-  width: 100%;
-}
-
 /* ── Input additions ──────────────────────────────────────────────────────── */
 
 .input-label {
@@ -59,7 +45,7 @@
 
 .input-error:focus {
   border-color: var(--error);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--error) 22%, transparent);
 }
 
 .input-message {
@@ -76,9 +62,9 @@
 /* .badge already ships the accent background, so .badge-accent is a no-op kept
    for symmetry with the other tones. */
 
-.badge-success { background: var(--success); }
-.badge-error { background: var(--error); }
-.badge-warning { background: var(--warning); color: #000; }
+.badge-success { background: var(--success); color: var(--success-fg); }
+.badge-error { background: var(--error); color: var(--error-fg); }
+.badge-warning { background: var(--warning); color: var(--warning-fg); }
 
 /* ── Skeleton stack ───────────────────────────────────────────────────────── */
 

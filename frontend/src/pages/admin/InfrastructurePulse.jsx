@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { HiDatabase as HiHardDrive } from 'react-icons/hi'
-
+import { HiDatabase as HiHardDrive } from '../../components/ui/icons'
 export default function InfrastructurePulse({ pulse }) {
     const [load, setLoad] = useState(pulse?.load || 24)
     const [latency, setLatency] = useState(pulse?.latency || 12)

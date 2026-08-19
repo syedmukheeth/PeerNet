@@ -1,0 +1,1402 @@
+/* ========================================================================================================================================================================================================================================
+   MESSAGES (DM SYSTEM)
+   ======================================================================================================================================================================================================================================== */
+
+.convo-item.active {
+  background: var(--accent-subtle);
+  border-left-color: var(--accent);
+}
+
+.message-bubble.mine {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+
+.message-wrap.mine .message-time {
+  text-align: right;
+}
+
+/* Typing */
+
+/* -- Direct messages layout -- */
+
+/* REPAIR DONE */
+
+/* Chat area */
+
+@keyframes pulse-dot {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* DM Empty state */
+
+/* Messages Modal */
+
+/* Skeletons moved to bottom */
+
+/* DM empty list */
+
+/* ==========================================================================
+   ZENITH MESSAGING SYSTEM v2.0
+   ========================================================================== */
+
+/* 1. Sidebar / Chat List */
+
+.zn-convo-row.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+}
+
+.zn-convo-row.active .zn-convo-name {
+  color: var(--text-1);
+}
+
+/* 2. Main Chat Area */
+
+/* Ensure empty space at top for short conversations if desired, 
+   but standard chat starts from top. We'll add a min-height spacer 
+   to the viewport to ensure it's scrollable and clean. */
+.zn-viewport::before {
+  content: '';
+  flex: 1;
+}
+
+/* 3. Bubbles & actions: consecutive-message grouping */
+
+/* Add margin when the user changes */
+.zn-row.new-group {
+  margin-top: 12px;
+}
+
+.zn-row.peer {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.zn-row.peer .zn-bubble-container {
+  align-items: flex-start;
+}
+
+.zn-row.has-reactions {
+  margin-bottom: 24px;
+  z-index: 20;
+}
+
+/* Grouping Border Radius Physics */
+
+.zn-row.peer.pos-top .zn-bubble {
+  border-bottom-left-radius: 4px;
+}
+
+.zn-row.peer.pos-middle .zn-bubble {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.zn-row.peer.pos-bottom .zn-bubble {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 18px;
+}
+
+.zn-row.peer.pos-single .zn-bubble {
+  border-bottom-left-radius: 4px;
+}
+
+.zn-row.self.pos-top .zn-bubble {
+  border-bottom-right-radius: 4px;
+}
+
+.zn-row.self.pos-middle .zn-bubble {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.zn-row.self.pos-bottom .zn-bubble {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 18px;
+}
+
+.zn-row.self.pos-single .zn-bubble {
+  border-bottom-right-radius: 4px;
+}
+
+/* 4. Footer & Composer: Senior Frontend Refinement */
+
+.zn-send-btn:active {
+  transform: scale(0.95);
+}
+
+/* 5. Scrollbars */
+
+.zn-sidebar-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+
+.zn-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.zn-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-radius: var(--r-md);
+}
+
+.zn-viewport::-webkit-scrollbar {
+  width: 5px;
+}
+
+.zn-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.zn-viewport::-webkit-scrollbar-thumb {
+  background: rgba(var(--border-rgb), 0.1);
+  border-radius: var(--r-md);
+}
+
+.zn-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--border-rgb), 0.2);
+}
+
+/* -------------------------------------------------------------------------
+   REPLY SYSTEM
+   ------------------------------------------------------------------------- */
+
+.zn-row.self .zn-bubble-meta {
+  justify-content: flex-end;
+}
+
+/* -------------------------------------------------------------------------
+   REACTIONS CLUSTER
+   ------------------------------------------------------------------------- */
+
+.zn-row.self .zn-reactions {
+  right: 12px;
+}
+
+/* -------------------------------------------------------------------------
+   SIDEBAR INDICATORS (PIN/MUTE/ARCHIVE)
+   ------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------
+   VOICE NOTES
+   ------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------
+   MEDIA GRID
+   ------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------
+   SEARCH BOX REFINEMENT
+   ------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------
+   SIDEBAR INDICATORS (PIN/MUTE/ARCHIVE)
+   ------------------------------------------------------------------------- */
+
+.zn-mini-icon.active {
+  color: var(--zn-accent);
+}
+
+/* -------------------------------------------------------------------------
+   VOICE NOTES
+   ------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------
+   MEDIA GRID
+   ------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------
+   SEARCH BOX REFINEMENT
+   ------------------------------------------------------------------------- */
+
+/* --- Redundant Skeleton System Removed - Using Unified Digital Obsidian v2 Above --- */
+
+/* ============================================================
+   ZN MESSAGING SYSTEM - COMPLETE CSS ENGINE
+   These are the definitive styles for the Messages.jsx component.
+   The component uses zn-* class names that were missing from CSS.
+   ============================================================ */
+
+/* ---- ROOT CONTAINER ---- */
+
+/* ---- SIDEBAR (Conversation List) ---- */
+
+/* ---- CONVERSATION ROWS ---- */
+.zn-convo-row {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 12px 20px;
+
+  cursor: pointer;
+
+  transition: background 0.15s ease;
+
+  border-left: 3px solid transparent;
+
+  position: relative;
+
+}
+
+.zn-convo-row:hover {
+  background: var(--hover, rgba(255, 255, 255, 0.05));
+}
+
+.zn-convo-row.active {
+  background: var(--accent-subtle);
+  border-left-color: var(--zn-accent);
+  position: relative;
+}
+
+.zn-convo-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.zn-online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 13px;
+  height: 13px;
+  background: var(--success);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+/* ---- CHAT MAIN AREA ---- */
+
+/* ---- CHAT HEADER ---- */
+.zn-chat-header {
+  height: 64px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1, var(--card));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: sticky;
+  z-index: 1000;
+  transform: translateZ(10px);
+  flex-shrink: 0;
+  top: 0;
+}
+
+/* ---- MESSAGE VIEWPORT ---- */
+
+/* ---- MESSAGE BUBBLES ---- */
+.zn-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2px;
+  width: 100%;
+  position: relative;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.zn-row.self {
+  align-items: flex-end;
+  text-align: right;
+  flex-direction: row-reverse;
+}
+
+.zn-bubble-container {
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 10;
+}
+
+.zn-row.self .zn-bubble-container {
+  align-items: flex-end;
+}
+
+.zn-bubble {
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  border-radius: var(--r-xl);
+  position: relative;
+  transition: all 0.2s var(--ease-out);
+  max-width: fit-content;
+  word-break: break-word;
+  min-width: 50px;
+  word-wrap: break-word;
+}
+
+.zn-row.peer .zn-bubble {
+  background: var(--surface-1);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+  border-top-left-radius: 18px;
+  border-bottom-left-radius: 18px;
+  border-radius: 4px 18px 18px 18px;
+}
+
+.zn-row.self .zn-bubble {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-top-right-radius: 18px;
+  border-bottom-right-radius: 18px;
+  border-radius: 18px 4px 18px 18px;
+}
+
+.zn-bubble-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* A timestamp is data, not a heading. Uppercase at 0.08em tracking gave every
+   single message its own small-caps label. */
+.zn-bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.zn-bubble-meta.self {
+  justify-content: flex-end;
+}
+
+.zn-bubble-reply {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid var(--accent);
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+  max-width: 100%;
+}
+
+.zn-reactions {
+  position: absolute;
+  bottom: -10px;
+  display: flex;
+  gap: 4px;
+  z-index: 50;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.zn-reaction-chip {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: var(--r-xl);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zn-reaction-chip.active {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+}
+
+/* ---- BUBBLE ACTIONS ---- */
+
+.zn-bubble-container:hover .zn-bubble-actions {
+  opacity: 1;
+  pointer-events: auto;
+  display: flex;
+}
+
+/* ---- FOOTER / COMPOSER ---- */
+
+.zn-composer-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
+}
+
+.zn-composer-pill {
+  background: var(--zn-composer-bg);
+  border: 1px solid var(--zn-composer-border);
+  border-radius: 28px;
+  padding: 8px 8px 8px 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.zn-composer-pill:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.zn-composer-action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  border: none;
+  background: transparent;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.zn-composer-action-btn:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+.zn-composer-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 6px 0;
+  min-height: 40px;
+  max-height: 160px;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+}
+
+.zn-composer-input::placeholder {
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.zn-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--accent-fg);
+  transition: background var(--trans-fast);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.zn-send-btn:hover {
+  background: var(--accent-hover);
+}
+
+.zn-send-btn:disabled {
+  background: var(--surface-2);
+  color: var(--text-3);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.3;
+  transform: none;
+}
+
+/* ---- SEARCH INLINE ---- */
+
+/* ---- PAGE TRANSITION ---- */
+
+/* ============================================================
+   MOBILE & TABLET RESPONSIVE MESSAGING
+   ============================================================ */
+
+/* Tablet: side-by-side DM list + chat, both visible */
+@media (min-width: 768px) and (max-width: 1263px) {
+
+  /* Default: show only sidebar (list) */
+
+  /* When chat is active: show only chat panel */
+
+  /* Restore back button for tablet since we are panel-toggling */
+  .zn-chat-header .zn-back-btn,
+  .zn-back-btn,
+  .lg\:hidden {
+    display: flex !important;
+  }
+
+  /* Composer footer stays fixed at bottom */
+  .zn-footer {
+    flex-shrink: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Viewport scrolls properly */
+  .zn-viewport {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 767px) {
+
+  /* Make back button visible on mobile */
+  .lg\:hidden {
+    display: flex !important;
+  }
+
+  /* Ensure composer stays at bottom */
+
+  /* Viewport takes available space */
+
+}
+
+/* ============================================================
+   UTILITY CLASSES (used by Messages.jsx)
+   ============================================================ */
+
+/* pb-safe: padding bottom safe area for iOS */
+
+/* On mobile: messages page's main-col should not add extra padding */
+@media (max-width: 767px) {
+  .main-col:has(.zn-messages-root) {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1263px) {
+  .main-col:has(.zn-messages-root) {
+    padding-top: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ============================================================
+   ZN MESSAGING - MISSING CLASSES FOR REWRITTEN COMPONENT
+   ============================================================ */
+
+/* Convo row sub-elements */
+.zn-convo-info {
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+.zn-convo-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.zn-convo-time {
+  font-size: 11px;
+  font-weight: 400;
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.zn-convo-name {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.zn-convo-name.unread {
+  font-weight: 700;
+}
+
+.zn-convo-msg {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-3);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zn-convo-msg.unread {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.zn-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* Sidebar title row */
+.zn-sidebar-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.zn-sidebar-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+}
+
+/* Sidebar search */
+.zn-sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-el);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 10px 14px;
+}
+
+.zn-search-icon {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.zn-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-1);
+  font-family: inherit;
+}
+
+.zn-search-input::placeholder {
+  color: var(--text-3);
+}
+
+/* Icon buttons */
+.zn-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: var(--r-md);
+  transition: background 0.15s, color 0.15s;
+}
+
+.zn-icon-btn:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+.zn-icon-btn.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.zn-icon-btn-sm {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: all 0.15s;
+}
+
+.zn-icon-btn-sm:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+/* Skeleton rows */
+.zn-skeleton-list {
+  padding: 8px;
+}
+
+.zn-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+}
+
+.zn-skeleton-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.zn-skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zn-skeleton-name {
+  height: 14px;
+  width: 40%;
+  border-radius: var(--r-sm);
+}
+
+.zn-skeleton-msg {
+  height: 12px;
+  width: 85%;
+  border-radius: 4px;
+}
+
+/* Chat skeleton */
+
+.zn-chat-skeleton-row:nth-child(odd) .zn-chat-skeleton-bubble {
+  width: 180px;
+  border-bottom-left-radius: 4px;
+}
+
+.zn-chat-skeleton-row:nth-child(even) .zn-chat-skeleton-bubble {
+  width: 120px;
+  border-bottom-right-radius: 4px;
+}
+
+/* Empty state */
+.zn-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.zn-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r-xl);
+  background: var(--surface-el);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  margin-bottom: 16px;
+}
+
+.zn-empty-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 6px;
+}
+
+.zn-empty-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* Chat inner wrapper */
+
+/* Chat header */
+.zn-chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zn-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zn-back-btn:hover {
+  background: var(--hover);
+}
+
+.zn-chat-peer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.zn-chat-peer-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+}
+
+.zn-chat-peer-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.zn-chat-peer-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.zn-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+
+.zn-status-dot.online {
+  background: var(--success);
+}
+
+.zn-online-dot-sm {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 2px solid var(--bg);
+}
+
+/* Chat search bar */
+.zn-chat-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* Chat skeleton */
+.zn-chat-skeleton {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.zn-chat-skeleton-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.zn-chat-skeleton-row.self {
+  justify-content: flex-end;
+}
+
+.zn-chat-skeleton-bubble {
+  height: 50px;
+  width: 200px;
+  border-radius: var(--r-xl);
+}
+
+/* Date divider */
+.zn-date-divider {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.zn-date-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-3);
+  background: var(--surface-el);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: var(--r-xl);
+}
+
+/* Empty chat */
+.zn-empty-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 300px;
+  color: var(--text-3);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+}
+
+.zn-empty-chat-icon {
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+
+/* Reply preview */
+.zn-reply-preview {
+  background: var(--surface-el);
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: var(--r-lg);
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+
+.zn-reply-bar {
+  width: 3px;
+  height: 32px;
+  border-radius: 4px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.zn-reply-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.zn-reply-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0;
+  margin: 0 0 2px;
+}
+
+.zn-reply-body {
+  font-size: 12px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
+/* Bubble sub-elements */
+
+.zn-edited {
+  font-style: italic;
+  font-size: 10px;
+}
+
+.zn-reaction-count {
+  font-size: 11px;
+  margin-left: 3px;
+  opacity: 0.7;
+}
+
+.zn-search-highlight {
+  background: var(--accent-subtle);
+  color: var(--text-1);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.zn-reply-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 0.5;
+  margin-bottom: 2px;
+}
+
+.zn-reply-text {
+  font-size: 11px;
+  opacity: 0.7;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zn-bubble.optimistic {
+  opacity: 0.65;
+}
+
+/* Select conversation state */
+.zn-select-convo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--bg);
+}
+
+.zn-select-convo-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--surface-el);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.zn-select-convo-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 8px;
+}
+
+.zn-select-convo-sub {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: 0;
+}
+
+/* Edit modal */
+.zn-edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.zn-edit-modal {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface-el);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-xl);
+  padding: 28px;
+}
+
+.zn-edit-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.zn-edit-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 4px;
+}
+
+.zn-edit-modal-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.zn-edit-textarea {
+  width: 100%;
+  min-height: 140px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  color: var(--text-1);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.zn-edit-textarea:focus {
+  border-color: var(--accent);
+}
+
+.zn-edit-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.zn-btn-primary {
+  flex: 1;
+  height: 44px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--r-lg);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zn-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.zn-btn-secondary {
+  flex: 1;
+  height: 44px;
+  background: var(--hover);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zn-btn-secondary:hover {
+  background: var(--surface-el);
+}
+
+/* On desktop: hide back button (only show on tablet/mobile) */
+.zn-back-btn {
+  width: 40px;
+  height: 40px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-1);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1263px) {
+  .zn-back-btn {
+    display: flex;
+  }
+}
+
+/* ============================================================
+   MESSAGE ACTIONS (EDIT, DELETE, REACT, REPLY)
+   ============================================================ */
+
+.zn-bubble-actions {
+
+  position: absolute;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  display: none;
+
+  align-items: center;
+
+  z-index: 10;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition: all 0.2s ease;
+
+  visibility: hidden;
+
+}
+
+.zn-row:hover .zn-bubble-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.zn-row.self .zn-bubble-actions {
+  right: calc(100% + 8px);
+  padding-right: 12px;
+}
+.zn-row.self .zn-bubble-actions::before {
+  content: '';
+  position: absolute;
+  right: -12px;
+  top: 0;
+  bottom: 0;
+  width: 15px;
+}
+
+.zn-row.peer .zn-bubble-actions {
+  left: calc(100% + 8px);
+  padding-left: 12px;
+}
+.zn-row.peer .zn-bubble-actions::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 0;
+  width: 15px;
+}
+
+.zn-action-bar {
+  display: flex;
+  align-items: center;
+  background: var(--surface-el);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  gap: 2px;
+}
+
+.zn-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  transition: all 0.15s;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.zn-action-btn:hover {
+  background: var(--hover);
+  color: var(--text-1);
+  transform: scale(1.1);
+}
+
+.zn-action-btn.delete:hover {
+  color: var(--error);
+  background: var(--hover);
+}
+
+.zn-action-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.zn-quick-emojis {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+}
+
+.zn-emoji-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  font-size: 16px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zn-emoji-btn:hover {
+  transform: scale(1.1);
+  background: var(--hover);
+}
+
+/* On mobile, we might want the actions to be more accessible,
+   or just rely on touch-and-hold. But since there's no state for touch-hold,
+   we'll just show them statically below the bubble on mobile. */
+@media (max-width: 767px) {
+  .zn-bubble-actions {
+    position: relative;
+    top: 0;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    margin-top: 4px;
+  }
+
+  .zn-row.self .zn-bubble-actions,
+  .zn-row.peer .zn-bubble-actions {
+    right: auto;
+    left: auto;
+  }
+
+  .zn-action-bar {
+    box-shadow: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+}

@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiX, HiEmojiHappy, HiCamera, HiTrash } from 'react-icons/hi'
-import { FiAlignLeft, FiAlignCenter, FiAlignRight } from 'react-icons/fi'
-
+import { HiX, HiEmojiHappy, HiCamera, HiTrash, FiAlignLeft, FiAlignCenter, FiAlignRight } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 
@@ -328,11 +326,11 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
 
                         {/* Modal Footer Actions */}
                         <div className="status-footer-actions">
-                            <button className="btn btn-secondary px-6" onClick={onClose} disabled={loading}>
+                            <button className="btn btn-secondary" onClick={onClose} disabled={loading}>
                                 Cancel
                             </button>
                             <button 
-                                className={`btn btn-primary px-8 ${loading ? 'btn-loading' : ''}`} 
+                                className={`btn btn-primary ${loading ? 'btn-loading' : ''}`} 
                                 onClick={handleSubmit}
                                 disabled={loading || (!content.trim() && !mediaFile)}
                             >

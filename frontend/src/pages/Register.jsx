@@ -3,10 +3,9 @@ import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import ThemeToggle from '../components/ThemeToggle'
-import logo from '../assets/logo.png'
+import logo from '../assets/logo.svg'
 import { GoogleLogin } from '@react-oauth/google'
-import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
-
+import { MdVisibility, MdVisibilityOff } from '../components/ui/icons'
 export default function Register() {
     const [form, setForm] = useState({ username: '', email: '', fullName: '', password: '' })
     const [loading, setLoading] = useState(false)
@@ -146,7 +145,7 @@ export default function Register() {
                             width="100%"
                         />
                     </div>
-                    <button className="btn btn-secondary w-full text-xs" onClick={handleGuestLogin} disabled={loading}>
+                    <button className="btn btn-secondary btn-block" onClick={handleGuestLogin} disabled={loading}>
                         Try as guest
                     </button>
                 </div>

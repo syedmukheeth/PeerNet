@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
+import { useCallback, lazy, Suspense } from 'react'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import api from '../api/axios'
@@ -6,151 +6,10 @@ import api from '../api/axios'
 // Lazy load heavy components
 const PostCard = lazy(() => import('../components/PostCard'))
 const StoryRail = lazy(() => import('../components/StoryRail'))
+const RightPanel = lazy(() => import('../components/shell/RightPanel'))
 
-import { optimizeAvatarUrl } from '../utils/cloudinary'
 import { useAuth } from '../context/AuthContext'
-import { HiBadgeCheck, HiCamera, HiExclamationCircle } from 'react-icons/hi'
-import { FaLinkedin } from 'react-icons/fa'
-import avatarFallback from '../components/ui/avatarFallback'
-
-/* ── Right Panel ─────────────────────────────────────────── */
-function RightPanel() {
-    const { user } = useAuth()
-    const [suggestions, setSuggestions] = useState([])
-    const [followed, setFollowed] = useState({})
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        if (!user) {
-            setLoading(false)
-            return
-        }
-
-        // Aborted on unmount: this panel used to call setSuggestions and
-        // setLoading after the user navigated away.
-        const controller = new AbortController()
-
-        setLoading(true)
-        api.get('/users/suggestions', { params: { limit: 5 }, signal: controller.signal })
-            .then(({ data }) => setSuggestions(data.data || []))
-            .catch(() => { if (!controller.signal.aborted) setSuggestions([]) })
-            .finally(() => { if (!controller.signal.aborted) setLoading(false) })
-
-        return () => controller.abort()
-    }, [user])
-
-    const handleFollow = async (u) => {
-        setFollowed(f => ({ ...f, [u._id]: !f[u._id] }))
-        try { await api.post(`/users/${u._id}/follow`) }
-        catch { setFollowed(f => ({ ...f, [u._id]: !f[u._id] })) }
-    }
-
-    const myAvatar = optimizeAvatarUrl(user?.avatarUrl ||
-        avatarFallback(user?.username))
-
-    return (
-        <div className="sp-container">
-
-            {/* ── Current User Card ───────────── */}
-            {/* The avatar and username were click-handled divs and images:
-                not focusable, not keyboard-activatable, and announced as plain
-                content. They navigate, so they are links. */}
-            <div className="sp-user-card">
-                <Link to={`/profile/${user?._id}`} aria-label={`Your profile, ${user?.username || ''}`}>
-                    <img src={myAvatar} className="sp-user-avatar" alt="" />
-                </Link>
-                <div className="sp-user-info">
-                    <Link to={`/profile/${user?._id}`} className="sp-username">
-                        {user?.username}
-                        {user?.isVerified && <HiBadgeCheck className="text-accent" />}
-                    </Link>
-                    {user?.fullName && <div className="sp-fullname">{user.fullName}</div>}
-                </div>
-                <Link to={`/profile/${user?._id}`} className="sp-action-link">
-                    View profile
-                </Link>
-            </div>
-
-            {/* ── Suggestions Section ─────────── */}
-            <div className="mt-2">
-                <div className="sp-section-header">
-                    <span className="sp-section-title">Suggested for you</span>
-                    <Link to="/search" className="sp-action-link sp-action-link--muted">See All</Link>
-                </div>
-
-                <div className="flex flex-col sp-suggestions-list">
-                    {loading ? (
-                        [...Array(5)].map((_, i) => (
-                            <div key={i} className="sp-suggestion-row">
-                                <div className="skeleton skeleton-circle w-8 h-8" />
-                                <div className="sp-suggestion-info">
-                                    <div className="skeleton skeleton-text m h-3" />
-                                    <div className="skeleton skeleton-text s h-2" />
-                                </div>
-                                <div className="skeleton w-12 h-6 rounded-md" />
-                            </div>
-                        ))
-                    ) : suggestions.map((u) => {
-                        const av = optimizeAvatarUrl(u.avatarUrl ||
-                            avatarFallback(u.username))
-                        const isFollowed = followed[u._id]
-                        const followers = u.followersCount || 0
-                        return (
-                            <div key={u._id} className="sp-suggestion-row">
-                                <Link to={`/profile/${u._id}`} tabIndex={-1} aria-hidden="true">
-                                    <img src={av} className="sp-suggestion-avatar" alt="" />
-                                </Link>
-                                <div className="sp-suggestion-info ml-1">
-                                    {/* The avatar above repeats this link, so it
-                                        is hidden from the accessible tree and
-                                        taken out of the tab order rather than
-                                        announcing the same destination twice. */}
-                                    <Link
-                                        to={`/profile/${u._id}`}
-                                        className="sp-suggestion-username hover:underline"
-                                    >
-                                        {u.username}
-                                        {u.isVerified && <HiBadgeCheck className="text-accent" />}
-                                    </Link>
-                                    <div className="sp-suggestion-subtext">
-                                        {u.fullName || `${followers} follower${followers === 1 ? '' : 's'}`}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => handleFollow(u)}
-                                    aria-label={`${isFollowed ? 'Unfollow' : 'Follow'} ${u.username}`}
-                                    aria-pressed={!!isFollowed}
-                                    className={`sp-btn-follow text-xs font-bold ${isFollowed ? 'text-muted' : 'text-accent hover:text-accent-hover'}`}
-                                >
-                                    {isFollowed ? 'Following' : 'Follow'}
-                                </button>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
-
-            {/* ── Aesthetic Sidebar Footer ──────────────── */}
-            <div className="sp-footer">
-                <div className="flex flex-col gap-3">
-                    <a 
-                        href="https://www.linkedin.com/in/syedmukheeth" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="sp-developer-link"
-                    >
-                        <FaLinkedin size={14} className="text-[#0A66C2]" />
-                        <span>Developed by Syed Mukheeth</span>
-                    </a>
-                    <span className="sp-footer-copyright">
-                        © 2026 PEERNET FROM INDIA
-                    </span>
-                </div>
-            </div>
-
-        </div>
-    )
-}
+import { HiCamera, HiExclamationCircle } from '../components/ui/icons'
 
 /* ── Feed ─────────────────────────────────────────────────── */
 export default function Feed() {
@@ -257,19 +116,19 @@ export default function Feed() {
                                     <div key={i} className="l-post-card" aria-hidden="true">
                                         <div className="post-card-header">
                                             <div className="post-card-user">
-                                                <div className="skeleton skeleton-circle shrink-0" style={{ width: 32, height: 32 }} />
+                                                <div className="skeleton skeleton-circle shrink-0" style={{ width: 36, height: 36 }} />
                                                 <div className="skeleton rounded-full" style={{ width: 140, height: 14 }} />
                                             </div>
-                                            <div className="skeleton skeleton-circle" style={{ width: 28, height: 28 }} />
+                                            <div className="skeleton rounded-sm" style={{ width: 32, height: 32 }} />
                                         </div>
                                         <div className="skeleton w-full aspect-square rounded-none shrink-0" />
                                         <div className="post-card-actions">
                                             <div className="post-card-actions-left">
-                                                <div className="skeleton rounded-md" style={{ width: 26, height: 26 }} />
-                                                <div className="skeleton rounded-md" style={{ width: 24, height: 24 }} />
-                                                <div className="skeleton rounded-md" style={{ width: 22, height: 22 }} />
+                                                <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
+                                                <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
+                                                <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
                                             </div>
-                                            <div className="skeleton rounded-md" style={{ width: 24, height: 24 }} />
+                                            <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
                                         </div>
                                         <div className="post-card-footer">
                                             <div className="flex items-center" style={{ height: 22, marginBottom: 2 }}>
@@ -322,7 +181,7 @@ export default function Feed() {
 
                         {hasNextPage && !isLoading && posts.length > 0 && (
                             <div className="flex justify-center py-8">
-                                <button className="btn btn-secondary px-8" onClick={() => fetchNextPage()}>
+                                <button className="btn btn-secondary" onClick={() => fetchNextPage()}>
                                     Load more
                                 </button>
                             </div>
@@ -332,7 +191,9 @@ export default function Feed() {
 
                 {/* ── Right panel ───────────── */}
                 <aside className="l-side-panel">
-                    <RightPanel />
+                    <Suspense fallback={null}>
+                        <RightPanel />
+                    </Suspense>
                 </aside>
 
             </div>

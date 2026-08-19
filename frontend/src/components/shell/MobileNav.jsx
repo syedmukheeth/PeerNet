@@ -1,10 +1,6 @@
 import { NavLink } from 'react-router'
 import { useLocation } from 'react-router'
-import {
-    HiHome, HiSearch, HiPlus, HiLogin,
-} from 'react-icons/hi'
-import { HiOutlineHome, HiOutlineSearch } from 'react-icons/hi'
-
+import { HiHome, HiSearch, HiPlus, HiLogin, HiOutlineHome, HiOutlineSearch } from '../ui/icons'
 /*
  * Bottom tab bar, mobile only. Layout hides this entirely while inside a
  * specific message thread (kept as Layout's own visibility check, since it

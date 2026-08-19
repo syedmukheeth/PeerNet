@@ -1,0 +1,288 @@
+/* ========================================================================================================================================================================================================================================
+   PROFILE PAGE
+   ======================================================================================================================================================================================================================================== */
+.profile-page-wrap {
+  max-width: 930px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+.profile-tabs {
+  display: flex;
+  border-top: 1px solid var(--border-md);
+  gap: 60px;
+  justify-content: center;
+}
+
+.profile-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-top: 2px solid transparent;
+  margin-top: -1px;
+  transition: color var(--trans-fast), border-color var(--trans-fast);
+}
+
+.profile-tab-btn svg {
+  font-size: 18px;
+}
+
+.profile-tab-btn.active {
+  color: var(--text-1);
+  border-top-color: var(--text-1);
+}
+
+/* Profile styles */
+.profile-header-v2 {
+  display: flex;
+  gap: 40px;
+  padding: 30px 20px;
+  max-width: 935px;
+  margin: 0 auto;
+}
+
+/* The gutter used to open to 100px above 1024px, which is the spacing of the
+   site this page was copied from. 56px keeps the avatar and the identity block
+   reading as one unit instead of two separate columns. */
+@media (min-width: 1024px) {
+  .profile-header-v2 {
+    gap: 56px;
+  }
+}
+
+.profile-avatar-wrap {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  padding: 3px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .avatar-ring {
+    width: 112px;
+    height: 112px;
+  }
+}
+
+.avatar-ring.has-stories {
+  background: var(--story-ring);
+  border: none;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--bg);
+}
+
+.profile-info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-info-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 10px;
+}
+
+.profile-header-top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.profile-username {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+}
+
+.profile-actions-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-stats-v2 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 40px;
+}
+
+.profile-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+}
+
+/* The count is the figure, the word beside it is the caption. Both were
+   text-1 at the same weight, so the row read as six equal words. */
+.stat-value {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+}
+
+.stat-label {
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+.profile-bio-v2 {
+  max-width: 450px;
+  color: var(--text-1);
+}
+
+.profile-link-v2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+.profile-link-v2:hover {
+  text-decoration: underline;
+}
+
+/* Tiles, not a contact sheet. A 1px gutter fuses the posts into one block and
+   is the single most recognisable grid on the internet. */
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-1);
+  margin-top: 0;
+}
+
+.profile-grid-item {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  position: relative;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+
+.profile-grid-item img,
+.profile-grid-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  /* Keep face in focus */
+  transition: transform 350ms ease;
+  display: block;
+}
+
+.profile-grid-item:hover img,
+.profile-grid-item:hover video {
+  transform: scale(1.03);
+}
+
+.profile-grid-item:hover .profile-grid-overlay {
+  opacity: 1;
+}
+
+/* ============================================================================
+   Removed: "PROFILE PAGE - MOBILE & TABLET UNIFICATION"
+
+   77 lines and 17 !important declarations that restyled .profile-header,
+   .profile-stats, .profile-stat, .profile-bio, .profile-actions and
+   .profile-tab across two breakpoints.
+
+   Not one of those class names appears in pages/Profile.jsx. The markup was
+   rewritten to a -v2 set (.profile-header-v2, .profile-stats-v2,
+   .profile-stat-item, .profile-bio-v2, .profile-actions-row) and the old rules
+   were never removed, so an entire responsive pass was styling elements that do
+   not exist. The v1 base rules it was overriding are gone from this file too.
+
+   If a profile element looks wrong on mobile, the rule for it is in the
+   breakpoint blocks of styles/responsive.css or in the two remaining passes in
+   styles/overrides.css, both of which target the -v2 markup that is actually
+   rendered.
+   ============================================================================ */
+
+/* -- Text post tiles ------------------------------------------------------
+   A text post has mediaType 'text', no mediaUrl, and a backgroundColor the
+   author picked. The grid used to send it down the <img> branch with an
+   undefined src, so it painted as an empty grey square: the "no thumbnail"
+   report. It gets a real tile instead, showing the colour and the caption.
+
+   The type is clamped rather than truncated with an ellipsis on one line,
+   because a status post is usually a sentence and one line of it says nothing.
+   --accent-fg is the label colour: the author's chosen background can be any
+   hue, so a fixed white would fail contrast on the light ones. */
+
+.profile-grid-text {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-3);
+  text-align: center;
+  overflow: hidden;
+}
+
+.profile-grid-text-body {
+  color: var(--accent-fg);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 768px) {
+  .profile-grid-text-body {
+    font-size: 15px;
+    -webkit-line-clamp: 6;
+  }
+}

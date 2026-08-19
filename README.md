@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/syedmukheeth/PeerNet/master/frontend/src/assets/logo.png" alt="PeerNet Logo" width="90" height="90" style="border-radius:20px"/>
+<img src="frontend/src/assets/logo.svg" alt="PeerNet Logo" width="90" height="90" style="border-radius:20px"/>
 
 # PeerNet
 

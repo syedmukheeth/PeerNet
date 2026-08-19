@@ -1,0 +1,480 @@
+/* ========================================================================================================================================================================================================================================
+   SEARCH
+   ======================================================================================================================================================================================================================================== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-full);
+  padding: 14px 22px;
+  margin-bottom: 24px;
+  transition: all 0.3s var(--ease-out);
+  box-shadow: var(--shadow-sm);
+}
+
+.search-bar:focus-within {
+  border-color: var(--accent);
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--accent-ring),
+  0 8px 30px -10px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+.zn-viewport-spacer {
+  height: env(safe-area-inset-bottom);
+}
+
+/* Removed misplaced grid style */
+
+.search-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-1);
+  font-size: 15px;
+}
+
+/* ========================================================================================================================================================================================================================================
+   USER ROW
+   ======================================================================================================================================================================================================================================== */
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  transition: background var(--trans-fast);
+}
+
+.user-row:hover {
+  background: var(--hover);
+}
+
+/* ========================================================================================================================================================================================================================================
+   INSTAGRAM-STYLE SEARCH PAGE
+   ======================================================================================================================================================================================================================================== */
+
+.ig-search-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 24px;
+  background: var(--bg);
+  color: var(--text-1);
+}
+
+/* Search bar */
+.ig-search-bar-wrap {
+  padding: 20px 0 8px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+.ig-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-1);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 11px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ig-search-bar.focused {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.ig-search-icon {
+  color: var(--text-3);
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.ig-search-icon.loading {
+  color: var(--accent);
+}
+
+.ig-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--text-1);
+  font-weight: 400;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.ig-search-input::placeholder {
+  color: var(--text-3);
+}
+
+.ig-search-clear {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text-3);
+  color: var(--bg);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.ig-search-clear:hover {
+  background: var(--text-2);
+}
+
+/* Skeleton */
+.ig-search-skeleton {
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+
+.ig-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+}
+
+.ig-skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ig-skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ig-skeleton-name {
+  height: 13px;
+  width: 40%;
+  border-radius: var(--r-sm);
+}
+
+.ig-skeleton-sub {
+  height: 11px;
+  width: 25%;
+  border-radius: var(--r-sm);
+}
+
+/* Results list */
+.ig-search-results {
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.ig-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-sm, rgba(255, 255, 255, 0.05));
+  gap: 12px;
+}
+
+.ig-result-row:last-child {
+  border-bottom: none;
+}
+
+.ig-result-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.ig-result-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ig-result-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.ig-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ig-result-username {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ig-verified {
+  color: var(--accent);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ig-result-fullname {
+  font-size: 13px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ig-result-meta {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Follow button */
+.ig-follow-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.ig-follow-btn.following {
+  background: var(--surface-1);
+  color: var(--text-1);
+  border: 1.5px solid var(--border);
+}
+
+.ig-follow-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Empty / initial state */
+/* Sits directly under the field it is talking about, left aligned, instead of
+   floating in the vertical centre of a blank page. */
+.ig-search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 28px 2px 40px;
+  gap: 6px;
+}
+
+.ig-empty-icon-wrap {
+  display: flex;
+  align-items: center;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+
+.ig-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.ig-empty-sub {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 42ch;
+}
+
+/* Mobile tweaks */
+@media (max-width: 767px) {
+  .ig-search-bar-wrap {
+    padding: 16px 0 6px;
+  }
+
+  .ig-search-bar {
+    padding: 10px 12px;
+  }
+
+  .ig-result-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ig-follow-btn {
+    padding: 6px 13px;
+    font-size: 12px;
+  }
+}
+
+/* --- Emoji picker overrides --- */
+.zn-emoji-picker-container {
+  position: relative;
+  display: flex; /* Changed from inline-flex to flex for better layout */
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.zn-emoji-popover {
+  position: fixed !important;
+  bottom: 80px !important; /* Standard desktop height above footer */
+  right: 20px !important;
+  width: 360px !important;
+  transform-origin: bottom right;
+  z-index: 10000; /* Extremely high to clear everything */
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--border-md);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Picker Internal Styling */
+.zn-emoji-popover .EmojiPickerReact {
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  --epr-bg-color: transparent;
+  --epr-category-label-bg-color: transparent;
+  --epr-picker-border-color: transparent;
+  --epr-search-border-color: var(--border-md);
+  --epr-search-input-bg-color: rgba(255, 255, 255, 0.08) !important;
+  --epr-search-input-text-color: var(--text-1) !important;
+  --epr-highlight-color: var(--accent);
+  --epr-category-navigation-button-size: 22px;
+  --epr-header-padding: 16px;
+  --epr-emoji-size: 32px;
+  --epr-category-label-text-color: var(--text-1) !important;
+  --epr-hover-bg-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Category Label Stylings */
+.EmojiPickerReact .epr-category-label {
+  height: 44px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-1);
+  background: transparent !important;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}/* Light Mode Specific Adjustments */
+[data-theme="light"] .zn-emoji-popover {
+  background: var(--surface) !important;
+  border-color: var(--border);
+  box-shadow: var(--shadow-md) !important;
+}
+
+[data-theme="light"] .EmojiPickerReact {
+  --epr-search-input-bg-color: var(--input-bg) !important;
+  --epr-search-input-text-color: var(--text-1) !important;
+  --epr-category-label-text-color: var(--text-1) !important;
+  --epr-category-icon-active-color: var(--accent);
+  --epr-hover-bg-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Emoji backdrop - must cover full screen */
+.zn-emoji-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999; /* Just below popover */
+  background: transparent;
+  cursor: default;
+}
+
+@media (max-width: 767px) {
+  .zn-emoji-popover {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0;
+    right: 0 !important;
+    width: 100% !important;
+    margin-bottom: 0;
+    border-radius: 24px 24px 0 0 !important;
+    height: 400px;
+    max-height: 75vh;
+    transform: none;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+  }
+
+  .zn-emoji-backdrop {
+    background: rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    bottom: 0;
+  }
+
+  /* Shift footer up when emoji picker is active */
+  .zn-messages-root.emoji-open .zn-footer {
+    transform: translateY(-400px);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .zn-footer {
+    flex-shrink: 0 !important;
+    min-height: fit-content;
+    background: var(--surface-1) !important;
+    position: fixed !important;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 12px !important;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    border-top: 1px solid var(--border) !important;
+    z-index: 1000 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Ensure messages can be scrolled above the shifted footer */
+  .zn-messages-root.emoji-open .zn-viewport {
+    scroll-padding-bottom: 490px !important; /* 400 picker + 90 spacer */
+  }
+
+  .zn-messages-root.emoji-open .zn-viewport-spacer {
+    height: 490px !important;
+    transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}

@@ -1,0 +1,1141 @@
+/* ========================================================================================================================================================================================================================================
+   LAYOUT - 3-COLUMN INSTAGRAM DESKTOP
+   ======================================================================================================================================================================================================================================== */
+.app-layout {
+  display: flex;
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* -- SIDEBAR (Left Column) ------------------------------- */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--sidebar-actual-w);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  z-index: var(--z-fixed);
+  padding: 24px 16px;
+  overflow-y: visible;
+  scrollbar-width: none;
+  transition: all 0.3s var(--ease-out);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .sidebar {
+  background: rgba(5, 5, 5, 0.8);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile State: Bottom Nav (< 768px) */
+@media (max-width: 767px) {
+
+  /* MUST come after the show rules above, hides mobile chrome when chat is fullscreen */
+  body:has(.zn-messages-root.chat-active) .mobile-top-header,
+  body:has(.zn-messages-root.chat-active) .mobile-nav,
+  html body.chat-active-mode .mobile-top-header,
+  html body.chat-active-mode .mobile-nav {
+    display: none !important;
+  }
+
+  /* Strip top gap from layout when chat is open */
+  body:has(.zn-messages-root.chat-active) .main-col,
+  body:has(.zn-messages-root.chat-active) .content-wrap,
+  html body.chat-active-mode .main-col,
+  html body.chat-active-mode .content-wrap {
+    padding-top: 0 !important;
+    margin-top: 0;
+  }
+}
+
+/* --- MOBILE ELEMENTS --- */
+.mobile-top-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0; /* Set to 0 to prevent ghost white bars on desktop if display:none is bypassed */
+  overflow: hidden;
+  background: rgba(var(--bg-rgb), 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-bottom: 1px solid var(--border);
+  z-index: 5000;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 767px) {
+
+}
+
+.mobile-header-btn {
+  cursor: pointer;
+  pointer-events: auto;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-lg);
+  background: transparent;
+  border: none;
+  color: var(--text-1);
+  transition: all 0.2s ease;
+}
+
+.mobile-header-btn:active {
+  background: var(--hover);
+  transform: scale(0.92);
+}
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  background: rgba(var(--bg-rgb), 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  z-index: var(--z-fixed);
+  padding: 0 10px;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: 50px;
+  height: 50px;
+}
+
+.mobile-nav-item.active {
+  color: var(--text-1);
+}
+
+.sidebar-logo-row {
+  margin-bottom: 48px;
+  padding: 0 12px;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.sidebar-brand-img {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Solid, not clipped. The wordmark used to be a blue to violet gradient
+   painted through the letterforms, which is the one thing every generated
+   interface does. The logo mark beside it carries the colour instead. */
+.peernetLogo {
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  color: var(--text-1);
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.ig-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 12px;
+  margin: 4px 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  border-radius: var(--r-lg);
+  color: var(--text-1);
+  transition: background-color 0.15s var(--ease-standard);
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+}
+
+.ig-link:hover {
+  background: var(--hover);
+}
+
+/* The active item used to say so four times over: a tinted background, a left
+   bar, an accent label and an icon scaled up 10 percent. Two signals is
+   enough, and the label stays the reading colour so the row is still a row. */
+.ig-link--active {
+  background: var(--surface-1);
+}
+
+.ig-link--active .ig-label {
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.ig-link--active .ig-icon {
+  color: var(--accent);
+}
+
+.ig-icon-wrap {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ig-icon {
+  width: 22px;
+  height: 22px;
+  transition: color var(--trans-fast);
+}
+
+.ig-label {
+  font-size: 15px;
+  font-weight: 500;
+  margin-left: 14px;
+  letter-spacing: -0.015em;
+  color: var(--text-1);
+}
+
+.ig-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: var(--error);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-full);
+  border: 2px solid var(--bg);
+  z-index: 10;
+  pointer-events: none;
+  animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ig-badge--msg {
+  background: var(--accent);
+  /* Blue for messages */
+  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.4);
+}
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.sidebar-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-lg);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+}
+
+.sidebar-profile-card:hover {
+  background: var(--hover);
+}
+
+.profile-card-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.profile-card-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.profile-card-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-card-role {
+  font-size: 12px;
+  color: var(--text-2);
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.sidebar-more-wrap {
+  position: relative;
+}
+
+.ig-link--active.show-more .ig-icon {
+  color: var(--accent);
+}
+
+.ig-more-popup {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  width: 240px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  padding: 8px;
+  box-shadow: var(--shadow-xl);
+  z-index: var(--z-dropdown);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-more-popup {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  width: 280px;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-xl);
+  padding: 12px;
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-more-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
+}
+
+.mobile-more-header span {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+.mobile-more-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  color: var(--text-primary);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.mobile-more-item:active {
+  background: var(--surface-hover);
+  transform: scale(0.98);
+}
+
+.mobile-more-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+@media (max-width: 767px) {
+  .desktop-only {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  
+}
+
+.ig-more-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s var(--ease-out);
+  width: 100%;
+  text-align: left;
+}
+
+.ig-more-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-1);
+}
+
+.ig-more-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 8px;
+}
+
+/* Nav Badge Style */
+
+/* -- MAIN COLUMN (Center) -------------------------------- */
+.main-col {
+  flex: 1;
+  height: 100dvh;
+  margin-left: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  scroll-behavior: smooth;
+  transition: margin-left 0.3s var(--ease-out);
+}
+
+/* The sidebar is fixed, so the main column has to be inset by its width -
+   but only once the sidebar exists. This used to be a desktop default on the
+   base rule that every narrow breakpoint then had to undo with
+   `margin-left: 0 !important`, and on a 390px viewport the undo lost: the
+   sidebar was display:none while the column kept its 244px inset, so the whole
+   feed rendered in a 146px strip pushed off the right of the screen.
+   Mobile-first removes the fight entirely. */
+@media (min-width: 768px) {
+  .main-col {
+    margin-left: var(--sidebar-actual-w);
+  }
+}
+
+.main-col--admin {
+  margin-left: 0;
+}
+
+.content-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 20px;
+  box-sizing: border-box;
+}
+
+/* Single column pages: Search, Notifications, Settings and the static pages.
+   The wide shell above only makes sense for the feed, which puts a 320px
+   panel beside its column. */
+.content-wrap--narrow {
+  max-width: var(--page-max);
+}
+
+/* -- FEED LAYOUT - 2-col inside main col ---------------- */
+
+/* Center feed column */
+.l-main-col {
+  flex: 0 0 620px;
+  max-width: 620px;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 1264px) {
+  .l-main-col {
+    flex: 1;
+    max-width: 100%;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 767px) {
+
+}
+
+/* Right panel */
+.l-side-panel {
+  width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 1264px) {
+  .l-side-panel {
+    display: none;
+  }
+}
+
+.sp-container {
+  width: 100%;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border-radius: var(--r-xl);
+  border: 1px solid var(--border-sm);
+  gap: 24px;
+}
+
+/* User Profile Card (Top) */
+.sp-user-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.sp-user-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.sp-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sp-username {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sp-fullname {
+  font-size: 13px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-action-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.sp-action-link:hover {
+  opacity: 0.8;
+}
+
+.sp-action-link--muted {
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+/* Suggestions Section */
+.sp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sp-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-3);
+}
+
+.sp-suggestion-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.sp-suggestion-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+}
+
+.sp-suggestion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sp-suggestion-username {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sp-suggestion-subtext {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.sp-btn-follow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-sm);
+  padding: 0 var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--accent-fg);
+  background: var(--accent);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--trans-fast), color var(--trans-fast), border-color var(--trans-fast);
+}
+
+.sp-btn-follow:hover {
+  color: var(--text-1);
+}
+
+.sp-btn-follow.active {
+  color: var(--text-3);
+}
+
+/* Footer Links */
+
+.l-feed-grid {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 20px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ========================================================================================================================================================================================================================================
+   MOBILE NAV + HEADER
+   ======================================================================================================================================================================================================================================== */
+
+/* ============================================================================================================================================================================================================================================
+   PeerNet V4.0 - WORLD CLASS 3-PANEL REBUILD
+   Layout architecture
+   ============================================================================================================================================================================================================================================ */
+
+/* Message Composer */
+
+/* ============================================================================================================================================================================================================================================
+   ANIMATIONS & SHIMMERS
+   ============================================================================================================================================================================================================================================ */
+
+/* =============================================================================
+   INTEGRATED UTILITY BRIDGE (Tailwind Compatibility)
+   ============================================================================= */
+
+@media (min-width: 1024px) {
+  .lg\:w-56 {
+    width: var(--sidebar-w);
+  }
+}
+
+/* =============================================================================
+   PeerNet - CSS Architecture Completion (Resolved Plan)
+   Admin hardening + utility bridge
+   ============================================================================= */
+
+/* Admin hardening */
+
+[data-theme="dark"] .admin-surface-el {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%), rgba(13, 13, 15, 0.6);
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
+}
+
+.admin-surface-el::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.admin-table tr {
+  transition: transform var(--trans-fast), background-color var(--trans-fast);
+}
+
+@keyframes statusPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.65);
+  }
+
+  70% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+/* --- Admin surface tokens --- */
+
+[data-theme="light"] .admin-surface-el {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .admin-stat-card {
+  background: linear-gradient(165deg, rgba(20, 20, 22, 0.8), rgba(10, 10, 12, 0.4));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .admin-stat-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+.admin-stat-card:hover {
+  border-color: var(--accent);
+  background: var(--hover);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -10px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+[data-theme="dark"] .admin-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.admin-stat-card:hover .chart-bg {
+  opacity: 1;
+}
+
+/* ========================================================================================================================================================================================================================================
+   FOOTER SYSTEMS - Sidebar & Global
+   ======================================================================================================================================================================================================================================== */
+
+/* Sidebar Panel Footer (Instagram Style) */
+.sp-footer {
+  margin-top: 2.5rem;
+  padding: 0 0.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sp-developer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-1);
+  text-decoration: none;
+  transition: all var(--trans-fast);
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+
+.sp-developer-link:hover {
+  background: var(--hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sp-footer-copyright {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.4;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Global Site Footer (Traditional Layout) */
+.site-footer {
+  position: relative;
+  margin-top: auto;
+  padding: 3rem 1.5rem 4rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--border-md);
+  background: var(--bg);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 1012px;
+  margin: 0 auto;
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.site-footer__link {
+  color: var(--text-2);
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 400;
+  transition: color var(--trans-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.site-footer__link:hover {
+  color: var(--text-1);
+}
+
+.footer-dot {
+  width: 2px;
+  height: 2px;
+  background: var(--text-3);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.site-footer__developer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.dev-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  text-decoration: none;
+  transition: all var(--trans-fast);
+  padding: 0.4rem 0.75rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+}
+
+.dev-link:hover {
+  opacity: 0.7;
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  background: var(--surface-2);
+}
+
+.site-footer__copyright {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.shadow-\[0_0_8px_rgba\(0\,240\,255\,0\.4\)\] {
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+}
+
+.shadow-\[0_0_8px_rgba\(16\,185\,129\,0\.5\)\] {
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.shadow-\[0_0_10px_rgba\(239\,68\,68\,0\.5\)\] {
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.placeholder\:opacity-20::placeholder {
+  opacity: 0.2;
+}
+
+.hover\:text-white:hover {
+  color: #fff;
+}
+
+.hover\:text-accent:hover {
+  color: var(--accent);
+}
+
+.hover\:text-error:hover {
+  color: var(--error);
+}
+
+.hover\:bg-white\/5:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.hover\:bg-white\/10:hover {
+  background-color: rgba(255, 255, 255, 0.10);
+}
+
+.hover\:bg-white\/\[0\.01\]:hover {
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+.hover\:bg-white\/\[0\.02\]:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.hover\:bg-white\/\[0\.05\]:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.hover\:bg-accent:hover {
+  background-color: var(--accent);
+}
+
+.hover\:bg-accent\/10:hover {
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.hover\:bg-error:hover {
+  background-color: var(--error);
+}
+
+.hover\:bg-error\/10:hover {
+  background-color: color-mix(in srgb, var(--error) 10%, transparent);
+}
+
+.hover\:border-white\/10:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.hover\:border-accent\/20:hover {
+  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.hover\:border-error:hover {
+  border-color: var(--error);
+}
+
+.hover\:border-error\/20:hover {
+  border-color: color-mix(in srgb, var(--error) 20%, transparent);
+}
+
+.hover\:border-error\/30:hover {
+  border-color: color-mix(in srgb, var(--error) 30%, transparent);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+.hover\:scale-\[1\.02\]:hover {
+  transform: scale(1.02);
+}
+
+.hover\:scale-\[1\.05\]:hover {
+  transform: scale(1.05);
+}
+
+.focus\:border-accent:focus {
+  border-color: var(--accent);
+}
+
+.focus\:border-error\/50:focus {
+  border-color: color-mix(in srgb, var(--error) 50%, transparent);
+}
+
+.focus\:bg-error\/5:focus {
+  background-color: color-mix(in srgb, var(--error) 5%, transparent);
+}
+
+.active\:scale-95:active {
+  transform: scale(0.95);
+}
+
+.active\:scale-\[0\.95\]:active {
+  transform: scale(0.95);
+}
+
+.active\:scale-\[0\.98\]:active {
+  transform: scale(0.98);
+}
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.group:hover .group-hover\:text-error {
+  color: var(--error);
+}
+
+.group:hover .group-hover\:translate-y-0 {
+  transform: translateY(0);
+}
+
+.group:hover .group-hover\:border-accent\/20 {
+  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.group:hover .group-hover\:border-error\/20 {
+  border-color: color-mix(in srgb, var(--error) 20%, transparent);
+}
+
+.group:hover .group-hover\:border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.group\/status:hover .group-hover\/status\:opacity-100 {
+  opacity: 1;
+}
+
+@media (min-width: 640px) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:block {
+    display: block;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:block {
+    display: block;
+  }
+
+  .lg\:overflow-visible {
+    overflow: visible;
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================================================
+   PROJECT ZENITH: PROFESSIONAL INSTAGRAM-STYLE (REFINED)
+   ========================================================================== */
+
+/* The :root block that used to sit here defined the --v4-*, --zn-*, --ease-*
+   and --z-* families, and re-declared --font-sans/--font-display that @theme
+   already emits. It also introduced a second accent colour, violet #8b5cf6,
+   competing with the app's blue. All of it now lives in styles/tokens.css, with
+   the violet folded onto the single blue accent. */
+
+/* 1. Sidebar */
+.zn-sidebar {
+  width: var(--zn-list-w);
+  height: 100%;
+  border-right: 1px solid var(--zn-border);
+  display: flex;
+  flex-direction: column;
+  background: var(--zn-bg);
+  flex-shrink: 0;
+}
+
+/* Sidebar List Items */
+
+.zn-convo-name.active {
+  color: var(--text-1);
+}
+
+/* 2. Main View */

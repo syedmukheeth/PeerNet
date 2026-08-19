@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { HiSearch, HiShieldCheck, HiTrash, HiCheck, HiUsers } from 'react-icons/hi'
+import { HiSearch, HiShieldCheck, HiTrash, HiCheck, HiUsers } from '../../../components/ui/icons'
 import avatarFallback from '../../../components/ui/avatarFallback'
 
 /**

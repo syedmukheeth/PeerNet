@@ -1,0 +1,168 @@
+/* ============================================================================
+   BUTTONS
+
+   One system, one place. This used to be five fragments scattered across
+   4000 lines of a single file: the base box in the reset section, the states
+   900 lines later, the variants after that, .btn-primary another 2600 lines
+   on, and a mobile patch at the very bottom. Because later rules won on
+   source order alone, each fragment needed !important to beat the one before
+   it, and .btn-secondary read a --card-alt token that was never declared, so
+   `background: var(--card-alt)` was invalid and browsers dropped it outright.
+   That is why "Cancel" rendered with no background at all.
+
+   Rules for anything added here:
+   - The base owns the box: height, padding, type, radius, border. A variant
+     may only change colour. A size may only change height, padding, type and
+     radius.
+   - No !important. If a rule needs it, the selector is in the wrong file.
+   - Every filled variant sets an explicit foreground token. Never assume
+     white reads on a fill: white on --error is 2.90:1 in the dark theme.
+   ============================================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: var(--ctl-md);
+  padding: 0 var(--s-4);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background var(--trans-fast),
+    border-color var(--trans-fast),
+    color var(--trans-fast),
+    opacity var(--trans-fast);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button.jsx already renders a .spinner while loading, so this only has to dim
+   the control and stop further clicks. The rule it replaces also injected a
+   second spinner through ::after, which is why loading buttons showed two. */
+.btn-loading,
+.btn[aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* -- Sizes ---------------------------------------------------------------- */
+
+.btn-sm {
+  height: var(--ctl-sm);
+  padding: 0 var(--s-3);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+}
+
+/* Named so size="md" in Button.jsx maps to a real class. It used to map to the
+   empty string, and .btn declared no height, so a default button collapsed to
+   its text box and every call site invented its own with Tailwind padding. */
+.btn-md {
+  height: var(--ctl-md);
+  padding: 0 var(--s-4);
+  border-radius: var(--r-md);
+  font-size: 14px;
+}
+
+.btn-lg {
+  height: var(--ctl-lg);
+  padding: 0 var(--s-5);
+  border-radius: var(--r-lg);
+  font-size: 15px;
+}
+
+.btn-icon {
+  width: var(--ctl-md);
+  height: var(--ctl-md);
+  padding: 0;
+  border-radius: var(--r-md);
+}
+
+.btn-icon-sm {
+  width: var(--ctl-sm);
+  height: var(--ctl-sm);
+  padding: 0;
+  border-radius: var(--r-sm);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* -- Variants ------------------------------------------------------------- */
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-secondary,
+.following-btn {
+  background: var(--surface-el);
+  color: var(--text-1);
+  border-color: var(--border-md);
+}
+
+.btn-secondary:hover:not(:disabled),
+.following-btn:hover:not(:disabled) {
+  background: var(--hover);
+  border-color: var(--border-lg);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+/* Accent-tinted, for a secondary action that still belongs to the primary
+   flow. Reads as the accent without competing with a real primary button. */
+.btn-subtle {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.btn-subtle:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.btn-danger {
+  background: var(--error);
+  color: var(--error-fg);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--error) 88%, var(--bg));
+}

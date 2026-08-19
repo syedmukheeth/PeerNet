@@ -1,14 +1,10 @@
 import { NavLink, Link, useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
-import {
-    HiLogout, HiLogin, HiCog, HiMenu, HiMoon, HiSun,
-    HiShieldCheck, HiSwitchHorizontal,
-} from 'react-icons/hi'
-import { HiOutlinePlusCircle, HiOutlineShieldCheck } from 'react-icons/hi'
+import { HiLogout, HiLogin, HiCog, HiMenu, HiMoon, HiSun, HiShieldCheck, HiSwitchHorizontal, HiOutlinePlusCircle, HiOutlineShieldCheck } from '../ui/icons'
 import { chatApi } from '../../api/axios'
 import { navLinks } from './navLinks'
-import logoImg from '../../assets/logo.png'
+import logoImg from '../../assets/logo.svg'
 
 /*
  * The desktop rail: branding, primary nav, create/admin entries, and the

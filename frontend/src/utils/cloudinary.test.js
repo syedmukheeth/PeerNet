@@ -21,9 +21,25 @@ describe('optimizeCloudinaryUrl', () => {
         expect(optimizeCloudinaryUrl(already)).toBe(already)
     })
 
-    it('returns falsy input unchanged rather than throwing', () => {
-        expect(optimizeCloudinaryUrl(undefined)).toBe(undefined)
+    /*
+     * This used to assert that a falsy url came back unchanged, so
+     * optimizeCloudinaryUrl(undefined) returned undefined. That is what made
+     * text posts render as empty grey squares in the profile grid: React drops
+     * a src attribute whose value is undefined, so <img> was emitted with no
+     * src at all and failed silently instead of visibly.
+     *
+     * The contract is now "always a string", which a caller can test.
+     */
+    it('normalises a missing url to an empty string', () => {
+        expect(optimizeCloudinaryUrl(undefined)).toBe('')
+        expect(optimizeCloudinaryUrl(null)).toBe('')
         expect(optimizeCloudinaryUrl('')).toBe('')
+    })
+
+    it('never returns undefined for any input', () => {
+        for (const input of [undefined, null, '', 0, false, 'not-a-url']) {
+            expect(typeof optimizeCloudinaryUrl(input)).toBe('string')
+        }
     })
 })
 

@@ -1,4 +1,4 @@
-import { HiPlus, HiCheckCircle } from 'react-icons/hi'
+import { HiPlus, HiCheckCircle } from './ui/icons'
 import { useNavigate } from 'react-router'
 import { useMultiAccount } from '../context/MultiAccountContext'
 import { useAuth } from '../context/AuthContext'

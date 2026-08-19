@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router'
-import { HiX, HiBadgeCheck, HiUser } from 'react-icons/hi'
+import { HiX, HiBadgeCheck, HiUser } from './ui/icons'
 import api from '../api/axios'
 import avatarFallback from './ui/avatarFallback'
 

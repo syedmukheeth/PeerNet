@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { HiServer, HiLightningBolt, HiGlobe } from 'react-icons/hi'
+import { HiServer, HiLightningBolt, HiGlobe } from '../../../components/ui/icons'
 import StatCard from '../StatCard'
 
 export default function InfrastructureModule({ pulse }) {

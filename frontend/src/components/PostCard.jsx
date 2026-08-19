@@ -2,15 +2,12 @@ import { useState, useRef, useEffect, memo } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-    HiHeart, HiOutlineHeart, HiChatAlt2,
-    HiBookmark, HiOutlineBookmark, HiDotsHorizontal, HiBadgeCheck,
-    HiPencil, HiTrash, HiShare, HiPlay, HiVolumeUp, HiVolumeOff
-} from 'react-icons/hi'
+import { HiHeart, HiOutlineHeart, HiChatAlt2, HiBookmark, HiOutlineBookmark, HiDotsHorizontal, HiBadgeCheck, HiPencil, HiTrash, HiShare, HiPlay, HiVolumeUp, HiVolumeOff } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { timeago } from '../utils/timeago'
 import { optimizeAvatarUrl, optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
+import { readableTextOn } from '../utils/contrast'
 import EditPostModal from './EditPostModal'
 import ReportModal from './ReportModal'
 import ConfirmDialog from './ConfirmDialog'
@@ -33,7 +30,8 @@ function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
     const [showHeart, setShowHeart] = useState(false)
     const menuRef = useRef(null)
     const isOwner = user?._id === (post.author?._id || post.author)
-    const isAdmin = user?.role === 'admin'
+    // superadmin outranks admin, so match the console's check in App.jsx.
+    const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
 
     // Sync liked state from server data, but only when no local override is active
     useEffect(() => {
@@ -238,7 +236,7 @@ function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                         // caption is set in white, which clears 8:1 on the deep shade and
                         // only 2.9:1 on the bright one.
                         <div className="post-card-text-content" style={{ background: post.backgroundColor || 'var(--accent-2)' }}>
-                            <div className="post-card-text-inner">{post.caption}</div>
+                            <div className="post-card-text-inner" style={{ color: readableTextOn(post.backgroundColor) }}>{post.caption}</div>
                         </div>
                     ) : post.mediaType === 'video' ? (
                         <div className="post-card-video-wrap">
@@ -260,7 +258,7 @@ function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                 <div className="post-card-actions">
                     <div className="post-card-actions-left">
                         <button className={`post-card-action-btn ${liked ? 'is-liked' : ''}`} onClick={handleLike} aria-label={liked ? 'Unlike this post' : 'Like this post'} aria-pressed={liked}>
-                            {liked ? <HiHeart size={26} /> : <HiOutlineHeart size={26} />}
+                            {liked ? <HiHeart size={24} /> : <HiOutlineHeart size={24} />}
                         </button>
                         <Link to={`/posts/${post._id}`} className="post-card-action-btn">
                             <HiChatAlt2 size={24} />
@@ -277,7 +275,7 @@ function PostCard({ post, onLikeToggle, onDelete, onUpdate }) {
                                 toast.error('Could not copy the link')
                             }
                         }}>
-                            <HiShare size={22} />
+                            <HiShare size={24} />
                         </button>
                     </div>
                     <button className={`post-card-action-btn ${saved ? 'is-saved' : ''}`} onClick={handleSave} aria-label={saved ? 'Remove from saved' : 'Save this post'} aria-pressed={saved}>

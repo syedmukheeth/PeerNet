@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
-import { HiFlag, HiShieldCheck, HiCheck } from 'react-icons/hi'
-
+import { HiFlag, HiShieldCheck, HiCheck } from '../../../components/ui/icons'
 export default function ReportModule({ reports, onResolve, loading }) {
     return (
         <motion.div className="admin-surface-el overflow-hidden border-0 md:border border-error/20">

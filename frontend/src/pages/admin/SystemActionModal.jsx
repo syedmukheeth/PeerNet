@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
-import { HiShieldCheck } from 'react-icons/hi'
-
+import { HiShieldCheck } from '../../components/ui/icons'
 export default function SystemActionModal({
     actionType,
     confirmCode,

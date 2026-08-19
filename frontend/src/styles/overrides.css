@@ -1,0 +1,957 @@
+/* ========================================================================================================================================================================================================================================
+   STORY CREATOR MOBILE & TABLET FIXES
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 1263px) {
+
+  /* Ensure status modal doesn't hide the header area */
+  .l-status-modal {
+    margin-top: 60px !important;
+    max-height: calc(100vh - 140px) !important;
+    width: 95% !important;
+    max-width: 450px !important;
+  }
+
+  .status-preview-canvas {
+    max-height: 60vh;
+    border-radius: var(--r-xl);
+  }
+}
+
+@media (max-width: 767px) {
+  .l-status-modal {
+    max-width: 100%;
+    margin-top: 70px !important;
+    margin-bottom: 90px;
+    height: auto;
+    max-height: calc(100vh - 160px) !important;
+    border-radius: 24px !important;
+  }
+
+  /* Fix bottom controls overlapping the nav */
+  
+}
+
+/* ========================================================================================================================================================================================================================================
+   MESSAGING RESPONSIVE LOGIC - MASTER/DETAIL FIX
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 1263px) {
+
+  /* Messages Page Unification */
+
+  /* Default state: List takes full width, Area is hidden */
+
+  
+
+  /* When a conversation is active (ID in URL) */
+
+  
+
+  /* Show back button on mobile chat area */
+  
+}
+
+@media (max-width: 767px) {
+  
+}
+
+/* ========================================================================================================================================================================================================================================
+   SENIOR DEV OVERRIDE: PROFILE PAGE V2 RESPONSIVE
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 767px) {
+  .profile-page-wrap {
+
+    padding: 0 !important;
+
+    padding-top: 0;
+
+  }
+
+  /* Force vertical stack with grid for precise control */
+
+  .profile-info-col,
+  .profile-info-main {
+    display: contents !important;
+  }
+
+  .profile-username {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Ensure actions are visible and part of the grid */
+
+  /* Bio area - Full Width */
+
+  /* Stats area - Centered Row */
+
+  /* Actions area refinement */
+
+  /* Tabs Refinement */
+  .profile-tabs {
+    display: flex !important;
+    justify-content: space-around !important;
+    border-top: none !important;
+    margin-top: 10px;
+    gap: 0 !important;
+    padding: 0;
+  }
+
+  .profile-tab-btn {
+    flex: 1;
+    padding: 12px 0 !important;
+    border-top: 2px solid transparent !important;
+    color: var(--text-3) !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .profile-tab-btn span {
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-weight: 800 !important;
+  }
+
+  .profile-tab-btn.active {
+    color: var(--text-1) !important;
+    border-top: 2px solid var(--text-1) !important;
+  }
+
+  /* Grid Alignment */
+  .profile-grid {
+    gap: 2px !important;
+    padding: 0;
+  }
+
+}
+
+/* ========================================================================================================================================================================================================================================
+   INSTAGRAM-VIBE PROFILE OVERHAUL
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 767px) {
+
+  /* Re-ordering Grid to match Instagram Mobile */
+  .profile-header-v2 {
+    display: grid !important;
+    grid-template-columns: 85px 1fr;
+    grid-template-areas: "avatar stats"
+    "bio bio"
+    "actions actions";
+    gap: 12px 20px !important;
+    padding: 20px 16px 12px !important;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+
+  .profile-avatar-wrap {
+    grid-area: avatar;
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-avatar-img {
+    border: 1px solid var(--border) !important;
+    padding: 2px;
+    background: var(--bg);
+  }
+
+  /* Stats next to Avatar */
+  .profile-stats-v2 {
+    grid-area: stats;
+    display: flex !important;
+    justify-content: space-around;
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    gap: 0 !important;
+    border: none;
+    background: transparent;
+  }
+
+  /* Info Column (Username) - Hidden on mobile if redundant, or integrated into bio */
+  .profile-info-col {
+    width: 100%;
+    flex: 1 !important;
+    display: contents !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .profile-header-top {
+    display: flex !important;
+    grid-area: actions;
+    gap: 8px !important;
+    width: 100%;
+  }
+
+  .profile-username-group {
+    grid-area: main;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  /* Bio below Avatar/Stats */
+  .profile-bio-v2 {
+
+    grid-area: bio;
+
+    width: 100%;
+
+    margin: 0;
+
+    font-size: 14px !important;
+
+    margin-top: 4px !important;
+
+    text-align: left;
+
+  }
+
+  .profile-bio-v2 .font-bold {
+    font-size: 14px !important;
+    font-weight: 700;
+  }
+
+  .profile-bio-v2 .text-\[14px\] {
+    font-size: 14px !important;
+    margin-top: 2px !important;
+    color: var(--text-1) !important;
+  }
+
+  /* Actions below Bio */
+  .profile-actions-row {
+    grid-area: actions;
+    display: flex !important;
+    gap: 8px !important;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .profile-actions-row .btn {
+    flex: 1;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Faster Image Load Placeholder */
+  .profile-grid-item {
+    border-radius: 0;
+    background: var(--card-alt) !important;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   CRITICAL UI STABILITY FIX - PROFILE & MESSAGING
+   ======================================================================================================================================================================================================================================== */
+
+@media (max-width: 767px) {
+
+  /* Profile Stat Label Fix */
+  .profile-stat-item {
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+
+    gap: 0 !important;
+
+    flex: 1;
+
+    justify-content: center;
+
+    min-width: 60px !important;
+
+  }
+
+  .stat-label {
+    font-size: 11px !important;
+    color: var(--text-1) !important;
+    text-transform: lowercase;
+    font-weight: 400 !important;
+    display: block !important;
+    position: static;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7 !important;
+    text-align: center;
+    width: auto;
+  }
+
+  .stat-value {
+    font-size: 17px;
+    font-weight: 700 !important;
+    color: var(--text-1) !important;
+    display: block;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+
+  .zn-messages-sidebar,
+  .convo-list {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    flex: 1 !important;
+    background: var(--bg) !important;
+    z-index: 100 !important;
+    visibility: visible !important;
+  }
+
+  /* Force chat area to only show when active */
+  .chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .chat-active .zn-chat-main {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    z-index: 200 !important;
+  }
+}
+
+/* ========================================================================================================================================================================================================================================
+   FINAL SENIOR STABILITY ENGINE - MOBILE & TABLET
+   ======================================================================================================================================================================================================================================== */
+
+/* Tablet-only: global container bg & profile fixes */
+@media (min-width: 768px) and (max-width: 1263px) {
+
+  /* GLOBAL CONTAINER FIXES */
+  #root,
+  .App,
+  .main-col,
+  .content-wrap {
+    background: var(--bg) !important;
+    min-height: 100vh;
+  }
+
+  /* PROFILE OVERLAP & STAT FIX */
+  .profile-stat-item {
+    flex-direction: column !important;
+    align-items: center !important;
+    min-width: 70px !important;
+  }
+
+  .stat-label {
+    display: block !important;
+    font-size: 11px !important;
+    opacity: 0.8 !important;
+    margin-top: -2px;
+  }
+
+  /* TOP HEADER SYNC */
+  .mobile-top-header {
+    background: rgba(var(--bg-rgb), 0.92) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  /* TABLET MESSAGES: show both panels side-by-side like desktop */
+  .zn-messages-sidebar,
+  .convo-list {
+    display: flex !important;
+    width: 280px !important;
+    min-width: 220px !important;
+    flex: none !important;
+    visibility: visible !important;
+  }
+
+  .zn-chat-main,
+  .chat-area {
+    display: flex !important;
+    flex: 1 !important;
+    position: relative !important;
+    height: 100% !important;
+  }
+
+  /* On tablet with active chat: both panels remain visible */
+  .chat-active .zn-messages-sidebar,
+  .chat-active .convo-list {
+    display: flex !important;
+    width: 280px !important;
+    min-width: 220px !important;
+  }
+
+  .chat-active .zn-chat-main {
+    display: flex !important;
+    position: relative !important;
+    flex: 1 !important;
+    width: auto !important;
+    height: 100% !important;
+    z-index: auto !important;
+  }
+}
+
+/* Mobile-only: panel-toggle (show DM list OR chat, not both) */
+@media (max-width: 767px) {
+
+  /* Ensure the sidebar/list is the only thing shown initially */
+  .zn-messages-sidebar,
+  .convo-list {
+    display: flex !important;
+    width: 100% !important;
+    flex: 1 !important;
+    background: var(--bg) !important;
+    visibility: visible !important;
+    z-index: 10 !important;
+  }
+
+  /* Hide the chat detail by default on mobile */
+  .zn-chat-main,
+  .chat-area {
+    display: none !important;
+  }
+
+  /* When a conversation is active on mobile */
+  .chat-active .zn-messages-sidebar,
+  .chat-active .convo-list {
+    display: none !important;
+  }
+
+  .chat-active .zn-chat-main,
+  .chat-active .chat-area {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    z-index: 100 !important;
+    background: var(--bg) !important;
+  }
+}
+
+@media (max-width: 767px) {
+
+  /* Navigation Safety */
+  .mobile-nav {
+
+    display: flex !important;
+
+    position: fixed;
+
+    bottom: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 65px;
+
+    backdrop-filter: blur(20px);
+
+    -webkit-backdrop-filter: blur(20px);
+
+    border-top: 1px solid var(--border);
+
+    z-index: 100;
+
+    padding: 0 10px;
+
+    align-items: center;
+
+    justify-content: space-around;
+
+    background: rgba(var(--bg-rgb), 0.95) !important;
+
+    padding-bottom: env(safe-area-inset-bottom) !important;
+
+  }
+}
+
+/* ============================================================
+   MESSAGING LAYOUT FIX - COMPOSER & SCROLL
+   Ensures the footer (composer) is always visible above bottom nav
+   and the viewport is properly scrollable on mobile/tablet
+   ============================================================ */
+
+/* Desktop */
+.zn-messages-root {
+
+  display: flex;
+
+  height: 100dvh;
+
+  background: var(--bg);
+
+  overflow: hidden;
+
+  color: var(--text-1);
+
+  flex-direction: row;
+
+  width: 100%;
+
+  position: relative;
+
+}
+
+.zn-chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+.zn-chat-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.zn-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  gap: 4px;
+  background: var(--bg);
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+.zn-footer {
+  padding: 12px 16px;
+  background: var(--surface-1);
+  backdrop-filter: blur(30px);
+  border-top: 1px solid var(--border);
+  z-index: 30;
+  position: relative;
+  flex-shrink: 0;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.zn-messages-sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.zn-sidebar-header {
+  padding: 20px 16px 12px;
+  position: relative;
+  z-index: 500;
+  flex-shrink: 0;
+}
+
+.zn-sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+/* Chat Menu Dropdown */
+.zn-chat-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 200px;
+  background: var(--surface-el);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-lg);
+  padding: 6px;
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+  /* Even higher than header */
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transform: translateZ(20px);
+}
+
+.zn-chat-menu button {
+  background: none;
+  border: none;
+  color: var(--text-1);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zn-chat-menu button:hover {
+  background: var(--hover);
+  color: var(--accent);
+}
+
+.zn-menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Tablet: side-by-side layout */
+@media (min-width: 768px) and (max-width: 1263px) {
+  .zn-messages-root {
+    height: 100dvh;
+    width: 100%;
+    margin-left: 0;
+    overflow: hidden;
+    position: relative;
+    flex-direction: row !important;
+  }
+
+  /* DEFAULT: show only sidebar */
+  .zn-messages-sidebar {
+    width: 100% !important;
+    max-width: 100%;
+    display: flex !important;
+    flex: 1 !important;
+  }
+
+  .zn-chat-main {
+    display: none !important;
+  }
+
+  /* ACTIVE: show only chat */
+  .zn-messages-root.chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .zn-messages-root.chat-active .zn-chat-main {
+    display: flex !important;
+    width: 100% !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    position: relative !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Mobile - DEFINITIVE FIX */
+@media (max-width: 767px) {
+
+  /* Position the whole root between the header and bottom nav */
+  .zn-messages-root {
+    position: fixed !important;
+    display: flex !important;
+    flex-direction: column !important;
+    top: 0 !important;
+    /* Default with global header */
+    left: 0 !important;
+    right: 0 !important;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    height: auto !important;
+    margin: 0 !important;
+    z-index: 100;
+    background: var(--bg);
+    overflow: hidden !important;
+  }
+
+  /* When chat is active, go completely fullscreen (header + bottom nav hidden) */
+
+  /* Instagram-style: header absorbs the status-bar / notch area */
+
+  /* Default: show only sidebar (list) */
+  .zn-messages-sidebar {
+    border-right: none;
+    border-bottom: none;
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Default: hide chat area */
+  .zn-chat-main {
+
+    width: 100%;
+
+    display: none !important;
+
+  }
+
+  /* When chat is active: hide list, show chat */
+  .zn-messages-root.chat-active .zn-messages-sidebar {
+    display: none !important;
+  }
+
+  .zn-messages-root.chat-active .zn-chat-main {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    /* Force height for scrolling */
+    overflow: hidden !important;
+    position: relative;
+  }
+
+  /* Chat inner must fill the full height and let footer sit at bottom */
+  .zn-chat-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+    flex: 1;
+    min-height: 0 !important;
+    height: 100% !important;
+    /* Force height for scrolling */
+    overflow: hidden !important;
+    /* CRITICAL: Disable transforms so fixed children (footer) stay fixed to viewport */
+    transform: none;
+  }
+
+  /* Viewport fills remaining space and scrolls */
+  .zn-viewport {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0 !important;
+    height: 100%;
+    padding: 4px 12px 12px !important;
+    scroll-padding-bottom: 90px !important;
+  }
+
+  /* Physical spacer to push last message above the fixed footer */
+  .zn-viewport-spacer {
+    height: 90px !important;
+    width: 100%;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  /* Footer - NUCLEAR FIX: Use fixed positioning to bypass all parent clipping */
+
+  /* Main-col must NOT add padding for messages page.
+     margin-left is no longer reset here: .main-col is mobile-first in
+     layout.css now, so there is nothing to undo, and this !important was
+     beating the desktop @media (min-width: 768px) rule and collapsing the
+     sidebar inset on every screen size. */
+  .main-col {
+    padding-top: 0 !important;
+    padding-bottom: 80px !important;
+  }
+}
+
+/* Messages page: override main-col padding so zn-messages-root (position:fixed) works correctly */
+/* Messaging page: Eliminate container padding globally to allow flush composer alignment */
+body:has(.zn-messages-root) .main-col,
+body:has(.zn-messages-root) .content-wrap {
+  padding: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 767px) {
+  /* CRITICAL: Hide global mobile nav/header when chat or admin is active to prevent overlap */
+  body:has(.zn-messages-root.chat-active) .mobile-nav,
+  body:has(.zn-messages-root.chat-active) .mobile-top-header,
+  body:has(.admin-root-v2) .mobile-nav,
+  body:has(.admin-root-v2) .mobile-top-header {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   LIGHT MODE COMPATIBILITY - MOBILE & MESSAGING
+   Ensures all theme-aware CSS variables are correctly applied
+   in light mode across the mobile interface.
+   ============================================================ */
+
+[data-theme="light"] {
+  /* Token declarations for this theme moved to styles/tokens.css, where they
+     sit directly beneath the dark palette instead of three thousand lines away
+     from it.
+
+     What is left is a handful of surfaces that were written as literal light
+     hex values: #fafafa sidebars, #f0f0f2 bubbles, an #09090b menu item and a
+     hard-coded blue selection. They now name the same tokens the dark theme
+     uses, so the palette can be changed in one file and both themes follow.
+     The !important flags stay only where a dark-theme rule of equal
+     specificity would otherwise win. */
+
+  .mobile-top-header,
+  .mobile-nav {
+    background: var(--glass-bg) !important;
+    border-color: var(--border);
+  }
+
+  .zn-messages-sidebar {
+    background: var(--surface) !important;
+    border-right-color: var(--border);
+  }
+
+  .zn-chat-header {
+    background: var(--glass-bg) !important;
+    border-bottom-color: var(--border);
+  }
+
+  .zn-footer {
+    background: var(--zn-footer-bg) !important;
+    border-top-color: var(--border);
+  }
+
+  .zn-composer-pill {
+    background: var(--zn-composer-bg) !important;
+    border-color: var(--zn-composer-border);
+  }
+
+  .zn-row.peer .zn-bubble {
+    background: var(--zn-bubble-peer) !important;
+    color: var(--zn-bubble-peer-text) !important;
+  }
+
+  .zn-convo-row:hover {
+    background: var(--hover) !important;
+  }
+
+  .zn-convo-row.active {
+    background: var(--accent-subtle) !important;
+  }
+
+  .zn-sidebar-search {
+    background: var(--zn-search-bg) !important;
+  }
+
+  .zn-date-label {
+    background: var(--surface-2) !important;
+  }
+
+  .zn-edit-modal {
+    background: var(--surface) !important;
+  }
+
+  .zn-edit-textarea {
+    background: var(--input-bg) !important;
+  }
+
+  .mobile-more-popup {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  .mobile-more-item {
+    color: var(--text-1) !important;
+  }
+
+  .mobile-more-item:active {
+    background: var(--hover) !important;
+  }
+}
+
+/* ============================================================
+   ULTRA NUCLEAR FIX - MOBILE MESSAGING FULLSCREEN
+   Placed at the end of the file to ensure absolute priority.
+   Kills the upper gap and ensures full edge-to-edge chat.
+   ============================================================ */
+
+@media (max-width: 767px) {
+  /* Kill ALL top-level layout padding when in chat mode */
+  body.chat-active-mode,
+  body:has(.zn-messages-root.chat-active) {
+    overflow: hidden !important;
+    position: fixed !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  body.chat-active-mode .main-col,
+  body.chat-active-mode .layout-container,
+  body.chat-active-mode .content-wrap,
+  body.chat-active-mode #root,
+  body.chat-active-mode #root > div,
+  body:has(.zn-messages-root.chat-active) .main-col,
+  body:has(.zn-messages-root.chat-active) .layout-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 100dvh !important;
+    width: 100% !important;
+    max-width: none !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  /* Force hide global headers */
+  body.chat-active-mode .mobile-top-header,
+  body:has(.zn-messages-root.chat-active) .mobile-top-header,
+  body.chat-active-mode .mobile-nav,
+  body:has(.zn-messages-root.chat-active) .mobile-nav {
+    display: none !important;
+    height: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  /* Chat root MUST be flush with top */
+  .zn-messages-root.chat-active {
+    top: 0 !important;
+    bottom: 0 !important;
+    height: 100dvh !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    padding-top: 0 !important;
+    margin: 0 !important;
+    z-index: 9999 !important;
+    background: var(--bg) !important;
+  }
+
+  /* Instagram Header style - include safe area */
+  .zn-messages-root.chat-active .zn-chat-header {
+    padding-top: env(safe-area-inset-top, 10px) !important;
+    height: calc(64px + env(safe-area-inset-top, 10px)) !important;
+    align-items: center !important;
+    background: var(--surface-1) !important;
+    border-bottom: 1px solid var(--border) !important;
+    display: flex !important;
+  }
+}

@@ -1,8 +1,4 @@
-import {
-    HiUsers, HiCollection, HiGlobe, HiChatAlt2, HiFlag,
-    HiTrendingUp, HiShieldCheck, HiDatabase,
-} from 'react-icons/hi'
-
+import { HiUsers, HiCollection, HiGlobe, HiChatAlt2, HiFlag, HiTrendingUp, HiShieldCheck, HiDatabase } from '../../components/ui/icons'
 export const navGroups = [
     {
         title: 'Insights',
