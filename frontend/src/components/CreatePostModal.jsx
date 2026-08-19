@@ -10,6 +10,13 @@ import { useQueryClient } from '@tanstack/react-query'
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024
 
+const formatBytes = (bytes) => {
+    if (!bytes) return '0 B'
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export default function CreatePostModal({ onClose }) {
     const queryClient = useQueryClient()
     const [isTextMode, setIsTextMode] = useState(false)
@@ -20,7 +27,13 @@ export default function CreatePostModal({ onClose }) {
     const [caption, setCaption] = useState('')
     const [loading, setLoading] = useState(false)
     const [dragOver, setDragOver] = useState(false)
-    
+    // A rejected file used to be a toast that was gone in four seconds, next to
+    // a drop zone that looked exactly as it had before. The reason now stays in
+    // the zone itself until the next attempt.
+    const [fileError, setFileError] = useState('')
+    const [progress, setProgress] = useState(0)
+
+
     const inputRef = useRef()
     const textareaRef = useRef()
     const MAX_CHARS = 2200
@@ -64,18 +77,39 @@ export default function CreatePostModal({ onClose }) {
         // Matches the limits the upload middleware enforces, so an oversized
         // file is rejected here rather than after a long upload.
         const video = f.type?.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi|3gp|hevc|m4v)$/i.test(f.name || '')
-        const limit = video ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES
-        if (f.size > limit) {
-            toast.error(`That file is too large. Limit is ${video ? '100MB' : '10MB'}.`)
+        const image = f.type?.startsWith('image/') || /\.(jpe?g|png|gif|webp|avif|heic|bmp)$/i.test(f.name || '')
+
+        if (!video && !image) {
+            setFileError(`${f.name} is not a photo or a video.`)
             return
         }
 
+        const limit = video ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES
+        if (f.size > limit) {
+            setFileError(`${formatBytes(f.size)} is over the ${video ? '100MB' : '10MB'} limit for a ${video ? 'video' : 'photo'}.`)
+            return
+        }
+
+        setFileError('')
         setFile(f)
         setPreview(URL.createObjectURL(f))
     }, [])
 
-    const handleFile = (e) => processFile(e.target.files[0])
-    
+    // Clearing the input's value matters: picking the same file twice in a row
+    // fires no change event otherwise, so "Replace" then re-choosing the file
+    // you just removed did nothing.
+    const handleFile = (e) => {
+        processFile(e.target.files[0])
+        e.target.value = ''
+    }
+
+    const clearMedia = () => {
+        setFile(null)
+        setPreview(null)
+        setFileError('')
+    }
+
+
     const onDragOver = (e) => {
         e.preventDefault()
         setDragOver(true)
@@ -97,9 +131,10 @@ export default function CreatePostModal({ onClose }) {
         if (isTextMode && !caption.trim()) return toast.error('Type something for your post')
         
         setLoading(true)
+        setProgress(0)
         try {
             const fd = new FormData()
-            
+
             if (isTextMode) {
                 fd.append('mediaType', 'text')
                 fd.append('backgroundColor', backgroundColor)
@@ -115,7 +150,18 @@ export default function CreatePostModal({ onClose }) {
                 fd.append('media', file)
                 fd.append('caption', caption)
 
-                await api.post('/posts', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+                // A 100MB video on a slow connection sat behind a spinner that
+                // said "Sharing..." for two minutes with no way to tell whether
+                // anything was happening. onUploadProgress reports the browser
+                // to server leg; Cloudinary's own processing happens after it
+                // reaches 100, which is why the label switches to "Processing".
+                await api.post('/posts', fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    onUploadProgress: (e) => {
+                        if (!e.total) return
+                        setProgress(Math.round((e.loaded * 100) / e.total))
+                    },
+                })
                 toast.success(isVideo ? 'Video shared' : 'Post shared')
                 await queryClient.invalidateQueries({ queryKey: ['feed'] })
                 onClose()
@@ -124,6 +170,7 @@ export default function CreatePostModal({ onClose }) {
             toast.error(err.response?.data?.message || 'Failed to share content')
         } finally {
             setLoading(false)
+            setProgress(0)
         }
     }
 
@@ -143,29 +190,39 @@ export default function CreatePostModal({ onClose }) {
                     transition={{ duration: 0.2, ease: 'easeOut' }}
                     onClick={e => e.stopPropagation()}
                 >
-                    {/* Header */}
+                    {/* Header. The mode switch used to share this row with the
+                        title and the close button, which left three items
+                        fighting for the same 560px and stacked the tabs on top
+                        of the heading. It has its own row now. */}
                     <header className="create-post-header">
-                        <div className="creative-tabs m-0 p-1">
-                            <div 
-                                className={`creative-tab ${!isTextMode ? 'active' : ''} t-h3 px-4 py-2`}
-                                onClick={() => setIsTextMode(false)}
-                            >
-                                <HiPhotograph /> Media
-                            </div>
-                            <div 
-                                className={`creative-tab ${isTextMode ? 'active' : ''} t-h3 px-4 py-2`}
-                                onClick={() => setIsTextMode(true)}
-                            >
-                                <HiPencilAlt /> Status
-                            </div>
-                        </div>
-                        <h2 className="t-h2 m-0">
+                        <h2 className="create-post-heading">
                             {isTextMode ? 'Create Status' : 'Create New Post'}
                         </h2>
                         <button className="btn btn-ghost btn-icon-sm" onClick={onClose} aria-label="Close">
                             <HiX size={20} />
                         </button>
                     </header>
+
+                    <div className="creative-tabs" role="tablist" aria-label="Post type">
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={!isTextMode}
+                            className={`creative-tab ${!isTextMode ? 'active' : ''}`}
+                            onClick={() => setIsTextMode(false)}
+                        >
+                            <HiPhotograph size={17} /> Media
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={isTextMode}
+                            className={`creative-tab ${isTextMode ? 'active' : ''}`}
+                            onClick={() => setIsTextMode(true)}
+                        >
+                            <HiPencilAlt size={17} /> Status
+                        </button>
+                    </div>
 
                     {/* Body */}
                     <div className="create-post-body dark-scrollbar">
@@ -199,67 +256,110 @@ export default function CreatePostModal({ onClose }) {
                         ) : (
                             <>
                                 {/* Upload / Preview */}
+                                <input
+                                    ref={inputRef}
+                                    type="file"
+                                    accept="image/*,video/*"
+                                    hidden
+                                    onChange={handleFile}
+                                />
+
                                 {!preview ? (
-                                    <div
-                                        className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
-                                        onClick={() => inputRef.current.click()}
+                                    /* A button, not a div: the zone is the
+                                       control that opens the picker, so Enter
+                                       and Space have to work on it. The old
+                                       markup also nested a real <button> inside
+                                       the clickable div, which is invalid and
+                                       fired the picker twice. */
+                                    <button
+                                        type="button"
+                                        className={`upload-zone ${dragOver ? 'drag-over' : ''} ${fileError ? 'has-error' : ''}`}
+                                        onClick={() => inputRef.current?.click()}
                                         onDragOver={onDragOver}
                                         onDragLeave={onDragLeave}
                                         onDrop={onDrop}
                                     >
-                                        <div className="upload-zone__icon">
-                                            <HiCloudUpload />
-                                        </div>
-                                        <div>
-                                            <p className="create-post-title" style={{ fontSize: 20, marginBottom: 4 }}>
-                                                Drop photos or videos
-                                            </p>
-                                            <p className="t-small">High quality images and 4K videos supported</p>
-                                        </div>
-                                        <button className="btn btn-primary btn-sm" style={{ marginTop: 8 }}>
-                                            Select from device
-                                        </button>
-                                        <input ref={inputRef} type="file" accept="image/*,video/*" hidden onChange={handleFile} />
-                                    </div>
-                                ) : (
-                                    <div className="media-preview">
-                                        {isVideo ? (
-                                            <video src={preview} controls playsInline autoPlay muted loop />
-                                        ) : (
-                                            <img src={preview} alt="Preview" />
+                                        <span className="upload-zone__icon">
+                                            <HiCloudUpload size={30} />
+                                        </span>
+                                        <span className="upload-zone__title">
+                                            {dragOver ? 'Drop to add it' : 'Drag a photo or video here'}
+                                        </span>
+                                        <span className="upload-zone__hint">
+                                            JPG, PNG, GIF or WEBP up to 10MB. MP4, MOV or WEBM up to 100MB.
+                                        </span>
+                                        <span className="upload-zone__cta">Select from device</span>
+                                        {fileError && (
+                                            <span className="upload-zone__error" role="alert">{fileError}</span>
                                         )}
-                                        <button 
-                                            className="media-preview__remove"
-                                            onClick={() => { setFile(null); setPreview(null) }}
-                                            title="Remove Media"
-                                        >
-                                            <HiTrash size={18} />
-                                        </button>
+                                    </button>
+                                ) : (
+                                    <div className="media-preview-wrap">
+                                        <div className="media-preview">
+                                            {isVideo ? (
+                                                <video src={preview} controls playsInline autoPlay muted loop />
+                                            ) : (
+                                                <img src={preview} alt="Preview" />
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="media-preview__remove"
+                                                onClick={clearMedia}
+                                                aria-label="Remove media"
+                                                title="Remove media"
+                                            >
+                                                <HiTrash size={18} />
+                                            </button>
+                                        </div>
+                                        <div className="media-preview__bar">
+                                            <span className="media-preview__meta" title={file?.name}>
+                                                {file?.name} <span className="media-preview__size">{formatBytes(file?.size)}</span>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-sm"
+                                                onClick={() => inputRef.current?.click()}
+                                            >
+                                                Replace
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
                                 {/* Caption & Tools */}
                                 <div className="caption-section">
-                                    <textarea
-                                        ref={textareaRef}
-                                        className="caption-field"
-                                        placeholder="Write a caption..."
-                                        value={caption}
-                                        onChange={e => setCaption(e.target.value.slice(0, MAX_CHARS))}
-                                    />
+                                    {/* The ring belongs to the shell, not the
+                                        textarea. Both used to draw one, so a
+                                        focused caption box showed a purple
+                                        rectangle inside a purple rectangle. */}
+                                    <div className="caption-shell field-shell">
+                                        <textarea
+                                            ref={textareaRef}
+                                            className="caption-field"
+                                            placeholder="Write a caption..."
+                                            aria-label="Caption"
+                                            value={caption}
+                                            onChange={e => setCaption(e.target.value.slice(0, MAX_CHARS))}
+                                        />
+                                    </div>
 
                                     <div className="caption-tools">
-                                        <div style={{ display: 'flex', gap: 12 }}>
-                                            <div className="hashtags-helper" onClick={() => addHashtag('#peernet')}>#peernet</div>
-                                            <div className="hashtags-helper" onClick={() => addHashtag('#community')}>#community</div>
-                                            <div className="hashtags-helper" onClick={() => addHashtag('#web3')}>#web3</div>
+                                        <div className="hashtags-row">
+                                            {['#peernet', '#community', '#web3'].map(tag => (
+                                                <button
+                                                    key={tag}
+                                                    type="button"
+                                                    className="hashtags-helper"
+                                                    onClick={() => addHashtag(tag)}
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
                                         </div>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            <span className={`character-counter ${caption.length > MAX_CHARS * 0.9 ? 'warning' : ''}`}>
-                                                {caption.length}/{MAX_CHARS}
-                                            </span>
-                                        </div>
+                                        <span className={`character-counter ${caption.length > MAX_CHARS * 0.9 ? 'warning' : ''}`}>
+                                            {caption.length}/{MAX_CHARS}
+                                        </span>
                                     </div>
                                 </div>
                             </>
@@ -268,10 +368,22 @@ export default function CreatePostModal({ onClose }) {
 
                     {/* Footer */}
                     <footer className="create-post-footer">
+                        {loading && !isTextMode && (
+                            <div
+                                className="upload-progress"
+                                role="progressbar"
+                                aria-valuenow={progress}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label="Upload progress"
+                            >
+                                <div className="upload-progress__bar" style={{ width: `${progress}%` }} />
+                            </div>
+                        )}
                         <button className="btn btn-secondary" onClick={onClose} disabled={loading}>
                             Cancel
                         </button>
-                        <motion.button 
+                        <motion.button
                             className={`btn btn-primary ${loading ? 'btn-loading' : ''}`}
                             onClick={handleSubmit}
                             disabled={loading || (!isTextMode && !file) || (isTextMode && !caption.trim())}
@@ -279,7 +391,9 @@ export default function CreatePostModal({ onClose }) {
                             whileTap={{ scale: 0.98 }}
                         >
                             {!loading && <HiCheckCircle />}
-                            {loading ? 'Sharing...' : (isTextMode ? 'Share Status' : 'Share Post')}
+                            {loading
+                                ? (isTextMode || progress >= 100 ? 'Processing...' : `Uploading ${progress}%`)
+                                : (isTextMode ? 'Share Status' : 'Share Post')}
                         </motion.button>
                     </footer>
                 </motion.div>

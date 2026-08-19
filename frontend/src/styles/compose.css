@@ -302,10 +302,14 @@
 }
 
 /* Hashtag helpers */
+/* A <button> now rather than a div with an onClick, so it carries the button
+   reset with it. */
 .hashtags-helper {
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   color: var(--accent);
+  background: transparent;
   cursor: pointer;
   padding: 3px 8px;
   border-radius: var(--r-sm);
@@ -315,6 +319,11 @@
 
 .hashtags-helper:hover {
   background: var(--accent-low);
+}
+
+.hashtags-helper:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 /* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 

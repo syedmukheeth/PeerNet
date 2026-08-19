@@ -748,7 +748,7 @@ export default function Messages() {
                                             </button>
                                         </motion.div>
                                     )}
-                                    <div className="zn-composer-pill">
+                                    <div className="zn-composer-pill field-shell">
                                         <div className="zn-emoji-picker-container">
                                             <button 
                                                 className={`zn-composer-action-btn${showEmojiPicker ? ' active' : ''}`}

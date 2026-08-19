@@ -88,27 +88,18 @@
   width: 100%;
 }
 
+/* The look, the ring and every state come from .input in components.css, which
+   this class is now part of. What stays here is only what is specific to an
+   auth screen: a taller target, because these two forms are the whole page. */
 .input-field {
-  width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--border-md);
-  border-radius: var(--r-md);
+  min-height: 50px;
   padding: 14px 16px;
-  color: var(--text-1);
-  font-size: 15px;
   line-height: 1.4;
-  transition: border-color var(--trans-fast), box-shadow var(--trans-fast), background-color var(--trans-fast);
 }
 
 .input-field::placeholder {
   color: var(--text-3);
   opacity: 0.8;
-}
-
-.input-field:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .auth-divider {

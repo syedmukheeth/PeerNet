@@ -99,7 +99,7 @@ export default function Search() {
         <div className="ig-search-page">
             {/* ── Search Bar ── */}
             <div className="ig-search-bar-wrap">
-                <div className={`ig-search-bar ${focused ? 'focused' : ''}`}>
+                <div className={`ig-search-bar field-shell ${focused ? 'focused' : ''}`}>
                     <HiSearch className={`ig-search-icon ${loading ? 'loading' : ''}`} />
                     <input
                         ref={inputRef}

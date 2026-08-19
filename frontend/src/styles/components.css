@@ -40,21 +40,53 @@
 /* ========================================================================================================================================================================================================================================
    INPUTS
    ======================================================================================================================================================================================================================================== */
-.input {
+/* One field, four states. This used to be a 4px ring plus a 20px drop shadow
+   fired on `:focus`, so clicking into a login field lit up a haloed, lifted
+   box: the heaviest thing on the screen was an empty text input. The ring is
+   now 3px and there is no shadow, the transition names the two properties that
+   actually change rather than `all`, and the disabled and invalid states exist
+   at all, which they did not. */
+.input,
+.input-field {
   width: 100%;
-  background: var(--surface-1);
+  min-height: 44px;
+  background: var(--input-bg);
   border: 1px solid var(--border-md);
   border-radius: var(--r-md);
-  padding: 12px 16px;
+  padding: 11px 14px;
   color: var(--text-1);
   font-size: 15px;
-  transition: all 0.25s var(--ease-out);
+  font-family: inherit;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
 }
 
-.input:focus {
+.input:hover:not(:disabled):not(:focus),
+.input-field:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-lg);
+}
+
+.input:focus,
+.input-field:focus {
+  outline: none;
   border-color: var(--accent);
-  background: var(--surface-2);
-  box-shadow: 0 0 0 4px var(--accent-ring), 0 4px 20px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.input:disabled,
+.input-field:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--surface-1);
+}
+
+.input[aria-invalid='true'],
+.input-field[aria-invalid='true'] {
+  border-color: var(--error);
+}
+
+.input[aria-invalid='true']:focus,
+.input-field[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--error) 30%, transparent);
 }
 
 .input-group {
@@ -233,9 +265,70 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.create-post-heading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+}
+
+/* The mode switch. These two classes were used by CreatePostModal and defined
+   nowhere, so the tabs rendered as raw text with the icon on its own line, on
+   top of the title they were sharing a row with. A segmented control: one
+   track, one moving pill, both tabs the same width so the pill does not
+   resize as it moves. */
+.creative-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  margin: 12px 16px 0;
+  padding: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  flex-shrink: 0;
+}
+
+.creative-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: calc(var(--r-md) - 4px);
+  background: transparent;
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--trans-fast), color var(--trans-fast);
+}
+
+.creative-tab:hover:not(.active) {
+  color: var(--text-1);
+  background: var(--hover);
+}
+
+.creative-tab.active {
+  background: var(--surface-1);
+  color: var(--text-1);
+  box-shadow: var(--shadow-sm);
+}
+
+.creative-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .create-post-body {
@@ -260,37 +353,137 @@
   color: var(--text-1);
 }
 
-/* Upload zones */
+/* The drop zone.
+
+   This selector was defined twice in this file with different padding, so
+   which one applied depended on which came last, and editing the first one
+   appeared to do nothing. One definition now.
+
+   It is a <button>, so it needs the button reset (background, font, width) as
+   well as its own look, and it must not move on hover: the old rule lifted it
+   2px, which slides the drop target out from under a file the user is already
+   dragging onto it. Only colour changes. */
 .upload-zone {
   border: 2px dashed var(--border-md);
   border-radius: var(--r-lg);
-  padding: 48px 24px;
+  padding: 44px 24px;
+  margin: 16px;
+  width: calc(100% - 32px);
   text-align: center;
   cursor: pointer;
   background: var(--input-bg);
+  color: inherit;
+  font: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  transition: all var(--trans-fast);
+  gap: 10px;
+  transition: border-color var(--trans-fast), background var(--trans-fast);
 }
 
-.upload-zone:hover,
-.upload-zone.drag-over {
+.upload-zone:hover {
   border-color: var(--accent);
   background: var(--accent-low);
 }
 
+.upload-zone:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Solid rather than dashed while a file is over it: the target has stopped
+   being a suggestion and became a thing you are about to hit. */
+.upload-zone.drag-over {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.upload-zone.has-error {
+  border-color: var(--error);
+}
+
 .upload-zone__icon {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: var(--accent-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
   color: var(--accent);
+  transition: transform var(--trans-fast);
+}
+
+.upload-zone.drag-over .upload-zone__icon {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.upload-zone__title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+}
+
+.upload-zone__hint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+  max-width: 40ch;
+}
+
+/* Reads as the button it replaces, without being a button inside a button. */
+.upload-zone__cta {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  height: var(--ctl-sm);
+  padding: 0 var(--s-4);
+  border-radius: var(--r-sm);
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.upload-zone:hover .upload-zone__cta {
+  background: var(--accent-hover, var(--accent));
+}
+
+.upload-zone__error {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--error);
+}
+
+.media-preview-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.media-preview__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+.media-preview__meta {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-preview__size {
+  color: var(--text-3);
 }
 
 .media-preview {
@@ -335,6 +528,22 @@
   border-top: 1px solid var(--border);
 }
 
+/* One ring, drawn by the container. The field inside stays borderless and
+   outline-free, so focus reads as a single object rather than a rectangle
+   inside a rectangle. */
+.caption-shell {
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  background: var(--input-bg);
+  padding: 10px 12px;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.caption-shell:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
 .caption-field {
   width: 100%;
   background: none;
@@ -348,32 +557,44 @@
   line-height: 1.5;
 }
 
+.caption-field:focus-visible {
+  outline: none;
+}
+
 .caption-tools {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-top: 10px;
 }
 
-.upload-zone {
-  border: 2px dashed var(--border-md);
-  border-radius: var(--r-lg);
-  padding: 56px 24px;
-  text-align: center;
-  cursor: pointer;
-  background: var(--input-bg);
-  transition: all var(--trans-fast);
+.hashtags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.upload-zone:hover {
-  border-color: var(--accent);
-  background: var(--accent-low);
-  transform: translateY(-2px);
+/* Upload progress. Sits along the top edge of the footer so it reads as the
+   modal filling up, and takes no vertical space of its own. */
+.create-post-footer {
+  position: relative;
 }
 
-.upload-zone.drag-over {
-  border-color: var(--accent);
-  background: var(--accent-subtle);
+.upload-progress {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.upload-progress__bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 200ms linear;
 }
 
 /* ============================================================================================================================================================================================================================================
