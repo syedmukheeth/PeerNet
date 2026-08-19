@@ -66,7 +66,7 @@ const formatNotification = (notif, hydratedEntity = null) => {
         isVerified: obj.sender.isVerified
     } : null;
 
-    // 🚀 PRODUCTION TRACER: Log generated thumbnail
+    // PRODUCTION TRACER: Log generated thumbnail
     // For comment/reply, surface the comment body for frontend preview
     let commentBody = null;
     if ((type === 'comment' || type === 'reply') && e) {

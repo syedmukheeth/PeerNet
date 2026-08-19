@@ -36,10 +36,10 @@ const authenticateMetrics = (req, res, next) => {
 const createApp = () => {
     const app = express();
     
-    // ── 🔧 Production Proxy Setting ────────────────────────────────────────────
+    // ── Production Proxy Setting ────────────────────────────────────────────
     app.set('trust proxy', 1);
 
-    // ── 🌐 CORS ───────────────────────────────────────────────────────────────
+    // ── CORS ───────────────────────────────────────────────────────────────
     // CORS runs before the rate limiter so that a 429 response still carries the
     // Access-Control-Allow-Origin header. Without it the browser reports an
     // opaque network failure and the client cannot show the real reason.
@@ -67,7 +67,7 @@ const createApp = () => {
         optionsSuccessStatus: 200 // Some legacy browsers crash on 204
     }));
 
-    // ── 🛡️ Middleware ──────────────────────────────────────────────────────────
+    // ── Middleware ──────────────────────────────────────────────────────────
     app.use(tracingMiddleware);
     app.use(globalLimiter);
     // Google Identity Services completes sign-in by posting a message back to
@@ -91,7 +91,7 @@ const createApp = () => {
 
     app.use(metricsMiddleware);
 
-    // ── 🩺 Health Check & Monitoring ──────────────────────────────────────────
+    // ── Health Check & Monitoring ──────────────────────────────────────────
     // Process, route and traffic telemetry is infrastructure detail, not public
     // information. Requires either the scrape token Prometheus is configured
     // with or an authenticated admin session.
@@ -112,21 +112,21 @@ const createApp = () => {
         env: process.env.NODE_ENV || 'development',
     }));
 
-    // ── 🔄 Global Sync Bypass (Confirmed Fixed) ───────────────────────────────
+    // ── Global Sync Bypass (Confirmed Fixed) ───────────────────────────────
     // Mount unread count at top level to ensure high availability regardless of sub-routers.
     const syncPaths = ['/notifications/unread-count', '/api/v1/notifications/unread-count'];
     app.get(syncPaths, authenticate, notificationController.getUnreadCount);
 
-    // ── 📚 API Docs (development only) ────────────────────────────────────────
+    // ── API Docs (development only) ────────────────────────────────────────
     if (process.env.NODE_ENV !== 'production') {
         require('./docs/swagger')(app);
         logger.info('API docs available at /api-docs');
     }
 
-    // ── 🚀 API Routes ─────────────────────────────────────────────────────────
+    // ── API Routes ─────────────────────────────────────────────────────────
     app.use('/api/v1', routes);
 
-    // ── 📄 Static Files & SPA Fallback ─────────────────────────────────────────
+    // ── Static Files & SPA Fallback ─────────────────────────────────────────
     // Serve frontend static assets from public/ folder
     app.use(express.static(path.join(__dirname, '../public')));
 
@@ -146,7 +146,7 @@ const createApp = () => {
         });
     }
 
-    // ── ❌ Error Handling ──────────────────────────────────────────────────────
+    // ── Error Handling ──────────────────────────────────────────────────────
     // Runs before the handlers below so a request that fails validation after
     // multer has already written to os.tmpdir() does not leave the file behind.
     app.use(cleanupOrphanedUpload);

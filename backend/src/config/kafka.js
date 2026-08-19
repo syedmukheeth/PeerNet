@@ -6,7 +6,7 @@ const logger = require('./logger');
 
 const isKafkaEnabled = !!process.env.KAFKA_BROKER;
 
-// ── 👻 GHOST KAFKA (MOCK OBJECT) ─────────────────────────────────────────────
+// ── GHOST KAFKA (MOCK OBJECT) ─────────────────────────────────────────────
 // This ensures that workers calling kafka.consumer() or kafka.producer()
 // at the top level do not crash with a TypeError when Kafka is disabled.
 const ghostKafka = {

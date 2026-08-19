@@ -13,7 +13,7 @@ const aiRoutes = require('../../modules/ai/ai.routes');
 const feedbackRoutes = require('../../modules/feedback/feedback.routes');
 const reportRoutes = require('../../modules/report/report.routes');
 
-// 🚀 NUCLEAR BYPASS: Diagnostic and Heartbeat routes defined directly to ensure visibility
+// Diagnostic bypass: Diagnostic and Heartbeat routes defined directly to ensure visibility
 router.get('/ping', (_req, res) => res.json({ status: 'pong', version: 'v2.bypass', timestamp: new Date() }));
 
 router.use('/auth', authRoutes);

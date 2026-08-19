@@ -70,12 +70,12 @@ const bootstrap = async () => {
         // story cleanup cron down with it.
         await runStep('Guest cleanup cron', scheduleGuestCleanup);
 
-        logger.info('🚀 Background service initialization complete');
+        logger.info('Background service initialization complete');
     };
 
     // ── 5. Start listening IMMEDIATELY ───────────────────────────────────────
     httpServer.listen(PORT, () => {
-        logger.info(`✨ PeerNet server live on port ${PORT} [${process.env.NODE_ENV}]`);
+        logger.info(`PeerNet server live on port ${PORT} [${process.env.NODE_ENV}]`);
         initServices();
     });
 

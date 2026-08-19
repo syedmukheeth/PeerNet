@@ -54,11 +54,11 @@ const seed = async () => {
             mediaUrl: `https://picsum.photos/seed/${i + 1}/600/600`,
             mediaPublicId,
             mediaType: 'image',
-            caption: `Hello from ${authors[i].username}! Post #${i + 1} 🚀`,
+            caption: `Hello from ${authors[i].username}! Post #${i + 1}`,
         });
     }
 
-    logger.info('✅ Seeding complete.');
+    logger.info('Seeding complete.');
     logger.info(`Admin credentials: admin@peernet.dev / ${SEED_PASSWORD}`);
     logger.info(`User credentials: alice@peernet.dev (and bob, charlie, diana, eve) / ${SEED_PASSWORD}`);
     await mongoose.disconnect();
