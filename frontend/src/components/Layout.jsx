@@ -187,8 +187,24 @@ export default function Layout() {
         if (!socket || !user) return
         const onMsg = (msg) => {
             if (msg.sender?._id === user?._id) return
-            msgRef.current += 1
-            setMsgCount(msgRef.current)
+
+            /*
+             * Mute now means something. It was stored, shown as a setting and
+             * read by nothing, so muting a conversation changed no behaviour at
+             * all: the toast and the badge fired exactly as before.
+             *
+             * A muted thread still updates its unread count in the list - you
+             * should be able to see it waiting - it just stops interrupting.
+             */
+            const isMuted = queryClient
+                .getQueriesData({ queryKey: ['conversations'] })
+                .flatMap(([, list]) => (Array.isArray(list) ? list : []))
+                .some((c) => c._id === msg.conversationId && c.isMuted)
+
+            if (!isMuted) {
+                msgRef.current += 1
+                setMsgCount(msgRef.current)
+            }
 
             // Invalidate conversations to update unread counts/previews
             queryClient.invalidateQueries({ queryKey: ['conversations'] })
@@ -201,7 +217,7 @@ export default function Layout() {
                 queryClient.invalidateQueries({ queryKey: ['messages', msg.conversationId] })
             }
 
-            if (!location.pathname.startsWith('/messages')) showMsgToast(msg)
+            if (!isMuted && !location.pathname.startsWith('/messages')) showMsgToast(msg)
         }
         socket.on('new_message', onMsg)
         return () => socket.off('new_message', onMsg)

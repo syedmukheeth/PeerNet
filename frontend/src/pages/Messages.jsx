@@ -17,6 +17,7 @@ import { splitOnQuery } from '../utils/highlight'
 import toast from 'react-hot-toast'
 import avatarFallback from '../components/ui/avatarFallback'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { Icon } from '../components/ui/icons'
 import { optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
 /**
@@ -68,7 +69,19 @@ const ConvoItem = ({ c, isActive, user, onClick }) => {
                     <span className={`zn-convo-name${isUnread ? ' unread' : ''}`}>
                         {peer?.username || 'Unknown User'}
                     </span>
-                    <span className="zn-convo-time">{formatTime(c.updatedAt)}</span>
+                    <span className="zn-convo-meta">
+                        {/* The state existed and the row showed no sign of it,
+                            so a pinned or muted thread looked like any other. */}
+                        {c.isPinned && (
+                            <Icon name="bookmark" size={12} solid className="zn-convo-flag"
+                                title="Pinned" />
+                        )}
+                        {c.isMuted && (
+                            <Icon name="volume-off" size={12} className="zn-convo-flag"
+                                title="Muted" />
+                        )}
+                        <span className="zn-convo-time">{formatTime(c.updatedAt)}</span>
+                    </span>
                 </div>
                 <p className={`zn-convo-msg${isUnread ? ' unread' : ''}`}>
                     {previewLabel(lastMsg, user)}
@@ -283,7 +296,7 @@ export default function Messages() {
         isLoading: loadingConvos,
         isError: convosFailed,
         refetch: refetchConvos,
-    } = useConvos()
+    } = useConvos({ archived: showArchived })
     const {
         data: messages = [],
         isLoading: loadingMsgs,
@@ -313,6 +326,9 @@ export default function Messages() {
     const [showChatMenu, setShowChatMenu] = useState(false)
     const [peerTyping, setPeerTyping] = useState(false)
     const [confirmDeleteChat, setConfirmDeleteChat] = useState(false)
+    // Archived conversations were filtered out of the list and had no view of
+    // their own, so archiving one hid it permanently.
+    const [showArchived, setShowArchived] = useState(false)
     const [isAtBottom, setIsAtBottom] = useState(true)
     const [unseenBelow, setUnseenBelow] = useState(0)
     const queryClient = useQueryClient()
@@ -436,13 +452,19 @@ export default function Messages() {
 
     const peer = useMemo(() => activeConvo?.participants?.find(p => p._id !== user?._id), [activeConvo, user?._id])
 
+    /*
+     * Only the search filter is left here. The archived split and the
+     * pinned-first ordering are the server's job now: it knows the flags, and
+     * doing the ordering there means paging cannot drop a pinned thread off the
+     * end of the list.
+     */
     const filteredConvos = useMemo(() => {
-        return convos
-            .filter(c => {
-                const p = c.participants?.find(p => p._id !== user?._id)
-                return p?.username?.toLowerCase().includes(searchQuery.toLowerCase()) && !c.isArchived
-            })
-            .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0) || new Date(b.updatedAt) - new Date(a.updatedAt))
+        const q = searchQuery.trim().toLowerCase()
+        if (!q) return convos
+        return convos.filter(c => {
+            const p = c.participants?.find(p => p._id !== user?._id)
+            return p?.username?.toLowerCase().includes(q)
+        })
     }, [convos, searchQuery, user?._id])
 
     const groupedMessages = useMemo(() => {
@@ -735,8 +757,29 @@ export default function Messages() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="field-input"
-                            placeholder="Search chats..."
+                            placeholder={showArchived ? 'Search archived...' : 'Search chats...'}
                         />
+                    </div>
+
+                    <div className="zn-inbox-tabs" role="tablist" aria-label="Conversation list">
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={!showArchived}
+                            className={!showArchived ? 'active' : ''}
+                            onClick={() => setShowArchived(false)}
+                        >
+                            Inbox
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={showArchived}
+                            className={showArchived ? 'active' : ''}
+                            onClick={() => setShowArchived(true)}
+                        >
+                            Archived
+                        </button>
                     </div>
                 </div>
 
@@ -892,14 +935,17 @@ export default function Messages() {
                                                         exit={{ opacity: 0, scale: 0.9, y: -10 }}
                                                         className="zn-chat-menu"
                                                     >
-                                                        <button onClick={() => { pinMutation.mutate(convoId); setShowChatMenu(false) }}>
-                                                            {activeConvo?.isPinned ? 'Unpin Chat' : 'Pin Chat'}
+                                                        {/* Each states the value it wants rather than
+                                                            toggling, so a stale local flag cannot invert
+                                                            the request. */}
+                                                        <button onClick={() => { pinMutation.mutate({ id: convoId, value: !activeConvo?.isPinned }); setShowChatMenu(false) }}>
+                                                            {activeConvo?.isPinned ? 'Unpin chat' : 'Pin chat'}
                                                         </button>
-                                                        <button onClick={() => { muteMutation.mutate(convoId); setShowChatMenu(false) }}>
-                                                            {activeConvo?.isMuted ? 'Unmute' : 'Mute Notifications'}
+                                                        <button onClick={() => { muteMutation.mutate({ id: convoId, value: !activeConvo?.isMuted }); setShowChatMenu(false) }}>
+                                                            {activeConvo?.isMuted ? 'Unmute notifications' : 'Mute notifications'}
                                                         </button>
-                                                        <button onClick={() => { archiveMutation.mutate(convoId); navigate('/messages'); setShowChatMenu(false) }}>
-                                                            Archive Chat
+                                                        <button onClick={() => { archiveMutation.mutate({ id: convoId, value: !activeConvo?.isArchived }); navigate('/messages'); setShowChatMenu(false) }}>
+                                                            {activeConvo?.isArchived ? 'Move to inbox' : 'Archive chat'}
                                                         </button>
                                                         <div className="zn-chat-menu-divider" style={{ height: '1px', background: 'var(--border)', margin: '4px 0' }} />
                                                         {/* Was a single click

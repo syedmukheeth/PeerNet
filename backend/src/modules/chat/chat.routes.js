@@ -10,6 +10,7 @@ const {
     postMessageSchema,
     editMessageSchema,
     reactMessageSchema,
+    conversationStateSchema,
 } = require('../../validators/chat.validator');
 
 router.use(authenticate);
@@ -30,6 +31,12 @@ router.patch('/:conversationId/messages/read', chatController.markSeen);
 router.patch('/:conversationId/messages/:messageId', validate(editMessageSchema), chatController.editMessage);
 router.delete('/:conversationId/messages/:messageId', chatController.deleteMessage);
 router.post('/:conversationId/messages/:messageId/react', validate(reactMessageSchema), chatController.reactMessage);
+// Pin, mute and archive, per participant.
+router.patch(
+    '/:conversationId/state',
+    validate(conversationStateSchema),
+    chatController.setConversationState,
+);
 router.delete('/:conversationId', chatController.deleteConversation);
 
 module.exports = router;

@@ -51,24 +51,86 @@ const getOrCreateConversation = async (userId, targetUserId) => {
  */
 const CONVERSATION_PAGE_SIZE = 50;
 
-const getUserConversations = async (userId, { limit = CONVERSATION_PAGE_SIZE } = {}) => {
+const getUserConversations = async (userId, { limit = CONVERSATION_PAGE_SIZE, archived = false } = {}) => {
     // Bounded. This used to fetch every conversation a user had ever been part
     // of, fully populated, on every inbox load.
-    const conversations = await Conversation.find({
+    //
+    // Pin, mute and archive are per participant, not per conversation: you can
+    // pin a thread the other person has not. That is why each lives as an array
+    // of user ids under metadata rather than as a boolean on the document.
+    const query = {
         participants: userId,
-        'metadata.deleted': { $ne: userId }
-    })
+        'metadata.deleted': { $ne: userId },
+        'metadata.archived': archived ? userId : { $ne: userId }
+    };
+
+    const conversations = await Conversation.find(query)
         .populate('participants', 'username avatarUrl fullName isVerified isOnline')
         .populate('lastMessage')
         .sort({ updatedAt: -1 })
         .limit(Math.min(limit, CONVERSATION_PAGE_SIZE));
 
-    return conversations.map(conv => {
-        const obj = conv.toObject();
-        // Extract unread count from the Map
-        obj.unreadCount = conv.unreadCounts?.get(userId.toString()) || 0;
-        return obj;
-    });
+    const holds = (list, id) => (list || []).some((u) => u.toString() === id.toString());
+
+    return conversations
+        .map(conv => {
+            const obj = conv.toObject();
+            // Extract unread count from the Map
+            obj.unreadCount = conv.unreadCounts?.get(userId.toString()) || 0;
+
+            // Resolved for the asking user, so the client never has to reason
+            // about the arrays.
+            obj.isPinned = holds(conv.metadata?.pinned, userId);
+            obj.isMuted = holds(conv.metadata?.muted, userId);
+            obj.isArchived = holds(conv.metadata?.archived, userId);
+
+            delete obj.metadata;
+            return obj;
+        })
+        // Pinned first, then most recent. Sorting here rather than on the
+        // client means paging cannot push a pinned thread off the list.
+        .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0)
+            || new Date(b.updatedAt) - new Date(a.updatedAt));
+};
+
+/**
+ * Pin, mute or archive a conversation for one participant.
+ *
+ * These three were frontend-only fakes living in localStorage: they did not
+ * survive a different browser, mute had no effect on anything, and an archived
+ * conversation was simply filtered out of the list with no way to see it again.
+ * The schema always had somewhere to put them.
+ */
+const CONVERSATION_FLAGS = ['pinned', 'muted', 'archived'];
+
+const setConversationFlag = async (conversationId, userId, flag, value) => {
+    if (!CONVERSATION_FLAGS.includes(flag)) {
+        throw new ApiError(400, 'Unknown conversation setting');
+    }
+
+    await assertParticipant(conversationId, userId);
+
+    const update = value
+        ? { $addToSet: { [`metadata.${flag}`]: userId } }
+        : { $pull: { [`metadata.${flag}`]: userId } };
+
+    const conversation = await Conversation.findByIdAndUpdate(conversationId, update, { new: true });
+
+    // Archiving a thread should take it out of the way entirely, so it stops
+    // being pinned at the same time.
+    if (flag === 'archived' && value) {
+        await Conversation.findByIdAndUpdate(conversationId, {
+            $pull: { 'metadata.pinned': userId }
+        });
+    }
+
+    const holds = (list) => (list || []).some((u) => u.toString() === userId.toString());
+    return {
+        _id: conversation._id,
+        isPinned: flag === 'archived' && value ? false : holds(conversation.metadata?.pinned),
+        isMuted: holds(conversation.metadata?.muted),
+        isArchived: holds(conversation.metadata?.archived)
+    };
 };
 
 /**
@@ -312,5 +374,7 @@ module.exports = {
     updateMessage,
     deleteMessage,
     reactToMessage,
-    deleteConversation
+    deleteConversation,
+    setConversationFlag,
+    CONVERSATION_FLAGS
 };

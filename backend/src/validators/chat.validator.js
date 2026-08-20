@@ -29,7 +29,19 @@ const reactMessageSchema = Joi.object({
     emoji: Joi.string().min(1).max(16).required(),
 });
 
+/*
+ * Pin, mute and archive are per participant and each is an independent
+ * boolean. `.or` requires at least one, so an empty body is rejected rather
+ * than quietly doing nothing.
+ */
+const conversationStateSchema = Joi.object({
+    pinned: Joi.boolean(),
+    muted: Joi.boolean(),
+    archived: Joi.boolean(),
+}).or('pinned', 'muted', 'archived');
+
 module.exports = {
+    conversationStateSchema,
     createConversationSchema,
     postMessageSchema,
     editMessageSchema,

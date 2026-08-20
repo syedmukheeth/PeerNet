@@ -7,68 +7,27 @@ import { useAuth } from '../context/AuthContext'
 const draftCache = {}
 const scrollCache = {}
 
-/*
- * Pin, mute and archive are client-side preferences: the API has no field for
- * them. They used to live in module-level Sets, so every toggle was silently
- * lost on reload and leaked between accounts on the same device, while the UI
- * presented them as saved settings.
- *
- * Persisted per user id in localStorage instead. Still local-only, but now it
- * behaves the way the controls claim to.
- */
-const STATE_KEY = 'pn_convo_state'
-
-const readState = (userId) => {
-    if (!userId) return { pinned: [], muted: [], archived: [] }
-    try {
-        const all = JSON.parse(localStorage.getItem(STATE_KEY) || '{}')
-        const mine = all[userId] || {}
-        return {
-            pinned: mine.pinned || [],
-            muted: mine.muted || [],
-            archived: mine.archived || [],
-        }
-    } catch {
-        return { pinned: [], muted: [], archived: [] }
-    }
-}
-
-const writeState = (userId, next) => {
-    if (!userId) return
-    try {
-        const all = JSON.parse(localStorage.getItem(STATE_KEY) || '{}')
-        all[userId] = next
-        localStorage.setItem(STATE_KEY, JSON.stringify(all))
-    } catch {
-        // Storage can be full or blocked; the toggle simply does not persist.
-    }
-}
-
 /**
  * Hook for managing conversations list
  */
-export const useConvos = () => {
+/*
+ * Pin, mute and archive come from the server now, resolved per participant.
+ * They used to be invented here from localStorage, so they did not survive a
+ * different browser and the other person's copy of the thread knew nothing
+ * about them.
+ */
+export const useConvos = ({ archived = false } = {}) => {
     const { user } = useAuth()
     const userId = user?._id
 
     return useQuery({
-        queryKey: ['conversations'],
+        queryKey: ['conversations', archived ? 'archived' : 'inbox'],
         queryFn: async () => {
-            const res = await chatApi.get('/')
-            let data = res.data
-            let list = []
-            if (data?.data && Array.isArray(data.data)) list = data.data
-            else if (data?.conversations && Array.isArray(data.conversations)) list = data.conversations
-            else list = Array.isArray(data) ? data : []
-
-            // Inject local state for Pin/Mute/Archive; the API has no such fields
-            const state = readState(userId)
-            return list.map(c => ({
-                ...c,
-                isPinned: state.pinned.includes(c._id),
-                isMuted: state.muted.includes(c._id),
-                isArchived: state.archived.includes(c._id)
-            }))
+            const res = await chatApi.get(archived ? '/?archived=1' : '/')
+            const data = res.data
+            if (data?.data && Array.isArray(data.data)) return data.data
+            if (data?.conversations && Array.isArray(data.conversations)) return data.conversations
+            return Array.isArray(data) ? data : []
         },
         enabled: !!userId,
         staleTime: 30000,
@@ -258,35 +217,50 @@ export const useMessageActions = (convoId) => {
 }
 
 /**
- * Hook for conversation management (Pin, Mute, Archive)
- * These run as local-only state toggles, backend endpoints are not yet implemented.
- * When backend support is added, swap mutationFn back to an API call.
+ * Pin, mute and archive.
+ *
+ * These were hand-rolled objects pretending to be mutations: `{ mutate,
+ * mutateAsync, isLoading: false }` around a localStorage write, with no request,
+ * no error path and no way to fail. They are real mutations now, against
+ * PATCH /chat/:id/state, and the flag is per participant on the server.
+ *
+ * Each takes { id, value } so a caller states the intent rather than relying on
+ * a toggle deriving it from state the server may already disagree with.
  */
+const FLAG_FIELD = { pinned: 'isPinned', muted: 'isMuted', archived: 'isArchived' }
+
+/*
+ * Options only. This cannot call useMutation itself: a hook has to be invoked
+ * unconditionally from the top level of a component or another hook, and three
+ * calls from inside a helper is exactly the pattern that breaks.
+ */
+const flagMutationOptions = (flag, queryClient) => ({
+    mutationFn: ({ id, value }) => chatApi.patch(`/${id}/state`, { [flag]: value }),
+    onMutate: async ({ id, value }) => {
+        await queryClient.cancelQueries({ queryKey: ['conversations'] })
+        const prev = queryClient.getQueriesData({ queryKey: ['conversations'] })
+
+        queryClient.setQueriesData({ queryKey: ['conversations'] }, (old) =>
+            old?.map((c) => (c._id === id ? { ...c, [FLAG_FIELD[flag]]: value } : c)))
+
+        return { prev }
+    },
+    onError: (_err, _vars, context) => {
+        context?.prev?.forEach(([key, data]) => queryClient.setQueryData(key, data))
+    },
+    onSettled: () => {
+        // Archiving moves a conversation between two lists, so both refetch.
+        queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    },
+})
+
 export const useConvoActions = () => {
     const queryClient = useQueryClient()
-    const { user } = useAuth()
-    const userId = user?._id
-
-    const toggleState = (type, id) => {
-        const current = readState(userId)
-        const list = current[type]
-        current[type] = list.includes(id) ? list.filter((x) => x !== id) : [...list, id]
-        writeState(userId, current)
-        queryClient.invalidateQueries({ queryKey: ['conversations'] })
-    }
-
-    // Local-only toggle, no API call, no error
-    const localMutate = (type) => ({
-        mutate: (id) => toggleState(type, id),
-        mutateAsync: async (id) => toggleState(type, id),
-        isLoading: false,
-        isPending: false,
-    })
 
     return {
-        pin: localMutate('pinned'),
-        mute: localMutate('muted'),
-        archive: localMutate('archived'),
+        pin: useMutation(flagMutationOptions('pinned', queryClient)),
+        mute: useMutation(flagMutationOptions('muted', queryClient)),
+        archive: useMutation(flagMutationOptions('archived', queryClient)),
     }
 }
 

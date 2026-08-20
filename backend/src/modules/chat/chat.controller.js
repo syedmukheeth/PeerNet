@@ -1,6 +1,7 @@
 'use strict';
 
 const chatService = require('./chat.service');
+const ApiError = require('../../utils/ApiError');
 const { getIOOptional } = require('../../config/socket');
 const { uploadToCloudinary } = require('../../utils/cloudinary.utils');
 const logger = require('../../config/logger');
@@ -32,8 +33,34 @@ const broadcastToParticipants = (conversation, event, payload) => {
 
 const getConversations = async (req, res, next) => {
     try {
-        const conversations = await chatService.getUserConversations(req.user.id);
+        // ?archived=1 opens the archive. Without it an archived conversation
+        // was hidden with no way to reach it again.
+        const archived = req.query.archived === '1' || req.query.archived === 'true';
+        const conversations = await chatService.getUserConversations(req.user.id, { archived });
         res.json({ success: true, data: conversations });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const setConversationState = async (req, res, next) => {
+    try {
+        const { conversationId } = req.params;
+        const updates = chatService.CONVERSATION_FLAGS
+            .filter((flag) => typeof req.body[flag] === 'boolean');
+
+        if (updates.length === 0) {
+            throw new ApiError(400, 'Provide one of pinned, muted or archived as a boolean');
+        }
+
+        let state = null;
+        for (const flag of updates) {
+            state = await chatService.setConversationFlag(
+                conversationId, req.user.id, flag, req.body[flag],
+            );
+        }
+
+        res.json({ success: true, data: state });
     } catch (err) {
         next(err);
     }
@@ -197,5 +224,6 @@ module.exports = {
     editMessage,
     deleteMessage,
     reactMessage,
-    deleteConversation
+    deleteConversation,
+    setConversationState
 };

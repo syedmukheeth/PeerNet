@@ -107,8 +107,12 @@ export default function DesktopSidebar({
                             // ['convos'] while useConvos registers under
                             // ['conversations'], and neither call supplied a
                             // queryFn, which React Query v5 throws on.
+                            //
+                            // The key gained an 'inbox' segment when the
+                            // archived list arrived, and it has to be kept in
+                            // step or this silently stops matching again.
                             queryClient.prefetchQuery({
-                                queryKey: ['conversations'],
+                                queryKey: ['conversations', 'inbox'],
                                 queryFn: async () => (await chatApi.get('/')).data?.data ?? [],
                             })
                             const lastId = localStorage.getItem('zn_last_convo_id')
