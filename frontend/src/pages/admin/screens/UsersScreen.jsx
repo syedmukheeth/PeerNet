@@ -6,6 +6,8 @@ import avatarFallback from '../../../components/ui/avatarFallback'
 import { isAdmin } from '../../../utils/roles'
 import * as adminApi from '../admin.api'
 import { useAdminData } from '../useAdminData'
+import Skeleton from '../../../components/ui/Skeleton'
+import TableRowsSkeleton from '../TableRowsSkeleton'
 import ConfirmDialog from '../../../components/ConfirmDialog'
 
 const STATUS_TONE = { active: 'is-good', suspended: 'is-warn', banned: 'is-bad' }
@@ -63,7 +65,9 @@ export default function UsersScreen() {
                 <div>
                     <div className="ac-panel-title">Users</div>
                     <div className="ac-panel-sub">
-                        {loading ? 'Loading' : `${visible.length} of ${users?.length || 0}`}
+                        {loading
+                            ? <Skeleton h={12} w={72} radius="var(--r-xs)" />
+                            : `${visible.length} of ${users?.length || 0}`}
                     </div>
                 </div>
                 <div className="field field-sm">
@@ -78,7 +82,7 @@ export default function UsersScreen() {
             </div>
 
             {loading ? (
-                <TableSkeleton />
+                <TableRowsSkeleton columns={5} />
             ) : visible.length === 0 ? (
                 <div className="ac-empty">
                     <Icon name="users" size={28} />
@@ -261,16 +265,6 @@ export default function UsersScreen() {
     )
 }
 
-function TableSkeleton() {
-    return (
-        <div className="ac-panel-body">
-            {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="skeleton"
-                    style={{ height: 44, borderRadius: 8, marginBottom: 8, opacity: 1 - i * 0.12 }} />
-            ))}
-        </div>
-    )
-}
 
 function formatDate(value) {
     if (!value) return '--'

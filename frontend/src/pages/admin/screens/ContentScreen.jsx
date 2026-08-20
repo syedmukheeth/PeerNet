@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button'
 import avatarFallback from '../../../components/ui/avatarFallback'
 import * as adminApi from '../admin.api'
 import { useAdminData } from '../useAdminData'
+import TableRowsSkeleton from '../TableRowsSkeleton'
 import ConfirmDialog from '../../../components/ConfirmDialog'
 
 const TYPES = [
@@ -86,12 +87,7 @@ export default function ContentScreen() {
             </div>
 
             {loading ? (
-                <div className="ac-panel-body">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="skeleton"
-                            style={{ height: 44, borderRadius: 8, marginBottom: 8, opacity: 1 - i * 0.12 }} />
-                    ))}
-                </div>
+                <TableRowsSkeleton columns={6} />
             ) : visible.length === 0 ? (
                 <div className="ac-empty">
                     <Icon name="collection" size={28} />

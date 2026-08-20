@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { HiLockClosed, HiUser, HiLogout, HiShieldCheck, HiChevronRight } from '../components/ui/icons'
+import Skeleton from '../components/ui/Skeleton'
 function SettingsSection({ title, children }) {
     return (
         <div className="settings-section">
@@ -133,19 +134,36 @@ export default function Settings() {
 
     if (!user) {
         return (
-            <div className="settings-page p-6 max-w-2xl mx-auto space-y-12">
-                <div className="space-y-4">
-                    <div className="skeleton h-8 w-32 rounded-lg" />
-                    <div className="skeleton h-4 w-64 rounded-md" />
+            /* Built from the page's own section and row classes. It used to be
+               three anonymous 128px blocks, a number measured against nothing:
+               the real sections are cards of 14px/18px rows and vary in height,
+               so the page re-flowed on resolve. */
+            <div className="settings-page" aria-busy="true">
+                <div className="settings-header">
+                    <Skeleton h={26} w={132} radius="var(--r-sm)" />
+                    <Skeleton h={14} w={240} radius="var(--r-xs)" style={{ marginTop: 8 }} />
                 </div>
-                <div className="space-y-8">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="space-y-4">
-                            <div className="skeleton h-4 w-24 rounded-md" />
-                            <div className="skeleton h-32 w-full rounded-2xl" />
+
+                {[3, 2, 2].map((rows, section) => (
+                    <div key={section} className="settings-section">
+                        <h3 className="settings-section-title">
+                            <Skeleton h={12} w={96} radius="var(--r-xs)" />
+                        </h3>
+                        <div className="settings-card">
+                            {Array.from({ length: rows }).map((_, i) => (
+                                <div key={i} className="settings-row">
+                                    <div className="settings-row-icon">
+                                        <Skeleton w={20} h={20} radius="var(--r-xs)" />
+                                    </div>
+                                    <div className="settings-row-content">
+                                        <Skeleton h={14} w={120} radius="var(--r-xs)" />
+                                    </div>
+                                    <Skeleton w={16} h={16} radius="var(--r-xs)" />
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
         )
     }

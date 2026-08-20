@@ -261,7 +261,10 @@
     padding: 10px 12px;
   }
 
-  .ig-result-avatar {
+  /* The skeleton avatar follows the real one down. It stayed at 44px while the
+     result it stood in for shrank to 40. */
+  .ig-result-avatar,
+  .ig-skeleton-avatar {
     width: 40px;
     height: 40px;
   }

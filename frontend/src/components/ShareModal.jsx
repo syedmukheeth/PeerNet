@@ -5,6 +5,7 @@ import api, { chatApi } from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import avatarFallback from './ui/avatarFallback'
+import Skeleton from './ui/Skeleton'
 
 export default function ShareModal({ isOpen, onClose, postId }) {
     const { user: currentUser } = useAuth()
@@ -86,8 +87,25 @@ export default function ShareModal({ isOpen, onClose, postId }) {
                         {/* List */}
                         <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 16 }}>
                             {loading ? (
-                                <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
-                                    <div className="spinner cursor-pointer" />
+                                /* Rows, not a spinner. The loaded content is a
+                                   list of 44px avatar rows at 10px/20px, so a
+                                   centred spinner threw away the one thing a
+                                   loading state is for: showing the shape of
+                                   what is arriving. */
+                                <div aria-busy="true">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <div key={i} style={{
+                                            display: 'flex', alignItems: 'center', gap: 13,
+                                            padding: '10px 20px',
+                                        }}>
+                                            <Skeleton w={44} h={44} circle />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton h={13} w="38%" radius="var(--r-xs)" />
+                                                <Skeleton h={11} w="55%" radius="var(--r-xs)" />
+                                            </div>
+                                            <Skeleton w={64} h={30} radius="var(--r-sm)" />
+                                        </div>
+                                    ))}
                                 </div>
                             ) : users.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-3)' }}>

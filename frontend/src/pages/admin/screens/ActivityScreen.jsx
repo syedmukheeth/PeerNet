@@ -4,6 +4,7 @@ import { Icon } from '../../../components/ui/icons'
 import Button from '../../../components/ui/Button'
 import * as adminApi from '../admin.api'
 import { useAdminData } from '../useAdminData'
+import TableRowsSkeleton from '../TableRowsSkeleton'
 
 export default function ActivityScreen() {
     const [search, setSearch] = useState('')
@@ -58,12 +59,7 @@ export default function ActivityScreen() {
             </div>
 
             {loading ? (
-                <div className="ac-panel-body">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="skeleton"
-                            style={{ height: 36, borderRadius: 8, marginBottom: 8, opacity: 1 - i * 0.09 }} />
-                    ))}
-                </div>
+                <TableRowsSkeleton columns={5} rows={8} />
             ) : visible.length === 0 ? (
                 <div className="ac-empty">
                     <Icon name="terminal" size={28} />

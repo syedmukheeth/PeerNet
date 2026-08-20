@@ -747,16 +747,19 @@
   padding: 8px;
 }
 
+/* Padding and avatar size are taken from .zn-convo-row and .zn-convo-avatar.
+   They were 12px/16px and 56px against a real 12px/20px and 52px, so every row
+   in the list moved when the conversations arrived. */
 .zn-skeleton-row {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 16px;
+  padding: 12px 20px;
 }
 
 .zn-skeleton-avatar {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   flex-shrink: 0;
 }

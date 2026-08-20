@@ -17,6 +17,24 @@ import avatarFallback from '../components/ui/avatarFallback'
 
 const COMMENT_PAGE_SIZE = 20
 
+/*
+ * One comment row, mirroring the real one: a 32px avatar and a text column.
+ * Used by the page skeleton and by the load-more branch, so both stay in
+ * step with the comment list.
+ */
+function CommentRowSkeleton() {
+    return (
+        <div className="flex gap-4 items-start" style={{ marginBottom: 16 }}>
+            <div className="skeleton size-8 rounded-full flex-shrink-0" />
+            <div className="flex-1 space-y-2.5 pt-1">
+                <div className="skeleton h-3.5 w-1/4 rounded-md" />
+                <div className="skeleton h-3.5 w-full rounded-md" />
+                <div className="skeleton h-3.5 w-2/3 rounded-md" />
+            </div>
+        </div>
+    )
+}
+
 export default function PostDetail() {
     const queryClient = useQueryClient()
     const { id } = useParams()
@@ -325,9 +343,21 @@ export default function PostDetail() {
         <div key="post-detail-skeleton" className="post-detail-card overflow-hidden">
             <div className="post-detail-media skeleton min-h-[400px] md:min-h-[600px]" />
             <div className="post-detail-info p-6 space-y-6 flex flex-col h-full">
+                {/* 36px: .post-detail-avatar, not the 40px this drew. */}
                 <div className="flex items-center gap-3 border-b border-border/10 pb-6">
-                    <div className="skeleton size-10 rounded-full" />
+                    <div className="skeleton size-9 rounded-full" />
                     <div className="skeleton h-4 w-32 rounded-md" />
+                </div>
+
+                {/* The caption block sits between the author and the comments
+                    in the real layout and was missing here, so the comment list
+                    jumped down the moment the post arrived. */}
+                <div className="flex gap-4 items-start">
+                    <div className="skeleton size-8 rounded-full flex-shrink-0" />
+                    <div className="flex-1 space-y-2.5 pt-1">
+                        <div className="skeleton h-3.5 w-full rounded-md" />
+                        <div className="skeleton h-3.5 w-3/5 rounded-md" />
+                    </div>
                 </div>
                 <div className="flex-1 space-y-8 py-4 overflow-hidden">
                     {[1, 2, 3, 4, 5].map(i => (
@@ -672,6 +702,16 @@ export default function PostDetail() {
                             >
                                 {loadingMoreComments ? 'Loading…' : 'Load more comments'}
                             </button>
+                        )}
+
+                        {/* The next page's rows, so the list grows while it is
+                            fetched. Only the button's label changed before, and
+                            nothing was appended, so the list sat still and the
+                            press felt ignored. */}
+                        {loadingMoreComments && (
+                            <div aria-busy="true">
+                                {[1, 2, 3].map(i => <CommentRowSkeleton key={i} />)}
+                            </div>
                         )}
                         <div ref={commentsEndRef} />
                     </div>

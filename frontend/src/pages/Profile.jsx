@@ -136,8 +136,11 @@ export default function Profile() {
     if (loading) return (
         <div key="profile-skeleton" className="profile-page-wrap">
             <header className="profile-header-v2">
+                {/* 112px, not 150. The real .avatar-ring is 80px on mobile and
+                    112px from md up (profile.css), so the placeholder was 38px
+                    too wide and the whole header re-laid out on resolve. */}
                 <div className="profile-avatar-wrap">
-                    <div className="skeleton w-[80px] h-[80px] md:w-[150px] md:h-[150px] rounded-full" />
+                    <div className="skeleton w-[80px] h-[80px] md:w-[112px] md:h-[112px] rounded-full" />
                 </div>
                 <div className="profile-info-col">
                     <div className="profile-info-main">
@@ -158,17 +161,20 @@ export default function Profile() {
                 </div>
             </header>
 
+            {/* Two tabs, matching the real header. It drew three, so one always
+                vanished when the page resolved - and on someone else's profile
+                there is only POSTS, since SAVED is yours alone. */}
             <div className="profile-tabs border-t border-white/5 py-4 mt-8">
                 <div className="flex justify-center gap-12">
                     <div className="skeleton h-8 w-24 rounded-lg opacity-40" />
                     <div className="skeleton h-8 w-24 rounded-lg opacity-20" />
-                    <div className="skeleton h-8 w-24 rounded-lg opacity-20" />
                 </div>
             </div>
 
+            {/* .profile-grid-item is --r-sm, not square-cornered. */}
             <div className="profile-grid px-0 mt-2">
                 {[...Array(9)].map((_, i) => (
-                    <div key={i} className="skeleton aspect-square rounded-none" />
+                    <div key={i} className="skeleton aspect-square rounded-[var(--r-sm)]" />
                 ))}
             </div>
         </div>
@@ -305,7 +311,7 @@ export default function Profile() {
                     if (gridLoading) return (
                         <div className="profile-grid px-0">
                             {[...Array(9)].map((_, i) => (
-                                <div key={`skel-${i}`} className="skeleton aspect-square rounded-none" />
+                                <div key={`skel-${i}`} className="skeleton aspect-square rounded-[var(--r-sm)]" />
                             ))}
                         </div>
                     )

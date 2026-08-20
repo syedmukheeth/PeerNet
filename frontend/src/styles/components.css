@@ -680,9 +680,12 @@
   100% { transform: translateX(150%) skewX(-20deg); }
 }
 
-@keyframes peernet-pulse-glow {
-  0%, 100% { opacity: 1; filter: brightness(1); }
-  50% { opacity: 0.9; }
+/* Used only under reduced motion, where the shimmer is suppressed. A skeleton
+   with no motion at all is indistinguishable from a broken grey box, so the
+   state still has to read as active. */
+@keyframes peernet-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.62; }
 }
 
 .skeleton {
@@ -743,9 +746,10 @@
   border-radius: 50%;
 }
 
+/* No margin here. .skeleton-stack owns the rhythm through `gap`, and carrying
+   both stacked every pair of lines 16px apart instead of 8. */
 .skeleton-text {
   height: 12px;
-  margin-bottom: 8px;
   border-radius: var(--r-sm);
 }
 
@@ -753,20 +757,9 @@
 .skeleton-text.m { width: 60%; }
 .skeleton-text.l { width: 100%; }
 
-/* Glass Enhancement for Skeletons */
-.skeleton::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Legacy support handled above */
+/* The radial gloss lived here as a hardcoded white wash with no light-theme
+   override, so on a white surface it did nothing but wash the fill out. The
+   shimmer already carries the effect; this is gone rather than themed. */
 
 .react-hot-toast>div {
   border-radius: var(--r-lg);

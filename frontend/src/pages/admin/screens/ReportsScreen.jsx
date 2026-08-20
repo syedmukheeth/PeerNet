@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { Icon } from '../../../components/ui/icons'
 import Button from '../../../components/ui/Button'
 import * as adminApi from '../admin.api'
+import TableRowsSkeleton from '../TableRowsSkeleton'
 
 /*
  * The reporter's name was blank on every row. The screen read
@@ -14,7 +15,7 @@ import * as adminApi from '../admin.api'
  * a Post carries `caption`, a Comment `body`, a User `username`.
  */
 export default function ReportsScreen() {
-    const { reports, reloadReports } = useOutletContext()
+    const { reports, reportsLoading, reloadReports } = useOutletContext()
     const [busyId, setBusyId] = useState(null)
 
     const resolve = async (report, status) => {
@@ -28,6 +29,23 @@ export default function ReportsScreen() {
         } finally {
             setBusyId(null)
         }
+    }
+
+    // Empty and "not asked yet" are different states. Reading them as the same
+    // thing meant this screen announced an empty moderation queue during every
+    // load, which is the one thing a report queue must never get wrong.
+    if (reportsLoading) {
+        return (
+            <section className="ac-panel">
+                <div className="ac-panel-head">
+                    <div>
+                        <div className="ac-panel-title">Pending reports</div>
+                        <div className="ac-panel-sub">Loading</div>
+                    </div>
+                </div>
+                <TableRowsSkeleton columns={5} rows={4} />
+            </section>
+        )
     }
 
     if (!reports?.length) {

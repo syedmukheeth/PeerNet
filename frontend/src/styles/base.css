@@ -284,7 +284,15 @@ select:focus-visible,
     animation-iteration-count: infinite !important;
   }
 
+  /* The shimmer sweep is a translating gradient, which is exactly the kind of
+     motion this query exists to stop. It is replaced with a slow opacity pulse
+     rather than removed, so a skeleton still reads as loading instead of as a
+     dead grey block. */
   .skeleton::after {
     animation: none !important;
+  }
+
+  .skeleton {
+    animation: peernet-skeleton-pulse 2s ease-in-out infinite !important;
   }
 }

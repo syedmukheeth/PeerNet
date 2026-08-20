@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router'
 import * as adminApi from '../admin.api'
 import { useAdminData } from '../useAdminData'
 import Metric from '../Metric'
+import Skeleton from '../../../components/ui/Skeleton'
 
 /*
  * Everything on this screen is a real process measurement.
@@ -64,15 +65,15 @@ export default function HealthScreen() {
                 </div>
                 <div className="ac-panel-body">
                     <div className="ac-rows">
-                        <Row label="CPU time consumed" value={system?.cpuSeconds ? `${system.cpuSeconds}s` : '--'} />
-                        <Row label="Users" value={fmt(live?.userCount)} />
-                        <Row label="Posts" value={fmt(live?.postCount)} />
-                        <Row label="Stories" value={fmt(live?.storyCount)} />
-                        <Row label="Videos" value={fmt(live?.videoCount)} />
-                        <Row label="Open feedback" value={fmt(live?.openFeedback)} />
+                        <Row loading={loading && !live} label="CPU time consumed" value={system?.cpuSeconds ? `${system.cpuSeconds}s` : '--'} />
+                        <Row loading={loading && !live} label="Users" value={fmt(live?.userCount)} />
+                        <Row loading={loading && !live} label="Posts" value={fmt(live?.postCount)} />
+                        <Row loading={loading && !live} label="Stories" value={fmt(live?.storyCount)} />
+                        <Row loading={loading && !live} label="Videos" value={fmt(live?.videoCount)} />
+                        <Row loading={loading && !live} label="Open feedback" value={fmt(live?.openFeedback)} />
                         {/* Weighted from content counts server side, not metered
                             at the CDN, so it is labelled as an estimate. */}
-                        <Row label="Estimated bandwidth" value={live?.bandwidthUsage || '--'} />
+                        <Row loading={loading && !live} label="Estimated bandwidth" value={live?.bandwidthUsage || '--'} />
                     </div>
                 </div>
             </section>
@@ -80,11 +81,18 @@ export default function HealthScreen() {
     )
 }
 
-function Row({ label, value }) {
+/*
+ * A row renders a skeleton rather than the literal '--' while the first
+ * snapshot is in flight. Seven rows all reading '--' looked like seven real
+ * measurements that happened to be empty.
+ */
+function Row({ label, value, loading }) {
     return (
         <div className="ac-row">
             <span className="ac-row-label">{label}</span>
-            <span className="ac-row-value">{value}</span>
+            {loading
+                ? <Skeleton h={14} w={72} radius="var(--r-xs)" />
+                : <span className="ac-row-value">{value}</span>}
         </div>
     )
 }

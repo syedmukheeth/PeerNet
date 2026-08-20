@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import * as adminApi from '../admin.api'
 import { useAdminData } from '../useAdminData'
 import Metric from '../Metric'
+import Skeleton from '../../../components/ui/Skeleton'
 import TrendChart from '../TrendChart'
 
 /*
@@ -85,27 +86,52 @@ export default function SummaryScreen() {
                         <div className="ac-panel-title">Platform status</div>
                         <div className="ac-panel-sub">Derived from the last 50 admin operations</div>
                     </div>
-                    {!loading && (
+                    {loading ? (
+                        // Was hidden entirely while loading, so the badge
+                        // popped into the panel head on resolve.
+                        <Skeleton h={22} w={72} radius="var(--r-sm)" />
+                    ) : (
                         <span className={`ac-badge ${data?.health?.status === 'Healthy' ? 'is-good' : 'is-warn'}`}>
                             {data?.health?.status || 'Unknown'}
                         </span>
                     )}
                 </div>
                 <div className="ac-panel-body">
+                    {/* These rendered the literal string '--' during load,
+                        which reads as a real value rather than an absent one. */}
                     <div className="ac-rows">
                         <div className="ac-row">
                             <span className="ac-row-label">Admin operations without errors</span>
-                            <span className="ac-row-value">{data?.health?.synchronicity ?? '--'}%</span>
+                            {loading
+                                ? <Skeleton h={14} w={56} radius="var(--r-xs)" />
+                                : <span className="ac-row-value">{data?.health?.synchronicity ?? '--'}%</span>}
                         </div>
                         <div className="ac-row">
                             <span className="ac-row-label">Estimated media storage</span>
-                            <span className="ac-row-value">
-                                {fmt(storage?.usedMB)} MB of {fmt(storage?.maxMB)} MB
-                            </span>
+                            {loading
+                                ? <Skeleton h={14} w={140} radius="var(--r-xs)" />
+                                : (
+                                    <span className="ac-row-value">
+                                        {fmt(storage?.usedMB)} MB of {fmt(storage?.maxMB)} MB
+                                    </span>
+                                )}
                         </div>
                     </div>
 
-                    {storage && (
+                    {/* The meter was absent during load and then appeared,
+                        growing the panel by about 70px. */}
+                    {loading && (
+                        <div className="ac-meter" style={{ marginTop: 16 }}>
+                            <div className="ac-meter-head">
+                                <Skeleton h={13} w={88} radius="var(--r-xs)" />
+                                <Skeleton h={13} w={36} radius="var(--r-xs)" />
+                            </div>
+                            <Skeleton h={6} radius="var(--r-full)" className="w-full" />
+                            <Skeleton h={12} w="70%" radius="var(--r-xs)" />
+                        </div>
+                    )}
+
+                    {!loading && storage && (
                         <div className="ac-meter" style={{ marginTop: 16 }}>
                             <div className="ac-meter-head">
                                 <span>Storage used</span>

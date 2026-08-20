@@ -5,6 +5,8 @@ import Button from '../../../components/ui/Button'
 import avatarFallback from '../../../components/ui/avatarFallback'
 import * as adminApi from '../admin.api'
 import { useAdminData } from '../useAdminData'
+import Skeleton from '../../../components/ui/Skeleton'
+import TableRowsSkeleton from '../TableRowsSkeleton'
 import ConfirmDialog from '../../../components/ConfirmDialog'
 
 export default function CommentsScreen() {
@@ -50,7 +52,9 @@ export default function CommentsScreen() {
                 <div>
                     <div className="ac-panel-title">Comments</div>
                     <div className="ac-panel-sub">
-                        {loading ? 'Loading' : `${visible.length} of ${comments?.length || 0}`}
+                        {loading
+                            ? <Skeleton h={12} w={72} radius="var(--r-xs)" />
+                            : `${visible.length} of ${comments?.length || 0}`}
                     </div>
                 </div>
                 <div className="field field-sm">
@@ -65,12 +69,7 @@ export default function CommentsScreen() {
             </div>
 
             {loading ? (
-                <div className="ac-panel-body">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="skeleton"
-                            style={{ height: 44, borderRadius: 8, marginBottom: 8, opacity: 1 - i * 0.12 }} />
-                    ))}
-                </div>
+                <TableRowsSkeleton columns={5} />
             ) : visible.length === 0 ? (
                 <div className="ac-empty">
                     <Icon name="comment" size={28} />

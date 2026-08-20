@@ -121,12 +121,17 @@ export default function Search() {
             {loading && hasQuery && (
                 <div className="ig-search-skeleton">
                     {[...Array(5)].map((_, i) => (
+                        /* A result row is a three-line info column with a follow
+                           button on the right. The button had no placeholder, so
+                           a ~72px control popped in on every row. */
                         <div key={i} className="ig-skeleton-row">
                             <div className="skeleton ig-skeleton-avatar" />
                             <div className="ig-skeleton-lines">
                                 <div className="skeleton ig-skeleton-name" />
                                 <div className="skeleton ig-skeleton-sub" />
+                                <div className="skeleton ig-skeleton-sub" style={{ width: '18%' }} />
                             </div>
+                            <div className="skeleton" style={{ width: 72, height: 30, borderRadius: 'var(--r-sm)' }} />
                         </div>
                     ))}
                 </div>

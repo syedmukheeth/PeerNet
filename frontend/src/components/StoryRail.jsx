@@ -432,12 +432,18 @@ export default function StoryRail() {
             <div className="story-rail">
                 {loading ? (
                     [...Array(8)].map((_, i) => (
-                        <div key={i} className="story-item px-2">
-                            <div className="relative">
-                                <div className="skeleton rounded-full w-[76px] h-[76px]" />
-                                <div className="absolute inset-[-4px] border-2 border-white/5 rounded-full" />
+                        /* The ring sits inside the 76px box, the way
+                           .story-ring-vibrant does at inset:0. Drawn at
+                           inset:-4px it made the placeholder 8px wider than the
+                           real circle. Its colour was a literal white/5, which
+                           is invisible in the light theme; the border token
+                           follows it. */
+                        <div key={i} className="story-item">
+                            <div className="relative w-[76px] h-[76px]">
+                                <div className="skeleton rounded-full w-full h-full" />
+                                <div className="absolute inset-0 border-2 border-[var(--border)] rounded-full" />
                             </div>
-                            <div className="skeleton w-14 h-2 mt-3 rounded-full opacity-30" />
+                            <div className="skeleton w-14 h-3 mt-2 rounded-full opacity-30" />
                         </div>
                     ))
                 ) : (

@@ -10,6 +10,8 @@ const RightPanel = lazy(() => import('../components/shell/RightPanel'))
 
 import { useAuth } from '../context/AuthContext'
 import { HiCamera, HiExclamationCircle } from '../components/ui/icons'
+import { PostFeedSkeleton } from '../components/PostCardSkeleton'
+import { StoryRailSkeleton, SuggestionsSkeleton } from '../components/RailSkeletons'
 
 /* ── Feed ─────────────────────────────────────────────────── */
 export default function Feed() {
@@ -97,54 +99,22 @@ export default function Feed() {
                 {/* ── Feed column ───────────── */}
                 <div className="l-main-col l-stack">
                     <div style={{ minHeight: '144px' }}>
-                        <Suspense fallback={<div className="h-[144px] w-full" />}>
+                        <Suspense fallback={<StoryRailSkeleton />}>
                             <StoryRail />
                         </Suspense>
                     </div>
                     
                     <div className="feed-posts">
-                        <Suspense fallback={null}>
+                        {/* Was fallback={null}: the feed column rendered nothing
+                            between the query resolving and the lazy PostCard
+                            chunk arriving. */}
+                        <Suspense fallback={<PostFeedSkeleton count={2} />}>
                             {posts.filter(Boolean).map((post) => (
                                 <PostCard key={post._id} post={post} onLikeToggle={onLikeToggle} onDelete={onDelete} onUpdate={onUpdate} />
                             ))}
                         </Suspense>
 
-                        {(isLoading || isFetchingNextPage) && (
-                            <div className="flex flex-col gap-8 pb-20">
-                                {/* Mirrors PostCard's own layout classes so the two cannot drift apart. */}
-                                {[...Array(3)].map((_, i) => (
-                                    <div key={i} className="l-post-card" aria-hidden="true">
-                                        <div className="post-card-header">
-                                            <div className="post-card-user">
-                                                <div className="skeleton skeleton-circle shrink-0" style={{ width: 36, height: 36 }} />
-                                                <div className="skeleton rounded-full" style={{ width: 140, height: 14 }} />
-                                            </div>
-                                            <div className="skeleton rounded-sm" style={{ width: 32, height: 32 }} />
-                                        </div>
-                                        <div className="skeleton w-full aspect-square rounded-none shrink-0" />
-                                        <div className="post-card-actions">
-                                            <div className="post-card-actions-left">
-                                                <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
-                                                <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
-                                                <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
-                                            </div>
-                                            <div className="skeleton rounded-sm" style={{ width: 40, height: 40 }} />
-                                        </div>
-                                        <div className="post-card-footer">
-                                            <div className="flex items-center" style={{ height: 22, marginBottom: 2 }}>
-                                                <div className="skeleton rounded-full" style={{ width: 96, height: 12 }} />
-                                            </div>
-                                            <div className="flex items-center" style={{ height: 20 }}>
-                                                <div className="skeleton rounded-full w-full" style={{ height: 12 }} />
-                                            </div>
-                                            <div className="flex items-center" style={{ height: 22, marginTop: 2 }}>
-                                                <div className="skeleton rounded-full" style={{ width: 150, height: 12 }} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        {(isLoading || isFetchingNextPage) && <PostFeedSkeleton />}
 
                         {/* A failed request used to fall through to the empty
                             state below, so "the server is down" and "you follow
@@ -191,7 +161,7 @@ export default function Feed() {
 
                 {/* ── Right panel ───────────── */}
                 <aside className="l-side-panel">
-                    <Suspense fallback={null}>
+                    <Suspense fallback={<SuggestionsSkeleton />}>
                         <RightPanel />
                     </Suspense>
                 </aside>

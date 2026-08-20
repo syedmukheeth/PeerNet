@@ -82,9 +82,12 @@ export default function RightPanel() {
                 <div className="flex flex-col sp-suggestions-list">
                     {loading ? (
                         [...Array(5)].map((_, i) => (
+                            /* 34px and ml-1, matching .sp-suggestion-avatar and
+                               the real info column. It was 32px with no margin,
+                               so the text block sat 4px left of where it landed. */
                             <div key={i} className="sp-suggestion-row">
-                                <div className="skeleton skeleton-circle w-8 h-8" />
-                                <div className="sp-suggestion-info">
+                                <div className="skeleton skeleton-circle w-[34px] h-[34px]" />
+                                <div className="sp-suggestion-info ml-1">
                                     <div className="skeleton skeleton-text m h-3" />
                                     <div className="skeleton skeleton-text s h-2" />
                                 </div>

@@ -7,6 +7,8 @@ import { useSocket } from '../../hooks/useSocket'
 import * as adminApi from './admin.api'
 import { navGroups } from './navGroups'
 import AdminSidebar from './AdminSidebar'
+import Skeleton from '../../components/ui/Skeleton'
+import TableRowsSkeleton from './TableRowsSkeleton'
 import './admin.css'
 
 /*
@@ -19,6 +21,11 @@ export default function AdminPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [pulse, setPulse] = useState(null)
     const [reports, setReports] = useState([])
+    // Reports start as an empty array, and ReportsScreen renders its "Nothing
+    // to review" empty state from that. Without a separate loading flag the
+    // console told an admin the moderation queue was clear before it had
+    // finished asking.
+    const [reportsLoading, setReportsLoading] = useState(true)
 
     const { user } = useAuth()
     const socket = useSocket(user)
@@ -35,11 +42,14 @@ export default function AdminPage() {
     }, [socket])
 
     const loadReports = useCallback(async () => {
+        setReportsLoading(true)
         try {
             const { data } = await adminApi.getPendingReports()
             if (data.success) setReports(data.reports || [])
         } catch {
             // The badge is not worth a toast on every screen change.
+        } finally {
+            setReportsLoading(false)
         }
     }, [])
 
@@ -105,7 +115,12 @@ export default function AdminPage() {
                     shell and flashes a full-page spinner on every tab click. */}
                 <div className="ac-content">
                     <Suspense fallback={<ScreenFallback />}>
-                        <Outlet context={{ pulse, reports, reloadReports: loadReports }} />
+                        <Outlet context={{
+                            pulse,
+                            reports,
+                            reportsLoading,
+                            reloadReports: loadReports,
+                        }} />
                     </Suspense>
                 </div>
             </main>
@@ -126,11 +141,23 @@ function resolveTitle(pathname) {
     return item?.label || 'Admin'
 }
 
+/*
+ * Shown while a screen's chunk downloads. It was two anonymous bars, 96px and
+ * 320px, used for all eight screens, none of which is shaped like that. Five of
+ * the eight are a panel with a toolbar over a table, so that is what this
+ * draws, using the same components those screens use.
+ */
 function ScreenFallback() {
     return (
-        <div className="ac-stack">
-            <div className="skeleton" style={{ height: 96, borderRadius: 14 }} />
-            <div className="skeleton" style={{ height: 320, borderRadius: 14, opacity: 0.6 }} />
-        </div>
+        <section className="ac-panel">
+            <div className="ac-toolbar">
+                <div>
+                    <Skeleton h={14} w={120} radius="var(--r-xs)" />
+                    <Skeleton h={12} w={72} radius="var(--r-xs)" style={{ marginTop: 6 }} />
+                </div>
+                <Skeleton h={36} w={240} radius="var(--r-lg)" />
+            </div>
+            <TableRowsSkeleton columns={5} />
+        </section>
     )
 }
