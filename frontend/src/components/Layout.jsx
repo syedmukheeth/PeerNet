@@ -14,7 +14,8 @@ import MobileHeader from './shell/MobileHeader'
 import MobileNav from './shell/MobileNav'
 import SiteFooter from './shell/SiteFooter'
 import ErrorBoundary from './ErrorBoundary'
-import { HiHeart, HiChatAlt2, HiUserAdd } from './ui/icons'
+import { Icon } from './ui/icons'
+import { notificationCopy } from '../utils/notificationCopy'
 import { useQueryClient } from '@tanstack/react-query'
 import avatarFallback from './ui/avatarFallback'
 
@@ -105,19 +106,17 @@ export default function Layout() {
     }, [location.pathname, syncAllCounts])
 
     const showNotifToast = useCallback((notif) => {
-        // Icons, not emoji. The emoji rendered as whatever glyph the operating
-        // system happened to ship, which is why the badge looked like a
-        // different app on Windows than on iOS.
-        const TypeIcon = {
-            like: HiHeart, comment: HiChatAlt2, follow: HiUserAdd,
-            message: HiChatAlt2, reply: HiChatAlt2
-        }[notif.type] || HiChatAlt2
-        const typeText = {
-            like: notif.entityModel === 'Comment' ? 'liked your comment' : 'liked your post',
-            comment: 'commented on your post',
-            reply: 'replied to your comment',
-            follow: 'started following you'
-        }
+        /*
+         * The same description the notifications list uses. This carried its
+         * own map, which covered four types and disagreed with the page on what
+         * a like on a comment says. A new type had to be added in two places
+         * and was invariably added to one.
+         *
+         * Icons, not emoji: an emoji rendered as whatever glyph the operating
+         * system happened to ship, which is why the badge looked like a
+         * different app on Windows than on iOS.
+         */
+        const copy = notificationCopy(notif)
         const targetUrl = notif.targetUrl || '/notifications';
 
         toast((t) => (
@@ -125,12 +124,12 @@ export default function Layout() {
                 <div className="relative flex-shrink-0">
                     <img src={notif.sender?.avatarUrl || avatarFallback(notif.sender?.username || 'User')} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
                     <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-accent text-accent-fg flex items-center justify-center border-2 border-surface">
-                        <TypeIcon size={10} />
+                        <Icon name={copy.icon} size={10} />
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="m-0 text-[13.5px] font-bold text-primary">
-                        {notif.sender?.username} <span className="font-medium text-secondary">{typeText[notif.type]}</span>
+                        {notif.sender?.username} <span className="font-medium text-secondary">{copy.text}</span>
                     </p>
                 </div>
             </div>
@@ -150,7 +149,7 @@ export default function Layout() {
                 <div className="relative flex-shrink-0">
                     <img src={msg.sender?.avatarUrl || avatarFallback(senderName)} className="w-10 h-10 rounded-full object-cover border border-border-md" alt="" />
                     <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-accent text-accent-fg flex items-center justify-center border-2 border-surface">
-                        <HiChatAlt2 size={10} />
+                        <Icon name="chat" size={10} />
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">

@@ -47,6 +47,15 @@ const TYPES = {
         color: 'var(--notif-comment)',
         text: () => 'sent you a message.',
     },
+    // The emoji travels in `message`, so the row can say which reaction it was
+    // rather than just that one happened.
+    reaction: {
+        icon: 'heart',
+        color: 'var(--notif-like)',
+        text: (n) => (n.message
+            ? `reacted ${n.message} to your message.`
+            : 'reacted to your message.'),
+    },
     system_warning: {
         icon: 'alert-circle',
         color: 'var(--warning)',

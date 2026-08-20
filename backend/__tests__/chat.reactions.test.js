@@ -17,6 +17,8 @@ const User = require('../src/modules/user/User');
 const Conversation = require('../src/modules/chat/Conversation');
 const Message = require('../src/modules/chat/Message');
 const chatService = require('../src/modules/chat/chat.service');
+const notificationService = require('../src/modules/notification/notification.service');
+const Notification = require('../src/modules/notification/Notification');
 
 const makeUser = (username) => User.create({
     username,
@@ -97,6 +99,72 @@ describe('chat.service reactions', () => {
         await expect(
             chatService.reactToMessage(message._id, mallory._id, '🔥'),
         ).rejects.toThrow(/Access denied/);
+    });
+});
+
+describe('chat.service reaction notifications', () => {
+    let alice;
+    let bob;
+    let convo;
+    let message;
+
+    beforeEach(async () => {
+        alice = await makeUser('alice');
+        bob = await makeUser('bob');
+        convo = await Conversation.create({ participants: [alice._id, bob._id] });
+        // Alice wrote it, so Bob reacting is what should notify her.
+        message = await Message.create({
+            conversation: convo._id,
+            sender: alice._id,
+            body: 'hello',
+        });
+    });
+
+    it('tells the author when someone reacts, and which emoji it was', async () => {
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+
+        const notifs = await Notification.find({ recipient: alice._id, type: 'reaction' });
+        expect(notifs).toHaveLength(1);
+        expect(notifs[0].message).toBe('🔥');
+        expect(notifs[0].entityModel).toBe('Message');
+    });
+
+    it('withdraws the notification when the reaction is taken back', async () => {
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+
+        expect(await Notification.countDocuments({ recipient: alice._id, type: 'reaction' })).toBe(0);
+    });
+
+    it('does not notify you about your own reaction', async () => {
+        await chatService.reactToMessage(message._id, alice._id, '🔥');
+
+        expect(await Notification.countDocuments({ type: 'reaction' })).toBe(0);
+    });
+
+    // Mute has to mean the whole thread. Suppressing only the toast while still
+    // writing the row would put a muted conversation back on the notifications
+    // screen anyway.
+    it('stays silent when the author has muted the conversation', async () => {
+        await chatService.setConversationFlag(convo._id, alice._id, 'muted', true);
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+
+        expect(await Notification.countDocuments({ recipient: alice._id, type: 'reaction' })).toBe(0);
+    });
+
+    it('links back to the conversation the message is in', async () => {
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+
+        const { data } = await notificationService.getNotifications(alice._id, { limit: 10 });
+        const row = data.find((n) => n.type === 'reaction');
+
+        expect(row.targetUrl).toBe(`/messages/${convo._id.toString()}`);
+    });
+
+    afterEach(async () => {
+        await Promise.all(
+            Object.values(mongoose.connection.collections).map((c) => c.deleteMany({})),
+        );
     });
 });
 

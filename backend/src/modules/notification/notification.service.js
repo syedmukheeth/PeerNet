@@ -3,6 +3,7 @@
 const Notification = require('./Notification');
 const Post = require('../post/Post');
 const Comment = require('../comment/Comment');
+const Message = require('../chat/Message');
 const User = require('../user/User');
 const Follower = require('../user/Follower');
 const { getRedisOptional } = require('../../config/redis');
@@ -75,6 +76,12 @@ const formatNotification = (notif, hydratedEntity = null) => {
             const rawParentId = e ? e.post?.toString() : null;
             targetUrl = rawParentId ? `/posts/${rawParentId}?commentId=${obj.entityId}` : '/';
         }
+        } else if (obj.entityModel === 'Message') {
+            // A reacted-to direct message. There is no thumbnail to show - the
+            // conversation is private and a preview does not belong in a
+            // notification list - so this only needs to lead back to the thread.
+            targetId = (e.conversation?._id || e.conversation)?.toString() || null;
+            targetUrl = targetId ? `/messages/${targetId}` : '/messages';
         }
     }
 
@@ -142,6 +149,10 @@ const createNotification = async (data) => {
         else if (data.entityModel === 'Comment') hydratedEntity = await Comment.findById(data.entityId)
             .populate({ path: 'post', strictPopulate: false })
             .lean();
+        // A reacted-to message only needs to know which thread it is in, so the
+        // notification can link back to it. Its body stays out of this.
+        else if (data.entityModel === 'Message') hydratedEntity = await Message
+            .findById(data.entityId).select('conversation').lean();
 
         const sender = await User.findById(data.sender).select('username avatarUrl isVerified').lean();
         
@@ -231,7 +242,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const hasMore = notifications.length > limit;
 
     // Stage 2: Entity ID collection
-    const grouped = { Post: [], Comment: [] };
+    const grouped = { Post: [], Comment: [], Message: [] };
     rawResults.forEach(n => {
         if (n.entityId && n.entityModel && grouped[n.entityModel]) {
             grouped[n.entityModel].push(n.entityId);
@@ -240,11 +251,14 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
 
     // Stage 3: Bulk Manual Hydration
     // For comments, also eagerly load the parent post so thumbnail can be extracted
-    const [posts, comments] = await Promise.all([
+    const [posts, comments, dmMessages] = await Promise.all([
         Post.find({ _id: { $in: grouped.Post } }).lean(),
         Comment.find({ _id: { $in: grouped.Comment } })
             .populate({ path: 'post', select: 'mediaUrl mediaType author backgroundColor caption', strictPopulate: false })
-            .lean()
+            .lean(),
+        // Only the conversation id: a reaction notification links back to the
+        // thread and never quotes what was said in it.
+        Message.find({ _id: { $in: grouped.Message } }).select('conversation').lean()
     ]);
 
     // Helper to check if a field is an unpopulated ObjectId
@@ -273,6 +287,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const entitiesMap = new Map();
     posts.forEach(p => entitiesMap.set(p._id.toString(), p));
     comments.forEach(c => entitiesMap.set(c._id.toString(), c));
+    dmMessages.forEach(m => entitiesMap.set(m._id.toString(), m));
 
     // Stage 4: Formatted Stitching
     const formattedResults = rawResults.map(n => {

@@ -6,6 +6,7 @@ const ApiError = require('../../utils/ApiError');
 const { getRedisOptional } = require('../../config/redis');
 const { deleteFromCloudinary } = require('../../utils/cloudinary.utils');
 const logger = require('../../config/logger');
+const notificationService = require('../notification/notification.service');
 
 const EDIT_WINDOW = 15 * 60 * 1000; // 15 minutes in milliseconds
 
@@ -148,6 +149,19 @@ const getUserConversations = async (userId, { limit = CONVERSATION_PAGE_SIZE, ar
  * The schema always had somewhere to put them.
  */
 const CONVERSATION_FLAGS = ['pinned', 'muted', 'archived'];
+
+/**
+ * Has this participant muted the thread?
+ *
+ * Mute has to mean the whole conversation. Suppressing only the in-app toast
+ * while still writing a notification row would put the muted thread straight
+ * back on the notifications screen.
+ */
+const isMutedFor = async (conversationId, userId) => {
+    const conversation = await Conversation.findById(conversationId).select('metadata.muted').lean();
+    return (conversation?.metadata?.muted || [])
+        .some((u) => u.toString() === userId.toString());
+};
 
 const setConversationFlag = async (conversationId, userId, flag, value) => {
     if (!CONVERSATION_FLAGS.includes(flag)) {
@@ -315,10 +329,40 @@ const reactToMessage = async (messageId, userId, emoji) => {
         r.emoji === emoji && r.user.toString() === userId.toString()
     );
 
-    if (existingIndex > -1) {
+    const removing = existingIndex > -1;
+
+    if (removing) {
         message.reactions.splice(existingIndex, 1);
     } else {
         message.reactions.push({ emoji, user: userId });
+    }
+
+    /*
+     * Tell the author someone reacted.
+     *
+     * Reacting to a message told nobody anything: the reaction landed silently
+     * and the person who wrote the message only found out by scrolling back to
+     * it. Taking the reaction back withdraws the notification, the same way
+     * unliking a post does.
+     *
+     * Not for your own message, and not into a conversation the author has
+     * muted: muting a thread has to mean the whole thread, not just the toast.
+     */
+    const authorId = (message.sender?._id || message.sender).toString();
+    if (authorId !== userId.toString()) {
+        const filter = {
+            recipient: authorId,
+            sender: userId,
+            entityId: message._id,
+            entityModel: 'Message',
+            type: 'reaction',
+        };
+
+        if (removing) {
+            await notificationService.removeNotification(filter);
+        } else if (!(await isMutedFor(message.conversation, authorId))) {
+            await notificationService.createNotification({ ...filter, message: emoji });
+        }
     }
 
     await message.save();

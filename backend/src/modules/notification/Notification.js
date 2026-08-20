@@ -12,7 +12,10 @@ const notificationSchema = new mongoose.Schema(
         sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         type: {
             type: String,
-            enum: ['like', 'comment', 'reply', 'follow', 'mention', 'message', 'system_warning'],
+            // 'reaction' is a reaction on a direct message. It is distinct from
+            // 'like', which is a like on a post or a comment: they carry
+            // different entities and read differently in the list.
+            enum: ['like', 'comment', 'reply', 'follow', 'mention', 'message', 'reaction', 'system_warning'],
             required: true,
         },
         entityId: { type: mongoose.Schema.Types.ObjectId, refPath: 'entityModel', default: null },
