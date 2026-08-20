@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { IoCheckmark, IoCheckmarkDone, HiDotsVertical, HiPaperClip, HiEmojiHappy, HiReply, HiPencil, HiTrash, HiSearch, HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiExclamationCircle } from '../components/ui/icons'
+import { IoCheckmark, IoCheckmarkDone, HiDotsVertical, HiPaperClip, HiEmojiHappy, HiReply, HiPencil, HiTrash, HiSearch, HiX, HiClock, HiMail, HiArrowRight, HiArrowLeft, HiExclamationCircle, HiPlus } from '../components/ui/icons'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import { useAuth } from '../context/AuthContext'
@@ -129,22 +129,52 @@ const dayLabel = (value) => {
     return date.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
-const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQuery, isNewGroup, pos = 'single' }) => {
-    const reactions = useMemo(() => {
-        const raw = m.reactions || []
-        const map = {}
-        raw.forEach(r => {
-            if (!map[r.emoji]) {
-                map[r.emoji] = { emoji: r.emoji, count: 0, me: false }
-            }
-            map[r.emoji].count += (r.count || 1)
-            if (r.me) map[r.emoji].me = true
-        })
-        return Object.values(map)
-    }, [m.reactions])
+/*
+ * "alice and bob reacted with a heart". The chip carried no explanation of
+ * itself at all, so a count was the only thing you could learn from it.
+ */
+/*
+ * What a quoted message reads as. A photo used to quote as the bare word
+ * "Media", which is neither what it is nor what it says.
+ */
+const quotedText = (msg) => {
+    if (!msg) return 'Message unavailable'
+    if (msg.body) return msg.body
+    if (msg.mediaType === 'video') return 'Video'
+    if (msg.mediaType === 'image') return 'Photo'
+    if (msg.mediaType === 'audio') return 'Audio message'
+    return 'Attachment'
+}
 
-    // Only the first three were ever rendered; the other three were dead.
-    const quickEmojis = ['❤️', '😂', '🔥']
+const reactionTitle = (r) => {
+    const names = r.users || []
+    const others = r.count - names.length
+
+    if (names.length === 0) {
+        return `${r.count} ${r.count === 1 ? 'reaction' : 'reactions'} ${r.emoji}`
+    }
+
+    const listed = names.length === 1
+        ? names[0]
+        : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+
+    const suffix = others > 0 ? ` and ${others} more` : ''
+    return `${listed}${suffix} reacted ${r.emoji}`
+}
+
+const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, onJumpToMessage, pickerTheme, searchQuery, isNewGroup, pos = 'single' }) => {
+    /*
+     * The server groups these now, so a reaction arrives as
+     * { emoji, count, me, users }. This used to aggregate raw rows here and
+     * read `r.me`, which the API never sent, so your own reaction chip never
+     * highlighted and there was no way to see who had reacted.
+     */
+    const reactions = m.reactions || []
+
+    // Six now, all rendered. It held six and sliced to three, so half the row
+    // was dead. The last is a picker for everything else.
+    const quickEmojis = ['❤️', '😂', '🔥', '👍', '😢', '😮']
+    const [showReactionPicker, setShowReactionPicker] = useState(false)
 
     const hasMedia = Boolean(m.mediaUrl) && m.mediaType && m.mediaType !== 'none'
 
@@ -165,14 +195,28 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
             /* pos was computed for every message and then never applied, so the
                eight grouping rules in messages.css were dead and consecutive
                messages from one person all got identical corners. */
+            data-message-id={m._id}
             className={`zn-row${isSelf ? ' self' : ' peer'} pos-${pos}${isNewGroup ? ' new-group' : ''}${reactions.length > 0 ? ' has-reactions' : ''}`}
         >
             <div className="zn-bubble-container">
                 {m.replyTo && (
-                    <div className="zn-bubble-reply">
-                        <div className="zn-reply-label">Replying to</div>
-                        <div className="zn-reply-text">{m.replyTo.body || 'Media'}</div>
-                    </div>
+                    /*
+                     * A quote you can act on. It said only "Replying to" over
+                     * the body text, with no idea whose message it was, the
+                     * word "Media" for anything without a body, and no way to
+                     * reach the message being quoted.
+                     */
+                    <button
+                        type="button"
+                        className="zn-bubble-reply"
+                        onClick={() => onJumpToMessage?.(m.replyTo._id)}
+                        aria-label={`Go to the message from ${m.replyTo.sender?.username || 'them'}`}
+                    >
+                        <span className="zn-reply-label">
+                            {m.replyTo.sender?.username || 'Message'}
+                        </span>
+                        <span className="zn-reply-text">{quotedText(m.replyTo)}</span>
+                    </button>
                 )}
 
                 <div className={`zn-bubble${m.isOptimistic ? ' optimistic' : ''}${hasMedia ? ' has-media' : ''}${!m.body ? ' media-only' : ''}`}>
@@ -230,8 +274,12 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                                 {reactions.map(r => (
                                     <button
                                         key={r.emoji}
+                                        type="button"
                                         className={`zn-reaction-chip${r.me ? ' active' : ''}`}
                                         onClick={() => onReact(r.emoji)}
+                                        title={reactionTitle(r)}
+                                        aria-label={reactionTitle(r)}
+                                        aria-pressed={Boolean(r.me)}
                                     >
                                         <span>{r.emoji}</span>
                                         {r.count > 1 && <span className="zn-reaction-count">{r.count}</span>}
@@ -274,8 +322,52 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                                     {e}
                                 </button>
                             ))}
+                            {/* Anything outside the six. The vocabulary used to
+                                stop at three with no way past it. */}
+                            <button
+                                type="button"
+                                className="zn-emoji-btn zn-emoji-more"
+                                onClick={() => setShowReactionPicker(v => !v)}
+                                aria-label="More reactions"
+                                aria-expanded={showReactionPicker}
+                            >
+                                <HiPlus size={14} />
+                            </button>
                         </div>
                     </div>
+
+                    {/* The full set, reusing the same lazy picker the composer
+                        loads, so this costs no extra bundle. */}
+                    <AnimatePresence>
+                        {showReactionPicker && (
+                            <>
+                                <div
+                                    className="zn-reaction-picker-backdrop"
+                                    onClick={() => setShowReactionPicker(false)}
+                                />
+                                <motion.div
+                                    className="zn-reaction-picker"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                >
+                                    <Suspense fallback={<div className="zn-emoji-loading">Loading emojis...</div>}>
+                                        <EmojiPicker
+                                            onEmojiClick={(data) => {
+                                                onReact(data.emoji)
+                                                setShowReactionPicker(false)
+                                            }}
+                                            theme={pickerTheme}
+                                            width={320}
+                                            height={360}
+                                            searchDisabled={false}
+                                            previewConfig={{ showPreview: false }}
+                                        />
+                                    </Suspense>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
@@ -619,6 +711,26 @@ export default function Messages() {
         }, 2000)
     }, [socket, convoId])
 
+    /*
+     * Scroll a quoted message into view and flash it.
+     *
+     * A reply quote was previously inert, so following a conversation back to
+     * what it answered meant scrolling by hand. If the message is old enough to
+     * be outside the loaded window there is nothing to jump to, and saying so
+     * is better than doing nothing.
+     */
+    const jumpToMessage = useCallback((messageId) => {
+        const el = viewportRef.current?.querySelector(`[data-message-id="${messageId}"]`)
+        if (!el) {
+            toast('That message is further back than this thread has loaded')
+            return
+        }
+
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.classList.add('zn-row--flash')
+        setTimeout(() => el.classList.remove('zn-row--flash'), 1400)
+    }, [])
+
     const handleSend = async () => {
         // A reply with no text used to pass this guard and post an empty body.
         if (!inputText.trim()) return
@@ -627,13 +739,16 @@ export default function Messages() {
         typingSentAt.current = 0
         socket?.emit('typing_stop', convoId)
         const replyId = replyingTo?._id
+        // Kept so the optimistic bubble can draw a real quote rather than an
+        // empty one, since setReplyingTo(null) is about to clear it.
+        const replySnapshot = replyingTo
         setInputText('')
         // Clear the stored draft too. It was left behind, so the sent text
         // reappeared in the composer the next time the conversation was opened.
         setDraft('')
         setReplyingTo(null)
         try {
-            await sendMutation.mutateAsync({ text: body, replyToId: replyId })
+            await sendMutation.mutateAsync({ text: body, replyToId: replyId, replyTo: replySnapshot })
             scrollToBottom()
         } catch {
             toast.error('Failed to send message')
@@ -1034,6 +1149,8 @@ export default function Messages() {
                                                         ),
                                                     })}
                                                     onReact={(emoji) => onReact(item.value._id, emoji)}
+                                                    onJumpToMessage={jumpToMessage}
+                                                    pickerTheme={isDark ? 'dark' : 'light'}
                                                 />
                                             )
                                         ))
@@ -1116,7 +1233,7 @@ export default function Messages() {
                                             <div className="zn-reply-bar" />
                                             <div className="zn-reply-content">
                                                 <p className="zn-reply-name">Replying to {replyingTo.sender?.username || 'user'}</p>
-                                                <p className="zn-reply-body">{replyingTo.body}</p>
+                                                <p className="zn-reply-body">{quotedText(replyingTo)}</p>
                                             </div>
                                             <button onClick={() => setReplyingTo(null)} className="zn-icon-btn-sm" aria-label="Cancel reply">
                                                 <HiX size={16} />

@@ -77,14 +77,18 @@ export const useSendMessage = (convoId) => {
         // posts the multipart body the API actually expects.
         mutationFn: ({ text, replyToId }) =>
             chatApi.post(`/${convoId}/messages`, { body: text, replyTo: replyToId }),
-        onMutate: async ({ text, replyToId }) => {
+        // `replyTo` is the whole quoted message, not just its id: the optimistic
+        // copy used to carry { _id } alone, so a reply you had just sent showed
+        // an empty quote until the refetch replaced it.
+        onMutate: async ({ text, replyToId, replyTo }) => {
             await queryClient.cancelQueries({ queryKey: ['messages', convoId] })
             const previousMessages = queryClient.getQueryData(['messages', convoId])
 
             const optimisticMsg = {
                 _id: 'temp-' + Date.now(),
                 body: text,
-                replyTo: replyToId ? { _id: replyToId } : null,
+                replyTo: replyTo || (replyToId ? { _id: replyToId } : null),
+                reactions: [],
                 sender: 'me',
                 createdAt: new Date().toISOString(),
                 isOptimistic: true,

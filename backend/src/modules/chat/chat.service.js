@@ -9,6 +9,52 @@ const logger = require('../../config/logger');
 
 const EDIT_WINDOW = 15 * 60 * 1000; // 15 minutes in milliseconds
 
+// What a reply quote needs in order to render: who wrote it, what it said, and
+// enough about any attachment to describe it. `sender` alone came back as a
+// bare id, so a quote could not name the person it was quoting.
+const REPLY_FIELDS = 'body sender mediaType mediaUrl';
+const REPLY_POPULATE = {
+    path: 'replyTo',
+    select: REPLY_FIELDS,
+    populate: { path: 'sender', select: 'username' },
+};
+
+/**
+ * Shape a message for the client.
+ *
+ * Reactions are stored one row per person per emoji, which is the right shape
+ * to write but the wrong one to render: the client was left to aggregate them
+ * and had no way to know whether one of them was yours. It guessed with
+ * `r.me`, a field the API never sent, so your own reaction chip never lit up.
+ *
+ * This groups them by emoji and answers the three questions a bubble actually
+ * asks: which emoji, how many, and is one of them mine.
+ */
+const shapeMessage = (message, userId) => {
+    const obj = message.toObject ? message.toObject() : { ...message };
+    const me = userId?.toString();
+
+    const byEmoji = new Map();
+    (obj.reactions || []).forEach((r) => {
+        if (!r?.emoji) return;
+        const reactor = r.user && typeof r.user === 'object' ? r.user : null;
+        const reactorId = (reactor?._id || r.user)?.toString();
+
+        if (!byEmoji.has(r.emoji)) {
+            byEmoji.set(r.emoji, { emoji: r.emoji, count: 0, me: false, users: [] });
+        }
+        const group = byEmoji.get(r.emoji);
+        group.count += 1;
+        if (reactorId === me) group.me = true;
+        // Names for the "who reacted" tooltip. Capped, because a popular
+        // message should not ship a hundred usernames per emoji.
+        if (reactor?.username && group.users.length < 8) group.users.push(reactor.username);
+    });
+
+    obj.reactions = [...byEmoji.values()];
+    return obj;
+};
+
 /**
  * Load a conversation and assert the caller is one of its participants.
  * Every read and every mutation has to go through this. Skipping it on any
@@ -157,15 +203,20 @@ const getMessages = async (conversationId, userId, { limit = 30, cursor = null }
 
     const messages = await Message.find(query)
         .populate('sender', 'username avatarUrl')
-        .populate('replyTo', 'body sender') // Support for replies
+        .populate(REPLY_POPULATE)
+        .populate('reactions.user', 'username')
         .sort({ createdAt: -1 })
         .limit(limit + 1);
 
     const hasMore = messages.length > limit;
     const results = hasMore ? messages.slice(0, limit) : messages;
     const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
-    
-    return { data: results.reverse(), nextCursor, hasMore };
+
+    return {
+        data: results.reverse().map((m) => shapeMessage(m, userId)),
+        nextCursor,
+        hasMore,
+    };
 };
 
 /**
@@ -216,9 +267,11 @@ const saveMessage = async (conversationId, senderId, { body, mediaUrl, mediaType
         .populate('participants', 'username avatarUrl');
 
     await message.populate('sender', '_id username avatarUrl');
-    if (message.replyTo) await message.populate('replyTo', 'body sender');
+    // The quote needs the author's name and the attachment kind, not just a
+    // body string and a bare id.
+    if (message.replyTo) await message.populate(REPLY_POPULATE);
 
-    return { message, conversation: updated };
+    return { message: shapeMessage(message, senderId), conversation: updated };
 };
 
 /**
@@ -269,7 +322,14 @@ const reactToMessage = async (messageId, userId, emoji) => {
     }
 
     await message.save();
-    return message.populate('sender', '_id username avatarUrl');
+    await message.populate([
+        { path: 'sender', select: '_id username avatarUrl' },
+        { path: 'reactions.user', select: 'username' },
+        REPLY_POPULATE,
+    ]);
+    // Shaped for the person who reacted. Everyone else re-reads the thread off
+    // the message_reacted event, which resolves `me` from their own side.
+    return shapeMessage(message, userId);
 };
 
 const updateMessage = async (messageId, userId, body) => {
