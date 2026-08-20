@@ -4,8 +4,11 @@ import { Link } from 'react-router'
 import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
-import { HiHeart, HiChatAlt2, HiUserAdd, HiBadgeCheck, HiAtSymbol, HiRefresh } from '../components/ui/icons'
+import { HiHeart, HiBadgeCheck, HiRefresh, Icon } from '../components/ui/icons'
 import avatarFallback from '../components/ui/avatarFallback'
+import { notificationCopy, isSystemNotification } from '../utils/notificationCopy'
+import NotificationThumb from '../components/NotificationThumb'
+import Skeleton from '../components/ui/Skeleton'
 
 // Compact relative time, e.g. "3h", "2d"
 const formatTime = (date) => {
@@ -19,15 +22,83 @@ const formatTime = (date) => {
     return `${Math.floor(diff / 604800)}w`;
 };
 
-const typeConfig = {
-    // Colours come from tokens.css so they follow the theme. These were
-    // hard-coded hex literals, the one place in the app that bypassed the
-    // token system.
-    like: { icon: HiHeart, color: 'var(--notif-like)', text: 'liked your post.' },
-    comment: { icon: HiChatAlt2, color: 'var(--notif-comment)', text: 'commented on your post.' },
-    reply: { icon: HiChatAlt2, color: 'var(--notif-comment)', text: 'replied to your comment.' },
-    follow: { icon: HiUserAdd, color: 'var(--notif-follow)', text: 'started following you.' },
-    mention: { icon: HiAtSymbol, color: '#FF9500', text: 'mentioned you in a post.' },
+// The copy and icon for every type now live in utils/notificationCopy, shared
+// with the toast in Layout.jsx so the two cannot describe the same event
+// differently.
+
+// A comment quoted in a row is clamped: bodies run to 300 chars (Comment.js)
+// and an untruncated one pushed the timestamp off the row.
+const COMMENT_CLAMP = 90
+
+const clamp = (text) =>
+    text.length > COMMENT_CLAMP ? `${text.slice(0, COMMENT_CLAMP).trimEnd()}...` : text
+
+/*
+ * The sticky header, shared by the loading branch and the loaded one.
+ *
+ * The loading state used to draw its own approximation: a static 32px bar at
+ * pt-10 instead of this 64px sticky bar. So the entire page jumped vertically
+ * the moment notifications arrived.
+ */
+function NotificationsHeader({ onRefresh }) {
+    return (
+        <div className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-border-sm">
+            <div className="l-main-col flex items-center justify-between px-5 h-16">
+                <h1 className="text-2xl font-black text-primary tracking-tighter">Notifications</h1>
+                {/* Was a dead control with no onClick and no label. Now it
+                    does the one thing this header can usefully offer. */}
+                <button
+                    className="p-2 hover:bg-surface-hover rounded-full transition-all active:scale-90 disabled:opacity-40"
+                    aria-label="Refresh notifications"
+                    title="Refresh"
+                    onClick={onRefresh}
+                    disabled={!onRefresh}
+                >
+                    <HiRefresh size={22} className="text-primary" />
+                </button>
+            </div>
+        </div>
+    )
+}
+
+/*
+ * The loading placeholder for one row.
+ *
+ * It renders `.notif-row` itself rather than an approximation of it, so the
+ * 48px avatar, the 14px gap, the 12/16 padding and the 8px side margin all come
+ * from the same CSS the real row uses and cannot drift from it. The previous
+ * version was a bare flex div at gap-3 with a flat 80x32 block on the right,
+ * where the real trailing element is a 44px square for every like and comment.
+ */
+function NotificationRowSkeleton({ trailing = 'thumb' }) {
+    return (
+        <li className="notif-row">
+            <div className="notif-avatar-wrap">
+                <Skeleton w={48} h={48} circle />
+            </div>
+
+            <div className="notif-content">
+                <div className="notif-text-wrap">
+                    <Skeleton h={13} w="72%" radius="var(--r-xs)" />
+                    <Skeleton h={11} w="34%" radius="var(--r-xs)" style={{ marginTop: 7 }} />
+                </div>
+            </div>
+
+            <div className="shrink-0 ml-3 notif-trailing">
+                {trailing === 'button'
+                    ? <Skeleton w={86} h={32} radius="var(--r-sm)" />
+                    : <Skeleton w={44} h={44} radius="var(--r-xs)" />}
+            </div>
+        </li>
+    )
+}
+
+function SectionHeaderSkeleton() {
+    return (
+        <div className="px-4 pt-6 pb-2">
+            <Skeleton h={13} w={64} radius="var(--r-xs)" />
+        </div>
+    )
 }
 
 function SectionHeader({ label }) {
@@ -39,7 +110,14 @@ function SectionHeader({ label }) {
 }
 
 function NotifRow({ n }) {
-    const cfg = typeConfig[n.type] || typeConfig.like
+    const cfg = notificationCopy(n)
+    const isSystem = isSystemNotification(n)
+    // Likes on one post arrive grouped: `count` is the true total and `senders`
+    // holds the first few for the avatar stack.
+    const othersCount = Math.max(0, (n.count || 1) - 1)
+    // Two avatars is the whole stack; a third at 44px is a smudge, and the
+    // count already carries the scale.
+    const stack = (n.senders || []).slice(0, 2)
     const avatar = n.sender?.avatarUrl || avatarFallback(n.sender?.username)
     const [isFollowed, setIsFollowed] = useState(n.sender?.isFollowing || false)
     const [actionLoading, setActionLoading] = useState(false)
@@ -66,8 +144,9 @@ function NotifRow({ n }) {
 
     const navTarget = n.targetUrl || (n.type === 'follow' ? `/profile/${n.sender?._id}` : `/posts/${n.targetId || n.entityId?._id || n.entityId}`)
 
+    const verb = n.type === 'reply' ? 'replied' : 'commented'
     const actionText = (n.type === 'comment' || n.type === 'reply') && n.commentBody
-        ? `commented: "${n.commentBody}"`
+        ? `${verb}: "${clamp(n.commentBody)}"`
         : cfg.text
 
     /*
@@ -82,25 +161,55 @@ function NotifRow({ n }) {
      */
     return (
         <li className={`notif-row ${!n.isRead ? 'notif-unread' : ''}`}>
-            <Link
-                to={`/profile/${n.sender?._id}`}
-                className="notif-avatar-wrap"
-                aria-label={`${n.sender?.username || 'User'}'s profile`}
-            >
-                <img src={avatar} alt="" className="notif-avatar" />
-                {!n.isRead && <div className="notif-unread-dot" />}
-            </Link>
+            {stack.length > 1 ? (
+                // A grouped row shows who, not just how many.
+                <div className="notif-avatar-wrap notif-avatar-stack" aria-hidden="true">
+                    {stack.map((s, i) => (
+                        <img
+                            key={s._id || i}
+                            src={s.avatarUrl || avatarFallback(s.username)}
+                            alt=""
+                            className="notif-avatar"
+                            style={{ zIndex: stack.length - i }}
+                        />
+                    ))}
+                    {!n.isRead && <div className="notif-unread-dot" />}
+                </div>
+            ) : (
+                <Link
+                    to={`/profile/${n.sender?._id}`}
+                    className="notif-avatar-wrap"
+                    aria-label={`${n.sender?.username || 'User'}'s profile`}
+                >
+                    <img src={avatar} alt="" className="notif-avatar" />
+                    {!n.isRead && <div className="notif-unread-dot" />}
+                </Link>
+            )}
 
             <div className="notif-content">
                 <div className="notif-text-wrap">
-                    <Link to={navTarget} className="notif-main-link">
-                        <span className="notif-username">
-                            {n.sender?.username || 'User'}
-                            {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-0.5 text-accent align-middle" size={14} />}
-                        </span>
-                        {' '}
+                    {isSystem ? (
+                        // A moderation warning is the message itself, not
+                        // somebody acting on your content, so it is not
+                        // prefixed with a username and does not link anywhere.
                         <span className="notif-action-text">{actionText}</span>
-                    </Link>
+                    ) : (
+                        <Link to={navTarget} className="notif-main-link">
+                            <span className="notif-username">
+                                {n.sender?.username || 'User'}
+                                {n.sender?.isVerified && <HiBadgeCheck className="inline-block ml-0.5 text-accent align-middle" size={14} />}
+                            </span>
+                            {othersCount > 0 && (
+                                <span className="notif-action-text">
+                                    {' and '}
+                                    {othersCount.toLocaleString()}
+                                    {othersCount === 1 ? ' other' : ' others'}
+                                </span>
+                            )}
+                            {' '}
+                            <span className="notif-action-text">{actionText}</span>
+                        </Link>
+                    )}
                     <span className="notif-time">{formatTime(n.createdAt)}</span>
                 </div>
             </div>
@@ -116,13 +225,11 @@ function NotifRow({ n }) {
                     >
                         {isFollowed ? 'Following' : 'Follow'}
                     </button>
-                ) : n.thumbnail ? (
-                    <div className="notif-thumbnail-wrap">
-                        <img src={n.thumbnail} alt="" className="notif-thumbnail" />
-                    </div>
+                ) : n.thumbnail || n.thumbnailType === 'text' ? (
+                    <NotificationThumb notification={n} />
                 ) : (
                     <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-2 border border-border-sm">
-                        <cfg.icon size={18} style={{ color: cfg.color }} />
+                        <Icon name={cfg.icon} size={18} style={{ color: cfg.color }} />
                     </div>
                 )}
             </div>
@@ -136,9 +243,17 @@ export default function Notifications() {
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
-    // Held in a ref, not state: the paging cursor must not re-create loadNotifs,
-    // or the mount effect would refetch page 0 on every page load.
-    const skipRef = useRef(0)
+    /*
+     * The endpoint is cursor-paginated: parsePagination (utils/pagination.utils)
+     * reads `limit` and `cursor` and has never read `skip`. This page sent
+     * `skip`, so every "load more" silently re-requested page one and appended
+     * a second copy of it. The API returns `nextCursor` and `hasMore` and both
+     * were being discarded.
+     *
+     * Held in a ref, not state, so advancing the cursor does not re-create
+     * loadNotifs and re-trigger the mount effect.
+     */
+    const cursorRef = useRef(null)
     const LIMIT = 50
     const socket = useSocket(user)
 
@@ -147,23 +262,32 @@ export default function Notifications() {
         else setLoading(true)
 
         try {
-            const currentSkip = isMore ? skipRef.current + LIMIT : 0
-            const { data } = await api.get(`/notifications?limit=${LIMIT}&skip=${currentSkip}`)
+            const cursor = isMore ? cursorRef.current : null
+            const query = cursor
+                ? `/notifications?limit=${LIMIT}&cursor=${encodeURIComponent(cursor)}`
+                : `/notifications?limit=${LIMIT}`
+            const { data } = await api.get(query)
             const newNotifs = data.data || []
 
-            // Reset as well as clear. hasMore was only ever set to false, so
-            // once a session had paged to the end, a later reload of page 0
-            // could not page again.
-            setHasMore(newNotifs.length >= LIMIT)
-            skipRef.current = currentSkip
+            cursorRef.current = data.nextCursor || null
+            setHasMore(Boolean(data.hasMore && data.nextCursor))
 
             if (isMore) {
-                setNotifs(prev => [...prev, ...newNotifs])
+                // Guard against a duplicate anyway: a live socket insert can
+                // land in the list between the request and its response.
+                setNotifs(prev => {
+                    const seen = new Set(prev.map(n => n._id))
+                    return [...prev, ...newNotifs.filter(n => !seen.has(n._id))]
+                })
             } else {
                 setNotifs(newNotifs)
                 if (newNotifs.some(n => !n.isRead)) {
                     await api.patch('/notifications/read')
                     window.dispatchEvent(new CustomEvent('peernet:sync-counts'))
+                    // The server rows are read now, so clear the local flags
+                    // too. They were left set, so the unread dots stayed lit
+                    // until the next full refetch.
+                    setNotifs(prev => prev.map(n => (n.isRead ? n : { ...n, isRead: true })))
                 }
             }
         } catch (err) {
@@ -184,12 +308,23 @@ export default function Notifications() {
             setNotifs(prev => [notif, ...prev.filter(n => n._id !== notif._id)])
         }
 
+        // The server deletes the notification when someone unlikes a post or
+        // unfollows, and emits this. Nothing listened, so the row sat there
+        // claiming an event that had been undone until the next refetch.
+        const handleRemoval = ({ notificationId }) => {
+            setNotifs(prev => prev.filter(n => n._id !== notificationId))
+        }
+
         socket.on('new_notification', handleNotification)
-        // Named handler, because socket.off('new_notification') with no second
+        socket.on('notification_removed', handleRemoval)
+        // Named handlers, because socket.off('new_notification') with no second
         // argument removes every listener for the event, including the one
         // Layout registers for the global toast and the unread badge. Visiting
         // this page once and leaving used to kill both until a full reload.
-        return () => socket.off('new_notification', handleNotification)
+        return () => {
+            socket.off('new_notification', handleNotification)
+            socket.off('notification_removed', handleRemoval)
+        }
     }, [socket, user?._id])
 
     const categorized = useMemo(() => {
@@ -224,45 +359,22 @@ export default function Notifications() {
     }, [notifs])
 
     if (loading) return (
-        <div className="min-h-screen bg-bg">
-            <div className="l-main-col pt-10">
-                <header className="px-5 mb-8">
-                    <div className="skeleton h-8 w-40 rounded-lg" />
-                </header>
-                <div className="space-y-1 px-1">
-                    {[...Array(12)].map((_, i) => (
-                        <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent">
-                            <div className="skeleton size-12 rounded-full flex-shrink-0" />
-                            <div className="flex-1 space-y-2">
-                                <div className="skeleton h-3.5 w-[70%] rounded-full" />
-                                <div className="skeleton h-2.5 w-[30%] rounded-full" />
-                            </div>
-                            <div className="skeleton w-20 h-8 rounded-lg" />
-                        </div>
+        <div className="min-h-dvh pb-24 bg-bg">
+            <NotificationsHeader />
+            <div className="l-main-col">
+                <SectionHeaderSkeleton />
+                <ul className="notif-list" aria-busy="true">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <NotificationRowSkeleton key={i} trailing={i % 4 === 0 ? 'button' : 'thumb'} />
                     ))}
-                </div>
+                </ul>
             </div>
         </div>
     )
 
     return (
         <div className="min-h-dvh pb-24 bg-bg">
-            {/* Header - Sticky IG Style */}
-            <div className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-border-sm">
-                <div className="l-main-col flex items-center justify-between px-5 h-16">
-                    <h1 className="text-2xl font-black text-primary tracking-tighter">Notifications</h1>
-                    {/* Was a dead control with no onClick and no label. Now it
-                        does the one thing this header can usefully offer. */}
-                    <button
-                        className="p-2 hover:bg-surface-hover rounded-full transition-all active:scale-90"
-                        aria-label="Refresh notifications"
-                        title="Refresh"
-                        onClick={() => loadNotifs(false)}
-                    >
-                        <HiRefresh size={22} className="text-primary" />
-                    </button>
-                </div>
-            </div>
+            <NotificationsHeader onRefresh={() => loadNotifs(false)} />
 
             <div className="l-main-col">
                 {notifs.length === 0 ? (

@@ -24,9 +24,27 @@ const formatNotification = (notif, hydratedEntity = null) => {
     let targetId = null;
     const type = obj.type;
 
+    // The thumbnail's media kind travels with it. It was fetched and then
+    // dropped, so the client had no way to tell a video from an image and put
+    // video URLs into <img src>, and no way to render a text post at all.
+    let thumbnailType = null;
+    let thumbnailBackground = null;
+    let thumbnailText = null;
+
     if (e) {
         // High-fidelity extraction logic
         const getMedia = (target) => (target ? target.mediaUrl || null : null);
+
+        const describeMedia = (target) => {
+            if (!target) return;
+            thumbnailType = target.mediaType || null;
+            // A text post has no mediaUrl at all, so the client needs its
+            // ground and its words to draw the tile the way the feed does.
+            if (target.mediaType === 'text') {
+                thumbnailBackground = target.backgroundColor || null;
+                thumbnailText = target.caption || null;
+            }
+        };
 
         if (obj.entityModel === 'Post') {
             if (!e) {
@@ -35,6 +53,7 @@ const formatNotification = (notif, hydratedEntity = null) => {
                 targetUrl = `/posts/${targetId}`;
             } else {
                 thumbnail = getMedia(e);
+                describeMedia(e);
                 targetId = e._id?.toString() || e.toString();
                 targetUrl = `/posts/${targetId}`;
             }
@@ -43,6 +62,7 @@ const formatNotification = (notif, hydratedEntity = null) => {
             const parent = (e && e.post && typeof e.post === 'object') ? e.post : null;
             if (parent) {
                 thumbnail = getMedia(parent);
+                describeMedia(parent);
                 targetId = parent._id?.toString();
             }
             
@@ -77,6 +97,9 @@ const formatNotification = (notif, hydratedEntity = null) => {
         ...obj,
         _id: obj._id.toString(),
         thumbnail,
+        thumbnailType,
+        thumbnailBackground,
+        thumbnailText,
         targetUrl,
         targetId: targetId || (e?._id?.toString() || e?.toString()),
         sender,
@@ -127,6 +150,17 @@ const createNotification = async (data) => {
         notificationObj.sender = sender;
 
         const formatted = formatNotification(notificationObj, hydratedEntity);
+
+        // The list path attaches this; the live path did not, so a follow
+        // arriving over the socket always rendered a "Follow" button even when
+        // the recipient already followed that person back.
+        if (formatted.sender) {
+            const followsBack = await Follower.exists({
+                follower: data.recipient,
+                following: data.sender
+            });
+            formatted.sender.isFollowing = Boolean(followsBack);
+        }
 
         // Broadcast to Redis for real-time delivery
         const redis = getRedisOptional();
@@ -209,7 +243,7 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     const [posts, comments] = await Promise.all([
         Post.find({ _id: { $in: grouped.Post } }).lean(),
         Comment.find({ _id: { $in: grouped.Comment } })
-            .populate({ path: 'post', select: 'mediaUrl mediaType author', strictPopulate: false })
+            .populate({ path: 'post', select: 'mediaUrl mediaType author backgroundColor caption', strictPopulate: false })
             .lean()
     ]);
 
@@ -222,7 +256,8 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     });
 
     const extraPosts = commentPostIds.length > 0
-        ? await Post.find({ _id: { $in: commentPostIds } }).select('mediaUrl mediaType author').lean()
+        ? await Post.find({ _id: { $in: commentPostIds } })
+            .select('mediaUrl mediaType author backgroundColor caption').lean()
         : [];
 
     const extraPostsMap = new Map(extraPosts.map(p => [p._id.toString(), p]));
@@ -289,7 +324,65 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     }
 
     const nextCursor = hasMore ? rawResults[rawResults.length - 1].createdAt.toISOString() : null;
-    return { data: validResults, nextCursor, hasMore };
+    return { data: groupLikes(validResults), nextCursor, hasMore };
+};
+
+/**
+ * Collapse likes on the same entity into one row.
+ *
+ * A post that does well used to produce one row per liker, so the list became
+ * a wall of near-identical lines and everything else on it was pushed out of
+ * reach. This is the "alice and 12 others liked your post" behaviour.
+ *
+ * Only likes are grouped. Comments and replies each carry their own text, and
+ * merging them would throw that away; follows and warnings are individual
+ * events by nature. This is also why the grouping is not a $group stage in the
+ * pipeline above: that pipeline hydrates entities, reaches from a comment
+ * through to its parent post for the thumbnail, attaches follow state and
+ * garbage-collects notifications whose target no longer exists. Grouping the
+ * formatted output keeps all of that intact.
+ *
+ * Grouping is within a page. Likes on one entity cluster in time and the page
+ * is ordered by createdAt, so they land together in practice; a run that
+ * straddles a page boundary yields two groups rather than a wrong one.
+ */
+const groupLikes = (rows) => {
+    const out = [];
+    const groupsByKey = new Map();
+
+    rows.forEach((row) => {
+        const entityKey = row.targetId || row.entityId?._id || row.entityId;
+        if (row.type !== 'like' || !entityKey) {
+            out.push(row);
+            return;
+        }
+
+        const key = `${row.entityModel || 'Post'}:${entityKey}`;
+        const existing = groupsByKey.get(key);
+
+        if (!existing) {
+            const group = { ...row, senders: row.sender ? [row.sender] : [], count: 1 };
+            groupsByKey.set(key, group);
+            out.push(group);
+            return;
+        }
+
+        // The same person liking twice cannot inflate the count.
+        const alreadyCounted = existing.senders.some(
+            (s) => s && row.sender && s._id === row.sender._id
+        );
+        if (!alreadyCounted && row.sender) {
+            // Only the first few are ever shown as avatars, but the count is
+            // the true total.
+            if (existing.senders.length < 3) existing.senders.push(row.sender);
+            existing.count += 1;
+        }
+
+        // A group is unread if any notification in it is.
+        if (!row.isRead) existing.isRead = false;
+    });
+
+    return out;
 };
 
 const markAllRead = async (userId) => {

@@ -139,12 +139,14 @@
 }
 
 .notif-thumbnail-wrap {
+  position: relative;
   width: 44px;
   height: 44px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   overflow: hidden;
   border: 1px solid var(--border-sm);
   flex-shrink: 0;
+  background: var(--surface-2);
 }
 
 .notif-thumbnail {
@@ -152,6 +154,68 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* A text post has no image to show, so the tile becomes the post: its own
+   ground colour with the opening of its caption, the way the feed draws it. */
+.notif-thumbnail-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+}
+
+.notif-thumbnail-text span {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.notif-thumbnail-badge {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: var(--r-full);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+}
+
+/* Grouped likes show the first few people rather than only a count, so the
+   avatars overlap in a stack the width of a single one. */
+.notif-avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.notif-avatar-stack .notif-avatar {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--bg);
+}
+
+.notif-avatar-stack .notif-avatar:nth-child(1) {
+  top: 0;
+  left: 0;
+}
+
+.notif-avatar-stack .notif-avatar:nth-child(2) {
+  top: 12px;
+  left: 12px;
+}
+
+
 
 /* Follow Buttons */
 .notif-btn-follow {
