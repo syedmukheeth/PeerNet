@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useQueryClient } from '@tanstack/react-query'
 import { useSocket } from '../hooks/useSocket'
 
 import {
@@ -15,6 +16,8 @@ import { timeago as formatTime } from '../utils/timeago'
 import { splitOnQuery } from '../utils/highlight'
 import toast from 'react-hot-toast'
 import avatarFallback from '../components/ui/avatarFallback'
+import ConfirmDialog from '../components/ConfirmDialog'
+import { optimizeCloudinaryUrl, optimizeCloudinaryVideo } from '../utils/cloudinary'
 
 /**
  * CONVERSATION ITEM
@@ -37,9 +40,19 @@ const ConvoItem = ({ c, isActive, user, onClick }) => {
     const lastMsg = c.lastMessage
     const isUnread = c.unreadCount > 0 || c.isMarkedUnread
 
+    const preview = `${lastMsg?.sender === user?._id ? 'You: ' : ''}${lastMsg?.body || 'Started a conversation'}`
+
     return (
-        <div
+        /*
+         * A button, not a div with a click handler. The row had no role, no
+         * tabIndex and no key handling, so the conversation list could not be
+         * reached or opened from a keyboard at all.
+         */
+        <button
+            type="button"
             onClick={onClick}
+            aria-current={isActive ? 'true' : undefined}
+            aria-label={`${peer?.username || 'Unknown user'}${isUnread ? ', unread' : ''}. ${preview}`}
             className={`zn-convo-row${isActive ? ' active' : ''}`}
         >
             <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -58,19 +71,52 @@ const ConvoItem = ({ c, isActive, user, onClick }) => {
                     <span className="zn-convo-time">{formatTime(c.updatedAt)}</span>
                 </div>
                 <p className={`zn-convo-msg${isUnread ? ' unread' : ''}`}>
-                    {lastMsg?.sender === user?._id ? 'You: ' : ''}
-                    {lastMsg?.body || 'Started a conversation'}
+                    {previewLabel(lastMsg, user)}
                 </p>
             </div>
             {isUnread && <div className="zn-unread-dot" />}
-        </div>
+        </button>
     )
+}
+
+/*
+ * The list preview. A media message has an empty body, so a photo showed as
+ * "Started a conversation" in the sidebar, the same as a brand new thread.
+ */
+const previewLabel = (lastMsg, user) => {
+    if (!lastMsg) return 'Started a conversation'
+    const mine = (lastMsg.sender?._id || lastMsg.sender) === user?._id ? 'You: ' : ''
+    if (lastMsg.body) return `${mine}${lastMsg.body}`
+    if (lastMsg.mediaType === 'video') return `${mine}Video`
+    if (lastMsg.mediaType === 'image') return `${mine}Photo`
+    return 'Started a conversation'
 }
 
 /**
  * MESSAGE BUBBLE
  */
-const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQuery, isNewGroup }) => {
+/*
+ * A divider says what day it is the way a person would. It used to print the
+ * full absolute date on every separator, so a conversation from an hour ago was
+ * introduced by "August 19, 2026".
+ */
+const dayLabel = (value) => {
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return ''
+
+    const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+    const days = Math.round((startOfDay(new Date()) - startOfDay(date)) / 86400000)
+
+    if (days === 0) return 'Today'
+    if (days === 1) return 'Yesterday'
+    if (days < 7) return date.toLocaleDateString([], { weekday: 'long' })
+    if (date.getFullYear() === new Date().getFullYear()) {
+        return date.toLocaleDateString([], { month: 'long', day: 'numeric' })
+    }
+    return date.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
+}
+
+const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQuery, isNewGroup, pos = 'single' }) => {
     const reactions = useMemo(() => {
         const raw = m.reactions || []
         const map = {}
@@ -84,7 +130,10 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
         return Object.values(map)
     }, [m.reactions])
 
-    const quickEmojis = ['❤️', '😂', '🔥', '👍', '😢', '😮']
+    // Only the first three were ever rendered; the other three were dead.
+    const quickEmojis = ['❤️', '😂', '🔥']
+
+    const hasMedia = Boolean(m.mediaUrl) && m.mediaType && m.mediaType !== 'none'
 
     const renderContent = () => {
         // splitOnQuery escapes the query and tolerates a null body. Building the
@@ -100,7 +149,10 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
 
     return (
         <div
-            className={`zn-row${isSelf ? ' self' : ' peer'}${isNewGroup ? ' new-group' : ''}${reactions.length > 0 ? ' has-reactions' : ''}`}
+            /* pos was computed for every message and then never applied, so the
+               eight grouping rules in messages.css were dead and consecutive
+               messages from one person all got identical corners. */
+            className={`zn-row${isSelf ? ' self' : ' peer'} pos-${pos}${isNewGroup ? ' new-group' : ''}${reactions.length > 0 ? ' has-reactions' : ''}`}
         >
             <div className="zn-bubble-container">
                 {m.replyTo && (
@@ -110,8 +162,30 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                     </div>
                 )}
 
-                <div className={`zn-bubble${m.isOptimistic ? ' optimistic' : ''}`}>
-                    <div className="zn-bubble-text">{renderContent()}</div>
+                <div className={`zn-bubble${m.isOptimistic ? ' optimistic' : ''}${hasMedia ? ' has-media' : ''}${!m.body ? ' media-only' : ''}`}>
+                    {/* Media was uploaded, stored and sent, and then never
+                        rendered: the bubble drew m.body alone, so an image or a
+                        video arrived as an empty bubble at both ends. */}
+                    {hasMedia && (
+                        <div className="zn-bubble-media">
+                            {m.mediaType === 'video' ? (
+                                <video
+                                    src={optimizeCloudinaryVideo(m.mediaUrl)}
+                                    controls
+                                    playsInline
+                                    preload="metadata"
+                                />
+                            ) : (
+                                <img
+                                    src={optimizeCloudinaryUrl(m.mediaUrl, 600)}
+                                    alt={m.body || 'Shared image'}
+                                    loading="lazy"
+                                />
+                            )}
+                        </div>
+                    )}
+
+                    {m.body && <div className="zn-bubble-text">{renderContent()}</div>}
 
                     <div className={`zn-bubble-meta${isSelf ? ' self' : ''}`}>
                         <span>{formatTime(m.createdAt)}</span>
@@ -176,11 +250,13 @@ const MessageBubble = ({ m, isSelf, onReply, onEdit, onDelete, onReact, searchQu
                         )}
                         <div className="zn-action-divider" />
                         <div className="zn-quick-emojis">
-                            {quickEmojis.slice(0, 3).map(e => (
+                            {quickEmojis.map(e => (
                                 <button
                                     key={e}
+                                    type="button"
                                     onClick={() => onReact(e)}
                                     className="zn-emoji-btn"
+                                    aria-label={`React with ${e}`}
                                 >
                                     {e}
                                 </button>
@@ -235,7 +311,14 @@ export default function Messages() {
     const [editingText, setEditingText] = useState('')
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const [showChatMenu, setShowChatMenu] = useState(false)
+    const [peerTyping, setPeerTyping] = useState(false)
+    const [confirmDeleteChat, setConfirmDeleteChat] = useState(false)
+    const [isAtBottom, setIsAtBottom] = useState(true)
+    const [unseenBelow, setUnseenBelow] = useState(0)
+    const queryClient = useQueryClient()
     const viewportRef = useRef(null)
+    const typingSentAt = useRef(0)
+    const typingStopTimer = useRef(null)
     const { mutate: markRead } = useMarkRead(convoId)
     const prevMsgCount = useRef(0)
     const isInitialLoad = useRef(true)
@@ -272,6 +355,83 @@ export default function Messages() {
             })
             return () => socket.emit('leave_conversation', convoId)
         }
+    }, [socket, convoId])
+
+    /*
+     * Live updates from the other end.
+     *
+     * chat.socket.js has always emitted all four of these and the client
+     * listened for none of them, so a peer typing showed nothing, and their
+     * edits, deletions and reactions did not appear until something else
+     * happened to invalidate the query.
+     */
+    useEffect(() => {
+        if (!socket || !convoId) return
+
+        const onTypingStart = ({ conversationId, userId }) => {
+            if (conversationId !== convoId || userId === user?._id) return
+            setPeerTyping(true)
+        }
+        const onTypingStop = ({ conversationId, userId }) => {
+            if (conversationId !== convoId || userId === user?._id) return
+            setPeerTyping(false)
+        }
+        const refreshThread = () => {
+            queryClient.invalidateQueries({ queryKey: ['messages', convoId] })
+        }
+
+        socket.on('user_typing_start', onTypingStart)
+        socket.on('user_typing_stop', onTypingStop)
+        socket.on('message_edited', refreshThread)
+        socket.on('message_deleted', refreshThread)
+        socket.on('message_reacted', refreshThread)
+
+        return () => {
+            socket.off('user_typing_start', onTypingStart)
+            socket.off('user_typing_stop', onTypingStop)
+            socket.off('message_edited', refreshThread)
+            socket.off('message_deleted', refreshThread)
+            socket.off('message_reacted', refreshThread)
+        }
+    }, [socket, convoId, user?._id, queryClient])
+
+    /*
+     * Escape backs out of whatever is open, innermost first.
+     *
+     * The only key handler on this whole surface was the composer's Enter. The
+     * emoji picker, the chat menu, the inline search and the reply preview all
+     * had to be dismissed by clicking exactly the right thing.
+     */
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            if (e.key !== 'Escape') return
+
+            if (editingId) return setEditingId(null)
+            if (showEmojiPicker) return setShowEmojiPicker(false)
+            if (showChatMenu) return setShowChatMenu(false)
+            if (isSearchingInChat) {
+                setIsSearchingInChat(false)
+                return setChatSearchQuery('')
+            }
+            if (replyingTo) return setReplyingTo(null)
+        }
+
+        document.addEventListener('keydown', onKeyDown)
+        return () => document.removeEventListener('keydown', onKeyDown)
+    }, [editingId, showEmojiPicker, showChatMenu, isSearchingInChat, replyingTo])
+
+    // The peer's indicator is cleared by their typing_stop, but a dropped
+    // connection never sends one, so it also expires on its own.
+    useEffect(() => {
+        if (!peerTyping) return
+        const timer = setTimeout(() => setPeerTyping(false), 6000)
+        return () => clearTimeout(timer)
+    }, [peerTyping])
+
+    // Leaving the conversation while mid-word would otherwise leave the other
+    // person looking at a typing indicator forever.
+    useEffect(() => () => {
+        if (socket && convoId) socket.emit('typing_stop', convoId)
     }, [socket, convoId])
 
     const peer = useMemo(() => activeConvo?.participants?.find(p => p._id !== user?._id), [activeConvo, user?._id])
@@ -314,20 +474,38 @@ export default function Messages() {
             const prevTime = prev ? new Date(prev.createdAt).getTime() : 0
             const isTimeGap = prev && (currTime - prevTime) > 15 * 60 * 1000
 
-            let pos = 'single'
-            if (isSameAsPrev && isSameAsNext && !isTimeGap) pos = 'middle'
-            else if (isSameAsPrev && !isTimeGap) pos = 'top'
-            else if (isSameAsNext) pos = 'bottom'
+            /*
+             * Where this message sits in a run by the same person.
+             *
+             * These were called top/middle/bottom/single, but 'top' was set
+             * when a message FOLLOWED another one, so it meant the last of a
+             * run, and 'bottom' meant the first. The CSS written against those
+             * names was flattening the wrong corners - which nobody noticed,
+             * because the class was never applied to the element at all.
+             */
+            const continuesAbove = isSameAsPrev && !isTimeGap
+            const continuesBelow = Boolean(isSameAsNext)
+
+            let pos = 'only'
+            if (continuesAbove && continuesBelow) pos = 'inner'
+            else if (continuesAbove) pos = 'last'
+            else if (continuesBelow) pos = 'first'
 
             groups.push({ type: 'message', value: m, id: m._id, pos, isNewGroup: !isSameAsPrev || isTimeGap })
 
-            // Date divider
-            const date = new Date(m.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
-            const prevDate = prev ? new Date(prev.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }) : ''
-            
-            if (date !== prevDate) {
-                // Insert divider before the current message
-                groups.splice(groups.length - 1, 0, { type: 'date', value: date, id: `date-${m._id}` })
+            // Date divider. The key is the calendar day so two messages on the
+            // same day never produce two dividers; the label is what a person
+            // would actually say about that day.
+            const dayKey = new Date(m.createdAt).toDateString()
+            const prevDayKey = prev ? new Date(prev.createdAt).toDateString() : ''
+
+            if (dayKey !== prevDayKey) {
+                // Insert the divider before the message it introduces.
+                groups.splice(groups.length - 1, 0, {
+                    type: 'date',
+                    value: dayLabel(m.createdAt),
+                    id: `date-${m._id}`,
+                })
             }
         })
         return groups
@@ -342,23 +520,46 @@ export default function Messages() {
         }
     }, [])
 
+    /*
+     * Follow the conversation only while the reader is already at the bottom.
+     *
+     * Every new message used to scroll unconditionally, so reading back through
+     * history and receiving a message threw you to the end mid-sentence. Your
+     * own message always scrolls: you just sent it.
+     */
     useEffect(() => {
-        if (!loadingMsgs && messages.length > 0) {
-            if (isInitialLoad.current) {
-                scrollToBottom(true)
-                isInitialLoad.current = false
-            } else if (messages.length > prevMsgCount.current) {
-                scrollToBottom(false)
-            }
-            prevMsgCount.current = messages.length
+        if (loadingMsgs || messages.length === 0) return
+
+        if (isInitialLoad.current) {
+            scrollToBottom(true)
+            isInitialLoad.current = false
+        } else if (messages.length > prevMsgCount.current) {
+            const last = messages[messages.length - 1]
+            const isMine = last?.sender === 'me' || (last?.sender?._id || last?.sender) === user?._id
+            if (isMine || isAtBottom) scrollToBottom(false)
+            else setUnseenBelow(n => n + 1)
         }
-    }, [messages, loadingMsgs, scrollToBottom])
+        prevMsgCount.current = messages.length
+    }, [messages, loadingMsgs, scrollToBottom, isAtBottom, user?._id])
 
     // Reset initial load flag when convo changes
     useEffect(() => {
         isInitialLoad.current = true
         prevMsgCount.current = 0
+        setUnseenBelow(0)
+        setIsAtBottom(true)
     }, [convoId])
+
+    // Track whether the reader is parked at the end, which is what decides
+    // whether an incoming message is allowed to move them.
+    const handleViewportScroll = useCallback(() => {
+        const el = viewportRef.current
+        if (!el) return
+        const distance = el.scrollHeight - el.scrollTop - el.clientHeight
+        const atBottom = distance < 80
+        setIsAtBottom(atBottom)
+        if (atBottom) setUnseenBelow(0)
+    }, [])
 
     // Load the draft for the conversation being opened. The matching write is
     // in the composer's onChange, not in an effect: as two effects they raced on
@@ -373,9 +574,36 @@ export default function Messages() {
         if (convoId) localStorage.setItem('zn_last_convo_id', convoId)
     }, [convoId])
 
+    /*
+     * Tell the other end we are typing.
+     *
+     * Throttled to one start per 3s rather than one per keystroke, and a stop
+     * follows 2s after the last one so the indicator clears when someone pauses
+     * instead of hanging until they send.
+     */
+    const notifyTyping = useCallback(() => {
+        if (!socket || !convoId) return
+
+        const now = Date.now()
+        if (now - typingSentAt.current > 3000) {
+            typingSentAt.current = now
+            socket.emit('typing_start', convoId)
+        }
+
+        clearTimeout(typingStopTimer.current)
+        typingStopTimer.current = setTimeout(() => {
+            typingSentAt.current = 0
+            socket.emit('typing_stop', convoId)
+        }, 2000)
+    }, [socket, convoId])
+
     const handleSend = async () => {
-        if (!inputText.trim() && !replyingTo) return
+        // A reply with no text used to pass this guard and post an empty body.
+        if (!inputText.trim()) return
         const body = inputText
+        clearTimeout(typingStopTimer.current)
+        typingSentAt.current = 0
+        socket?.emit('typing_stop', convoId)
         const replyId = replyingTo?._id
         setInputText('')
         // Clear the stored draft too. It was left behind, so the sent text
@@ -553,12 +781,42 @@ export default function Messages() {
                                 </button>
                             </div>
                         ) : (
+                            /* "You have no conversations" and "your search
+                               matched nothing" are different situations and used
+                               to share one message, with no way out of either. */
                             <div key="empty" className="zn-empty-state">
                                 <div className="zn-empty-icon">
-                                    <HiMail size={36} />
+                                    {searchQuery ? <HiSearch size={32} /> : <HiMail size={32} />}
                                 </div>
-                                <p className="zn-empty-title">No chats found</p>
-                                <p className="zn-empty-sub">Search for a user or start a conversation.</p>
+                                {searchQuery ? (
+                                    <>
+                                        <p className="zn-empty-title">No chats match</p>
+                                        <p className="zn-empty-sub">
+                                            Nothing here for &ldquo;{searchQuery}&rdquo;.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => setSearchQuery('')}
+                                        >
+                                            Clear search
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="zn-empty-title">No messages yet</p>
+                                        <p className="zn-empty-sub">
+                                            Find someone to start a conversation with.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary btn-sm"
+                                            onClick={() => navigate('/search')}
+                                        >
+                                            Find people
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         )}
                 </div>
@@ -601,16 +859,25 @@ export default function Messages() {
                                 </div>
 
                                 <div className="zn-chat-header-actions">
+                                    {/* Neither of these had an accessible name
+                                        or announced its state. */}
                                     <button
+                                        type="button"
                                         onClick={() => { setIsSearchingInChat(!isSearchingInChat); if (!isSearchingInChat) setChatSearchQuery('') }}
                                         className={`zn-icon-btn${isSearchingInChat ? ' active' : ''}`}
+                                        aria-label="Search in conversation"
+                                        aria-expanded={isSearchingInChat}
                                     >
                                         <HiSearch size={18} />
                                     </button>
                                     <div style={{ position: 'relative' }}>
                                         <button
+                                            type="button"
                                             onClick={() => setShowChatMenu(!showChatMenu)}
                                             className={`zn-icon-btn${showChatMenu ? ' active' : ''}`}
+                                            aria-label="Conversation options"
+                                            aria-haspopup="menu"
+                                            aria-expanded={showChatMenu}
                                         >
                                             <HiDotsVertical size={18} />
                                         </button>
@@ -635,7 +902,12 @@ export default function Messages() {
                                                             Archive Chat
                                                         </button>
                                                         <div className="zn-chat-menu-divider" style={{ height: '1px', background: 'var(--border)', margin: '4px 0' }} />
-                                                        <button onClick={() => { deleteChatMutation.mutate(convoId); navigate('/messages'); setShowChatMenu(false) }} style={{ color: 'var(--danger, #ff4d4f)' }}>
+                                                        {/* Was a single click
+                                                            straight to deletion,
+                                                            with no confirmation,
+                                                            while ConfirmDialog
+                                                            already existed. */}
+                                                        <button onClick={() => { setShowChatMenu(false); setConfirmDeleteChat(true) }} style={{ color: 'var(--error)' }}>
                                                             Delete Chat
                                                         </button>
                                                     </motion.div>
@@ -673,7 +945,14 @@ export default function Messages() {
                             </AnimatePresence>
 
                             {/* Message Viewport */}
-                            <div ref={viewportRef} className="zn-viewport">
+                            <div
+                                ref={viewportRef}
+                                className="zn-viewport"
+                                onScroll={handleViewportScroll}
+                                role="log"
+                                aria-live="polite"
+                                aria-label={`Conversation with ${peer?.username || 'your contact'}`}
+                            >
                                 <AnimatePresence mode="popLayout" initial={false}>
                                     {loadingMsgs ? (
                                         <div key="chat-skeleton" className="zn-chat-skeleton">
@@ -700,6 +979,7 @@ export default function Messages() {
                                                         item.value.sender === user?._id
                                                     }
                                                     isNewGroup={item.isNewGroup}
+                                                    pos={item.pos}
                                                     onReply={setReplyingTo}
                                                     onEdit={(msg) => { setEditingId(msg._id); setEditingText(msg.body) }}
                                                     onDelete={(messageId) => deleteMutation.mutate(messageId, {
@@ -728,8 +1008,55 @@ export default function Messages() {
                                         </div>
                                     )}
                                 </AnimatePresence>
+
+                                {/* The server has relayed typing events since
+                                    this feature was built; nothing listened. */}
+                                <AnimatePresence>
+                                    {peerTyping && (
+                                        <motion.div
+                                            className="zn-row peer pos-only zn-typing-row"
+                                            initial={{ opacity: 0, y: 4 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 4 }}
+                                        >
+                                            <div className="zn-bubble-container">
+                                                <div className="zn-bubble zn-typing-bubble" aria-live="polite"
+                                                    aria-label={`${peer?.username || 'They'} is typing`}>
+                                                    <span className="zn-typing-dot" />
+                                                    <span className="zn-typing-dot" />
+                                                    <span className="zn-typing-dot" />
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
                                 <div className="zn-viewport-spacer" />
                             </div>
+
+                            {/* Jump back to the end. Without it, scrolling up
+                                through history left no way back except dragging
+                                all the way down. */}
+                            <AnimatePresence>
+                                {!isAtBottom && (
+                                    <motion.button
+                                        type="button"
+                                        className={`zn-jump-bottom${unseenBelow > 0 ? ' has-unseen' : ''}`}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 8 }}
+                                        onClick={() => { scrollToBottom(false); setUnseenBelow(0) }}
+                                        aria-label={unseenBelow > 0
+                                            ? `${unseenBelow} new ${unseenBelow === 1 ? 'message' : 'messages'}, jump to latest`
+                                            : 'Jump to latest'}
+                                    >
+                                        <HiArrowLeft size={16} style={{ transform: 'rotate(-90deg)' }} />
+                                        {unseenBelow > 0 && (
+                                            <span className="zn-jump-count">{unseenBelow}</span>
+                                        )}
+                                    </motion.button>
+                                )}
+                            </AnimatePresence>
 
                             {/* Composer Footer */}
                             <footer className="zn-footer">
@@ -782,6 +1109,7 @@ export default function Messages() {
                                                 setDraft(e.target.value)
                                                 e.target.style.height = 'auto'
                                                 e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
+                                                notifyTyping()
                                             }}
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -795,7 +1123,7 @@ export default function Messages() {
                                         />
 
                                         <motion.button
-                                            disabled={!inputText.trim() && !replyingTo}
+                                            disabled={!inputText.trim()}
                                             onClick={() => {
                                                 handleSend()
                                                 // textareaRef is right there; this used to
@@ -817,10 +1145,32 @@ export default function Messages() {
                                 <HiMail size={40} />
                             </div>
                             <h2 className="zn-select-convo-title">Your messages</h2>
-                            <p className="zn-select-convo-sub">Pick a conversation, or start a new one.</p>
+                            <p className="zn-select-convo-sub">
+                                Pick a conversation from the list, or start a new one.
+                            </p>
+                            {/* "start a new one" was plain text. There was no
+                                control on this panel at all. */}
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => navigate('/search')}
+                            >
+                                Start a new chat
+                            </button>
                         </div>
                     )}
             </main>
+
+            {confirmDeleteChat && (
+                <ConfirmDialog
+                    title={`Delete your conversation with ${peer?.username || 'this person'}?`}
+                    body="The whole thread goes, for you and for them, and it cannot be brought back."
+                    confirmLabel="Delete conversation"
+                    destructive
+                    onClose={() => setConfirmDeleteChat(false)}
+                    onConfirm={() => { deleteChatMutation.mutate(convoId); navigate('/messages') }}
+                />
+            )}
 
             {/* Edit Message Modal */}
             <AnimatePresence>

@@ -57,15 +57,8 @@
 
 /* 1. Sidebar / Chat List */
 
-.zn-convo-row.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--accent);
-}
+/* The active rail is the row's own border-left, set below. This pseudo-element
+   drew a second 3px bar in the same place. */
 
 .zn-convo-row.active .zn-convo-name {
   color: var(--text-1);
@@ -102,42 +95,49 @@
   z-index: 20;
 }
 
-/* Grouping Border Radius Physics */
+/* Corner grouping.
 
-.zn-row.peer.pos-top .zn-bubble {
-  border-bottom-left-radius: 4px;
+   A run of messages from one person reads as a stack: the corner facing the
+   message above is flattened when there is one, and the tail corner is sharp
+   only on the last of the run, which is where the tail belongs. The spine is
+   the left edge for a peer and the right edge for you. */
+
+.zn-row.peer .zn-bubble {
+  border-radius: 18px 18px 18px 4px;
 }
 
-.zn-row.peer.pos-middle .zn-bubble {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+.zn-row.peer.pos-first .zn-bubble {
+  border-radius: 18px 18px 18px 18px;
 }
 
-.zn-row.peer.pos-bottom .zn-bubble {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 18px;
+.zn-row.peer.pos-inner .zn-bubble {
+  border-radius: 4px 18px 18px 18px;
 }
 
-.zn-row.peer.pos-single .zn-bubble {
-  border-bottom-left-radius: 4px;
+.zn-row.peer.pos-last .zn-bubble {
+  border-radius: 4px 18px 18px 4px;
 }
 
-.zn-row.self.pos-top .zn-bubble {
-  border-bottom-right-radius: 4px;
+.zn-row.self .zn-bubble {
+  border-radius: 18px 18px 4px 18px;
 }
 
-.zn-row.self.pos-middle .zn-bubble {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
+.zn-row.self.pos-first .zn-bubble {
+  border-radius: 18px 18px 18px 18px;
 }
 
-.zn-row.self.pos-bottom .zn-bubble {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 18px;
+.zn-row.self.pos-inner .zn-bubble {
+  border-radius: 18px 4px 18px 18px;
 }
 
-.zn-row.self.pos-single .zn-bubble {
-  border-bottom-right-radius: 4px;
+.zn-row.self.pos-last .zn-bubble {
+  border-radius: 18px 4px 4px 18px;
+}
+
+/* A run should sit tighter than separate messages do. */
+.zn-row.pos-inner,
+.zn-row.pos-last {
+  margin-top: -4px;
 }
 
 /* 4. Footer & Composer: Senior Frontend Refinement */
@@ -190,8 +190,17 @@
    REACTIONS CLUSTER
    ------------------------------------------------------------------------- */
 
+/* Both sides need an anchor. Only .self had one, so a peer's reaction cluster
+   fell back to static positioning inside an absolutely positioned parent and
+   sat wherever it landed. */
 .zn-row.self .zn-reactions {
   right: 12px;
+  left: auto;
+}
+
+.zn-row.peer .zn-reactions {
+  left: 12px;
+  right: auto;
 }
 
 /* -------------------------------------------------------------------------
@@ -244,23 +253,21 @@
 
 /* ---- CONVERSATION ROWS ---- */
 .zn-convo-row {
-
+  /* A <button> now, not a div with a click handler, so it needs the button
+     reset: full width, left aligned, no chrome. The row had no role, no
+     tabIndex and no key handling, so the list was unreachable by keyboard. */
   display: flex;
-
   align-items: center;
-
   gap: 14px;
-
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
   padding: 12px 20px;
-
   cursor: pointer;
-
   transition: background 0.15s ease;
-
   border-left: 3px solid transparent;
-
   position: relative;
-
 }
 
 .zn-convo-row:hover {
@@ -269,8 +276,9 @@
 
 .zn-convo-row.active {
   background: var(--accent-subtle);
-  border-left-color: var(--zn-accent);
-  position: relative;
+  /* --zn-accent is a legacy alias of --accent (tokens.css). Pointing at the
+     real token directly, since the alias layer is on its way out. */
+  border-left-color: var(--accent);
 }
 
 .zn-convo-avatar {
@@ -358,21 +366,18 @@
   word-wrap: break-word;
 }
 
+/* Colour only. The corners are owned by the grouping block above, and each of
+   these used to set two longhand radii immediately before a shorthand that
+   reset all four, so those two lines never did anything. */
 .zn-row.peer .zn-bubble {
   background: var(--surface-1);
   color: var(--text-1);
   border: 1px solid var(--border);
-  border-top-left-radius: 18px;
-  border-bottom-left-radius: 18px;
-  border-radius: 4px 18px 18px 18px;
 }
 
 .zn-row.self .zn-bubble {
   background: var(--accent);
   color: var(--accent-fg);
-  border-top-right-radius: 18px;
-  border-bottom-right-radius: 18px;
-  border-radius: 18px 4px 18px 18px;
 }
 
 .zn-bubble-text {
@@ -440,10 +445,12 @@
 
 /* ---- BUBBLE ACTIONS ---- */
 
-.zn-bubble-container:hover .zn-bubble-actions {
+/* One rule reveals it now. Focus-within is included so the buttons are
+   reachable by keyboard, which they never were. */
+.zn-bubble-container:hover .zn-bubble-actions,
+.zn-bubble-container:focus-within .zn-bubble-actions {
   opacity: 1;
   pointer-events: auto;
-  display: flex;
 }
 
 /* ---- FOOTER / COMPOSER ---- */
@@ -1228,34 +1235,22 @@
    ============================================================ */
 
 .zn-bubble-actions {
-
+  /* Hidden with opacity and pointer-events, not display, so one rule can reveal
+     it. This used to set display:none AND opacity:0 AND visibility:hidden while
+     the two rules that revealed it each set only part of that trio, so neither
+     was sufficient alone and the buttons worked only because both matched. */
   position: absolute;
-
   top: 50%;
-
   transform: translateY(-50%);
-
-  display: none;
-
+  display: flex;
   align-items: center;
-
-  z-index: 10;
-
   opacity: 0;
-
   pointer-events: none;
-
-  transition: all 0.2s ease;
-
-  visibility: hidden;
-
+  transition: opacity var(--trans-fast);
+  z-index: 30;
 }
 
-.zn-row:hover .zn-bubble-actions {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
+
 
 .zn-row.self .zn-bubble-actions {
   right: calc(100% + 8px);
@@ -1353,10 +1348,11 @@
   background: var(--hover);
 }
 
-/* On mobile, we might want the actions to be more accessible,
-   or just rely on touch-and-hold. But since there's no state for touch-hold,
-   we'll just show them statically below the bubble on mobile. */
-@media (max-width: 767px) {
+/* Hover cannot reveal anything on a touch screen, so below the tablet
+   breakpoint the actions sit permanently under the bubble. This used to start
+   at 767px, which left 768-1263px - tablets, all of them touch - with
+   hover-gated buttons that could not be reached. */
+@media (max-width: 1024px) {
   .zn-bubble-actions {
     position: relative;
     top: 0;
@@ -1379,4 +1375,192 @@
     border: none;
     padding: 0;
   }
+}
+
+/* ============================================================================
+   MEDIA IN A BUBBLE
+
+   The composer has always uploaded images and video, and the model has always
+   stored mediaUrl and mediaType, but the bubble rendered m.body alone. Sent
+   media arrived as an empty bubble at both ends, so the feature looked like
+   data loss. These are the styles it never had.
+   ============================================================================ */
+
+.zn-bubble-media {
+  margin: -4px -6px 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface-2);
+  line-height: 0;
+}
+
+.zn-bubble-media img,
+.zn-bubble-media video {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+/* A bubble that is only media needs no text padding around it, so the picture
+   fills the bubble the way it does in every other messenger. */
+.zn-bubble.media-only {
+  padding: 4px;
+  background: transparent;
+  border: none;
+}
+
+.zn-row.self .zn-bubble.media-only,
+.zn-row.peer .zn-bubble.media-only {
+  background: transparent;
+  border: none;
+}
+
+.zn-bubble.has-media .zn-bubble-text {
+  margin-top: 8px;
+}
+
+.zn-bubble.media-only .zn-bubble-meta {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+}
+
+.zn-bubble.media-only {
+  position: relative;
+}
+
+/* ============================================================================
+   TYPING INDICATOR
+
+   The section header for this existed in the stylesheet, empty, since the
+   feature was first sketched. The server relays typing_start and typing_stop
+   and the client now listens.
+   ============================================================================ */
+
+.zn-typing-bubble {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.zn-typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-full);
+  background: var(--text-3);
+  animation: zn-typing-bounce 1.3s ease-in-out infinite;
+}
+
+.zn-typing-dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.zn-typing-dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes zn-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Under reduced motion the dots hold still and fade instead of bouncing. */
+@media (prefers-reduced-motion: reduce) {
+  .zn-typing-dot {
+    animation: zn-typing-fade 1.6s ease-in-out infinite !important;
+  }
+
+  @keyframes zn-typing-fade {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+}
+
+/* ============================================================================
+   JUMP TO LATEST
+
+   The thread scrolled to the end on every incoming message, so there was no
+   state in which a reader was away from the bottom and no control was needed.
+   Now that reading history is possible, this is the way back.
+   ============================================================================ */
+
+.zn-jump-bottom {
+  position: absolute;
+  right: 20px;
+  bottom: 96px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--r-full);
+  background: var(--surface-el);
+  border: 1px solid var(--border-md);
+  color: var(--text-1);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: background var(--trans-fast), border-color var(--trans-fast);
+}
+
+.zn-jump-bottom:hover {
+  background: var(--hover);
+  border-color: var(--border-lg);
+}
+
+.zn-jump-bottom:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.zn-jump-bottom.has-unseen {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+
+.zn-jump-count {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
+   FOCUS STATES
+
+   Not one zn- control had a :focus-visible rule. Every one of them defined
+   :hover only, so the whole surface was invisible to a keyboard.
+   ============================================================================ */
+
+.zn-convo-row:focus-visible,
+.zn-icon-btn:focus-visible,
+.zn-icon-btn-sm:focus-visible,
+.zn-send-btn:focus-visible,
+.zn-action-btn:focus-visible,
+.zn-emoji-btn:focus-visible,
+.zn-reaction-chip:focus-visible,
+.zn-composer-action-btn:focus-visible,
+.zn-chat-menu button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.zn-convo-row:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Both empty states can now offer a way forward, so they need room for a
+   control under the copy. */
+.zn-empty-state .btn,
+.zn-select-convo .btn {
+  margin-top: 16px;
 }
