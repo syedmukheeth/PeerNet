@@ -41,8 +41,18 @@ export const ICON_PATHS = {
     'bell-solid': { fill: ['M12 2.5a7 7 0 0 0-7 7c0 3.85-1.4 4.83-1.85 5.21A1.5 1.5 0 0 0 4.13 17.4h15.74a1.5 1.5 0 0 0 .98-2.64C20.4 14.33 19 13.35 19 9.5a7 7 0 0 0-7-7z', 'M9.44 19a1 1 0 0 0-.87 1.5 4 4 0 0 0 6.86 0 1 1 0 0 0-.87-1.5z'] },
 
     /* -- post actions ----------------------------------------------------- */
+    /* Symmetric about x=12: the two lobes are near semicircles of r=4.7 whose
+       centres mirror at 4.6 and 19.4, meeting in a cleft at the top and a
+       point at the bottom. */
     heart: 'M12 20.3 4.6 13a4.7 4.7 0 0 1 6.65-6.63l.75.74.75-.74A4.7 4.7 0 0 1 19.4 13z',
-    'heart-solid': { fill: 'M11.25 5.66a5.7 5.7 0 0 0-7.35.63 5.7 5.7 0 0 0 0 7.42l7.4 7.3a1 1 0 0 0 1.4 0l7.4-7.3a5.7 5.7 0 0 0-8.1-8.05z' },
+
+    /* The same closed path, filled. The solid heart used to be a separate and
+       lopsided drawing: it began at x=11.25 rather than 12, built its left side
+       from two arcs and its right from one, and ended in a 1.4-unit flat bottom
+       instead of a point. Sharing the outline's geometry also means the
+       silhouette does not change when a like toggles, which is the whole job of
+       a toggle icon. */
+    'heart-solid': { fill: 'M12 20.3 4.6 13a4.7 4.7 0 0 1 6.65-6.63l.75.74.75-.74A4.7 4.7 0 0 1 19.4 13z' },
 
     bookmark: 'M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.2-6.5 4.2v-16a1 1 0 0 1 1-1z',
     'bookmark-solid': { fill: 'M6.5 2.5a2 2 0 0 0-2 2v16a1 1 0 0 0 1.54.84L12 17.19l5.96 4.15A1 1 0 0 0 19.5 20.5v-16a2 2 0 0 0-2-2z' },

@@ -142,6 +142,19 @@
   color: var(--text-2);
 }
 
+/* The dropdown below is absolutely positioned, so this has to be its
+   containing block. It had no rule at all, which left it static, and .l-post-card
+   sets `contain: content`. That is shorthand for `layout paint style`, and
+   `contain: layout` makes an element the containing block for absolutely
+   positioned descendants even without `position: relative`. So the menu
+   anchored to the card, opened at the card's bottom edge, and `contain: paint`
+   then clipped it out of existence: the button worked, the menu was simply
+   never visible. */
+.post-card-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .post-card-menu-btn {
   background: transparent;
   border: none;
