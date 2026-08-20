@@ -339,50 +339,77 @@ const getNotifications = async (userId, { limit = 20, cursor = null }) => {
     }
 
     const nextCursor = hasMore ? rawResults[rawResults.length - 1].createdAt.toISOString() : null;
-    return { data: groupLikes(validResults), nextCursor, hasMore };
+    return { data: groupNotifications(validResults), nextCursor, hasMore };
 };
 
+// Types where one row per event is noise: many people doing the same small
+// thing to the same object. Comments and replies each carry their own text and
+// merging them would throw it away; follows and warnings are singular by
+// nature.
+const GROUPABLE_TYPES = new Set(['like', 'reaction']);
+
+// How many distinct emoji a grouped reaction row shows before it stops
+// collecting. Past three the row is describing a pile, not a set.
+const MAX_GROUPED_EMOJI = 3;
+
 /**
- * Collapse likes on the same entity into one row.
+ * Collapse repeated events on the same entity into one row.
  *
  * A post that does well used to produce one row per liker, so the list became
  * a wall of near-identical lines and everything else on it was pushed out of
- * reach. This is the "alice and 12 others liked your post" behaviour.
+ * reach. This is the "alice and 12 others liked your post" behaviour, and it
+ * covers message reactions for the same reason: a thread where several people
+ * react to one message produced one row each.
  *
- * Only likes are grouped. Comments and replies each carry their own text, and
- * merging them would throw that away; follows and warnings are individual
- * events by nature. This is also why the grouping is not a $group stage in the
- * pipeline above: that pipeline hydrates entities, reaches from a comment
- * through to its parent post for the thumbnail, attaches follow state and
- * garbage-collects notifications whose target no longer exists. Grouping the
- * formatted output keeps all of that intact.
+ * A grouped reaction keeps the distinct emoji rather than the last one to
+ * arrive, so the row can still say what people reacted with.
  *
- * Grouping is within a page. Likes on one entity cluster in time and the page
+ * The grouping is not a $group stage in the pipeline above because that
+ * pipeline hydrates entities, reaches from a comment through to its parent post
+ * for the thumbnail, attaches follow state and garbage-collects notifications
+ * whose target no longer exists. Grouping the formatted output keeps all of
+ * that intact.
+ *
+ * Grouping is within a page. Events on one entity cluster in time and the page
  * is ordered by createdAt, so they land together in practice; a run that
  * straddles a page boundary yields two groups rather than a wrong one.
  */
-const groupLikes = (rows) => {
+const groupNotifications = (rows) => {
     const out = [];
     const groupsByKey = new Map();
 
     rows.forEach((row) => {
-        const entityKey = row.targetId || row.entityId?._id || row.entityId;
-        if (row.type !== 'like' || !entityKey) {
+        /*
+         * The entity, not the navigation target. targetId is where the row
+         * links to, which for a message reaction is the whole conversation and
+         * for a comment like is the parent post - so keying on it merged
+         * reactions on two different messages in one thread, and likes on two
+         * different comments under one post, into a single row.
+         */
+        const entityKey = row.entityId?._id || row.entityId || row.targetId;
+        if (!GROUPABLE_TYPES.has(row.type) || !entityKey) {
             out.push(row);
             return;
         }
 
-        const key = `${row.entityModel || 'Post'}:${entityKey}`;
+        // The type is part of the key: a like and a reaction on the same
+        // object are different events and must not merge.
+        const key = `${row.type}:${row.entityModel || 'Post'}:${entityKey}`;
         const existing = groupsByKey.get(key);
 
         if (!existing) {
-            const group = { ...row, senders: row.sender ? [row.sender] : [], count: 1 };
+            const group = {
+                ...row,
+                senders: row.sender ? [row.sender] : [],
+                count: 1,
+                emojis: row.type === 'reaction' && row.message ? [row.message] : undefined,
+            };
             groupsByKey.set(key, group);
             out.push(group);
             return;
         }
 
-        // The same person liking twice cannot inflate the count.
+        // The same person acting twice cannot inflate the count.
         const alreadyCounted = existing.senders.some(
             (s) => s && row.sender && s._id === row.sender._id
         );
@@ -393,8 +420,21 @@ const groupLikes = (rows) => {
             existing.count += 1;
         }
 
+        if (existing.emojis && row.message && !existing.emojis.includes(row.message)
+            && existing.emojis.length < MAX_GROUPED_EMOJI) {
+            existing.emojis.push(row.message);
+        }
+
         // A group is unread if any notification in it is.
         if (!row.isRead) existing.isRead = false;
+    });
+
+    // The row reads `message` for the emoji, so a group publishes its whole set
+    // through the same field rather than the client learning a second one.
+    out.forEach((row) => {
+        if (row.emojis?.length) row.message = row.emojis.join('');
+        // Internal accumulator; the client reads `message`.
+        delete row.emojis;
     });
 
     return out;

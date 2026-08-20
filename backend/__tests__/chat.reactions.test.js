@@ -168,6 +168,76 @@ describe('chat.service reaction notifications', () => {
     });
 });
 
+describe('notification grouping for reactions', () => {
+    let alice;
+    let bob;
+    let carol;
+    let convo;
+    let message;
+
+    beforeEach(async () => {
+        alice = await makeUser('alice');
+        bob = await makeUser('bob');
+        carol = await makeUser('carol');
+        convo = await Conversation.create({ participants: [alice._id, bob._id, carol._id] });
+        message = await Message.create({
+            conversation: convo._id,
+            sender: alice._id,
+            body: 'hello',
+        });
+    });
+
+    const rowsFor = async (userId) => {
+        const { data } = await notificationService.getNotifications(userId, { limit: 50 });
+        return data;
+    };
+
+    it('collapses several people reacting to one message into a single row', async () => {
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+        await chatService.reactToMessage(message._id, carol._id, '🔥');
+
+        const rows = await rowsFor(alice._id);
+        const reactions = rows.filter((n) => n.type === 'reaction');
+
+        expect(reactions).toHaveLength(1);
+        expect(reactions[0].count).toBe(2);
+        expect(reactions[0].senders.map((s) => s.username).sort()).toEqual(['bob', 'carol']);
+    });
+
+    // The emoji is the point of a reaction, so a group keeps the set rather
+    // than whichever one happened to arrive last.
+    it('keeps the distinct emoji of a grouped reaction', async () => {
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+        await chatService.reactToMessage(message._id, carol._id, '❤️');
+
+        const [row] = (await rowsFor(alice._id)).filter((n) => n.type === 'reaction');
+
+        expect(row.message).toContain('🔥');
+        expect(row.message).toContain('❤️');
+        expect(row.emojis).toBeUndefined();
+    });
+
+    it('keeps reactions on different messages apart', async () => {
+        const second = await Message.create({
+            conversation: convo._id,
+            sender: alice._id,
+            body: 'and another',
+        });
+
+        await chatService.reactToMessage(message._id, bob._id, '🔥');
+        await chatService.reactToMessage(second._id, bob._id, '🔥');
+
+        const reactions = (await rowsFor(alice._id)).filter((n) => n.type === 'reaction');
+        expect(reactions).toHaveLength(2);
+    });
+
+    afterEach(async () => {
+        await Promise.all(
+            Object.values(mongoose.connection.collections).map((c) => c.deleteMany({})),
+        );
+    });
+});
+
 describe('chat.service reply quotes', () => {
     let alice;
     let bob;
