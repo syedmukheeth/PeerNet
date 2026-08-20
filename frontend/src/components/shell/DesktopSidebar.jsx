@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQueryClient } from '@tanstack/react-query'
@@ -29,6 +30,57 @@ export default function DesktopSidebar({
 }) {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
+    const popupRef = useRef(null)
+    const moreBtnRef = useRef(null)
+
+    /*
+     * Menu keyboard behaviour. The popup was a div of buttons: no roles, no
+     * Escape, no arrow movement, and focus was left behind on the trigger so
+     * the first Tab went into the page underneath.
+     */
+    useEffect(() => {
+        if (!showMore) return
+        const popup = popupRef.current
+        if (!popup) return
+
+        const items = () => Array.from(popup.querySelectorAll('.ig-more-item'))
+        items()[0]?.focus()
+
+        const onKeyDown = (e) => {
+            const list = items()
+            if (!list.length) return
+            const at = list.indexOf(document.activeElement)
+
+            switch (e.key) {
+                case 'Escape':
+                    e.preventDefault()
+                    setShowMore(false)
+                    moreBtnRef.current?.focus()
+                    break
+                case 'ArrowDown':
+                    e.preventDefault()
+                    list[(at + 1) % list.length].focus()
+                    break
+                case 'ArrowUp':
+                    e.preventDefault()
+                    list[(at - 1 + list.length) % list.length].focus()
+                    break
+                case 'Home':
+                    e.preventDefault()
+                    list[0].focus()
+                    break
+                case 'End':
+                    e.preventDefault()
+                    list[list.length - 1].focus()
+                    break
+                default:
+                    break
+            }
+        }
+
+        document.addEventListener('keydown', onKeyDown)
+        return () => document.removeEventListener('keydown', onKeyDown)
+    }, [showMore, setShowMore])
 
     return (
         <aside className="sidebar">
@@ -132,9 +184,11 @@ export default function DesktopSidebar({
                 <div className="sidebar-more-wrap" ref={moreRef}>
                     <button
                         type="button"
+                        ref={moreBtnRef}
                         className={`ig-link ${showMore ? 'ig-link--active' : ''}`}
                         onClick={() => setShowMore(!showMore)}
                         aria-expanded={showMore}
+                        aria-haspopup="menu"
                         aria-label="More options"
                     >
                         <div className="ig-icon-wrap">
@@ -146,38 +200,41 @@ export default function DesktopSidebar({
                     <AnimatePresence>
                         {showMore && (
                             <motion.div
+                                ref={popupRef}
+                                role="menu"
+                                aria-label="More options"
                                 className="ig-more-popup desktop-only"
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 8 }}
                                 transition={{ duration: 0.15 }}
                             >
-                                <button className="ig-more-item" onClick={() => { toggle(); setShowMore(false) }}>
+                                <button role="menuitem" className="ig-more-item" onClick={() => { toggle(); setShowMore(false) }}>
                                     {isDark ? <HiSun size={20} /> : <HiMoon size={20} />}
                                     <span>{isDark ? 'Light mode' : 'Dark mode'}</span>
                                 </button>
                                 {user && (
-                                    <NavLink to="/settings" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                    <NavLink to="/settings" role="menuitem" className="ig-more-item" onClick={() => setShowMore(false)}>
                                         <HiCog size={20} /> <span>Settings</span>
                                     </NavLink>
                                 )}
                                 {isAdmin(user) && (
-                                    <NavLink to="/admin" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                    <NavLink to="/admin" role="menuitem" className="ig-more-item" onClick={() => setShowMore(false)}>
                                         <HiShieldCheck size={20} /> <span>Admin Console</span>
                                     </NavLink>
                                 )}
                                 {user && (
-                                    <button className="ig-more-item" onClick={() => { setShowMore(false); onSwitchAccounts() }}>
+                                    <button role="menuitem" className="ig-more-item" onClick={() => { setShowMore(false); onSwitchAccounts() }}>
                                         <HiSwitchHorizontal size={20} /> <span>Switch account</span>
                                     </button>
                                 )}
                                 <div className="ig-more-divider" />
                                 {user ? (
-                                    <button className="ig-more-item text-error" onClick={onLogout}>
+                                    <button role="menuitem" className="ig-more-item text-error" onClick={onLogout}>
                                         <HiLogout size={20} /> <span>Log out</span>
                                     </button>
                                 ) : (
-                                    <Link to="/login" className="ig-more-item" onClick={() => setShowMore(false)}>
+                                    <Link to="/login" role="menuitem" className="ig-more-item" onClick={() => setShowMore(false)}>
                                         <HiLogin size={20} /> <span>Log in</span>
                                     </Link>
                                 )}
