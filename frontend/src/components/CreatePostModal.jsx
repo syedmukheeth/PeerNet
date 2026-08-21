@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { modalCard, useMotionPreset } from '../lib/motion'
 import { HiX, HiPhotograph, HiPencilAlt, HiCheckCircle, HiCloudUpload, HiTrash } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -18,6 +19,9 @@ const formatBytes = (bytes) => {
 }
 
 export default function CreatePostModal({ onClose }) {
+    // One spring for every dialog, and it settles instantly under reduced motion.
+    const modalVariant = useMotionPreset(modalCard)
+
     const queryClient = useQueryClient()
     const [isTextMode, setIsTextMode] = useState(false)
     const [backgroundColor, setBackgroundColor] = useState('linear-gradient(135deg, #0f172a 0%, #334155 100%)')
@@ -184,10 +188,7 @@ export default function CreatePostModal({ onClose }) {
             <div className="create-post-overlay" onClick={onClose}>
                 <motion.div 
                     className="create-post-card"
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    {...modalVariant}
                     onClick={e => e.stopPropagation()}
                 >
                     {/* Header. The mode switch used to share this row with the

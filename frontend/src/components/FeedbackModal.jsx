@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { modalCard, useMotionPreset } from '../lib/motion'
 import { HiX, HiClipboardList, HiFire, HiLightningBolt } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 
 export default function FeedbackModal({ onClose }) {
+    // One spring for every dialog, and it settles instantly under reduced motion.
+    const modalVariant = useMotionPreset(modalCard)
+
     const [type, setType] = useState('bug') // bug, feature, other
     const [text, setText] = useState('')
     const [loading, setLoading] = useState(false)
@@ -29,10 +33,7 @@ export default function FeedbackModal({ onClose }) {
         <div className="modal-overlay" onClick={onClose}>
             <motion.div 
                 className="modal-card w-full max-w-[460px] p-6"
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                {...modalVariant}
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between mb-6">

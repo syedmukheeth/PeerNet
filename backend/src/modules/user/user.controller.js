@@ -58,8 +58,15 @@ const getFollowing = async (req, res, next) => {
 const searchUsers = async (req, res, next) => {
     try {
         const { limit } = parsePagination(req.query);
-        const users = await userService.searchUsers(req.query.q, { limit, skip: 0 });
-        res.json({ success: true, data: users });
+        // skip was hardcoded to 0, so the service's own skip argument was dead
+        // and search could not page at all.
+        const skip = Math.max(0, Number(req.query.skip) || 0);
+        const { data, hasMore } = await userService.searchUsers(req.query.q, {
+            limit,
+            skip,
+            viewerId: req.user.id,
+        });
+        res.json({ success: true, data, hasMore });
     } catch (err) { next(err); }
 };
 

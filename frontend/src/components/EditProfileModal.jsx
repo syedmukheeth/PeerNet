@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { modalCard, useMotionPreset } from '../lib/motion'
 import { HiX, HiCamera } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -7,6 +8,9 @@ import { useAuth } from '../context/AuthContext'
 import avatarFallback from './ui/avatarFallback'
 
 export default function EditProfileModal({ profile, onClose, onSave }) {
+    // One spring for every dialog, and it settles instantly under reduced motion.
+    const modalVariant = useMotionPreset(modalCard)
+
     const { updateUser } = useAuth()
     const [form, setForm] = useState({
         username: profile.username || '',
@@ -68,10 +72,7 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
         <div className="modal-overlay" onClick={onClose}>
             <motion.div className="modal-card"
                 style={{ maxWidth: 480 }}
-                initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.97 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
+                {...modalVariant}
                 onClick={e => e.stopPropagation()}>
 
                 {/* Header */}

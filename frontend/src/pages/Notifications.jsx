@@ -4,9 +4,10 @@ import { Link } from 'react-router'
 import api from '../api/axios'
 import { useSocket } from '../hooks/useSocket'
 import { useAuth } from '../context/AuthContext'
-import { HiHeart, HiBadgeCheck, HiRefresh, Icon } from '../components/ui/icons'
+import { HiHeart, HiBadgeCheck, HiRefresh, HiExclamationCircle, Icon } from '../components/ui/icons'
 import avatarFallback from '../components/ui/avatarFallback'
 import { notificationCopy, isSystemNotification } from '../utils/notificationCopy'
+import { scaleIn, useMotionPreset } from '../lib/motion'
 import NotificationThumb from '../components/NotificationThumb'
 import Skeleton from '../components/ui/Skeleton'
 
@@ -101,10 +102,43 @@ function SectionHeaderSkeleton() {
     )
 }
 
+/*
+ * All / Follows / Mentions.
+ *
+ * A busy account's notifications are mostly likes, which buries the two kinds
+ * people actually act on: someone new following you, and someone talking to
+ * you directly.
+ */
+const FILTERS = [
+    { id: 'all', label: 'All' },
+    { id: 'follows', label: 'Follows', types: ['follow'] },
+    { id: 'mentions', label: 'Mentions', types: ['comment', 'reply', 'mention', 'reaction'] },
+]
+
+function NotificationFilters({ value, onChange, counts }) {
+    return (
+        <div className="notif-filters" role="tablist" aria-label="Filter notifications">
+            {FILTERS.map((f) => (
+                <button
+                    key={f.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={value === f.id}
+                    className={value === f.id ? 'active' : ''}
+                    onClick={() => onChange(f.id)}
+                >
+                    {f.label}
+                    {counts[f.id] > 0 && <span className="notif-filter-count">{counts[f.id]}</span>}
+                </button>
+            ))}
+        </div>
+    )
+}
+
 function SectionHeader({ label }) {
     return (
-        <div className="px-4 pt-6 pb-2">
-            <span className="text-[13px] font-bold text-muted uppercase tracking-tight">{label}</span>
+        <div className="notif-section-header">
+            <span>{label}</span>
         </div>
     )
 }
@@ -242,6 +276,15 @@ export default function Notifications() {
     const [notifs, setNotifs] = useState([])
     const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
+    /*
+     * A failed load was console.error only, so the page rendered "No
+     * notifications yet" - stating as fact that nothing had happened when it had
+     * simply failed to ask. The same shape of bug as the admin report queue
+     * announcing an empty moderation queue while it was still loading.
+     */
+    const [failed, setFailed] = useState(false)
+    // All / Follows / Mentions. The types and grouping exist to support this.
+    const [filter, setFilter] = useState('all')
     const [hasMore, setHasMore] = useState(true)
     /*
      * The endpoint is cursor-paginated: parsePagination (utils/pagination.utils)
@@ -260,6 +303,7 @@ export default function Notifications() {
     const loadNotifs = useCallback(async (isMore = false) => {
         if (isMore) setLoadingMore(true)
         else setLoading(true)
+        setFailed(false)
 
         try {
             const cursor = isMore ? cursorRef.current : null
@@ -292,6 +336,9 @@ export default function Notifications() {
             }
         } catch (err) {
             console.error('Notification load failed', err)
+            // Only a first page failing empties the screen; a failed "load
+            // more" should leave what is already there alone.
+            if (!isMore) setFailed(true)
         } finally {
             setLoading(false)
             setLoadingMore(false)
@@ -327,6 +374,26 @@ export default function Notifications() {
         }
     }, [socket, user?._id])
 
+    // Counts come from the whole list, not the filtered view, so a tab can say
+    // how much is behind it.
+    const filterCounts = useMemo(() => {
+        const counts = { all: notifs.length }
+        FILTERS.slice(1).forEach((f) => {
+            counts[f.id] = notifs.filter((n) => f.types.includes(n.type)).length
+        })
+        return counts
+    }, [notifs])
+
+    const filtered = useMemo(() => {
+        const active = FILTERS.find((f) => f.id === filter)
+        if (!active?.types) return notifs
+        return notifs.filter((n) => active.types.includes(n.type))
+    }, [notifs, filter])
+
+    const visibleCount = filtered.length
+
+    const emptyVariant = useMotionPreset(scaleIn)
+
     const categorized = useMemo(() => {
         const now = new Date()
         const oneDay = 24 * 60 * 60 * 1000
@@ -338,7 +405,7 @@ export default function Notifications() {
             earlier: []
         }
 
-        notifs.forEach(n => {
+        filtered.forEach(n => {
             const d = new Date(n.createdAt)
             const diff = now - d
             
@@ -356,7 +423,7 @@ export default function Notifications() {
         })
 
         return groups
-    }, [notifs])
+    }, [filtered])
 
     if (loading) return (
         <div className="min-h-dvh pb-24 bg-bg">
@@ -377,19 +444,45 @@ export default function Notifications() {
             <NotificationsHeader onRefresh={() => loadNotifs(false)} />
 
             <div className="l-main-col">
-                {notifs.length === 0 ? (
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center justify-center mt-32 text-center px-4"
-                    >
-                        <div className="w-20 h-20 rounded-full bg-surface-1 border border-border-subtle flex items-center justify-center mb-6">
-                            <HiHeart size={40} className="text-muted opacity-20" />
+                <NotificationFilters value={filter} onChange={setFilter} counts={filterCounts} />
+
+                {failed ? (
+                    /* Distinguishable from an empty inbox, with a way out. */
+                    <div className="notif-state" role="alert">
+                        <div className="notif-state-icon">
+                            <HiExclamationCircle size={30} />
                         </div>
-                        <h2 className="text-xl font-bold text-primary mb-2">No notifications yet</h2>
-                        <p className="text-muted text-[14.5px] max-w-[260px] leading-relaxed">
-                            When someone likes or comments on your posts, you&apos;ll see them here.
+                        <h2 className="notif-state-title">Could not load notifications</h2>
+                        <p className="notif-state-sub">Check your connection and try again.</p>
+                        <button className="btn btn-secondary btn-sm" onClick={() => loadNotifs(false)}>
+                            Try again
+                        </button>
+                    </div>
+                ) : visibleCount === 0 ? (
+                    <motion.div
+                        variants={emptyVariant}
+                        initial="initial"
+                        animate="animate"
+                        className="notif-state"
+                    >
+                        <div className="notif-state-icon">
+                            <HiHeart size={34} />
+                        </div>
+                        <h2 className="notif-state-title">
+                            {filter === 'all' ? 'No notifications yet' : 'Nothing here'}
+                        </h2>
+                        <p className="notif-state-sub">
+                            {filter === 'all'
+                                ? 'When someone likes, comments or follows, it shows up here.'
+                                : 'Nothing matches this filter yet.'}
                         </p>
+                        {filter === 'all' ? (
+                            <Link to="/search" className="btn btn-primary btn-sm">Find people to follow</Link>
+                        ) : (
+                            <button className="btn btn-secondary btn-sm" onClick={() => setFilter('all')}>
+                                Show everything
+                            </button>
+                        )}
                     </motion.div>
                 ) : (
                     <div className="pb-10 pt-2">

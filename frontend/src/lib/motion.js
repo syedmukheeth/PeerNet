@@ -74,6 +74,23 @@ export const staggerContainer = (stagger = 0.04) => ({
     animate: { transition: { staggerChildren: stagger } },
 })
 
+/*
+ * Press and hover feedback.
+ *
+ * These were inline literals scattered across a dozen files - 0.85, 0.9, 0.96,
+ * 0.98, 1.02 - with no rule about which belonged to what, so two identical
+ * looking buttons could respond differently. One value per role instead.
+ *
+ * The smaller the control, the deeper the press: a 20px icon needs more travel
+ * than a full width button to read as having moved at all.
+ */
+export const PRESS = {
+    icon: { whileTap: { scale: 0.88 } },
+    button: { whileTap: { scale: 0.97 } },
+    row: { whileTap: { scale: 0.995 } },
+    card: { whileHover: { scale: 1.01 }, whileTap: { scale: 0.98 } },
+}
+
 // Zero-motion equivalents: same keys so a variant swap never breaks a component.
 const STILL = {
     initial: { opacity: 1 },

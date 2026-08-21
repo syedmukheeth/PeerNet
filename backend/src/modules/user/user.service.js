@@ -247,16 +247,78 @@ const getFollowing = async (userId, viewerId, options) => {
     return _paginateRelations({ follower: userId }, 'following', options);
 };
 
-const searchUsers = async (q, { limit = 20, skip = 0 }) => {
-    if (!q || q.trim().length < 1) throw new ApiError(400, 'Query must be at least 1 character');
-    return User.find(
-        { $text: { $search: q } },
-        { score: { $meta: 'textScore' } },
-    )
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Find people.
+ *
+ * This used to be a bare $text search, which has two consequences nobody wants
+ * from a people finder. $text matches whole stemmed words, so typing "jo" found
+ * nothing at all for "john" - you had to know the whole name before you could
+ * look it up. And it had no status filter and no self-exclusion, so banned and
+ * deleted accounts were returnable and you could find yourself.
+ *
+ * The text index still does the relevance work for whole words; an anchored
+ * regex handles the prefix case that people actually type. Results are ordered
+ * prefix matches first, then by follower count, because when someone types
+ * three letters they almost always mean the name that starts with them.
+ */
+const searchUsers = async (q, { limit = 20, skip = 0, viewerId = null } = {}) => {
+    const term = (q || '').trim();
+    if (term.length < 1) throw new ApiError(400, 'Query must be at least 1 character');
+
+    const prefix = new RegExp(`^${escapeRegex(term)}`, 'i');
+    const anywhere = new RegExp(escapeRegex(term), 'i');
+
+    const query = {
+        status: 'active',
+        $or: [
+            { username: anywhere },
+            { fullName: anywhere },
+        ],
+    };
+
+    // You are never a search result for yourself.
+    if (viewerId) query._id = { $ne: viewerId };
+
+    // One extra row tells the caller whether another page exists without a
+    // second count query.
+    const users = await User.find(query)
         .select('username fullName avatarUrl isVerified followersCount')
-        .sort({ score: { $meta: 'textScore' } })
-        .limit(limit)
-        .skip(skip);
+        .sort({ followersCount: -1, createdAt: -1 })
+        .limit(limit + 1)
+        .skip(skip)
+        .lean();
+
+    const hasMore = users.length > limit;
+    const page = hasMore ? users.slice(0, limit) : users;
+
+    // Someone whose name begins with the term is who you meant.
+    page.sort((a, b) => {
+        const aStarts = prefix.test(a.username) || prefix.test(a.fullName || '');
+        const bStarts = prefix.test(b.username) || prefix.test(b.fullName || '');
+        if (aStarts !== bStarts) return aStarts ? -1 : 1;
+        return (b.followersCount || 0) - (a.followersCount || 0);
+    });
+
+    /*
+     * Whether the viewer already follows each result.
+     *
+     * The endpoint never returned this, so `isFollowing` was always undefined
+     * and every row in the search results rendered "Follow" - including for
+     * people you already followed. Same batch lookup the notification list uses.
+     */
+    if (viewerId && page.length > 0) {
+        const relations = await Follower.find({
+            follower: viewerId,
+            following: { $in: page.map((u) => u._id) },
+        }).select('following').lean();
+
+        const followed = new Set(relations.map((r) => r.following.toString()));
+        page.forEach((u) => { u.isFollowing = followed.has(u._id.toString()); });
+    }
+
+    return { data: page, hasMore };
 };
 
 /**

@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { modalCard, useMotionPreset } from '../lib/motion'
 import { HiX } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 
 export default function EditPostModal({ post, onClose, onSave }) {
+    // One spring for every dialog, and it settles instantly under reduced motion.
+    const modalVariant = useMotionPreset(modalCard)
+
     const [caption, setCaption] = useState(post.caption || '')
     const [loading, setLoading] = useState(false)
 
@@ -24,10 +28,7 @@ export default function EditPostModal({ post, onClose, onSave }) {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <motion.div className="modal-card"
-                initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.97 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
+                {...modalVariant}
                 onClick={e => e.stopPropagation()}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>

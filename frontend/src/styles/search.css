@@ -416,3 +416,104 @@
     transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
+
+/* ============================================================================
+   IDLE SEARCH, SECTIONS AND KEYBOARD STATE
+
+   The idle screen was one line of text, and the suggestions rail linked "See
+   All" straight at it, so the app's own link led to a blank page. It now holds
+   recent searches and suggestions, which means it needs section headings, a
+   dismiss control, and a visible active row for keyboard navigation.
+   ============================================================================ */
+
+.ig-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 2px 6px;
+}
+
+.ig-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+}
+
+.ig-section-action {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 4px 6px;
+  margin-right: -6px;
+  border-radius: var(--r-sm);
+  transition: background var(--trans-fast);
+}
+
+.ig-section-action:hover {
+  background: var(--accent-subtle);
+}
+
+.ig-section-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The row had no hover state at all, so a list of people did not read as a
+   list of things you can open. */
+.ig-result-row {
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+  border-radius: var(--r-md);
+  transition: background var(--trans-fast);
+}
+
+.ig-result-row:hover {
+  background: var(--hover);
+}
+
+/* Arrow-key position. Distinct from hover so using the keyboard while the
+   pointer rests somewhere else is not ambiguous. */
+.ig-result-row.is-active {
+  background: var(--accent-subtle);
+}
+
+.ig-result-dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background var(--trans-fast), color var(--trans-fast);
+}
+
+.ig-result-dismiss:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.ig-result-dismiss:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The following state added a 1.5px border without compensating padding, so
+   the two states differed in height by 3px and the row twitched on every
+   toggle. */
+.ig-follow-btn {
+  border: 1.5px solid transparent;
+}
+
+.ig-follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

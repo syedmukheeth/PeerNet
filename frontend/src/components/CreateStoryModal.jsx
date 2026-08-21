@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { modalCard, useMotionPreset } from '../lib/motion'
 import { HiX, HiEmojiHappy, HiCamera, HiTrash, FiAlignLeft, FiAlignCenter, FiAlignRight } from './ui/icons'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
@@ -27,6 +28,9 @@ const COLOR_PALETTE = ['#ffffff', '#000000', '#ff4757', '#ffa502', '#2ed573', '#
 const EmojiPicker = lazy(() => import('emoji-picker-react'))
 
 export default function CreateStatusModal({ onClose, onSuccess }) {
+    // One spring for every dialog, and it settles instantly under reduced motion.
+    const modalVariant = useMotionPreset(modalCard)
+
     const [content, setContent] = useState('')
     const [backgroundColor, setBackgroundColor] = useState(BG_PRESETS[0].value)
     const [fontIdx, setFontIdx] = useState(0)
@@ -163,10 +167,7 @@ export default function CreateStatusModal({ onClose, onSuccess }) {
             >
                 <motion.div 
                     className="l-status-modal glass-card" 
-                    initial={{ opacity: 0, scale: 0.95, y: 30 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 30 }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                    {...modalVariant}
                     onClick={e => e.stopPropagation()}
                 >
                     {/* --- Header: Simple & Unobtrusive --- */}

@@ -309,3 +309,129 @@
 .zn-msg-status svg {
   display: block;
 }
+
+/* ============================================================================
+   FILTERS, STATES AND STICKY SECTIONS
+
+   The page had no filter, and no error state at all: a failed load rendered the
+   empty state, so the screen said nothing had happened when it had only failed
+   to ask. Empty and failed are different things and now look different.
+   ============================================================================ */
+
+.notif-filters {
+  display: flex;
+  gap: 2px;
+  padding: 10px 8px 6px;
+  position: sticky;
+  /* Sits directly under the 64px page header. */
+  top: 64px;
+  z-index: 20;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.notif-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-full);
+  color: var(--text-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--trans-fast), color var(--trans-fast);
+}
+
+.notif-filters button:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+
+.notif-filters button.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.notif-filters button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.notif-filter-count {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+/* "Today" stays visible while you scroll its own group, which is the whole
+   point of grouping by time. */
+.notif-section-header {
+  position: sticky;
+  top: 106px;
+  z-index: 10;
+  padding: 14px 16px 8px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.notif-section-header span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* One block for empty, filtered-empty and failed. They were three different
+   shapes before, and one of them did not exist. */
+.notif-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 72px 24px 40px;
+}
+
+.notif-state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 8px;
+  border-radius: var(--r-full);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+.notif-state-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text-1);
+}
+
+.notif-state-sub {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+  max-width: 34ch;
+}
+
+.notif-state .btn {
+  margin-top: 12px;
+}
+
+@media (max-width: 767px) {
+  .notif-filters { top: 56px; }
+  .notif-section-header { top: 96px; }
+}
