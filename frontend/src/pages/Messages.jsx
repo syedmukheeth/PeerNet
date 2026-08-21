@@ -383,6 +383,18 @@ export default function Messages() {
     const { user } = useAuth()
     const { isDark } = useTheme()
 
+    /*
+     * Declared here because useConvos below reads it. It used to sit with the
+     * other useState calls further down, i.e. after its own use, and a const in
+     * the temporal dead zone throws on every render: the whole /messages route
+     * died behind the error boundary. Lint, build and the test suite all passed,
+     * because none of them render this component.
+     *
+     * Archived conversations were filtered out of the list with no view of their
+     * own, so archiving one hid it permanently.
+     */
+    const [showArchived, setShowArchived] = useState(false)
+
     const {
         data: convos = [],
         isLoading: loadingConvos,
@@ -418,9 +430,6 @@ export default function Messages() {
     const [showChatMenu, setShowChatMenu] = useState(false)
     const [peerTyping, setPeerTyping] = useState(false)
     const [confirmDeleteChat, setConfirmDeleteChat] = useState(false)
-    // Archived conversations were filtered out of the list and had no view of
-    // their own, so archiving one hid it permanently.
-    const [showArchived, setShowArchived] = useState(false)
     const [isAtBottom, setIsAtBottom] = useState(true)
     const [unseenBelow, setUnseenBelow] = useState(0)
     const queryClient = useQueryClient()
